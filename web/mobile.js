@@ -61,43 +61,11 @@
     // __init__.inject_mobile_assets before this runs), so the class is on
     // before the body is drawn: no flash of the unanimated page.
     (function screenTransition() {
-        if (!root.classList.contains('onigiri-mobile')) return;
+        // the class comes with the page (__init__.inject_mobile_assets)
         var cls = root.classList.contains('onigiri-enter-forward') ? 'onigiri-enter-forward'
             : root.classList.contains('onigiri-enter-back') ? 'onigiri-enter-back' : '';
         if (cls) setTimeout(function () { root.classList.remove(cls); }, 520);
     })();
-
-    // The screen being left starts moving the moment it is tapped (opening
-    // a deck, Study Now, back), so the switch feels immediate; the next page
-    // then slides in. Undone if no new page arrives (a dialog opened).
-    function leave(direction) {
-        if (!root.classList.contains('onigiri-touch')) return;
-        var cls = direction === 'back' ? 'onigiri-leave-back' : 'onigiri-leave-forward';
-        root.classList.remove('onigiri-leave-back', 'onigiri-leave-forward');
-        root.classList.add(cls);
-        setTimeout(function () { root.classList.remove(cls); }, 700);
-    }
-
-    var NAV_FORWARD = /^(open:|study$|studymore$)/;
-    var NAV_BACK = /^(decks$|onigiri_native:back$)/;
-
-    function wrapPycmd() {
-        var original = window.pycmd;
-        if (typeof original !== 'function' || original.onigiriWrapped) return;
-        var wrapped = function (cmd) {
-            try {
-                if (typeof cmd === 'string' && (root.classList.contains('onigiri-screen-decks') ||
-                    root.classList.contains('onigiri-screen-overview') || root.classList.contains('onigiri-screen-review'))) {
-                    if (NAV_FORWARD.test(cmd) && !root.classList.contains('onigiri-select-mode')) leave('forward');
-                    else if (NAV_BACK.test(cmd)) leave('back');
-                }
-            } catch (e) {}
-            return original.apply(this, arguments);
-        };
-        wrapped.onigiriWrapped = true;
-        window.pycmd = wrapped;
-        if (window.bridgeCommand === original) window.bridgeCommand = wrapped;
-    }
     window.addEventListener('orientationchange', function () { setTimeout(updateClasses, 50); });
 
     // --- Long-press -> contextmenu ------------------------------------------------
@@ -1291,7 +1259,6 @@
     }
 
     function onReady() {
-        wrapPycmd();
         updateClasses();
         lockZoom();
         stripHover();

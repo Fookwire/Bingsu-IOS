@@ -1426,14 +1426,16 @@ def inject_mobile_assets(web_content, context):
         screen = {"DeckBrowser": "decks", "Overview": "overview", "Reviewer": "review"}.get(type(context).__name__)
         if screen:
             classes += f" onigiri-screen-{screen}"
-            # Python knows the screen before this one (the page can't count
-            # on storage surviving a page load in Kioku): deeper slides in
-            # from the right, back from the left.
-            order = {"decks": 0, "overview": 1, "review": 2}
+            # Deck list <-> deck overview: Python knows the previous screen
+            # (page storage may not survive a page load in Kioku). Opening a
+            # deck slides its overview in from the right; going back slides
+            # the deck list in from the left.
             previous = _SCREEN_STATE.get("last")
             _SCREEN_STATE["last"] = screen
-            if previous and previous != screen:
-                classes += " onigiri-enter-forward" if order[screen] > order[previous] else " onigiri-enter-back"
+            if (previous, screen) == ("decks", "overview"):
+                classes += " onigiri-enter-forward"
+            elif (previous, screen) == ("overview", "decks"):
+                classes += " onigiri-enter-back"
     boot = ""
     if classes:
         boot = (
