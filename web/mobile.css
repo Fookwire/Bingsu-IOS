@@ -1670,11 +1670,12 @@ html.onigiri-phone .onigiri-sidebar-profile .ba-side-donut-ring {
     font-family: inherit;
     -webkit-user-select: none;
     user-select: none;
-    animation: onigiri-sheet-in 0.34s cubic-bezier(0.32, 0.72, 0, 1);
+    /* the third tab: slides in from the right, like the other two */
+    animation: onigiri-tab-from-right 0.32s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 #onigiri-app-menu.is-closing {
-    transform: translateY(100%);
+    transform: translateX(100%);
     transition: transform 0.26s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
@@ -1846,4 +1847,67 @@ html.onigiri-ios.onigiri-phone body:has(.container.modern-main-menu, .ba-home) >
 
 html .onigiri-quick-menu.is-sheet .quick-menu-item {
     color: var(--onigiri-surface-ink, var(--fg, inherit));
+}
+
+/* Study screen bottom bar (phones): Edit and More level with Show Answer
+   (same top, same 48px height) and in from the screen edges; Show Answer
+   takes what is left. Ids repeated: other bottom-bar rules zeroed the
+   row's side padding. */
+html.onigiri-phone body #outer#outer > #innertable > tbody > tr {
+    align-items: flex-start !important;
+    gap: 10px !important;
+    padding-left: calc(18px + var(--onigiri-safe-left)) !important;
+    padding-right: calc(18px + var(--onigiri-safe-right)) !important;
+    padding-top: 6px !important;
+}
+
+html.onigiri-phone body #outer#outer > #innertable > tbody > tr > td {
+    align-items: flex-start !important;
+    align-self: flex-start !important;
+    vertical-align: top !important;
+}
+
+html.onigiri-phone body #outer#outer button.onigiri-other-btn:not(.onigiri-show-answer-btn),
+html.onigiri-phone body #outer#outer button.onigiri-show-answer-btn,
+html.onigiri-phone body #outer#outer button[data-onigiri-ease] {
+    height: 48px !important;
+    min-height: 48px !important;
+    margin: 0 !important;
+}
+
+html.onigiri-phone body #outer#outer button.onigiri-other-btn:not(.onigiri-show-answer-btn):not(.onigiri-more-btn) {
+    min-width: 60px !important;
+    padding: 0 12px !important;
+}
+
+html.onigiri-phone body #outer#outer button.onigiri-other-btn.onigiri-more-btn:not(.onigiri-show-answer-btn) {
+    width: 48px !important;
+    min-width: 48px !important;
+}
+
+/* Tab switches: the incoming pane slides in. */
+html body .onigiri-slide-from-right.onigiri-slide-from-right {
+    animation: onigiri-tab-from-right 0.3s cubic-bezier(0.32, 0.72, 0, 1) !important;
+}
+
+html body .onigiri-slide-from-left.onigiri-slide-from-left {
+    animation: onigiri-tab-from-left 0.3s cubic-bezier(0.32, 0.72, 0, 1) !important;
+}
+
+@keyframes onigiri-tab-from-right {
+    from { transform: translateX(100%); }
+    to { transform: none; }
+}
+
+@keyframes onigiri-tab-from-left {
+    from { transform: translateX(-100%); }
+    to { transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html body .onigiri-slide-from-right.onigiri-slide-from-right,
+    html body .onigiri-slide-from-left.onigiri-slide-from-left,
+    #onigiri-app-menu {
+        animation: none !important;
+    }
 }

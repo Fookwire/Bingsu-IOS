@@ -1107,7 +1107,33 @@
         try { return sessionStorage.getItem(TAB_KEY) || 'decks'; } catch (e) { return 'decks'; }
     }
 
+    var TAB_ORDER = { decks: 0, home: 1, menu: 2 };
+    var currentTab = null;
+
+    // The pane coming in slides from the side of its tab (Decks is left of
+    // Home, Home left of Menu), like paging between tabs.
+    function slidePane(tab, from) {
+        var sel = tab === 'home'
+            ? '.container.modern-main-menu .main-content, .ba-side'
+            : '.container.modern-main-menu .sidebar-left, .ba-home';
+        var pane = document.querySelector(sel);
+        if (!pane) return;
+        var cls = from === 'right' ? 'onigiri-slide-from-right' : 'onigiri-slide-from-left';
+        pane.classList.remove('onigiri-slide-from-right', 'onigiri-slide-from-left');
+        void pane.offsetWidth;
+        pane.classList.add(cls);
+        pane.addEventListener('animationend', function done() {
+            pane.classList.remove(cls);
+            pane.removeEventListener('animationend', done);
+        });
+    }
+
     function applyTab(tab) {
+        var previous = currentTab;
+        currentTab = tab;
+        if (previous && previous !== tab && root.classList.contains('onigiri-phone')) {
+            slidePane(tab, TAB_ORDER[tab] > TAB_ORDER[previous] ? 'right' : 'left');
+        }
         root.classList.toggle('onigiri-phone-tab-decks', tab !== 'home');
         root.classList.toggle('onigiri-phone-tab-home', tab === 'home');
         var bar = document.getElementById('onigiri-phone-tabs');
