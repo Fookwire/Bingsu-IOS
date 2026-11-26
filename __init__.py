@@ -1,7 +1,6 @@
 
-# Onigiri version controls (retained across release switches)
-from .version_manager import setup as _setup_version_controls
-_setup_version_controls(__file__)
+# iOS (Kioku) fork: the desktop release switcher/self-updater is removed so it
+# can never overwrite this fork with an upstream desktop build.
 import os
 import sys
 import json
@@ -1371,6 +1370,35 @@ def _hashi_notes_purge():
         print(f"Hashi Notes: purge hook error: {e}")
 gui_hooks.profile_did_open.append(_hashi_notes_purge)
 gui_hooks.webview_will_set_content.append(inject_menu_files)
+
+
+def inject_mobile_assets(web_content, context):
+    """Touch/phone support on every page (iPhone/iPad via Kioku).
+
+    mobile.js goes first in <head> so the <html> layout classes exist before
+    the body is parsed (no desktop-layout flash); mobile.css goes last so it
+    wins over Onigiri's desktop styles. Runs after inject_menu_files and also
+    covers the Kome theme, which returns early there.
+    """
+    from .core import platform as onigiri_platform
+
+    classes = onigiri_platform.body_classes()
+    boot = ""
+    if classes:
+        boot = (
+            "<script>document.documentElement.classList.add("
+            + ", ".join(json.dumps(c) for c in classes.split())
+            + ");</script>"
+        )
+    web_content.head = (
+        boot
+        + f'<script src="{versioned_web_asset("mobile.js")}"></script>'
+        + web_content.head
+        + stylesheet_link("mobile.css")
+    )
+
+
+gui_hooks.webview_will_set_content.append(inject_mobile_assets)
 gui_hooks.deck_browser_will_render_content.append(
     on_things_deck_browser_will_render_content
 )

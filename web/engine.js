@@ -1243,14 +1243,31 @@ window.OnigiriEngine = {
         submenu.className = 'onigiri-quick-menu quick-menu-submenu';
         group.items.forEach(item => this.appendMenuItem(submenu, item));
         row.appendChild(submenu);
+        // Touch has no hover: a tap on the group opens its submenu instead of
+        // reaching the document listener that closes the whole menu.
+        row.addEventListener('click', (event) => {
+            if (event.target.closest('.quick-menu-submenu')) return;
+            if (!(window.OnigiriMobile && OnigiriMobile.isTouch())) return;
+            event.stopPropagation();
+            const wasOpen = row.classList.contains('is-open');
+            menu.querySelectorAll('.quick-menu-group.is-open').forEach(g => g.classList.remove('is-open'));
+            row.classList.toggle('is-open', !wasOpen);
+        });
         menu.appendChild(row);
     },
 
     positionMenu: function (menu, x, y) {
-        menu.style.left = `${x}px`;
-        menu.style.top = `${y}px`;
-        document.body.appendChild(menu);
+        if (window.OnigiriMobile && OnigiriMobile.isPhone()) {
+            // Phones: a bottom sheet within thumb reach, not a cursor popup.
+            menu.classList.add('is-sheet');
+            document.body.appendChild(menu);
+        } else {
+            menu.style.left = `${x}px`;
+            menu.style.top = `${y}px`;
+            document.body.appendChild(menu);
+        }
         requestAnimationFrame(() => {
+            if (menu.classList.contains('is-sheet')) return;
             const rect = menu.getBoundingClientRect();
             if (rect.right > window.innerWidth) {
                 menu.style.left = `${Math.max(6, x - rect.width)}px`;

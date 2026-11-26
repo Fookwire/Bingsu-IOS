@@ -21,14 +21,17 @@
     }
 
     function updateDeckFocusLayout() {
-        const sidebar = document.querySelector('.sidebar-left');
+        // The header belongs directly before the deck list, inside the decks
+        // <section>. The old code inserted into .sidebar-expanded-content,
+        // which is not the list's parent: insertBefore threw NotFoundError and
+        // aborted init() (WebKit and Chromium alike).
         const header = document.getElementById('deck-list-header');
-        const expandedContent = sidebar ? sidebar.querySelector('.sidebar-expanded-content') : null;
         const deckListContainer = document.getElementById('deck-list-container');
+        const host = deckListContainer ? deckListContainer.parentElement : null;
 
-        if (!sidebar || !header || !expandedContent || !deckListContainer) return;
-        if (header.parentElement !== expandedContent) {
-            expandedContent.insertBefore(header, deckListContainer);
+        if (!header || !host) return;
+        if (header.parentElement !== host || header.nextElementSibling !== deckListContainer) {
+            host.insertBefore(header, deckListContainer);
         }
     }
 
@@ -1271,13 +1274,22 @@
             scheduleSidebarEdgeToggle();
         }
 
-        setupResizeHandle();
-        setupProfileSidebar();
-        setupDeckViewCycling();
-        setupActionButtons(); // Initialize action buttons
-        setupArchivedHomeButton();
-        updateDeckLayouts(); // Initial call
-        updateDeckFocusLayout(); // Add this line to handle initial state
+        // One failing step must not skip the ones after it.
+        [
+            setupResizeHandle,
+            setupProfileSidebar,
+            setupDeckViewCycling,
+            setupActionButtons,
+            setupArchivedHomeButton,
+            updateDeckLayouts,
+            updateDeckFocusLayout,
+        ].forEach(function (step) {
+            try {
+                step();
+            } catch (err) {
+                console.error('Onigiri: ' + (step.name || 'init step') + ' failed', err);
+            }
+        });
 
     }
 

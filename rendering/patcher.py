@@ -3726,6 +3726,11 @@ def install_main_webview_resize_repaint_guard():
     global _main_webview_resize_repaint_filter, _main_webview_resize_repaint_timer
     if _main_webview_resize_repaint_filter is not None:
         return
+    from ..core.platform import IS_MOBILE
+    if IS_MOBILE:
+        # Works around Chromium's inner QQuickWidget, which does not exist
+        # under Kioku's WKWebView stand-in.
+        return
     try:
         timer = QTimer(mw)
         timer.setSingleShot(True)
@@ -6314,7 +6319,7 @@ def generate_icon_css(addon_package, conf):
 def generate_conditional_css(conf):
 	styles = []
 	styles.append("""
-        body.deck-browser .sidebar-left.deck-focus-mode .sidebar-expanded-content > #deck-list-header {
+        body.deck-browser .sidebar-left.deck-focus-mode .onigiri-sidebar-decks-section > #deck-list-header {
             display: flex !important;
         }
     """)

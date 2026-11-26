@@ -1,0 +1,477 @@
+/* Onigiri on iPhone/iPad (Kioku). Loaded last on every Onigiri page.
+ *
+ * Classes on <html>, set by mobile.js before the body is parsed:
+ *   .onigiri-touch   coarse pointer / no hover (iPhone, iPad without mouse)
+ *   .onigiri-phone   viewport <= 600px (iPhone, iPad slide-over/split)
+ *   .onigiri-tablet  touch and wider than a phone (iPad)
+ *
+ * Kioku pads <html> by the safe area (notch, home indicator) through
+ * --kioku-safe-left/right/bottom; position:fixed elements add it themselves.
+ */
+
+:root {
+    --onigiri-safe-bottom: var(--kioku-safe-bottom, 0px);
+    --onigiri-safe-left: var(--kioku-safe-left, 0px);
+    --onigiri-safe-right: var(--kioku-safe-right, 0px);
+    --onigiri-phone-tabs-h: 56px;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Kioku compatibility                                                        */
+/* ------------------------------------------------------------------------- */
+
+/* Kioku's phone CSS (kioku/webscripts.py PHONE_CSS) turns any table holding
+   .decktd into a `display:block; width:fit-content` scroll box, with its cells
+   capped at `100vw - 13em`. That suits Anki's own deck table, but Onigiri's
+   rows are flex rows: they collapsed to ~30px and the deck list looked empty. */
+html #deck-list-container table.deck-table,
+html #deck-list-container table.deck-table.kioku-decks {
+    display: table !important;
+    position: static !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+}
+
+html #deck-list-container table.deck-table .decktd {
+    min-width: 0 !important;
+    max-width: none !important;
+}
+
+html #deck-list-container table.deck-table td {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/* Kioku gives the deck-list page body side margins (meant for Anki's own
+   deck list); Onigiri's layout manages its own gutters. */
+html body:has(.modern-main-menu) {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Touch basics                                                               */
+/* ------------------------------------------------------------------------- */
+
+html.onigiri-touch {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* iOS shows its own link preview / copy callout on long-press, which would
+   fight the long-press menus. Text inside cards keeps its callout. */
+html.onigiri-touch .modern-main-menu,
+html.onigiri-touch .onigiri-quick-menu,
+html.onigiri-touch #onigiri-phone-tabs,
+html.onigiri-touch #onigiri-reviewer-header {
+    -webkit-touch-callout: none;
+}
+
+html.onigiri-touch #deck-list-container tr.deck,
+html.onigiri-touch .onigiri-quick-menu {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+html.onigiri-touch tr.deck.onigiri-pressing {
+    background-color: var(--highlight-bg) !important;
+    transition: background-color 0.4s ease;
+}
+
+/* Hover-only affordances become always visible on touch. */
+html.onigiri-touch tr.deck .drag-handle {
+    opacity: 0.45;
+    width: 28px;
+    min-width: 28px;
+    height: 32px;
+}
+
+/* A tap leaves :hover on the element until the next tap elsewhere. */
+@media (hover: none) {
+    html.onigiri-touch tr.deck:hover:not(.ctx-row-active):not(.is-selected) {
+        background-color: transparent;
+    }
+}
+
+/* Per-row "more" button replacing right-click on touch. */
+.onigiri-row-more-cell {
+    display: none;
+}
+
+html.onigiri-touch .onigiri-row-more-cell {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    padding: 0 !important;
+    border: 0;
+}
+
+.onigiri-row-more {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    margin: 0 -6px 0 2px;
+    padding: 0;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--fg-subtle, #888);
+    cursor: pointer;
+}
+
+.onigiri-row-more:active {
+    background: var(--highlight-bg, rgba(127, 127, 127, 0.15));
+}
+
+html.onigiri-select-mode .onigiri-row-more-cell,
+html.onigiri-select-mode tr.deck .drag-handle {
+    visibility: hidden;
+}
+
+.onigiri-select-toggle {
+    width: auto !important;
+    padding: 0 10px !important;
+    font: inherit;
+    font-size: 13px !important;
+    color: var(--fg-subtle, #888);
+}
+
+.onigiri-select-toggle[aria-pressed="true"] {
+    color: var(--accent-color, var(--fg));
+    font-weight: 600;
+}
+
+/* Touch-sized deck rows and header buttons. */
+html.onigiri-touch #deck-list-container tr.deck {
+    min-height: 44px;
+}
+
+html.onigiri-touch #deck-list-header .deck-header-btn {
+    min-width: 36px;
+    min-height: 36px;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Quick menus (deck / tag / sort): tap-to-open submenus, bottom sheet        */
+/* ------------------------------------------------------------------------- */
+
+html.onigiri-touch .onigiri-quick-menu .quick-menu-item {
+    min-height: 40px;
+    font-size: 15px;
+}
+
+/* Submenus open on tap (engine.js toggles .is-open), not hover. */
+html.onigiri-touch .onigiri-quick-menu .quick-menu-group:hover > .quick-menu-submenu,
+html.onigiri-touch .onigiri-quick-menu .quick-menu-group:focus-within > .quick-menu-submenu {
+    display: none;
+}
+
+html.onigiri-touch .onigiri-quick-menu .quick-menu-group.is-open > .quick-menu-submenu {
+    display: block;
+}
+
+html.onigiri-touch .onigiri-quick-menu .quick-menu-group.is-open > .quick-menu-arrow {
+    transform: rotate(90deg);
+}
+
+.onigiri-quick-menu.is-sheet {
+    left: calc(8px + var(--onigiri-safe-left)) !important;
+    right: calc(8px + var(--onigiri-safe-right)) !important;
+    top: auto !important;
+    bottom: calc(8px + var(--onigiri-safe-bottom)) !important;
+    min-width: 0;
+    max-height: 72vh;
+    max-height: 72dvh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 16px;
+    padding: 8px;
+    box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.28);
+    animation: onigiri-sheet-in 0.18s ease-out;
+}
+
+/* In a sheet, submenus open inline below their group. */
+.onigiri-quick-menu.is-sheet .quick-menu-group {
+    flex-wrap: wrap;
+}
+
+.onigiri-quick-menu.is-sheet .quick-menu-submenu {
+    position: static !important;
+    flex-basis: 100%;
+    margin: 6px 0 2px 18px;
+    box-shadow: none;
+    border: 0;
+    background: transparent;
+    animation: none;
+}
+
+@keyframes onigiri-sheet-in {
+    from { transform: translateY(24px); opacity: 0; }
+    to { transform: none; opacity: 1; }
+}
+
+/* ------------------------------------------------------------------------- */
+/* Home screen: phone layout                                                  */
+/* ------------------------------------------------------------------------- */
+
+html.onigiri-phone body:has(.modern-main-menu) {
+    height: 100vh;
+    height: 100dvh;
+}
+
+html.onigiri-phone .container.modern-main-menu.modern-main-menu {
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: stretch !important;
+    height: 100vh;
+    height: 100dvh;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: calc(var(--onigiri-phone-tabs-h) + var(--onigiri-safe-bottom) + 8px);
+    box-sizing: border-box;
+}
+
+/* The sidebar takes the full width; desktop widths, resize and collapse do
+   not apply. Selectors repeat the classes to outrank the cycle states. */
+html.onigiri-phone .container.modern-main-menu .sidebar-left.sidebar-left,
+html.onigiri-phone .container.modern-main-menu.onigiri-cycle-stacked .sidebar-left.sidebar-left {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 8px 8px 0 !important;
+    padding: 16px 14px 0 !important;
+    flex: 0 0 auto !important;
+    overflow: visible !important;
+    border-radius: 18px;
+}
+
+html.onigiri-phone .container.modern-main-menu .sidebar-left.sidebar-collapsed .sidebar-expanded-content {
+    display: flex !important;
+}
+
+html.onigiri-phone .container.modern-main-menu .collapsed-content-wrapper,
+html.onigiri-phone .container.modern-main-menu .sidebar-edge-toggle-zone,
+html.onigiri-phone #onigiri-sidebar-edge-pill,
+html.onigiri-phone .container.modern-main-menu .resize-handle {
+    display: none !important;
+}
+
+html.onigiri-phone .container.modern-main-menu .sidebar-expanded-content,
+html.onigiri-phone .container.modern-main-menu.onigiri-cycle-stacked .sidebar-expanded-content,
+html.onigiri-phone .container.modern-main-menu #deck-list-container,
+html.onigiri-phone .container.modern-main-menu.onigiri-cycle-stacked #deck-list-container {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    contain: none !important;
+    flex: 0 0 auto !important;
+}
+
+html.onigiri-phone .container.modern-main-menu .main-content.main-content {
+    display: flex !important;
+    flex: 0 0 auto !important;
+    padding: 16px 10px !important;
+    overflow: visible !important;
+    min-height: 0;
+}
+
+/* Phone sidebar: decks right after the actions, Ready to go below them
+   (a phone shows only a screenful, and decks are what people open first). */
+html.onigiri-phone .modern-main-menu .onigiri-sidebar-profile-section { order: 0 !important; }
+html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section { order: 1 !important; }
+html.onigiri-phone .modern-main-menu .onigiri-sidebar-decks-section { order: 2 !important; }
+html.onigiri-phone .modern-main-menu .onigiri-ready-sidebar { order: 3 !important; margin-top: 8px; }
+
+html.onigiri-phone .modern-main-menu .onigiri-sidebar-profile-section .profile-bar {
+    min-height: 0;
+}
+
+/* Actions as a 4-column grid of icon tiles instead of a tall list. */
+html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section:not(:empty) {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    margin: 6px 0 10px;
+}
+
+html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > .menu-item,
+html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > details.menu-group > summary.menu-item {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    margin: 0;
+    padding: 9px 2px 7px;
+    min-height: 60px;
+    box-sizing: border-box;
+    border-radius: 14px;
+    font-size: 11.5px;
+    line-height: 1.15;
+    text-align: center;
+    background: var(--highlight-bg, rgba(127, 127, 127, 0.08));
+}
+
+html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > .menu-item > span,
+html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > details.menu-group > summary.menu-item > span {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin: 0 !important;
+}
+
+html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > .menu-item > .icon,
+html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > details.menu-group > summary.menu-item > .icon {
+    margin: 0 !important;
+}
+
+html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > details.menu-group {
+    margin: 0;
+}
+
+html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > details.menu-group > summary.menu-item::after {
+    display: none;
+}
+
+/* Open "More": the group spans the row, its tile stays first and the
+   extra actions follow as a list across the full width. */
+html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > details.menu-group[open] {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+}
+
+html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > details.menu-group[open] > .menu-group-items {
+    grid-column: 1 / -1;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px;
+    width: auto !important;
+    height: auto !important;
+    max-height: none !important;
+    opacity: 1 !important;
+    position: static !important;
+    transform: none !important;
+}
+
+html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > details.menu-group[open] > .menu-group-items > .menu-item > span {
+    display: inline !important;
+}
+
+html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > details.menu-group[open] > .menu-group-items > .menu-item {
+    margin: 0;
+    font-size: 14px;
+}
+
+/* Tabs: one pane at a time. */
+html.onigiri-phone.onigiri-has-phone-tabs.onigiri-phone-tab-decks .container.modern-main-menu .main-content.main-content {
+    display: none !important;
+}
+
+html.onigiri-phone.onigiri-has-phone-tabs.onigiri-phone-tab-home .container.modern-main-menu .sidebar-left.sidebar-left {
+    display: none !important;
+}
+
+#onigiri-phone-tabs {
+    display: none;
+}
+
+html.onigiri-phone #onigiri-phone-tabs {
+    display: flex;
+    position: fixed;
+    z-index: 9000;
+    left: calc(12px + var(--onigiri-safe-left));
+    right: calc(12px + var(--onigiri-safe-right));
+    bottom: calc(8px + var(--onigiri-safe-bottom));
+    height: var(--onigiri-phone-tabs-h);
+    padding: 4px;
+    gap: 4px;
+    box-sizing: border-box;
+    border-radius: 18px;
+    background: var(--onigiri-quick-menu-bg, var(--canvas-overlay, var(--canvas, #fff)));
+    border: 1px solid var(--border, rgba(127, 127, 127, 0.25));
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.16);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+}
+
+#onigiri-phone-tabs button {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    border: 0;
+    border-radius: 14px;
+    background: transparent;
+    color: var(--fg-subtle, #888);
+    font: inherit;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+#onigiri-phone-tabs button[aria-selected="true"] {
+    color: var(--fg, #111);
+    background: var(--highlight-bg, rgba(127, 127, 127, 0.14));
+}
+
+/* The widget grid reflows itself to the available width
+   (engine.js reflowWidgetGrid): one column on a phone. */
+html.onigiri-phone .main-content .unified-grid {
+    max-width: 100% !important;
+}
+
+/* Heavy effects: the full-page blurred background layers and particle
+   canvases cost a lot of GPU on a phone. */
+html.onigiri-touch body::before,
+html.onigiri-touch body::after {
+    filter: none !important;
+    -webkit-filter: none !important;
+}
+
+/* The desktop welcome overlay uses desktop type sizes. */
+html.onigiri-phone #onigiri-welcome-overlay {
+    padding: 24px;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+html.onigiri-phone #onigiri-welcome-overlay img {
+    width: min(240px, 70vw) !important;
+}
+
+html.onigiri-phone #onigiri-welcome-overlay h1 {
+    font-size: 36px !important;
+}
+
+html.onigiri-phone #onigiri-welcome-overlay p {
+    font-size: 19px !important;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Home screen: iPad                                                          */
+/* ------------------------------------------------------------------------- */
+
+html.onigiri-tablet .container.modern-main-menu:not(.onigiri-cycle-stacked) .sidebar-left {
+    width: clamp(300px, 40vw, 420px) !important;
+    min-width: 300px !important;
+}
+
+html.onigiri-tablet .container.modern-main-menu .main-content {
+    padding: 20px 16px !important;
+}
+
+html.onigiri-tablet .container.modern-main-menu .resize-handle,
+html.onigiri-tablet .container.modern-main-menu .sidebar-edge-toggle-zone {
+    display: none !important;
+}
