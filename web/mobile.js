@@ -982,6 +982,28 @@
         }, { passive: true });
     }
 
+    // --- Profile (phones): one slide up per open ----------------------------------
+    // A CSS animation on the panel could replay when iOS restyled the page
+    // around it (two pop-ups); a Web Animation runs exactly once.
+
+    function watchProfile() {
+        var sidebar = document.querySelector('.sidebar-left');
+        if (!sidebar || sidebar.dataset.onigiriProfileWatch || typeof MutationObserver === 'undefined') return;
+        sidebar.dataset.onigiriProfileWatch = '1';
+        var wasOpen = sidebar.classList.contains('profile-sidebar-open');
+        new MutationObserver(function () {
+            var open = sidebar.classList.contains('profile-sidebar-open');
+            if (open === wasOpen) return;
+            wasOpen = open;
+            root.classList.toggle('onigiri-profile-open', open);
+            var panel = sidebar.querySelector('.onigiri-sidebar-profile');
+            if (!open || !panel || !root.classList.contains('onigiri-phone') || !panel.animate) return;
+            if (mq('(prefers-reduced-motion: reduce)')) return;
+            panel.animate([{ transform: 'translateY(100%)' }, { transform: 'translateY(0)' }],
+                { duration: 320, easing: 'cubic-bezier(0.32, 0.72, 0, 1)' });
+        }).observe(sidebar, { attributes: true, attributeFilter: ['class'] });
+    }
+
     // --- Profile (phones): swipe down from the top to close -----------------------
 
     (function () {
@@ -1284,6 +1306,7 @@
         addSelectToggle();
         decorateDeckRows();
         watchSheets();
+        watchProfile();
         setupNavBar();
         setupEdgeSwipe();
         if (root.classList.contains('onigiri-touch')) {

@@ -1624,11 +1624,17 @@ html.onigiri-phone .sidebar-left.profile-sidebar-open .onigiri-sidebar-profile {
     overscroll-behavior: contain;
     padding-bottom: calc(24px + var(--onigiri-safe-bottom)) !important;
     background: var(--canvas, var(--rf-paper, #fff)) !important;
-    animation: onigiri-sheet-in 0.32s cubic-bezier(0.32, 0.72, 0, 1);
-    transition: transform 0.2s ease;
 }
 
-html.onigiri-phone:has(.profile-sidebar-open) #onigiri-phone-tabs {
+/* One motion only: mobile.js slides the page up once per open. The
+   desktop fade-and-shift is off on phones (it played as a second pop). */
+html.onigiri-phone .sidebar-left .onigiri-sidebar-profile,
+html.onigiri-phone .sidebar-left .sidebar-expanded-content > :not(.onigiri-sidebar-profile) {
+    transition: none !important;
+    animation: none !important;
+}
+
+html.onigiri-phone.onigiri-profile-open #onigiri-phone-tabs {
     display: none !important;
 }
 
