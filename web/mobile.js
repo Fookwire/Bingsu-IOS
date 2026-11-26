@@ -321,8 +321,25 @@
         return bg;
     }
 
-    var MAIN_SCREEN = '.container.modern-main-menu, .ba-home, .ba-side, body.onigiri-overview, #qa';
+    var MAIN_SCREEN = '.container.modern-main-menu, .ba-home, .ba-side, body.onigiri-overview, .overview-bottom-actions, #qa';
     var lastEdge = '';
+
+    // The colour actually showing at a point: the first opaque background
+    // (or ::before layer, where themes put theirs) from the element there up.
+    function colorAt(x, y) {
+        var el = document.elementFromPoint(x, y);
+        for (; el && el !== root; el = el.parentElement) {
+            var c = opaqueBackground(el);
+            if (!c) {
+                try {
+                    var b = getComputedStyle(el, '::before').backgroundColor;
+                    if (b && !/rgba\([^)]*,\s*0(\.0*)?\)|transparent/.test(b)) c = b;
+                } catch (e) {}
+            }
+            if (c) return c.replace(/\s+/g, '');
+        }
+        return (opaqueBackground(document.body) || opaqueBackground(root) || '').replace(/\s+/g, '');
+    }
 
     function paintEdges() {
         if (!root.classList.contains('onigiri-app') || !document.body) return;
@@ -330,11 +347,13 @@
         var color = opaqueBackground(document.body) ||
             opaqueBackground(document.querySelector('.container.modern-main-menu, .ba-home, #outer')) ||
             opaqueBackground(root);
-        if (!color) return;
-        root.style.backgroundColor = color;
-        if (document.querySelector(MAIN_SCREEN) && color !== lastEdge) {
-            lastEdge = color;
-            nativeCmd('edge:' + color.replace(/\s+/g, ''));
+        if (color) root.style.backgroundColor = color;
+        if (!document.querySelector(MAIN_SCREEN)) return;
+        var h = window.innerHeight || root.clientHeight;
+        var edge = colorAt(2, 2) + '|' + colorAt(2, h - 2);
+        if (edge !== '|' && edge !== lastEdge) {
+            lastEdge = edge;
+            nativeCmd('edge:' + edge);
         }
     }
 
@@ -954,6 +973,101 @@
         if (b) haptic(b.hasAttribute('data-onigiri-ease') ? 'medium' : 'light');
     }, true);
 
+
+    // --- Anki's menus as a full-screen page -------------------------------------------
+    // The Menu tab / Menu row: File, Edit, View, Tools, Help and Onigiri as
+    // an iOS list page (webview_handlers.show_app_menu sends the tree);
+    // a submenu pushes its own page with ‹ back, an item runs and closes.
+
+    var CHEVRON_SVG = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>';
+    var CHECK_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4 4L19 7"/></svg>';
+
+    function closeAppMenu() {
+        var page = document.getElementById('onigiri-app-menu');
+        if (!page) return;
+        page.classList.add('is-closing');
+        root.classList.remove('onigiri-app-menu-open');
+        setTimeout(function () { page.remove(); }, 260);
+    }
+
+    function showAppMenu(data) {
+        closeMenus();
+        var old = document.getElementById('onigiri-app-menu');
+        if (old) old.remove();
+        var page = document.createElement('div');
+        page.id = 'onigiri-app-menu';
+        page.setAttribute('role', 'dialog');
+        page.innerHTML = '<div class="oam-bar"><button type="button" class="oam-back"></button>' +
+            '<div class="oam-title"></div><button type="button" class="oam-done"></button></div>' +
+            '<div class="oam-body"></div>';
+        var stack = [{ title: t('menu', 'Menu'), items: (data && data.items) || [] }];
+        var backBtn = page.querySelector('.oam-back');
+        var doneBtn = page.querySelector('.oam-done');
+        var title = page.querySelector('.oam-title');
+        var body = page.querySelector('.oam-body');
+        doneBtn.textContent = t('done', 'Done');
+        doneBtn.addEventListener('click', closeAppMenu);
+        backBtn.addEventListener('click', function () {
+            if (stack.length > 1) { stack.pop(); render(-1); haptic('light'); }
+        });
+
+        function render(direction) {
+            var level = stack[stack.length - 1];
+            title.textContent = level.title;
+            if (stack.length > 1) {
+                backBtn.innerHTML = BACK_NAV_SVG + '<span></span>';
+                backBtn.querySelector('span').textContent = stack[stack.length - 2].title;
+                backBtn.style.visibility = 'visible';
+            } else {
+                backBtn.innerHTML = '';
+                backBtn.style.visibility = 'hidden';
+            }
+            body.innerHTML = '';
+            var list = document.createElement('div');
+            list.className = 'oam-list' + (direction > 0 ? ' is-push' : direction < 0 ? ' is-pop' : '');
+            var group = null;
+            level.items.forEach(function (item) {
+                if (item.sep) { group = null; return; }
+                if (!group) {
+                    group = document.createElement('div');
+                    group.className = 'oam-group';
+                    list.appendChild(group);
+                }
+                var row = document.createElement('button');
+                row.type = 'button';
+                row.className = 'oam-row' + (item.en === false ? ' is-disabled' : '');
+                var label = document.createElement('span');
+                label.className = 'oam-label';
+                label.textContent = item.t;
+                row.appendChild(label);
+                if (item.sub) {
+                    row.insertAdjacentHTML('beforeend', '<span class="oam-chevron">' + CHEVRON_SVG + '</span>');
+                } else if (item.chk) {
+                    row.insertAdjacentHTML('beforeend', '<span class="oam-check">' + CHECK_SVG + '</span>');
+                }
+                row.addEventListener('click', function () {
+                    if (item.sub) {
+                        stack.push({ title: item.t, items: item.sub });
+                        haptic('light');
+                        render(1);
+                        return;
+                    }
+                    if (item.en === false) return;
+                    haptic('light');
+                    closeAppMenu();
+                    try { pycmd('onigiri_app_menu_run:' + item.id); } catch (e) {}
+                });
+                group.appendChild(row);
+            });
+            body.appendChild(list);
+            body.scrollTop = 0;
+        }
+
+        render(0);
+        document.body.appendChild(page);
+        root.classList.add('onigiri-app-menu-open');
+    }
+
     // --- Phone tab bar (deck browser) --------------------------------------------
 
     var TAB_KEY = 'onigiriPhoneTab';
@@ -1137,6 +1251,8 @@
         setSelectMode: setSelectMode,
         showTab: applyTab,
         showActionSheet: showActionSheet,
+        showAppMenu: showAppMenu,
+        closeAppMenu: closeAppMenu,
         closeMenus: closeMenus,
         refresh: function () { updateClasses(); decorateDeckRows(); addSelectToggle(); stripHover(); paintEdges(); },
         haptic: haptic,

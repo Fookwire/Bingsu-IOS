@@ -769,6 +769,10 @@ html.onigiri-phone.onigiri-has-phone-tabs.onigiri-phone-tab-home .container.mode
    last row clears it). */
 html.onigiri-phone #onigiri-phone-tabs {
     display: flex;
+    align-items: stretch;
+    overflow: hidden;
+    margin: 0 !important;
+    font-size: 10px;
     position: fixed;
     z-index: 9000;
     left: calc(14px + var(--onigiri-safe-left));
@@ -779,6 +783,7 @@ html.onigiri-phone #onigiri-phone-tabs {
     gap: 2px;
     box-sizing: border-box;
     border-radius: 999px;
+    background: var(--onigiri-quick-menu-bg, var(--canvas, #fff));
     background: color-mix(in srgb, var(--onigiri-quick-menu-bg, var(--canvas, #fff)) 82%, transparent);
     border: 0.5px solid var(--border, rgba(127, 127, 127, 0.25));
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
@@ -821,6 +826,21 @@ html #onigiri-phone-tabs button:focus {
     border: 0 !important;
     box-shadow: none !important;
     outline: none;
+    /* themes and Anki give bare buttons margins, padding and heights: the
+       selected bubble spilled out of the bar */
+    position: static !important;
+    box-sizing: border-box !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: 100% !important;
+    width: auto !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.1 !important;
+    transform: none !important;
+    top: auto !important;
+    left: auto !important;
 }
 
 html #onigiri-phone-tabs button[aria-selected="true"] {
@@ -1615,4 +1635,171 @@ html.onigiri-phone .onigiri-sidebar-profile .ba-side-donut-ring {
 .onigiri-sidebar-profile .ba-side-donut-core strong.is-tiny {
     font-size: 13px !important;
     letter-spacing: -0.04em;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Anki's menus as a full-screen page (mobile.js showAppMenu)                 */
+/* ------------------------------------------------------------------------- */
+
+#onigiri-app-menu {
+    position: fixed;
+    inset: 0;
+    z-index: 100003;
+    display: flex;
+    flex-direction: column;
+    background: var(--canvas, var(--bg, #f2f2f7));
+    color: var(--fg, #111);
+    font-family: inherit;
+    -webkit-user-select: none;
+    user-select: none;
+    animation: onigiri-sheet-in 0.34s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+#onigiri-app-menu.is-closing {
+    transform: translateY(100%);
+    transition: transform 0.26s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+#onigiri-app-menu .oam-bar {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    flex: 0 0 auto;
+    min-height: 52px;
+    padding: 0 calc(6px + var(--onigiri-safe-right)) 0 calc(6px + var(--onigiri-safe-left));
+    border-bottom: 0.5px solid var(--border, rgba(127, 127, 127, 0.3));
+}
+
+#onigiri-app-menu .oam-title {
+    font-size: 17px;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 50vw;
+}
+
+html #onigiri-app-menu .oam-bar button {
+    -webkit-appearance: none;
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    min-width: 44px;
+    margin: 0 !important;
+    padding: 0 8px !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: var(--accent-color, #0a84ff) !important;
+    font: inherit;
+    font-size: 17px !important;
+}
+
+#onigiri-app-menu .oam-back {
+    justify-self: start;
+    padding-left: 0 !important;
+}
+
+#onigiri-app-menu .oam-back span {
+    max-width: 28vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#onigiri-app-menu .oam-done {
+    justify-self: end;
+    font-weight: 600 !important;
+}
+
+#onigiri-app-menu .oam-body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding: 18px calc(16px + var(--onigiri-safe-right)) calc(28px + var(--onigiri-safe-bottom)) calc(16px + var(--onigiri-safe-left));
+}
+
+#onigiri-app-menu .oam-list.is-push {
+    animation: onigiri-page-in 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+#onigiri-app-menu .oam-list.is-pop {
+    animation: onigiri-page-back 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@keyframes onigiri-page-back {
+    from { transform: translateX(-30%); opacity: 0.4; }
+    to { transform: none; opacity: 1; }
+}
+
+#onigiri-app-menu .oam-group {
+    overflow: hidden;
+    border-radius: 12px;
+    background: rgba(127, 127, 127, 0.12);
+}
+
+#onigiri-app-menu .oam-group + .oam-group {
+    margin-top: 22px;
+}
+
+html #onigiri-app-menu .oam-row {
+    -webkit-appearance: none;
+    appearance: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-sizing: border-box;
+    width: 100% !important;
+    min-height: 48px;
+    margin: 0 !important;
+    padding: 0 14px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border-bottom: 0.5px solid rgba(127, 127, 127, 0.28) !important;
+    color: var(--fg, #111) !important;
+    font: inherit;
+    font-size: 17px !important;
+    text-align: left;
+}
+
+html #onigiri-app-menu .oam-row:last-child {
+    border-bottom: 0 !important;
+}
+
+html #onigiri-app-menu .oam-row.onigiri-pressed {
+    opacity: 1 !important;
+    background: rgba(127, 127, 127, 0.18) !important;
+}
+
+#onigiri-app-menu .oam-row.is-disabled {
+    opacity: 0.4;
+}
+
+#onigiri-app-menu .oam-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#onigiri-app-menu .oam-chevron {
+    display: inline-flex;
+    color: var(--fg-subtle, rgba(127, 127, 127, 0.8));
+    opacity: 0.7;
+}
+
+#onigiri-app-menu .oam-check {
+    display: inline-flex;
+    color: var(--accent-color, #0a84ff);
+}
+
+html.onigiri-app-menu-open #onigiri-phone-tabs,
+html.onigiri-app-menu-open #onigiri-phone-nav {
+    visibility: hidden;
 }

@@ -515,18 +515,73 @@ def _build_create_deck_payload() -> dict:
 
     return {"destinations": destinations}
 
-def show_app_menu() -> None:
-    """Anki's menus (File, Edit, View, Tools, Help, Onigiri) as one popup.
+# Actions of the menu page last shown (id -> QAction), for its taps.
+_APP_MENU_ACTIONS: dict = {}
 
-    On iPhone/iPad the desktop menu row is hidden (Bingsu) or cramped
-    (Kioku); the phone tab bar's Menu button opens this instead, at the tap
-    (Kioku moves QCursor to where a page was tapped).
-    """
-    from aqt.qt import QCursor, QMenu
 
+def _menu_text(action) -> str:
+    text = (action.text() or "").split("\t")[0]
+    return text.replace("&&", "\0").replace("&", "").replace("\0", "&").strip()
+
+
+def _menu_tree(menu) -> list:
+    items = []
+    for action in menu.actions():
+        if action.isSeparator():
+            if items and not items[-1].get("sep"):
+                items.append({"sep": True})
+            continue
+        if not action.isVisible():
+            continue
+        sub = action.menu()
+        if sub is not None:
+            try:
+                # menus that fill themselves when opened (Edit > More)
+                sub.aboutToShow.emit()
+            except Exception:
+                pass
+            children = _menu_tree(sub)
+            if children:
+                items.append({"t": _menu_text(action), "sub": children})
+            continue
+        aid = str(len(_APP_MENU_ACTIONS) + 1)
+        _APP_MENU_ACTIONS[aid] = action
+        entry = {"t": _menu_text(action), "id": aid, "en": bool(action.isEnabled())}
+        if action.isCheckable():
+            entry["chk"] = bool(action.isChecked())
+        items.append(entry)
+    while items and items[-1].get("sep"):
+        items.pop()
+    return items
+
+
+def show_app_menu(context=None) -> None:
+    """Anki's menus (File, Edit, View, Tools, Help, Onigiri) as a full-screen
+    page in the web view that asked (web/mobile.js showAppMenu): on
+    iPhone/iPad the desktop menu row is hidden, and a Qt popup opened as a
+    desktop-sized list in the corner of the screen."""
     menubar = getattr(getattr(mw, "form", None), "menubar", None) or mw.menuBar()
     if menubar is None:
         return
+    _APP_MENU_ACTIONS.clear()
+    tree = _menu_tree(menubar)
+    web = getattr(context, "web", None) or mw.web
+    try:
+        payload = json.dumps({"items": tree})
+        web.eval(
+            "(function(){if(window.OnigiriMobile&&OnigiriMobile.showAppMenu){OnigiriMobile.showAppMenu(%s);}"
+            "else{pycmd('onigiri_app_menu_popup');}})();" % payload
+        )
+        return
+    except Exception as exc:
+        print(f"Onigiri: menu page failed, using a popup: {exc}")
+    _show_app_menu_popup()
+
+
+def _show_app_menu_popup() -> None:
+    from aqt.qt import QCursor, QMenu
+
+    menubar = getattr(getattr(mw, "form", None), "menubar", None) or mw.menuBar()
     menu = QMenu(mw)
     for action in menubar.actions():
         sub = action.menu()
@@ -535,6 +590,16 @@ def show_app_menu() -> None:
         elif not action.isSeparator() and action.isVisible():
             menu.addAction(action)
     menu.exec(QCursor.pos())
+
+
+def _run_app_menu_action(aid: str) -> None:
+    from aqt.qt import QTimer
+
+    action = _APP_MENU_ACTIONS.get(aid)
+    if action is None or not action.isEnabled():
+        return
+    # after the page has closed its menu
+    QTimer.singleShot(0, action.trigger)
 
 
 def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bool, Any]:
@@ -549,7 +614,15 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
         return handled
 
     if cmd == "onigiri_app_menu":
-        show_app_menu()
+        show_app_menu(context)
+        return (True, None)
+
+    if cmd == "onigiri_app_menu_popup":
+        _show_app_menu_popup()
+        return (True, None)
+
+    if cmd.startswith("onigiri_app_menu_run:"):
+        _run_app_menu_action(cmd.split(":", 1)[1])
         return (True, None)
 
     if cmd.startswith("onigiri_more_menu:"):

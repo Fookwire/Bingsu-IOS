@@ -125,8 +125,9 @@ def hide_menu_row() -> None:
 
             cls.show_menubar = show_menubar
         mw.hide_menubar()
+        _log("menu row hidden")
     except Exception as exc:
-        print(f"Onigiri: could not hide the menu row: {exc}")
+        _log(f"could not hide the menu row: {exc}")
 
 
 # --- edges ---------------------------------------------------------------------
@@ -151,34 +152,116 @@ def parse_css_color(text: str):
     return None
 
 
+def _log(message: str) -> None:
+    # Kioku writes stdout to Documents/kioku.log
+    print(f"Onigiri iOS: {message}")
+
+
 def set_edge_color(css_color: str) -> bool:
-    """Paint the safe-area strips and the web views' under-page colour."""
-    rgb = parse_css_color(css_color)
+    """Paint the safe-area strips and the web views' under-page colour.
+    ``css_color`` is one colour or ``top|bottom`` (the status-bar strip and
+    the home-indicator strip can sit on different surfaces)."""
+    parts = (css_color or "").split("|")
+    top = parse_css_color(parts[0])
+    bottom = parse_css_color(parts[1]) if len(parts) > 1 else top
+    top = top or bottom
+    bottom = bottom or top
     mw = _mw()
-    if rgb is None or mw is None or not active():
+    if top is None or mw is None or not active():
+        if active():
+            _log(f"no usable edge colour in {css_color!r}")
         return False
-    if _state["edge"] == rgb:
+    if _state["edge"] == (top, bottom):
         return True
-    _state["edge"] = rgb
+    _state["edge"] = (top, bottom)
     try:
         from aqt.qt import QColor, QPalette
 
-        color = QColor(*rgb)
+        color = QColor(*top)
         palette = mw.palette()
         palette.setColor(QPalette.ColorRole.Window, color)
         mw.setPalette(palette)
         mw.setAutoFillBackground(True)
-        for name in ("web", "toolbarWeb", "bottomWeb"):
+        # A stylesheet beats the palette, and Anki's app stylesheet has a
+        # `QWidget { ... }` rule: a rule on the main window itself (and
+        # nothing under it) wins over both. Top half one colour, bottom
+        # half the other; the web views cover everything but the strips.
+        if top == bottom:
+            declarations = "background-color: rgb(%d, %d, %d);" % top
+        else:
+            declarations = (
+                "background-color: rgb(%d, %d, %d); background: qlineargradient(x1:0, y1:0, x2:0, y2:1, "
+                "stop:0 rgb(%d, %d, %d), stop:0.5 rgb(%d, %d, %d), stop:0.5001 rgb(%d, %d, %d), "
+                "stop:1 rgb(%d, %d, %d));" % (top + top + top + bottom + bottom)
+            )
+        _set_window_rule(mw, declarations)
+        for name, rgb in (("web", top), ("toolbarWeb", top), ("bottomWeb", bottom)):
             web = getattr(mw, name, None)
             if web is not None:
                 try:
-                    web.page().setBackgroundColor(color)
+                    web.page().setBackgroundColor(QColor(*rgb))
                 except Exception:
                     pass
+        _log(f"edge colours {top} / {bottom}")
         return True
     except Exception as exc:
-        print(f"Onigiri: could not colour the screen edges: {exc}")
+        _log(f"could not colour the screen edges: {exc}")
         return False
+
+
+_RULE_START = "/* onigiri-edges */"
+_RULE_END = "/* /onigiri-edges */"
+
+
+def _set_window_rule(mw, declarations: str) -> None:
+    name = mw.objectName() or ""
+    selector = "AnkiQt" + (f", QMainWindow#{name}" if name else "")
+    rule = f"{_RULE_START} {selector} {{ {declarations} }} {_RULE_END}"
+    sheet = mw.styleSheet() or ""
+    start = sheet.find(_RULE_START)
+    if start >= 0:
+        end = sheet.find(_RULE_END, start)
+        end = len(sheet) if end < 0 else end + len(_RULE_END)
+        sheet = sheet[:start] + sheet[end:]
+    mw.setStyleSheet((sheet.strip() + "\n" + rule).strip())
+    mw.update()
+
+
+EDGE_JS = r"""
+(function () {
+    function opaque(el, pseudo) {
+        if (!el) return '';
+        var c = getComputedStyle(el, pseudo || null).backgroundColor;
+        var m = c && c.match(/rgba?\(([^)]+)\)/);
+        if (!m) return '';
+        var p = m[1].split(/[\s,\/]+/).filter(Boolean);
+        if (p.length > 3 && parseFloat(p[3]) < 0.5) return '';
+        return c.replace(/\s+/g, '');
+    }
+    function at(x, y) {
+        var el = document.elementFromPoint(x, y);
+        for (; el && el !== document.documentElement; el = el.parentElement) {
+            var c = opaque(el) || opaque(el, '::before');
+            if (c) return c;
+        }
+        return opaque(document.body) || opaque(document.body, '::before') || opaque(document.documentElement);
+    }
+    var h = window.innerHeight || document.documentElement.clientHeight;
+    return at(2, 2) + '|' + at(2, h - 2);
+})()
+"""
+
+
+def query_edge_color() -> None:
+    """Ask the main page for its edge colours from Python as well, in case
+    mobile.js's own report did not arrive."""
+    mw = _mw()
+    if mw is None or not active():
+        return
+    try:
+        mw.web.evalWithCallback(EDGE_JS, lambda value: set_edge_color(value or ""))
+    except Exception as exc:
+        _log(f"edge colour query failed: {exc}")
 
 
 # --- bounce --------------------------------------------------------------------
@@ -292,6 +375,15 @@ def _after_main_window() -> None:
         pass
 
 
+def _after_state_change(*_args) -> None:
+    try:
+        from aqt.qt import QTimer
+
+        QTimer.singleShot(900, query_edge_color)
+    except Exception:
+        pass
+
+
 def install() -> None:
     if not active() or _state["installed"]:
         return
@@ -300,3 +392,6 @@ def install() -> None:
 
     gui_hooks.main_window_did_init.append(_after_main_window)
     gui_hooks.profile_did_open.append(_after_main_window)
+    gui_hooks.state_did_change.append(_after_state_change)
+    gui_hooks.theme_did_change.append(lambda: _state.update(edge=None))
+    _log("native layer installed")
