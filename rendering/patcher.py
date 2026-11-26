@@ -5254,7 +5254,19 @@ def _reviewer_bottom_bar_height_px(conf=None):
     if (conf.get("onigiri_reviewer_btn_custom_enabled", True)
             and conf.get("onigiri_reviewer_stattxt_mode", "hover") == "fixed"):
         height = max(height, _reviewer_fixed_button_metrics(conf)[2] + 24)
+    try:
+        from ..core.platform import is_phone_device
+
+        if is_phone_device():
+            # room under the buttons: on an iPhone they sat down in the
+            # rounded corners, against the home indicator
+            height += PHONE_BOTTOM_BAR_LIFT
+    except Exception:
+        pass
     return height
+
+
+PHONE_BOTTOM_BAR_LIFT = 22
 
 
 def _reviewer_background_viewport_height_px(bar_height=None):

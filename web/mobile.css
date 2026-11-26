@@ -270,8 +270,8 @@ html.onigiri-touch.onigiri-select-mode #onigiri-edit-toolbar {
     min-height: 52px;
     padding: 4px calc(12px + var(--onigiri-safe-right)) calc(4px + var(--onigiri-safe-bottom)) calc(12px + var(--onigiri-safe-left));
     box-sizing: border-box;
-    background: var(--onigiri-bar-bg, var(--canvas, #fff));
-    border-top: 0.5px solid var(--border, rgba(127, 127, 127, 0.3));
+    background: var(--onigiri-surface, var(--canvas, #fff));
+    border-top: 0.5px solid var(--onigiri-surface-line, var(--border, rgba(127, 127, 127, 0.3)));
     -webkit-backdrop-filter: saturate(180%) blur(20px);
     backdrop-filter: saturate(180%) blur(20px);
 }
@@ -396,6 +396,23 @@ html.onigiri-touch .onigiri-quick-menu .quick-menu-group.is-open > .quick-menu-a
     position: fixed;
     background: var(--onigiri-quick-menu-bg, var(--canvas-overlay, var(--canvas-elevated, var(--canvas, #fff))));
     border: 0.5px solid var(--border, rgba(127, 127, 127, 0.3));
+}
+
+/* Sheets in the theme's own colours (mobile.js setSurfaces). */
+html .onigiri-quick-menu.is-sheet {
+    background: var(--onigiri-surface-raised, var(--onigiri-quick-menu-bg, var(--canvas-overlay, var(--canvas, #fff)))) !important;
+    border-color: var(--onigiri-surface-line, var(--border, rgba(127, 127, 127, 0.3))) !important;
+    color: var(--onigiri-surface-ink, var(--fg, inherit)) !important;
+}
+
+html .onigiri-quick-menu.is-sheet hr {
+    border: 0;
+    border-top: 0.5px solid var(--onigiri-surface-line, rgba(127, 127, 127, 0.3));
+}
+
+html .onigiri-quick-menu.is-sheet .onigiri-sheet-grabber {
+    background: var(--onigiri-surface-line, rgba(127, 127, 127, 0.5));
+    opacity: 1;
     color: var(--fg, #111);
     font-family: inherit;
 }
@@ -506,9 +523,9 @@ html .onigiri-quick-menu.is-sheet .onigiri-sheet-cancel {
     margin: 10px 0 0;
     border: 0 !important;
     border-radius: 12px;
-    background: var(--highlight-bg, rgba(127, 127, 127, 0.14)) !important;
+    background: var(--onigiri-surface-fill, var(--highlight-bg, rgba(127, 127, 127, 0.14))) !important;
     box-shadow: none !important;
-    color: var(--accent-color, var(--fg)) !important;
+    color: var(--onigiri-surface-ink, var(--fg, inherit)) !important;
     font: inherit;
     font-size: 17px;
     font-weight: 600;
@@ -627,7 +644,7 @@ html.onigiri-phone .container.modern-main-menu.modern-main-menu {
     overflow-x: hidden !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
-    padding-bottom: calc(var(--onigiri-phone-tabs-h) + var(--onigiri-safe-bottom) + 40px);
+    padding-bottom: calc(var(--onigiri-phone-tabs-h) + var(--onigiri-safe-bottom) + 24px);
     box-sizing: border-box;
 }
 
@@ -767,6 +784,8 @@ html.onigiri-phone.onigiri-has-phone-tabs.onigiri-phone-tab-home .container.mode
 /* Tab bar: a floating bar (iOS 26) just above the home indicator, with
    full-size icons. Content scrolls behind it (the lists are padded so the
    last row clears it). */
+/* Tab bar: full width, flush with the bottom of the screen (the strip
+   under it is painted the same colour). */
 html.onigiri-phone #onigiri-phone-tabs {
     display: flex;
     align-items: stretch;
@@ -775,20 +794,18 @@ html.onigiri-phone #onigiri-phone-tabs {
     font-size: 10px;
     position: fixed;
     z-index: 9000;
-    left: calc(24px + var(--onigiri-safe-left));
-    right: calc(24px + var(--onigiri-safe-right));
-    bottom: calc(16px + var(--onigiri-safe-bottom));
+    left: 0;
+    right: 0;
+    bottom: 0;
     height: var(--onigiri-phone-tabs-h);
-    padding: 4px;
+    padding: 4px calc(10px + var(--onigiri-safe-right)) calc(4px + var(--onigiri-safe-bottom)) calc(10px + var(--onigiri-safe-left));
     gap: 2px;
-    box-sizing: border-box;
-    border-radius: 999px;
-    background: var(--onigiri-quick-menu-bg, var(--canvas, #fff));
-    background: color-mix(in srgb, var(--onigiri-quick-menu-bg, var(--canvas, #fff)) 82%, transparent);
-    border: 0.5px solid var(--border, rgba(127, 127, 127, 0.25));
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
-    -webkit-backdrop-filter: saturate(180%) blur(20px);
-    backdrop-filter: saturate(180%) blur(20px);
+    box-sizing: content-box;
+    border-radius: 0;
+    background: var(--onigiri-surface, var(--onigiri-quick-menu-bg, var(--canvas, #fff)));
+    border: 0;
+    border-top: 0.5px solid var(--onigiri-surface-line, var(--border, rgba(127, 127, 127, 0.25)));
+    box-shadow: none;
 }
 
 #onigiri-phone-tabs button {
@@ -845,7 +862,7 @@ html #onigiri-phone-tabs button:focus {
 
 html #onigiri-phone-tabs button[aria-selected="true"] {
     color: var(--accent-color, var(--fg, #111)) !important;
-    background: rgba(127, 127, 127, 0.16) !important;
+    background: var(--onigiri-surface-fill, rgba(127, 127, 127, 0.16)) !important;
 }
 
 /* The widget grid reflows itself to the available width
@@ -951,7 +968,7 @@ html.onigiri-phone #outer > #innertable > tbody > tr {
     gap: 4px;
     width: 100%;
     /* in from the screen's rounded corners */
-    padding: 0 calc(16px + var(--onigiri-safe-right)) 10px calc(16px + var(--onigiri-safe-left));
+    padding: 0 calc(16px + var(--onigiri-safe-right)) 22px calc(16px + var(--onigiri-safe-left));
     box-sizing: border-box;
 }
 
@@ -1648,8 +1665,8 @@ html.onigiri-phone .onigiri-sidebar-profile .ba-side-donut-ring {
     z-index: 100003;
     display: flex;
     flex-direction: column;
-    background: var(--canvas, var(--bg, #f2f2f7));
-    color: var(--fg, #111);
+    background: var(--onigiri-surface, var(--canvas, var(--bg, #f2f2f7)));
+    color: var(--onigiri-surface-ink, var(--fg, #111));
     font-family: inherit;
     -webkit-user-select: none;
     user-select: none;
@@ -1668,7 +1685,7 @@ html.onigiri-phone .onigiri-sidebar-profile .ba-side-donut-ring {
     flex: 0 0 auto;
     min-height: 52px;
     padding: 0 calc(6px + var(--onigiri-safe-right)) 0 calc(6px + var(--onigiri-safe-left));
-    border-bottom: 0.5px solid var(--border, rgba(127, 127, 127, 0.3));
+    border-bottom: 0.5px solid var(--onigiri-surface-line, var(--border, rgba(127, 127, 127, 0.3)));
 }
 
 #onigiri-app-menu .oam-title {
@@ -1739,7 +1756,7 @@ html #onigiri-app-menu .oam-bar button {
 #onigiri-app-menu .oam-group {
     overflow: hidden;
     border-radius: 12px;
-    background: rgba(127, 127, 127, 0.12);
+    background: var(--onigiri-surface-raised, rgba(127, 127, 127, 0.12));
 }
 
 #onigiri-app-menu .oam-group + .oam-group {
@@ -1761,8 +1778,8 @@ html #onigiri-app-menu .oam-row {
     border-radius: 0 !important;
     background: transparent !important;
     box-shadow: none !important;
-    border-bottom: 0.5px solid rgba(127, 127, 127, 0.28) !important;
-    color: var(--fg, #111) !important;
+    border-bottom: 0.5px solid var(--onigiri-surface-line, rgba(127, 127, 127, 0.28)) !important;
+    color: var(--onigiri-surface-ink, var(--fg, #111)) !important;
     font: inherit;
     font-size: 17px !important;
     text-align: left;
@@ -1774,7 +1791,7 @@ html #onigiri-app-menu .oam-row:last-child {
 
 html #onigiri-app-menu .oam-row.onigiri-pressed {
     opacity: 1 !important;
-    background: rgba(127, 127, 127, 0.18) !important;
+    background: var(--onigiri-surface-fill, rgba(127, 127, 127, 0.18)) !important;
 }
 
 #onigiri-app-menu .oam-row.is-disabled {
@@ -1825,4 +1842,8 @@ html.onigiri-ios.onigiri-phone body:has(.container.modern-main-menu, .ba-home) >
     height: 28px;
     pointer-events: none;
     background: linear-gradient(to bottom, var(--onigiri-edge-bg, transparent) 0%, transparent 100%);
+}
+
+html .onigiri-quick-menu.is-sheet .quick-menu-item {
+    color: var(--onigiri-surface-ink, var(--fg, inherit));
 }

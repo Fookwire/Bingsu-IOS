@@ -341,6 +341,26 @@
         return (opaqueBackground(document.body) || opaqueBackground(root) || '').replace(/\s+/g, '');
     }
 
+    // Theme surfaces for sheets, the Menu page and bars: the page's own
+    // background, a raised shade and a fill shade (lighter on dark themes,
+    // darker on light ones). Anki's grey showed through otherwise.
+    function setSurfaces(color) {
+        var rgb = rgbOf(color);
+        if (!rgb) return;
+        var dark = luminance(rgb) < 0.4;
+        function mix(amount) {
+            var target = dark ? 255 : 0;
+            return 'rgb(' + rgb.map(function (v) { return Math.round(v + (target - v) * amount); }).join(', ') + ')';
+        }
+        var st = root.style;
+        st.setProperty('--onigiri-surface', 'rgb(' + rgb.join(', ') + ')');
+        st.setProperty('--onigiri-surface-raised', mix(dark ? 0.07 : 0.03));
+        st.setProperty('--onigiri-surface-fill', mix(dark ? 0.13 : 0.07));
+        st.setProperty('--onigiri-surface-line', mix(dark ? 0.2 : 0.12));
+        st.setProperty('--onigiri-surface-ink', dark ? '#f2f2f7' : '#1c1c1e');
+        root.classList.toggle('onigiri-surface-dark', dark);
+    }
+
     function paintEdges() {
         if (!root.classList.contains('onigiri-app') || !document.body) return;
         root.style.backgroundColor = '';
@@ -348,6 +368,7 @@
             opaqueBackground(document.querySelector('.container.modern-main-menu, .ba-home, #outer')) ||
             opaqueBackground(root);
         if (color) root.style.backgroundColor = color;
+        if (color) setSurfaces(color);
         if (!document.querySelector(MAIN_SCREEN)) return;
         var h = window.innerHeight || root.clientHeight;
         var topColor = colorAt(2, 2);
@@ -580,7 +601,7 @@
         cancel.className = 'onigiri-sheet-cancel';
         cancel.textContent = t('cancel', 'Cancel');
         // card and reviewer pages style bare buttons with !important
-        [['background', 'var(--highlight-bg, rgba(127, 127, 127, 0.14))'], ['color', 'var(--accent-color, var(--fg))'],
+        [['background', 'var(--onigiri-surface-fill, var(--highlight-bg, rgba(127, 127, 127, 0.14)))'], ['color', 'var(--onigiri-surface-ink, var(--fg, inherit))'],
             ['border', '0'], ['box-shadow', 'none'], ['font-weight', '600'], ['font-size', '17px'],
             ['text-transform', 'none']].forEach(function (p) { cancel.style.setProperty(p[0], p[1], 'important'); });
         cancel.addEventListener('click', function (event) {
