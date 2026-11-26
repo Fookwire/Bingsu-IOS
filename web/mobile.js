@@ -350,7 +350,15 @@
         if (color) root.style.backgroundColor = color;
         if (!document.querySelector(MAIN_SCREEN)) return;
         var h = window.innerHeight || root.clientHeight;
-        var edge = colorAt(2, 2) + '|' + colorAt(2, h - 2);
+        var topColor = colorAt(2, 2);
+        if (topColor) root.style.setProperty('--onigiri-edge-bg', topColor);
+        if (!document.getElementById('onigiri-status-fade') && document.body) {
+            var fade = document.createElement('div');
+            fade.id = 'onigiri-status-fade';
+            fade.setAttribute('aria-hidden', 'true');
+            document.body.appendChild(fade);
+        }
+        var edge = topColor + '|' + colorAt(2, h - 2);
         if (edge !== '|' && edge !== lastEdge) {
             lastEdge = edge;
             nativeCmd('edge:' + edge);

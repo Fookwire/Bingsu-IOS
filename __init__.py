@@ -1406,6 +1406,13 @@ def _is_onigiri_page(context) -> bool:
     return cls.__name__ in _ONIGIRI_PAGE_CONTEXTS or cls.__module__.startswith(__name__)
 
 
+def _state_is_home() -> bool:
+    from .core import ios_native
+
+    top, bottom = ios_native._state.get("insets") or (0, 0)
+    return bool(top or bottom)
+
+
 def inject_mobile_assets(web_content, context):
     """Touch/phone support on every page (iPhone/iPad via Kioku).
 
@@ -1428,6 +1435,12 @@ def inject_mobile_assets(web_content, context):
             + ", ".join(json.dumps(c) for c in classes.split())
             + ");</script>"
         )
+    if type(context).__name__ == "DeckBrowser":
+        from .core import ios_native
+
+        if ios_native.active() and _state_is_home():
+            boot += ios_native.edge_vars_css()
+            boot += "<script>document.documentElement.classList.add('onigiri-edge-to-edge');</script>"
     web_content.head = (
         boot
         + f'<script src="{versioned_web_asset("mobile.js")}"></script>'

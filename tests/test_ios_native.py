@@ -97,6 +97,69 @@ class IosNativeTests(unittest.TestCase):
         self.assertIsNone(self.native.native_webview(broken))
 
 
+class Margins:
+    def __init__(self, l, t, r, b):
+        self.v = (l, t, r, b)
+
+    def left(self): return self.v[0]
+    def top(self): return self.v[1]
+    def right(self): return self.v[2]
+    def bottom(self): return self.v[3]
+
+
+class FakeMw:
+    def __init__(self, state, margins):
+        self.state = state
+        self.margins = margins
+        self.evals = []
+        self.web = types.SimpleNamespace(eval=self.evals.append)
+
+    def windowHandle(self):
+        return types.SimpleNamespace(safeAreaMargins=lambda: Margins(0, 59, 0, 34))
+
+    def contentsMargins(self):
+        return Margins(*self.margins)
+
+    def setContentsMargins(self, *m):
+        self.margins = m
+
+
+class EdgeToEdgeTests(unittest.TestCase):
+    def setUp(self):
+        self.platform, self.native = load()
+
+    def run_update(self, state, margins):
+        mw = FakeMw(state, margins)
+        with patch.object(self.native.onigiri_platform, "IS_IOS", True):
+            self.native._after_kioku_edges(types.SimpleNamespace(mw=mw))
+        return mw
+
+    def test_home_fills_the_screen(self):
+        mw = self.run_update("deckBrowser", (0, 59, 0, 34))
+        self.assertEqual(mw.margins, (0, 0, 0, 0))
+        self.assertEqual(self.native._state["insets"], (59, 34))
+        self.assertIn("--onigiri-edge-top','59px'", mw.evals[-1])
+        self.assertIn("onigiri-edge-to-edge',true", mw.evals[-1])
+        self.assertIn("59px", self.native.edge_vars_css())
+
+    def test_home_with_bottom_bar_keeps_bottom(self):
+        mw = self.run_update("deckBrowser", (0, 59, 0, 0))
+        self.assertEqual(mw.margins, (0, 0, 0, 0))
+        self.assertEqual(self.native._state["insets"], (59, 0))
+
+    def test_other_screens_keep_kiokus_layout(self):
+        self.run_update("deckBrowser", (0, 59, 0, 34))
+        mw = self.run_update("review", (0, 59, 0, 0))
+        self.assertEqual(mw.margins, (0, 59, 0, 0))
+        self.assertEqual(self.native._state["insets"], (0, 0))
+        self.assertIn("onigiri-edge-to-edge',false", mw.evals[-1])
+
+    def test_off_ios_nothing_changes(self):
+        mw = FakeMw("deckBrowser", (0, 59, 0, 34))
+        self.native._after_kioku_edges(types.SimpleNamespace(mw=mw))
+        self.assertEqual(mw.margins, (0, 59, 0, 34))
+
+
 class MobileJsContractTests(unittest.TestCase):
     """mobile.js talks to ios_native through these commands."""
 
