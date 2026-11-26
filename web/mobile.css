@@ -426,9 +426,23 @@ html.onigiri-phone #onigiri-phone-tabs {
     cursor: pointer;
 }
 
-#onigiri-phone-tabs button[aria-selected="true"] {
-    color: var(--fg, #111);
-    background: var(--highlight-bg, rgba(127, 127, 127, 0.14));
+/* Themes style bare <button>s (Anki's .fancy gradient, Kome's accent):
+   the tabs keep their own look everywhere. */
+html #onigiri-phone-tabs button,
+html #onigiri-phone-tabs button:hover,
+html #onigiri-phone-tabs button:focus {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    outline: none;
+}
+
+html #onigiri-phone-tabs button[aria-selected="true"] {
+    color: var(--fg, var(--rf-ink, #111)) !important;
+    background: rgba(127, 127, 127, 0.14) !important;
 }
 
 /* The widget grid reflows itself to the available width
@@ -695,4 +709,74 @@ html.onigiri-phone .osw-page-head-row {
 
 html.onigiri-phone .osw-page-head h1 {
     font-size: 21px;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Kome theme (things_theme) home                                             */
+/* ------------------------------------------------------------------------- */
+
+/* Deck list: the desktop columns (progress 112px + three counts 216px)
+   left deck names ~100px on an iPad. Tighter columns on touch screens; no
+   progress column on phones. The gear (deck options) is always visible. */
+html.onigiri-touch .ad-list {
+    --ad-count-cols: 40px 52px 44px;
+    --ad-cols: 24px minmax(0, 1fr) 76px var(--ad-count-cols) 36px;
+    --ad-row-cols: minmax(0, 1fr) 76px var(--ad-count-cols) 36px;
+}
+
+html.onigiri-phone .ad-list {
+    --ad-count-cols: 34px 34px 34px;
+    --ad-cols: 24px minmax(0, 1fr) var(--ad-count-cols) 36px;
+    --ad-row-cols: minmax(0, 1fr) var(--ad-count-cols) 36px;
+}
+
+html.onigiri-phone .ad-list .ad-list-header-cell--progress,
+html.onigiri-phone .ad-list .ad-list-progress {
+    display: none !important;
+}
+
+html.onigiri-phone .ad-list .ad-list-header-cell {
+    font-size: 9px;
+    letter-spacing: 0.04em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+html.onigiri-touch .ad-list .ad-list-gear {
+    opacity: 0.6;
+}
+
+html.onigiri-touch .ad-list .ad-list-row {
+    min-height: 44px;
+}
+
+html.onigiri-tablet .ba-home {
+    padding-left: 24px;
+    padding-right: 24px;
+}
+
+/* Phones: the fixed 264px sidebar and the deck list become the two tabs. */
+html.onigiri-phone body.ba-with-side {
+    padding-left: 0 !important;
+}
+
+html.onigiri-phone .ba-home {
+    padding: 16px 10px calc(var(--onigiri-phone-tabs-h) + var(--onigiri-safe-bottom) + 24px);
+    min-height: 0;
+}
+
+html.onigiri-phone .ba-side {
+    width: auto;
+    right: 0;
+    bottom: 0;
+    padding-bottom: calc(var(--onigiri-phone-tabs-h) + var(--onigiri-safe-bottom) + 24px);
+    border-right: 0;
+}
+
+html.onigiri-phone.onigiri-has-phone-tabs.onigiri-phone-tab-decks .ba-side {
+    display: none !important;
+}
+
+html.onigiri-phone.onigiri-has-phone-tabs.onigiri-phone-tab-home .ba-home {
+    display: none !important;
 }

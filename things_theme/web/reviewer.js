@@ -455,7 +455,9 @@
   function hookEaseClicks() {
     var keys = document.querySelectorAll(".ba-rv-ease-key");
     for (var i = 0; i < keys.length; i++) {
-      keys[i].addEventListener("mousedown", function () {
+      // pointerdown, not mousedown: on touch (iOS) the compatibility
+      // mousedown only arrives with the click, after the card has changed.
+      keys[i].addEventListener(window.PointerEvent ? "pointerdown" : "mousedown", function () {
         var n = parseInt(this.getAttribute("data-ease"), 10);
         if (n >= 1 && n <= 4) {
           try { window.__baEaseFx(n); } catch (_) {}

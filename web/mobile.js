@@ -266,7 +266,8 @@
     var HOME_SVG = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1.8"/><rect x="13" y="4" width="7" height="7" rx="1.8"/><rect x="4" y="13" width="7" height="7" rx="1.8"/><rect x="13" y="13" width="7" height="7" rx="1.8"/></svg>';
 
     function addPhoneTabs() {
-        var container = document.querySelector('.container.modern-main-menu');
+        // Classic/Shima home (.modern-main-menu) or the Kome theme (.ba-side).
+        var container = document.querySelector('.container.modern-main-menu, .ba-side');
         if (!container || document.getElementById('onigiri-phone-tabs')) return;
         var bar = document.createElement('nav');
         bar.id = 'onigiri-phone-tabs';
@@ -327,6 +328,17 @@
         addPhoneTabs();
         addSelectToggle();
         decorateDeckRows();
+        // Kome builds its sidebar after load: add the tabs once it appears.
+        if (!document.getElementById('onigiri-phone-tabs') && typeof MutationObserver !== 'undefined' && document.body) {
+            var tabsObserver = new MutationObserver(function () {
+                if (document.querySelector('.container.modern-main-menu, .ba-side')) {
+                    tabsObserver.disconnect();
+                    addPhoneTabs();
+                }
+            });
+            tabsObserver.observe(document.body, { childList: true, subtree: true });
+            setTimeout(function () { tabsObserver.disconnect(); }, 10000);
+        }
         var container = document.getElementById('deck-list-container');
         if (container && typeof MutationObserver !== 'undefined') {
             new MutationObserver(function () {
