@@ -299,27 +299,52 @@ def _push_edge_vars(mw, top: int, bottom: int) -> None:
         pass
 
 
-def _after_kioku_edges(edges) -> None:
-    mw = edges.mw
-    _state["edges"] = edges
-    handle = mw.windowHandle()
-    if handle is None or not hasattr(handle, "safeAreaMargins"):
+def _set_insets(mw, top: int, bottom: int) -> None:
+    """Remember the insets the home page pads itself by; tell the page only
+    when they change (a page loaded later gets them in its <head>)."""
+    if _state.get("insets") == (top, bottom):
         return
-    if not _edge_to_edge(mw):
-        if _state.get("insets") not in (None, (0, 0)):
-            _state["insets"] = (0, 0)
-            _push_edge_vars(mw, 0, 0)
-        return
-    safe = handle.safeAreaMargins()
-    margins = mw.contentsMargins()
-    top = safe.top()
-    # the bottom strip is ours only when the bottom bar is hidden
-    bottom = safe.bottom() if margins.bottom() > 0 else 0
-    mw.setContentsMargins(margins.left(), 0, margins.right(), 0 if bottom else margins.bottom())
-    if _state.get("insets") != (top, bottom):
-        _state["insets"] = (top, bottom)
+    _state["insets"] = (top, bottom)
+    if top or bottom:
         _log(f"home screen edge to edge (top {top}, bottom {bottom})")
     _push_edge_vars(mw, top, bottom)
+
+
+def _kioku_update(edges, original, *args, **kwargs):
+    """Run Kioku's ScreenEdges.update, but on the home screen give the main
+    window no top/bottom margins *in the same call*.
+
+    Changing the margins makes Qt send the window a resize event, which
+    makes Kioku update again: setting Kioku's margins and then ours flipped
+    them back and forth endlessly (the app crawled). Setting the final
+    margins once means the follow-up update finds nothing to change."""
+    mw = edges.mw
+    _state["edges"] = edges
+    if not _edge_to_edge(mw):
+        result = original(edges, *args, **kwargs)
+        _set_insets(mw, 0, 0)
+        return result
+    captured = {}
+    real = mw.setContentsMargins
+
+    def set_margins(*margins):
+        if len(margins) == 1:
+            m = margins[0]
+            margins = (m.left(), m.top(), m.right(), m.bottom())
+        captured["margins"] = margins
+        real(margins[0], 0, margins[2], 0)
+
+    mw.setContentsMargins = set_margins
+    try:
+        result = original(edges, *args, **kwargs)
+    finally:
+        try:
+            del mw.setContentsMargins
+        except AttributeError:
+            pass
+    if "margins" in captured:
+        _set_insets(mw, captured["margins"][1], captured["margins"][3])
+    return result
 
 
 def install_edge_to_edge() -> None:
@@ -334,12 +359,15 @@ def install_edge_to_edge() -> None:
     original = cls.update
 
     def update(self, *args, **kwargs):
-        result = original(self, *args, **kwargs)
+        if _state.get("in_update"):
+            return original(self, *args, **kwargs)
+        _state["in_update"] = True
         try:
-            _after_kioku_edges(self)
+            return _kioku_update(self, original, *args, **kwargs)
         except Exception as exc:
             _log(f"edge to edge failed: {exc}")
-        return result
+        finally:
+            _state["in_update"] = False
 
     cls.update = update
 

@@ -97,66 +97,70 @@ class IosNativeTests(unittest.TestCase):
         self.assertIsNone(self.native.native_webview(broken))
 
 
-class Margins:
-    def __init__(self, l, t, r, b):
-        self.v = (l, t, r, b)
-
-    def left(self): return self.v[0]
-    def top(self): return self.v[1]
-    def right(self): return self.v[2]
-    def bottom(self): return self.v[3]
-
-
 class FakeMw:
     def __init__(self, state, margins):
         self.state = state
         self.margins = margins
+        self.calls = 0
         self.evals = []
         self.web = types.SimpleNamespace(eval=self.evals.append)
 
-    def windowHandle(self):
-        return types.SimpleNamespace(safeAreaMargins=lambda: Margins(0, 59, 0, 34))
-
-    def contentsMargins(self):
-        return Margins(*self.margins)
-
     def setContentsMargins(self, *m):
-        self.margins = m
+        if tuple(m) != self.margins:
+            self.calls += 1
+        self.margins = tuple(m)
+
+
+class FakeEdges:
+    """Kioku's ScreenEdges.update: sets the safe-area margins."""
+
+    def __init__(self, mw, bottom=34):
+        self.mw = mw
+        self.bottom = bottom
+
+    def update(self):
+        self.mw.setContentsMargins(0, 59, 0, self.bottom)
 
 
 class EdgeToEdgeTests(unittest.TestCase):
     def setUp(self):
         self.platform, self.native = load()
+        self.native._state["insets"] = None
 
-    def run_update(self, state, margins):
-        mw = FakeMw(state, margins)
+    def run_update(self, mw, bottom=34, times=1):
+        edges = FakeEdges(mw, bottom)
         with patch.object(self.native.onigiri_platform, "IS_IOS", True):
-            self.native._after_kioku_edges(types.SimpleNamespace(mw=mw))
+            for _ in range(times):
+                self.native._kioku_update(edges, FakeEdges.update)
         return mw
 
     def test_home_fills_the_screen(self):
-        mw = self.run_update("deckBrowser", (0, 59, 0, 34))
+        mw = self.run_update(FakeMw("deckBrowser", (0, 0, 0, 0)))
         self.assertEqual(mw.margins, (0, 0, 0, 0))
         self.assertEqual(self.native._state["insets"], (59, 34))
         self.assertIn("--onigiri-edge-top','59px'", mw.evals[-1])
-        self.assertIn("onigiri-edge-to-edge',true", mw.evals[-1])
         self.assertIn("59px", self.native.edge_vars_css())
+        self.assertNotIn("setContentsMargins", mw.__dict__)
 
-    def test_home_with_bottom_bar_keeps_bottom(self):
-        mw = self.run_update("deckBrowser", (0, 59, 0, 0))
-        self.assertEqual(mw.margins, (0, 0, 0, 0))
-        self.assertEqual(self.native._state["insets"], (59, 0))
+    def test_repeated_updates_change_nothing(self):
+        # the old code flipped the margins on every update: an endless loop
+        mw = FakeMw("deckBrowser", (0, 59, 0, 34))
+        self.run_update(mw, times=5)
+        self.assertEqual(mw.calls, 1)
+        self.assertEqual(len(mw.evals), 1)
 
     def test_other_screens_keep_kiokus_layout(self):
-        self.run_update("deckBrowser", (0, 59, 0, 34))
-        mw = self.run_update("review", (0, 59, 0, 0))
+        mw = FakeMw("deckBrowser", (0, 59, 0, 34))
+        self.run_update(mw)
+        mw.state = "review"
+        self.run_update(mw, bottom=0)
         self.assertEqual(mw.margins, (0, 59, 0, 0))
         self.assertEqual(self.native._state["insets"], (0, 0))
         self.assertIn("onigiri-edge-to-edge',false", mw.evals[-1])
 
-    def test_off_ios_nothing_changes(self):
-        mw = FakeMw("deckBrowser", (0, 59, 0, 34))
-        self.native._after_kioku_edges(types.SimpleNamespace(mw=mw))
+    def test_off_ios_kioku_runs_unchanged(self):
+        mw = FakeMw("deckBrowser", (0, 0, 0, 0))
+        self.native._kioku_update(FakeEdges(mw), FakeEdges.update)
         self.assertEqual(mw.margins, (0, 59, 0, 34))
 
 
