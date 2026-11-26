@@ -54,17 +54,31 @@
     updateClasses();
     window.addEventListener('resize', updateClasses, { passive: true });
 
-    // --- Screen transitions --------------------------------------------------------
-    // Decks -> overview -> study is a page load each time. The new page
-    // slides in from the right going deeper and from the left coming back,
-    // like iOS navigation. <html> carries onigiri-screen-* (set by
-    // __init__.inject_mobile_assets before this runs), so the class is on
-    // before the body is drawn: no flash of the unanimated page.
+    // --- Deck list <-> deck overview slide ---------------------------------------
+    // <html> arrives with onigiri-enter-forward/back (__init__): the page is
+    // held just off to the side, and slides in once it is ready to be shown.
+    // Starting at once (while WebKit was still loading the page) finished
+    // the slide before anything was on screen.
     (function screenTransition() {
-        // the class comes with the page (__init__.inject_mobile_assets)
         var cls = root.classList.contains('onigiri-enter-forward') ? 'onigiri-enter-forward'
             : root.classList.contains('onigiri-enter-back') ? 'onigiri-enter-back' : '';
-        if (cls) setTimeout(function () { root.classList.remove(cls); }, 520);
+        if (!cls) return;
+        var started = false;
+        function start() {
+            if (started) return;
+            started = true;
+            requestAnimationFrame(function () {
+                requestAnimationFrame(function () {
+                    root.classList.add('onigiri-entering');
+                    setTimeout(function () {
+                        root.classList.remove(cls, 'onigiri-entering');
+                    }, 520);
+                });
+            });
+        }
+        window.addEventListener('load', start);
+        document.addEventListener('DOMContentLoaded', function () { setTimeout(start, 450); });
+        setTimeout(start, 1200);
     })();
     window.addEventListener('orientationchange', function () { setTimeout(updateClasses, 50); });
 

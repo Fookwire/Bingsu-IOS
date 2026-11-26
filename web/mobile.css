@@ -1916,24 +1916,40 @@ html body .onigiri-slide-from-left.onigiri-slide-from-left {
 /* Motion (touch screens). Transform and opacity only: cheap on a phone.    */
 /* ------------------------------------------------------------------------- */
 
-/* Screen changes: decks -> overview -> study slide in from the right,
-   coming back slides in from the left (mobile.js screenTransition). */
+/* Deck list <-> deck overview (mobile.js screenTransition): the new page
+   waits off screen, then slides in (an animation, so it always plays from
+   the edge) once it is ready to be shown. Pure slide, like iOS navigation. */
 html.onigiri-enter-forward body {
-    animation: onigiri-enter-forward 0.38s cubic-bezier(0.32, 0.72, 0, 1) both;
+    transform: translateX(100%);
+    /* never left off screen if the script didn't run */
+    animation: onigiri-enter-failsafe 0s linear 1.6s forwards;
 }
 
 html.onigiri-enter-back body {
-    animation: onigiri-enter-back 0.38s cubic-bezier(0.32, 0.72, 0, 1) both;
+    transform: translateX(-100%);
+    animation: onigiri-enter-failsafe 0s linear 1.6s forwards;
 }
 
-@keyframes onigiri-enter-forward {
-    from { transform: translateX(32%); opacity: 0.2; }
-    to { transform: none; opacity: 1; }
+html.onigiri-enter-forward.onigiri-entering body {
+    animation: onigiri-push-from-right 0.42s cubic-bezier(0.32, 0.72, 0, 1) both !important;
 }
 
-@keyframes onigiri-enter-back {
-    from { transform: translateX(-24%); opacity: 0.2; }
-    to { transform: none; opacity: 1; }
+html.onigiri-enter-back.onigiri-entering body {
+    animation: onigiri-push-from-left 0.42s cubic-bezier(0.32, 0.72, 0, 1) both !important;
+}
+
+@keyframes onigiri-push-from-right {
+    from { transform: translateX(100%); }
+    to { transform: none; }
+}
+
+@keyframes onigiri-push-from-left {
+    from { transform: translateX(-100%); }
+    to { transform: none; }
+}
+
+@keyframes onigiri-enter-failsafe {
+    to { transform: none; }
 }
 
 /* Taps: tiles and big buttons sink a little under the finger. */
@@ -1999,14 +2015,20 @@ html.onigiri-touch .heatmap-day-cell.is-tip-open::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    html.onigiri-enter-forward body,
-    html.onigiri-enter-back body,
     html.onigiri-touch #deck-list-container tr.deck,
     html.onigiri-touch .main-content .unified-grid > *,
     html.onigiri-touch #outer #middle button,
     html.onigiri-touch .osw-shell .osw-nav-group,
     html.onigiri-touch #onigiri-app-menu .oam-group,
     html.onigiri-touch .onigiri-quick-menu.is-sheet > .quick-menu-item {
+        animation: none !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html.onigiri-enter-forward body,
+    html.onigiri-enter-back body {
+        transform: none !important;
         animation: none !important;
     }
 }

@@ -1426,10 +1426,9 @@ def inject_mobile_assets(web_content, context):
         screen = {"DeckBrowser": "decks", "Overview": "overview", "Reviewer": "review"}.get(type(context).__name__)
         if screen:
             classes += f" onigiri-screen-{screen}"
-            # Deck list <-> deck overview: Python knows the previous screen
-            # (page storage may not survive a page load in Kioku). Opening a
-            # deck slides its overview in from the right; going back slides
-            # the deck list in from the left.
+            # Tapping a deck slides its overview in from the right; going
+            # back slides the deck list in from the left. Python knows the
+            # screen before this one. Studying is not animated.
             previous = _SCREEN_STATE.get("last")
             _SCREEN_STATE["last"] = screen
             if (previous, screen) == ("decks", "overview"):
