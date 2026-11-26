@@ -739,7 +739,8 @@
 }
 
 .heatmap-day-cell:hover::after,
-.heatmap-day-cell:focus-visible::after {
+.heatmap-day-cell:focus-visible::after,
+.heatmap-day-cell.is-tip-open::after {
     opacity: 1;
     visibility: visible;
 }

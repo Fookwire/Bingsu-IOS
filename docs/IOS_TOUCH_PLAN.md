@@ -178,3 +178,19 @@ Each step is pushed separately, so you can test on the phone between steps.
 - Tap-the-card-to-show-answer is off by default.
 - Theme apply on touch is tap, then Apply.
 - Bingsu isn't deleted or changed. It just isn't developed further.
+
+## Status (2.0.3-Bento-ios.2)
+
+Done, and checked in iPhone 15 / iPad Pro 11 emulation (Chromium; WebKit
+and Kioku's native layer can only be checked on a device):
+
+- Steps 1-5 as above. Not done from the plan: the optional "tap the card
+  to show the answer" setting (left out; the bottom bar is unchanged), and
+  the large-title "Decks" header stays inside the sidebar card rather than
+  replacing the profile bar.
+- Only on a device: the menu row hiding, edge colours, bounce and haptics
+  (core/ios_native.py). Each is a no-op if Kioku's internals differ; the
+  add-on keeps working either way.
+- Settings: Kioku's Back closes the window without Onigiri's Done. Changes
+  save as they are made; a slider moved in the last half second before
+  closing may not be saved.

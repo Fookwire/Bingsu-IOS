@@ -906,6 +906,46 @@
         }, { passive: true });
     }
 
+    // --- Profile (phones): swipe down from the top to close -----------------------
+
+    (function () {
+        var start = null;
+        document.addEventListener('touchstart', function (event) {
+            var panel = event.target.closest && event.target.closest('.profile-sidebar-open .onigiri-sidebar-profile');
+            if (!panel || !root.classList.contains('onigiri-phone') || panel.scrollTop > 0 || event.touches.length !== 1) {
+                start = null;
+                return;
+            }
+            start = { y: event.touches[0].clientY, panel: panel, dy: 0 };
+        }, { passive: true });
+        document.addEventListener('touchmove', function (event) {
+            if (!start) return;
+            start.dy = event.touches[0].clientY - start.y;
+            if (start.dy > 0 && start.panel.scrollTop <= 0) {
+                start.panel.style.transition = 'none';
+                start.panel.style.transform = 'translateY(' + start.dy + 'px)';
+            }
+        }, { passive: true });
+        function end() {
+            if (!start) return;
+            var s = start;
+            start = null;
+            s.panel.style.transition = '';
+            if (s.dy > 120) {
+                s.panel.style.transform = 'translateY(100%)';
+                setTimeout(function () {
+                    s.panel.style.transform = '';
+                    if (window.OnigiriProfileSidebar && OnigiriProfileSidebar.close) OnigiriProfileSidebar.close();
+                    else if (window.OnigiriProfileSidebar && OnigiriProfileSidebar.toggle) OnigiriProfileSidebar.toggle();
+                }, 180);
+            } else {
+                s.panel.style.transform = '';
+            }
+        }
+        document.addEventListener('touchend', end, { passive: true });
+        document.addEventListener('touchcancel', end, { passive: true });
+    })();
+
     // --- Reviewer bottom bar: haptics on answer --------------------------------------
 
     document.addEventListener('pointerdown', function (event) {

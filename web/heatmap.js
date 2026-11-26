@@ -302,6 +302,14 @@ window.OnigiriHeatmap = window.OnigiriHeatmap || {};
 
     function bindCellInteractions(gridContainer) {
         gridContainer.addEventListener('click', (event) => {
+            const cell = event.target.closest('.heatmap-day-cell');
+            // Touch screens have no hover: the first tap on a day shows its
+            // count, a second tap on the same day opens it in the browser.
+            if (cell && window.OnigiriMobile && OnigiriMobile.isTouch() && !cell.classList.contains('is-tip-open')) {
+                document.querySelectorAll('.heatmap-day-cell.is-tip-open').forEach(c => c.classList.remove('is-tip-open'));
+                cell.classList.add('is-tip-open');
+                return;
+            }
             openDateInBrowser(event.target.closest('.heatmap-day-cell.browsable')?.dataset.dateKey);
         });
         gridContainer.addEventListener('keydown', (event) => {
@@ -870,7 +878,10 @@ window.OnigiriHeatmap = window.OnigiriHeatmap || {};
 
         const preparedData = prepareData(data);
 
-        const flatView = views.includes(config.heatmapDefaultView) ? config.heatmapDefaultView : 'year';
+        let flatView = views.includes(config.heatmapDefaultView) ? config.heatmapDefaultView : 'year';
+        // A year of days is a field of dots at phone width; a month has
+        // tappable days. The Year tab is still there.
+        if (flatView === 'year' && window.OnigiriMobile && OnigiriMobile.isPhone()) flatView = 'month';
         const defaultView = config.heatmapTerrainEnabled === true ? 'terrain' : flatView;
         let state = containerStates.get(container);
         if (!state || state.defaultView !== defaultView) {

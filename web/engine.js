@@ -153,15 +153,24 @@ window.OnigiriEngine = {
         if (columns === savedColumns) {
             grid.style.gridTemplateColumns = '';
             grid.style.gridTemplateRows = '';
+            grid.style.gridAutoRows = '';
             grid._onigiriSavedTiles.forEach(tile => { tile.element.style.gridArea = tile.area; });
             return;
         }
         grid.style.gridTemplateColumns = `repeat(${columns}, minmax(0, 1fr))`;
+        // Phones: one-cell widgets (Studied, Time...) were mostly empty
+        // space at the desktop row height; taller widgets (heatmap, charts)
+        // keep at least their desktop height in the shorter rows.
+        const baseRowHeight = Number(grid.dataset.gridRowHeight) || 150;
+        const rowHeight = phone ? Math.min(baseRowHeight, 120) : baseRowHeight;
+        const rowsOf = tile => (phone && tile.rows > 1)
+            ? Math.ceil(tile.rows * baseRowHeight / rowHeight) : tile.rows;
         const occupied = new Set();
         const titleRows = new Set();
         let cursor = 0;
         grid._onigiriSavedTiles.forEach(tile => {
             const span = Math.min(columns, tile.cols);
+            const tileRows = rowsOf(tile);
             let row, col;
             // Scan forward in reading order. Never backfill holes ahead of an
             // earlier widget; wide/tall cards keep their relative order.
@@ -170,24 +179,24 @@ window.OnigiriEngine = {
                 col = cursor % columns;
                 if (col + span > columns) continue;
                 let free = true;
-                for (let r = row; r < row + tile.rows && free; r++) {
+                for (let r = row; r < row + tileRows && free; r++) {
                     for (let c = col; c < col + span; c++) {
                         if (occupied.has(`${r}:${c}`)) { free = false; break; }
                     }
                 }
                 if (free) break;
             }
-            for (let r = row; r < row + tile.rows; r++) {
+            for (let r = row; r < row + tileRows; r++) {
                 for (let c = col; c < col + span; c++) occupied.add(`${r}:${c}`);
             }
-            tile.element.style.gridArea = `${row + 1} / ${col + 1} / span ${tile.rows} / span ${span}`;
-            if (tile.title && span === columns && tile.rows === 1) titleRows.add(row);
+            tile.element.style.gridArea = `${row + 1} / ${col + 1} / span ${tileRows} / span ${span}`;
+            if (tile.title && span === columns && tileRows === 1) titleRows.add(row);
             cursor++;
         });
-        const rowHeight = Number(grid.dataset.gridRowHeight) || 150;
         const lastTitle = titleRows.size ? Math.max(...titleRows) : -1;
         grid.style.gridTemplateRows = lastTitle < 0 ? 'none' :
             Array.from({ length: lastTitle + 1 }, (_, row) => titleRows.has(row) ? 'min-content' : `${rowHeight}px`).join(' ');
+        grid.style.gridAutoRows = phone ? `${rowHeight}px` : '';
     },
 
     openDeck: function (event, deckId) {

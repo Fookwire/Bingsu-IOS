@@ -1558,3 +1558,61 @@ html.onigiri-phone .osw-shell #oswPageTabs {
     margin-right: auto !important;
     max-width: 100%;
 }
+
+/* Heatmap month view on phones: day squares sized for a finger. */
+html.onigiri-phone .heatmap-grid.month-view {
+    --hm-cell: min(36px, calc((100vw - 120px) / 7)) !important;
+    --hm-cell-gap: 5px !important;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Profile on phones: a full-screen page                                     */
+/* ------------------------------------------------------------------------- */
+
+html.onigiri-phone .sidebar-left.profile-sidebar-open .onigiri-sidebar-profile {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 9500 !important;
+    width: auto !important;
+    height: auto !important;
+    max-height: none !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding-bottom: calc(24px + var(--onigiri-safe-bottom)) !important;
+    background: var(--canvas, var(--rf-paper, #fff)) !important;
+    animation: onigiri-sheet-in 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+    transition: transform 0.2s ease;
+}
+
+html.onigiri-phone:has(.profile-sidebar-open) #onigiri-phone-tabs {
+    display: none !important;
+}
+
+/* Close (×) is a 44pt target. */
+html.onigiri-phone .onigiri-sidebar-profile [class*="close"] {
+    min-width: 44px;
+    min-height: 44px;
+}
+
+/* Active-cards donut: the total fits inside the ring. */
+html.onigiri-phone .onigiri-sidebar-profile .ba-side-donut-ring {
+    flex-basis: 96px;
+    width: 96px;
+    height: 96px;
+}
+
+.onigiri-sidebar-profile .ba-side-donut-core strong.is-compact {
+    font-size: 16px !important;
+    letter-spacing: -0.04em;
+}
+
+.onigiri-sidebar-profile .ba-side-donut-core strong.is-tiny {
+    font-size: 13px !important;
+    letter-spacing: -0.04em;
+}
