@@ -99,7 +99,7 @@ _FALLBACK_JS = r"""
       // the bare "On" placeholder) means the Onigiri logo, not two letters.
       var iconSrc = data.iconImage ||
         ((!data.icon || data.icon === 'On')
-          ? '/_addons/1011095603/system_files/onigiri_mini_logo.svg' : '');
+          ? '/_addons/__ONIGIRI_PACKAGE__/system_files/onigiri_mini_logo.svg' : '');
       if (iconSrc) {
         var img = document.createElement('img');
         img.src = iconSrc;
@@ -470,6 +470,13 @@ def _native_show_info(message: str, title: str = "Onigiri", parent: Any = None,
             showInfo(f"{title}\n\n{message or ''}", title=title)
 
 
+def _addon_package() -> str:
+    """This add-on's folder name, as served under /_addons/."""
+    import os
+
+    return os.path.basename(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+
 def notification_script(
     message: str,
     *args: Any,
@@ -496,7 +503,7 @@ def notification_script(
         "centered": centered,
     }
     return (
-        _FALLBACK_JS
+        _FALLBACK_JS.replace("__ONIGIRI_PACKAGE__", _addon_package())
         + "\nwindow.OnigiriNotifications.show("
         + json.dumps(payload, ensure_ascii=False)
         + ");"

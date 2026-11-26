@@ -151,12 +151,12 @@ def _show_welcome_message():
                 style.innerHTML = `
                     @font-face {
                         font-family: 'OnigiriPoppins';
-                        src: url('/_addons/1011095603/system_files/fonts/system_fonts/Poppins/Poppins-Regular.ttf');
+                        src: url('/_addons/__ONIGIRI_PACKAGE__/system_files/fonts/system_fonts/Poppins/Poppins-Regular.ttf');
                         font-weight: 400;
                     }
                     @font-face {
                         font-family: 'OnigiriPoppins';
-                        src: url('/_addons/1011095603/system_files/fonts/system_fonts/Poppins/Poppins-Medium.ttf');
+                        src: url('/_addons/__ONIGIRI_PACKAGE__/system_files/fonts/system_fonts/Poppins/Poppins-Medium.ttf');
                         font-weight: 500 900;
                     }
                     #onigiri-welcome-overlay {
@@ -183,7 +183,7 @@ def _show_welcome_message():
                 const overlay = document.createElement("div");
                 overlay.id = "onigiri-welcome-overlay";
                 overlay.innerHTML = `
-                    <img src="/_addons/1011095603/system_files/onigiri_logo.png" style="width: 290px; height: auto; margin-bottom: 32px; filter: drop-shadow(0 6px 16px rgba(0,0,0,0.3));" />
+                    <img src="/_addons/__ONIGIRI_PACKAGE__/system_files/onigiri_logo.png" style="width: 290px; height: auto; margin-bottom: 32px; filter: drop-shadow(0 6px 16px rgba(0,0,0,0.3));" />
                     <h1 style="margin: 0 0 20px 0; font-size: 49px; font-weight: 700; text-shadow: 0 2px 6px rgba(0,0,0,0.5);">Welcome!</h1>
                     <p style="margin: 0; font-size: 26px; font-weight: 500; text-shadow: 0 1px 4px rgba(0,0,0,0.5);">Proceed to Settings to start customizing</p>
                     <button class="btn-continue">Continue</button>
@@ -203,7 +203,7 @@ def _show_welcome_message():
                 document.body.appendChild(overlay);
                 setTimeout(() => { overlay.style.opacity = "1"; }, 50);
             }
-        """)
+        """.replace("__ONIGIRI_PACKAGE__", mw.addonManager.addonFromModule(__name__)))
     elif mw.state == "overview":
         mw.moveToState("deckBrowser")
     elif mw.state == "review":

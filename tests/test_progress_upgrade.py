@@ -601,7 +601,7 @@ class ProgressUpgradeTests(unittest.TestCase):
             self.assertNotIn('onigiri_layout.json', names)
             self.assertFalse(any(name.startswith(('Onigiri(', 'tests/', 'tools/')) for name in names))
             self.assertEqual(json.loads(archive.read('config.json')), {})
-            self.assertEqual(json.loads(archive.read('manifest.json'))['package'], '1011095603')
+            self.assertEqual(json.loads(archive.read('manifest.json'))['package'], 'onigiri_ios')
 
         for folder in ('Onigiri(Original)', 'Onigiri(Middle)'):
             with self.subTest(version=folder):

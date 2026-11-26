@@ -162,3 +162,40 @@ Each opens its own `AnkiWebView` dialog with `set_bridge_command`: `nook_web_ui:
 4. **On device (you):** install the `.ankiaddon` in Kioku on iPhone and iPad.
    - Walk through the same checklist in portrait and landscape.
    - Check the Kioku log (Help › Debug log, or Safari Web Inspector on the device) for `unsupported WebEngine API` lines. These are the shim's silent no-ops; each one needs an alternative.
+
+## Status (implemented on this branch)
+
+Install: build with `python3 tools/build_addon.py /path/Onigiri-iOS.ankiaddon`, copy the file to the iPhone/iPad (Files app), then in Kioku use **Tools › Add-ons › Install from file…** and restart Kioku.
+
+The fork installs as its own add-on, `onigiri_ios`, with no AnkiWeb id. Anki's update check can't replace it with the desktop build, and it declares a conflict with `1011095603` so the two never run together.
+
+**Done:**
+- Phase 0: `core/platform.py`; self-updater removed; `injector.js` init crash fixed; `web/mobile.js` and `web/mobile.css` on every page.
+- Phase 1, home:
+  - Phone Decks/Home tabs, an action grid, and long-press or "⋯" deck menus as bottom sheets.
+  - Tap-to-open submenus and a Select mode.
+  - Override for Kioku's deck-table CSS, which had collapsed Onigiri's deck rows.
+  - iPad sidebar sizing.
+- Phase 2, review:
+  - Icon dock on phones.
+  - Bottom bar fits an iPhone SE.
+  - Intervals always shown on touch.
+- Phase 3, Settings: plain dialog (Kioku fills the screen and adds Close), and a phone list-to-page drill-down.
+- Phase 4:
+  - Hashi Notes, Pomodoro and the colour pickers no longer use floating Tool windows.
+  - Kome inline embeds are off on mobile.
+  - Kome layout works on phone and iPad.
+  - `-webkit-backdrop-filter` prefixes added.
+
+**Verified:**
+- Headless Anki 26.09.4 with the add-on installed through Anki's own installer.
+- Pages rendered in Chromium with iPhone 15, iPhone SE, iPad Mini and iPad Pro 11 emulation, with Kioku's own viewport and phone CSS applied (`kioku/webscripts.py`).
+- No horizontal overflow and no console errors on the home screen, overview, reviewer, bottom bar, Settings and game pages.
+- Long-press menus and submenus tested with real touch events.
+- Unit tests: no new failures compared with the baseline.
+
+**Not yet verified / open:**
+- Real WebKit and a real device. Playwright's WebKit download was blocked in the build environment, so test on device and check the Kioku log for `unsupported WebEngine API`.
+- Kome's deck drag-and-drop (`things_theme/web/decklist.js`) uses HTML5 drag events, which touch does not fire. Use the deck menu's "Move To" instead.
+- Hexagon Land zoom uses the page's pinch zoom, and its double-click reset has no touch gesture.
+- Haptics are a no-op on iOS.
