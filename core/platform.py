@@ -12,7 +12,8 @@ desktop app built for iOS. Things to know about that environment:
 * No subprocesses, no ctypes libraries, touch only, phone-sized screens.
 
 Set ``ONIGIRI_FORCE_MOBILE=1`` on a desktop Anki to preview the iOS code
-paths (dialog sizing, touch UI) without a device.
+paths (dialog sizing, touch UI) without a device; ``=phone`` also treats the
+screen as a phone's.
 """
 
 from __future__ import annotations
@@ -23,7 +24,9 @@ import sys
 IS_IOS: bool = sys.platform == "ios"
 IS_ANDROID: bool = sys.platform == "android"
 IS_KIOKU: bool = "kioku" in sys.modules or "kioku_platform" in sys.modules
-FORCE_MOBILE: bool = os.environ.get("ONIGIRI_FORCE_MOBILE", "") not in ("", "0")
+_FORCE = os.environ.get("ONIGIRI_FORCE_MOBILE", "").strip().lower()
+FORCE_MOBILE: bool = _FORCE not in ("", "0")
+FORCE_PHONE: bool = _FORCE == "phone"
 
 # Phone/tablet code paths: touch UI, full-screen dialogs, no floating windows.
 IS_MOBILE: bool = IS_IOS or IS_ANDROID or FORCE_MOBILE
@@ -58,7 +61,21 @@ def is_phone(widget=None) -> bool:
     """True on a phone-sized screen (portrait iPhone, iPad split view)."""
     if not IS_MOBILE:
         return False
+    if FORCE_PHONE:
+        return True
     return screen_size(widget)[0] <= PHONE_MAX_WIDTH
+
+
+def is_phone_device(widget=None) -> bool:
+    """True on a phone in either orientation (the screen's shorter side is
+    phone-sized). iPads, including split view, are not phones here: use the
+    CSS classes from web/mobile.js for width-based layout."""
+    if not IS_MOBILE:
+        return False
+    if FORCE_PHONE:
+        return True
+    w, h = screen_size(widget)
+    return min(w, h) <= PHONE_MAX_WIDTH
 
 
 def body_classes() -> str:

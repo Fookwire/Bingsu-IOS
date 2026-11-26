@@ -274,6 +274,12 @@ html.onigiri-phone .container.modern-main-menu.onigiri-cycle-stacked #deck-list-
     flex: 0 0 auto !important;
 }
 
+/* Repeated classes outrank patcher.py's sidebar gutter rules (0,8,0). */
+html.onigiri-phone .container.modern-main-menu.modern-main-menu.modern-main-menu .main-content.main-content.main-content.main-content {
+    padding: 16px 10px !important;
+    margin: 0 !important;
+}
+
 html.onigiri-phone .container.modern-main-menu .main-content.main-content {
     display: flex !important;
     flex: 0 0 auto !important;
@@ -474,4 +480,149 @@ html.onigiri-tablet .container.modern-main-menu .main-content {
 html.onigiri-tablet .container.modern-main-menu .resize-handle,
 html.onigiri-tablet .container.modern-main-menu .sidebar-edge-toggle-zone {
     display: none !important;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Reviewer bottom bar (its own web view under the card)                      */
+/* ------------------------------------------------------------------------- */
+
+/* Intervals: "show on hover" can't work on touch (the tap answers the
+   card), so the interval always sits under the label. */
+html.onigiri-touch #outer button[data-onigiri-ease] {
+    display: inline-flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 1px !important;
+}
+
+html.onigiri-touch #outer button[data-onigiri-ease] .onigiri-answer-label {
+    opacity: 1 !important;
+}
+
+html.onigiri-touch #outer button[data-onigiri-ease] .onigiri-answer-hover-number {
+    position: static !important;
+    inset: auto !important;
+    width: auto !important;
+    padding: 0 !important;
+    opacity: 0.72 !important;
+    visibility: visible !important;
+    transform: none !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+}
+
+/* Phones: Anki's three-cell table (Edit | answer buttons | More) is ~510px
+   wide. Make it a flex row: compact Edit and More at the edges, the four
+   answer buttons sharing the rest. */
+html.onigiri-phone #outer {
+    display: block;
+    width: 100%;
+    --onigiri-bbar-primary-width: 100%;
+    --onigiri-bbar-side-space: 96px;
+}
+
+html.onigiri-phone #outer > #innertable,
+html.onigiri-phone #outer > #innertable > tbody {
+    display: block !important;
+    width: 100% !important;
+}
+
+html.onigiri-phone #outer > #innertable > tbody > tr {
+    display: flex !important;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+    padding: 0 calc(6px + var(--onigiri-safe-right)) 0 calc(6px + var(--onigiri-safe-left));
+    box-sizing: border-box;
+}
+
+html.onigiri-phone #outer > #innertable > tbody > tr > td.stat,
+html.onigiri-phone #outer.onigiri-bbar-fixed > table > tbody > tr > td:first-child,
+html.onigiri-phone #outer.onigiri-bbar-fixed > table > tbody > tr > td:last-child {
+    display: flex !important;
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+}
+
+html.onigiri-phone #outer > #innertable > tbody > tr > td#middle {
+    display: block !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: auto !important;
+    padding: 0 !important;
+}
+
+html.onigiri-phone #outer #middle > center,
+html.onigiri-phone #outer #middle table,
+html.onigiri-phone #outer #middle tbody {
+    display: block !important;
+    width: 100% !important;
+}
+
+html.onigiri-phone #outer #middle tr {
+    display: flex !important;
+    gap: 5px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+}
+
+html.onigiri-phone #outer #middle td {
+    display: flex !important;
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+}
+
+html.onigiri-phone #outer button[data-onigiri-ease],
+html.onigiri-phone #outer.onigiri-bbar-fixed button[data-onigiri-ease].is-fixed {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    flex: 1 1 auto !important;
+    min-height: 44px;
+    margin: 0 !important;
+    padding: 4px 2px !important;
+}
+
+html.onigiri-phone #outer button[data-onigiri-ease] .onigiri-answer-label {
+    font-size: 14px !important;
+    white-space: nowrap !important;
+}
+
+html.onigiri-phone #outer button.onigiri-show-answer-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    min-height: 44px;
+}
+
+html.onigiri-phone #outer button.onigiri-other-btn:not(.onigiri-show-answer-btn) {
+    min-width: 0 !important;
+    width: auto !important;
+    height: 44px;
+    padding: 0 8px !important;
+    font-size: 13px !important;
+}
+
+/* More: an icon button ("⋯"); the label and chevron don't fit. */
+html.onigiri-phone body #outer button.onigiri-other-btn.onigiri-more-btn:not(.onigiri-show-answer-btn) {
+    position: relative;
+    width: 40px !important;
+    padding: 0 !important;
+    font-size: 0 !important;
+}
+
+html.onigiri-phone body #outer button.onigiri-more-btn > svg,
+html.onigiri-phone #outer button.onigiri-more-btn > .stattxt {
+    display: none !important;
+}
+
+html.onigiri-phone #outer button.onigiri-more-btn::before {
+    content: "\22EF";
+    font-size: 22px;
+    line-height: 1;
 }

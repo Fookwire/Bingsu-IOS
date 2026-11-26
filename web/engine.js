@@ -127,7 +127,11 @@ window.OnigiriEngine = {
         const savedColumns = Number(grid.dataset.gridColumns) || 1;
         // Permit a little compression, then reflow instead of reducing a card
         // to a sliver. Measure the panel, so sidebar resizing works as well.
-        const minColumn = Math.max(200, (Number(grid.dataset.gridColumnWidth) || 250) * 0.8);
+        // Phones fit two compact columns rather than one stretched one.
+        const phone = !!(window.OnigiriMobile && OnigiriMobile.isPhone());
+        const minColumn = phone
+            ? 140
+            : Math.max(200, (Number(grid.dataset.gridColumnWidth) || 250) * 0.8);
         const columns = Math.max(1, Math.min(savedColumns,
             Math.floor((grid.clientWidth + 15) / (minColumn + 15))));
         if (!grid.clientWidth || grid.dataset.activeColumns === String(columns)) return;

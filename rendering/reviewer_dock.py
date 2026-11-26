@@ -106,7 +106,18 @@ def dock_mode(conf: dict[str, Any] | None = None) -> str:
     if conf is None:
         conf = config.get_config_readonly()
     raw = str((conf or {}).get("onigiri_reviewer_dock_mode", "static") or "static").strip().lower()
-    return raw if raw in VALID_DOCK_MODES else "static"
+    mode = raw if raw in VALID_DOCK_MODES else "static"
+    if mode == "static":
+        # Static's labelled buttons wrap to two rows on an iPhone and cover
+        # the deck title; phones get the same actions as icons.
+        try:
+            from ..core.platform import is_phone_device
+
+            if is_phone_device():
+                return "minimal"
+        except Exception:
+            pass
+    return mode
 
 
 def _read_dock_css_text() -> str:
