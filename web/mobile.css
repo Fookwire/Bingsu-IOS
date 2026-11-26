@@ -391,6 +391,47 @@ html.onigiri-touch .onigiri-quick-menu .quick-menu-group.is-open > .quick-menu-a
     transform: rotate(90deg);
 }
 
+/* Base look for sheets on pages without menu.css (overview, reviewer). */
+.onigiri-quick-menu.is-sheet {
+    position: fixed;
+    background: var(--onigiri-quick-menu-bg, var(--canvas-overlay, var(--canvas-elevated, var(--canvas, #fff))));
+    border: 0.5px solid var(--border, rgba(127, 127, 127, 0.3));
+    color: var(--fg, #111);
+    font-family: inherit;
+}
+
+.onigiri-quick-menu.is-sheet .quick-menu-item {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    line-height: 1.2;
+}
+
+.onigiri-quick-menu.is-sheet .onigiri-action-icon-host svg,
+.onigiri-quick-menu.is-sheet .onigiri-action-icon-host img {
+    width: 20px;
+    height: 20px;
+}
+
+/* Mask-drawn glyphs (the reviewer dock's icons) take the row's colour. */
+.onigiri-quick-menu.is-sheet .onigiri-action-icon-host > [style*="mask-image"] {
+    display: block;
+    width: 20px;
+    height: 20px;
+    background-color: currentColor;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+}
+
+/* Rows without an icon (Menu) line up with the others. */
+.onigiri-quick-menu.onigiri-action-sheet .quick-menu-item > span:only-child {
+    padding-left: 34px;
+}
+
 /* iOS sheet: flush with the bottom of the screen, rounded top, grab
    handle, Cancel. mobile.js adds the backdrop, handle, Cancel and swipe. */
 .onigiri-quick-menu.is-sheet {
@@ -1121,4 +1162,119 @@ html.onigiri-phone.onigiri-has-phone-tabs.onigiri-phone-tab-decks .ba-side {
 
 html.onigiri-phone.onigiri-has-phone-tabs.onigiri-phone-tab-home .ba-home {
     display: none !important;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Overview and reviewer on phones: iOS navigation bar                        */
+/* ------------------------------------------------------------------------- */
+
+#onigiri-phone-nav {
+    display: none;
+}
+
+html.onigiri-phone #onigiri-phone-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    z-index: 9000;
+    top: 0;
+    left: var(--onigiri-safe-left);
+    right: var(--onigiri-safe-right);
+    height: 44px;
+    padding: 0 4px;
+    pointer-events: none;
+}
+
+html.onigiri-phone #onigiri-phone-nav > button {
+    pointer-events: auto;
+    -webkit-appearance: none;
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    min-width: 44px;
+    height: 44px;
+    padding: 0 8px 0 2px;
+    border: 0 !important;
+    border-radius: 22px;
+    background: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    color: var(--accent-color, var(--fg)) !important;
+    font: inherit;
+    font-size: 17px;
+}
+
+html.onigiri-phone #onigiri-phone-nav > button.onigiri-nav-more {
+    justify-content: center;
+    padding: 0;
+}
+
+html.onigiri-phone #onigiri-phone-nav > button svg {
+    flex: 0 0 auto;
+}
+
+html.onigiri-phone #onigiri-phone-nav .onigiri-nav-more svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Overview: its own copy of the circled toolbar goes; the page clears the
+   nav bar. */
+html.onigiri-phone.onigiri-has-phone-nav #onigiri-reviewer-header a.onigiri-reviewer-button,
+html.onigiri-phone.onigiri-has-phone-nav #onigiri-reviewer-header .onigiri-rubber-dock,
+html.onigiri-phone.onigiri-has-phone-nav #onigiri-reviewer-external-actions {
+    display: none !important;
+}
+
+html.onigiri-phone.onigiri-has-phone-nav #onigiri-reviewer-header {
+    min-height: 44px !important;
+}
+
+/* Overview buttons: thumb-sized. */
+html.onigiri-touch .overview-bottom-actions .overview-button {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    min-height: 46px;
+    box-sizing: border-box;
+}
+
+/* Edge-swipe cue: a chevron following the finger from the left edge. */
+#onigiri-edge-cue {
+    position: fixed;
+    z-index: 100002;
+    left: -36px;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--canvas-overlay, var(--canvas, #fff));
+    color: var(--fg-subtle, #888);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
+    pointer-events: none;
+    transition: color 0.12s ease, background-color 0.12s ease;
+}
+
+#onigiri-edge-cue.is-armed {
+    color: var(--accent-color, var(--fg));
+}
+
+/* Reviewer bottom bar: Edit and More are full 44pt targets. */
+html.onigiri-phone #outer button.onigiri-other-btn:not(.onigiri-show-answer-btn) {
+    min-width: 52px !important;
+    height: 44px !important;
+}
+
+html.onigiri-phone body #outer button.onigiri-other-btn.onigiri-more-btn:not(.onigiri-show-answer-btn) {
+    width: 44px !important;
+    min-width: 44px !important;
+}
+
+html.onigiri-phone #outer button.onigiri-show-answer-btn,
+html.onigiri-phone #outer button[data-onigiri-ease] {
+    min-height: 48px !important;
 }

@@ -550,6 +550,10 @@
         cancel.type = 'button';
         cancel.className = 'onigiri-sheet-cancel';
         cancel.textContent = t('cancel', 'Cancel');
+        // card and reviewer pages style bare buttons with !important
+        [['background', 'var(--highlight-bg, rgba(127, 127, 127, 0.14))'], ['color', 'var(--accent-color, var(--fg))'],
+            ['border', '0'], ['box-shadow', 'none'], ['font-weight', '600'], ['font-size', '17px'],
+            ['text-transform', 'none']].forEach(function (p) { cancel.style.setProperty(p[0], p[1], 'important'); });
         cancel.addEventListener('click', function (event) {
             event.stopPropagation();
             closeMenus();
@@ -622,36 +626,61 @@
         }).observe(document.body, { childList: true });
     }
 
-    // A sheet built here from existing elements (the More actions): each row
-    // runs the original element's click.
+    // A sheet built here: from existing elements (the More actions; each row
+    // runs the element's click) or from {label, icon (node), run} items.
+    function elementItem(el) {
+        var label = el.querySelector('span');
+        var host = document.createElement('span');
+        host.className = 'onigiri-action-icon-host ' + Array.prototype.filter.call(el.classList, function (c) {
+            return c.indexOf('action-') === 0;
+        }).join(' ');
+        var icon = el.querySelector('.icon, .onigiri-dock-glyph, [style*="mask-image"], svg, img, i');
+        if (icon) host.appendChild(icon.cloneNode(true));
+        return {
+            label: ((label ? label.textContent : '') || el.getAttribute('aria-label') ||
+                el.getAttribute('title') || el.textContent || '').trim(),
+            icon: host,
+            run: function () { el.click(); },
+        };
+    }
+
     function showActionSheet(elements, anchor) {
-        if (!window.OnigiriEngine || !OnigiriEngine.positionMenu) return;
         closeMenus();
         var menu = document.createElement('div');
         menu.className = 'onigiri-quick-menu onigiri-action-sheet';
-        elements.forEach(function (el) {
-            var label = el.querySelector('span');
+        elements.forEach(function (entry) {
+            var item = entry && entry.run ? entry : elementItem(entry);
+            if (!item.label) return;
             var row = document.createElement('div');
             row.className = 'quick-menu-item';
-            var host = document.createElement('span');
-            host.className = 'onigiri-action-icon-host ' + Array.prototype.filter.call(el.classList, function (c) {
-                return c.indexOf('action-') === 0;
-            }).join(' ');
-            var icon = el.querySelector('.icon');
-            if (icon) host.appendChild(icon.cloneNode(true));
-            row.appendChild(host);
+            if (item.icon) {
+                if (!item.icon.classList.contains('onigiri-action-icon-host')) {
+                    var wrap = document.createElement('span');
+                    wrap.className = 'onigiri-action-icon-host';
+                    wrap.appendChild(item.icon);
+                    item.icon = wrap;
+                }
+                row.appendChild(item.icon);
+            }
             var text = document.createElement('span');
-            text.textContent = (label ? label.textContent : el.textContent).trim();
+            text.textContent = item.label;
             row.appendChild(text);
             row.addEventListener('click', function (event) {
                 event.stopPropagation();
                 closeMenus();
-                el.click();
+                item.run();
             });
             menu.appendChild(row);
         });
-        var rect = anchor.getBoundingClientRect();
-        OnigiriEngine.positionMenu(menu, rect.left, rect.bottom);
+        var rect = anchor ? anchor.getBoundingClientRect() : { left: window.innerWidth - 20, bottom: 50 };
+        if (window.OnigiriEngine && OnigiriEngine.positionMenu) {
+            OnigiriEngine.positionMenu(menu, rect.left, rect.bottom);
+        } else {
+            // pages without engine.js (overview, reviewer): always a sheet,
+            // closed by its backdrop, Cancel or a swipe
+            menu.classList.add('is-sheet');
+            document.body.appendChild(menu);
+        }
     }
 
     // --- Home: action tiles ------------------------------------------------------------
@@ -725,6 +754,157 @@
         var text = h.textContent.trim();
         if (/^[A-Z][A-Z ]+$/.test(text)) h.textContent = text.charAt(0) + text.slice(1).toLowerCase();
     }
+
+
+    // --- Overview and reviewer: iOS navigation bar ----------------------------------
+    // Phones: the row of seven circled toolbar icons becomes a nav bar with
+    // ‹ (back: reviewer -> overview -> decks) and ⋯ (those actions as a
+    // sheet). The reviewer's progress counter stays in the middle. The
+    // header lives in a shadow root in the reviewer, so its buttons are
+    // hidden with a style put inside it.
+
+    var BACK_NAV_SVG = '<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 19-7-7 7-7"/></svg>';
+
+    function goBack() {
+        haptic('light');
+        try { if (typeof pycmd === 'function') pycmd('onigiri_native:back'); } catch (e) {}
+    }
+
+    function headerRoots() {
+        var roots = [document];
+        var host = document.getElementById('onigiri-reviewer-ui-host');
+        if (host && host.shadowRoot) roots.push(host.shadowRoot);
+        return roots;
+    }
+
+    function headerButtons() {
+        var out = [];
+        headerRoots().forEach(function (r) {
+            r.querySelectorAll('#onigiri-reviewer-header a.onigiri-reviewer-button, #onigiri-reviewer-header .onigiri-dock-item, ' +
+                '#onigiri-reviewer-external-actions > *').forEach(function (el) {
+                if (out.indexOf(el) < 0) out.push(el);
+            });
+        });
+        return out;
+    }
+
+    function hideHeaderButtonsInShadow() {
+        var host = document.getElementById('onigiri-reviewer-ui-host');
+        var shadow = host && host.shadowRoot;
+        if (!shadow || shadow.getElementById('onigiri-phone-nav-style')) return;
+        var style = document.createElement('style');
+        style.id = 'onigiri-phone-nav-style';
+        // ids repeated: the header's own rules are !important too
+        var H = '#onigiri-reviewer-header#onigiri-reviewer-header#onigiri-reviewer-header ';
+        style.textContent =
+            H + 'a.onigiri-reviewer-button.onigiri-reviewer-button,' +
+            H + '.onigiri-rubber-dock.onigiri-rubber-dock,' +
+            H + '.onigiri-dock-divider.onigiri-dock-divider,' +
+            H + '#onigiri-reviewer-external-actions#onigiri-reviewer-external-actions{display:none!important}' +
+            H + '.onigiri-reviewer-header-buttons.onigiri-reviewer-header-buttons{min-height:44px;justify-content:center!important}';
+        shadow.appendChild(style);
+    }
+
+    function isOverviewPage() {
+        return !!(document.body && (document.body.classList.contains('onigiri-overview') ||
+            document.querySelector('.overview-bottom-actions, #onigiri-overview-header')));
+    }
+
+    function setupNavBar() {
+        if (!root.classList.contains('onigiri-phone') || document.getElementById('onigiri-phone-nav')) return;
+        var isReviewer = !!document.getElementById('qa');
+        var isOverview = isOverviewPage();
+        if (!isReviewer && !isOverview) return;
+        var nav = document.createElement('nav');
+        nav.id = 'onigiri-phone-nav';
+        var back = document.createElement('button');
+        back.type = 'button';
+        back.className = 'onigiri-nav-back';
+        back.setAttribute('aria-label', t('back', 'Back'));
+        back.innerHTML = BACK_NAV_SVG + '<span>' + (isReviewer ? '' : t('decks', 'Decks')) + '</span>';
+        back.addEventListener('click', goBack);
+        var more = document.createElement('button');
+        more.type = 'button';
+        more.className = 'onigiri-nav-more';
+        more.setAttribute('aria-label', t('more', 'More'));
+        more.innerHTML = MORE_SVG;
+        more.addEventListener('click', function (event) {
+            event.stopPropagation();
+            var items = headerButtons().filter(function (el) {
+                // Decks is the back button now
+                var cmd = el.getAttribute('onclick') || '';
+                return cmd.indexOf("pycmd('decks')") < 0;
+            });
+            items.push({ label: t('menu', 'Menu'), icon: null, run: function () { pycmd('onigiri_app_menu'); } });
+            showActionSheet(items, more);
+        });
+        nav.appendChild(back);
+        nav.appendChild(more);
+        document.body.appendChild(nav);
+        root.classList.add('onigiri-has-phone-nav');
+        hideHeaderButtonsInShadow();
+        // the reviewer mounts its header after load
+        var tries = 0;
+        var timer = setInterval(function () {
+            hideHeaderButtonsInShadow();
+            if (++tries > 20) clearInterval(timer);
+        }, 250);
+    }
+
+    // --- Swipe from the left edge to go back (as in iOS navigation) -----------------
+
+    function setupEdgeSwipe() {
+        if (!root.classList.contains('onigiri-touch')) return;
+        if (document.documentElement.dataset.onigiriEdgeSwipe) return;
+        var isReviewer = !!document.getElementById('qa');
+        if (!isReviewer && !isOverviewPage()) return;
+        document.documentElement.dataset.onigiriEdgeSwipe = '1';
+        var start = null;
+        var cue = null;
+        document.addEventListener('touchstart', function (event) {
+            if (event.touches.length !== 1) return;
+            var touch = event.touches[0];
+            start = touch.clientX <= 22 ? { x: touch.clientX, y: touch.clientY } : null;
+        }, { passive: true });
+        document.addEventListener('touchmove', function (event) {
+            if (!start) return;
+            var touch = event.touches[0];
+            var dx = touch.clientX - start.x;
+            var dy = Math.abs(touch.clientY - start.y);
+            if (dy > 40 && dy > dx) { start = null; if (cue) cue.remove(); cue = null; return; }
+            if (dx > 12) {
+                if (!cue) {
+                    cue = document.createElement('div');
+                    cue.id = 'onigiri-edge-cue';
+                    cue.innerHTML = BACK_NAV_SVG;
+                    document.body.appendChild(cue);
+                }
+                cue.style.top = (touch.clientY - 22) + 'px';
+                cue.style.transform = 'translateX(' + Math.min(dx, 90) + 'px)';
+                cue.classList.toggle('is-armed', dx > 80);
+            }
+        }, { passive: true });
+        document.addEventListener('touchend', function (event) {
+            if (!start) return;
+            var touch = event.changedTouches[0];
+            var dx = touch.clientX - start.x;
+            start = null;
+            if (cue) { cue.remove(); cue = null; }
+            if (dx > 80) goBack();
+        }, { passive: true });
+        document.addEventListener('touchcancel', function () {
+            start = null;
+            if (cue) { cue.remove(); cue = null; }
+        }, { passive: true });
+    }
+
+    // --- Reviewer bottom bar: haptics on answer --------------------------------------
+
+    document.addEventListener('pointerdown', function (event) {
+        if (event.pointerType === 'mouse') return;
+        var b = event.target.closest && event.target.closest('#outer button[data-onigiri-ease], #outer .onigiri-show-answer-btn');
+        if (b) haptic(b.hasAttribute('data-onigiri-ease') ? 'medium' : 'light');
+    }, true);
 
     // --- Phone tab bar (deck browser) --------------------------------------------
 
@@ -859,6 +1039,8 @@
         addSelectToggle();
         decorateDeckRows();
         watchSheets();
+        setupNavBar();
+        setupEdgeSwipe();
         if (root.classList.contains('onigiri-touch')) {
             setupActionTiles();
             titleCaseHeader();
@@ -894,6 +1076,8 @@
         paintEdges();
         // themes and backgrounds settle after load
         setTimeout(paintEdges, 600);
+        setupNavBar();
+        setupEdgeSwipe();
     });
 
     window.OnigiriMobile = {

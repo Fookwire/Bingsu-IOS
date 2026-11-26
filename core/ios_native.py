@@ -262,7 +262,23 @@ def handle_command(cmd: str) -> bool:
         stop_bounce_everywhere()
     elif what == "haptic":
         haptic(arg or "light")
+    elif what == "back":
+        go_back()
     return True
+
+
+def go_back() -> None:
+    """The nav bar's ‹ and the edge swipe: reviewer -> overview -> decks."""
+    mw = _mw()
+    if mw is None or mw.col is None:
+        return
+    try:
+        if mw.state == "review":
+            mw.moveToState("overview")
+        elif mw.state in ("overview", "resetRequired"):
+            mw.moveToState("deckBrowser")
+    except Exception as exc:
+        print(f"Onigiri: back failed: {exc}")
 
 
 def _after_main_window() -> None:
