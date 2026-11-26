@@ -1806,59 +1806,23 @@ html.onigiri-app-menu-open #onigiri-phone-nav {
 }
 
 /* ------------------------------------------------------------------------- */
-/* Home screen edge to edge (core/ios_native.py): the page fills the screen  */
-/* under the status bar and home indicator and pads itself.                  */
+/* Top fade: the page dissolves into the status-bar strip (painted in the    */
+/* same colour) as it scrolls up, instead of ending at a hard edge.         */
 /* ------------------------------------------------------------------------- */
 
-:root {
-    --onigiri-edge-top: 0px;
-    --onigiri-edge-bottom: 0px;
-}
-
-html.onigiri-edge-to-edge .container.modern-main-menu.modern-main-menu {
-    padding-top: var(--onigiri-edge-top) !important;
-    padding-bottom: calc(var(--onigiri-phone-tabs-h) + var(--onigiri-edge-bottom) + 40px) !important;
-}
-
-html.onigiri-edge-to-edge:not(.onigiri-phone) .container.modern-main-menu.modern-main-menu {
-    padding-bottom: var(--onigiri-edge-bottom) !important;
-}
-
-html.onigiri-edge-to-edge .ba-home,
-html.onigiri-edge-to-edge .ba-side {
-    padding-top: calc(16px + var(--onigiri-edge-top)) !important;
-}
-
-html.onigiri-edge-to-edge.onigiri-phone #onigiri-phone-tabs {
-    bottom: calc(16px + var(--onigiri-edge-bottom));
-}
-
-html.onigiri-edge-to-edge.onigiri-select-mode #onigiri-edit-toolbar {
-    padding-bottom: calc(4px + var(--onigiri-edge-bottom));
-}
-
-html.onigiri-edge-to-edge .onigiri-quick-menu.is-sheet {
-    padding-bottom: calc(10px + var(--onigiri-edge-bottom)) !important;
-    max-height: calc(82vh - var(--onigiri-edge-top)) !important;
-}
-
-/* Behind the clock and battery: the page fades out as it scrolls under
-   them (as iOS does), instead of a solid bar. */
-#onigiri-status-fade {
+#onigiri-top-fade {
     display: none;
 }
 
-html.onigiri-edge-to-edge #onigiri-status-fade {
+html.onigiri-ios.onigiri-phone body:has(.container.modern-main-menu, .ba-home) #onigiri-top-fade,
+html.onigiri-ios.onigiri-phone body:has(.container.modern-main-menu, .ba-home) > #onigiri-top-fade {
     display: block;
     position: fixed;
     z-index: 8999;
     top: 0;
     left: 0;
     right: 0;
-    height: var(--onigiri-edge-top);
+    height: 28px;
     pointer-events: none;
-    background: linear-gradient(to bottom,
-        var(--onigiri-edge-bg, rgba(0, 0, 0, 0.5)) 0%,
-        transparent 100%);
-    opacity: 0.75;
+    background: linear-gradient(to bottom, var(--onigiri-edge-bg, transparent) 0%, transparent 100%);
 }

@@ -264,123 +264,6 @@ def query_edge_color() -> None:
         _log(f"edge colour query failed: {exc}")
 
 
-# --- edge to edge home screen ------------------------------------------------
-# Kioku keeps the main view out of the status bar and home indicator areas
-# (contents margins on the main window, kioku/screenedges.py). On the home
-# screen those strips sat over the page like bars. There the main view now
-# fills the screen and the page pads itself by the same amount (CSS
-# --onigiri-edge-top / --onigiri-edge-bottom): it scrolls under the status
-# bar like a native app. Other screens keep Kioku's layout.
-
-EDGE_STATES = ("deckBrowser",)
-
-
-def _edge_to_edge(mw) -> bool:
-    return active() and getattr(mw, "state", None) in EDGE_STATES
-
-
-def edge_vars_css() -> str:
-    top, bottom = _state.get("insets") or (0, 0)
-    return (
-        "<style id='onigiri-edge-vars'>:root{--onigiri-edge-top:%dpx;--onigiri-edge-bottom:%dpx}"
-        "</style>" % (top, bottom)
-    )
-
-
-def _push_edge_vars(mw, top: int, bottom: int) -> None:
-    try:
-        mw.web.eval(
-            "(function(){var s=document.documentElement.style;"
-            "s.setProperty('--onigiri-edge-top','%dpx');s.setProperty('--onigiri-edge-bottom','%dpx');"
-            "document.documentElement.classList.toggle('onigiri-edge-to-edge',%s);})();"
-            % (top, bottom, "true" if (top or bottom) else "false")
-        )
-    except Exception:
-        pass
-
-
-def _set_insets(mw, top: int, bottom: int) -> None:
-    """Remember the insets the home page pads itself by; tell the page only
-    when they change (a page loaded later gets them in its <head>)."""
-    if _state.get("insets") == (top, bottom):
-        return
-    _state["insets"] = (top, bottom)
-    if top or bottom:
-        _log(f"home screen edge to edge (top {top}, bottom {bottom})")
-    _push_edge_vars(mw, top, bottom)
-
-
-def _kioku_update(edges, original, *args, **kwargs):
-    """Run Kioku's ScreenEdges.update, but on the home screen give the main
-    window no top/bottom margins *in the same call*.
-
-    Changing the margins makes Qt send the window a resize event, which
-    makes Kioku update again: setting Kioku's margins and then ours flipped
-    them back and forth endlessly (the app crawled). Setting the final
-    margins once means the follow-up update finds nothing to change."""
-    mw = edges.mw
-    _state["edges"] = edges
-    if not _edge_to_edge(mw):
-        result = original(edges, *args, **kwargs)
-        _set_insets(mw, 0, 0)
-        return result
-    captured = {}
-    real = mw.setContentsMargins
-
-    def set_margins(*margins):
-        if len(margins) == 1:
-            m = margins[0]
-            margins = (m.left(), m.top(), m.right(), m.bottom())
-        captured["margins"] = margins
-        real(margins[0], 0, margins[2], 0)
-
-    mw.setContentsMargins = set_margins
-    try:
-        result = original(edges, *args, **kwargs)
-    finally:
-        try:
-            del mw.setContentsMargins
-        except AttributeError:
-            pass
-    if "margins" in captured:
-        _set_insets(mw, captured["margins"][1], captured["margins"][3])
-    return result
-
-
-def install_edge_to_edge() -> None:
-    try:
-        from kioku import screenedges  # type: ignore
-    except Exception:
-        return
-    cls = getattr(screenedges, "ScreenEdges", None)
-    if cls is None or getattr(cls, "_onigiri_edges", False):
-        return
-    cls._onigiri_edges = True
-    original = cls.update
-
-    def update(self, *args, **kwargs):
-        if _state.get("in_update"):
-            return original(self, *args, **kwargs)
-        _state["in_update"] = True
-        try:
-            return _kioku_update(self, original, *args, **kwargs)
-        except Exception as exc:
-            _log(f"edge to edge failed: {exc}")
-        finally:
-            _state["in_update"] = False
-
-    cls.update = update
-
-
-def refresh_edges() -> None:
-    edges = _state.get("edges")
-    if edges is not None:
-        try:
-            edges.update()
-        except Exception:
-            pass
-
-
 # --- bounce --------------------------------------------------------------------
 
 
@@ -496,7 +379,6 @@ def _after_state_change(*_args) -> None:
     try:
         from aqt.qt import QTimer
 
-        refresh_edges()
         QTimer.singleShot(900, query_edge_color)
     except Exception:
         pass
@@ -508,7 +390,6 @@ def install() -> None:
     _state["installed"] = True
     from aqt import gui_hooks
 
-    install_edge_to_edge()
     gui_hooks.main_window_did_init.append(_after_main_window)
     gui_hooks.profile_did_open.append(_after_main_window)
     gui_hooks.state_did_change.append(_after_state_change)

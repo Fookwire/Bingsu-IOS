@@ -351,10 +351,12 @@
         if (!document.querySelector(MAIN_SCREEN)) return;
         var h = window.innerHeight || root.clientHeight;
         var topColor = colorAt(2, 2);
+        // the top fade blends the page into the status-bar strip, which
+        // takes the same colour
         if (topColor) root.style.setProperty('--onigiri-edge-bg', topColor);
-        if (!document.getElementById('onigiri-status-fade') && document.body) {
+        if (!document.getElementById('onigiri-top-fade') && document.body) {
             var fade = document.createElement('div');
-            fade.id = 'onigiri-status-fade';
+            fade.id = 'onigiri-top-fade';
             fade.setAttribute('aria-hidden', 'true');
             document.body.appendChild(fade);
         }
