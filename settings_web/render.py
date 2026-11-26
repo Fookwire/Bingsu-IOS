@@ -342,6 +342,7 @@ def _strings():
     out["theme_export_name_placeholder"] = tr("settings_web_theme_export_name_placeholder", "Theme name")
     out["theme_card_sub"] = tr("settings_web_theme_card_sub", "Light · Dark")
     out["theme_hold_hint"] = tr("settings_web_theme_hold_hint", "Hold 3s to apply")
+    out["theme_apply_named"] = tr("settings_web_theme_apply_named", "Apply")
     out["theme_export_name_title"] = tr("settings_web_theme_export_name_title", "Name this theme")
     # Games pages (the former standalone Gamification Settings window).
     out["games"] = tr("games", "Games")

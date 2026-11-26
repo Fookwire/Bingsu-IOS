@@ -767,6 +767,12 @@
 
     function goBack() {
         haptic('light');
+        // Onigiri Settings: a page back to the list (the window itself
+        // closes with Kioku's Back)
+        if (document.querySelector('.osw-shell')) {
+            root.classList.remove('onigiri-settings-page');
+            return;
+        }
         try { if (typeof pycmd === 'function') pycmd('onigiri_native:back'); } catch (e) {}
     }
 
@@ -857,7 +863,8 @@
         if (!root.classList.contains('onigiri-touch')) return;
         if (document.documentElement.dataset.onigiriEdgeSwipe) return;
         var isReviewer = !!document.getElementById('qa');
-        if (!isReviewer && !isOverviewPage()) return;
+        var isSettings = !!document.querySelector('.osw-shell');
+        if (!isReviewer && !isSettings && !isOverviewPage()) return;
         document.documentElement.dataset.onigiriEdgeSwipe = '1';
         var start = null;
         var cue = null;
@@ -865,6 +872,7 @@
             if (event.touches.length !== 1) return;
             var touch = event.touches[0];
             start = touch.clientX <= 22 ? { x: touch.clientX, y: touch.clientY } : null;
+            if (start && isSettings && !root.classList.contains('onigiri-settings-page')) start = null;
         }, { passive: true });
         document.addEventListener('touchmove', function (event) {
             if (!start) return;

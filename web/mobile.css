@@ -1028,21 +1028,40 @@ html.onigiri-phone #outer button.onigiri-more-btn::before {
 /* Onigiri Settings: phone drill-down (rail list -> full-width page)          */
 /* ------------------------------------------------------------------------- */
 
+/* Phones: like iOS Settings. Edge to edge (Kioku's window bar is the only
+   chrome; its Back closes the window and changes save as they are made),
+   the list scrolls as one, groups are inset rounded lists with › rows,
+   and a page slides in over the list. */
 html.onigiri-phone .osw-shell {
-    --osw-shell-pad: 8px;
-    --osw-gutter: 16px;
+    --osw-shell-pad: 0px;
+    gap: 0 !important;
+    padding: 0 !important;
+}
+
+html.onigiri-phone .osw-shell > .osw-panel {
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: var(--osw-outer) !important;
 }
 
 html.onigiri-phone .osw-shell .osw-rail,
 html.onigiri-phone .osw-shell.is-collapsed .osw-rail {
+    display: block;
     flex: 1 1 auto;
     width: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding-bottom: calc(24px + var(--onigiri-safe-bottom));
 }
 
 html.onigiri-phone .osw-shell.is-collapsed .osw-search { display: flex; }
 html.onigiri-phone .osw-shell.is-collapsed .osw-rail-action-label { display: inline; }
-html.onigiri-phone .osw-shell .osw-rail-toggle { display: none; }
+html.onigiri-phone .osw-shell .osw-rail-toggle { display: none !important; }
 
+/* List or page, one at a time. */
 html.onigiri-phone:not(.onigiri-settings-page) .osw-shell .osw-main {
     display: none;
 }
@@ -1051,8 +1070,132 @@ html.onigiri-phone.onigiri-settings-page .osw-shell .osw-rail {
     display: none;
 }
 
+html.onigiri-phone .osw-shell .osw-rail-top {
+    padding: 12px 16px 8px;
+}
+
+html.onigiri-phone .osw-shell .osw-complexity {
+    margin-left: 16px;
+    margin-right: 16px;
+}
+
+html.onigiri-phone .osw-shell .osw-nav,
+html.onigiri-phone .osw-shell.is-collapsed .osw-nav {
+    flex: none;
+    overflow: visible;
+    padding: 4px 16px 0;
+    -webkit-mask-image: none;
+    mask-image: none;
+}
+
+html.onigiri-phone .osw-shell .osw-nav-group + .osw-nav-group {
+    margin-top: 22px;
+}
+
+html.onigiri-phone .osw-shell .osw-nav-title {
+    padding: 0 14px 7px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+}
+
+html.onigiri-phone .osw-shell .osw-nav-item,
+html.onigiri-phone .osw-shell .osw-rail-bottom .osw-rail-action {
+    height: auto;
+    min-height: 48px;
+    margin: 0;
+    padding: 0 14px;
+    gap: 12px;
+    border-radius: 0;
+    background: var(--osw-panel) !important;
+    color: var(--osw-fg) !important;
+    font-size: 16px;
+    box-shadow: inset 0 -0.5px 0 var(--osw-hairline, rgba(127, 127, 127, 0.25));
+}
+
+html.onigiri-phone .osw-shell .osw-nav-item .osw-nav-icon,
+html.onigiri-phone .osw-shell .osw-nav-item.is-active .osw-nav-icon {
+    color: var(--osw-accent);
+}
+
+html.onigiri-phone .osw-shell .osw-nav-item .osw-nav-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+html.onigiri-phone .osw-shell .osw-nav-title + .osw-nav-item,
+html.onigiri-phone .osw-shell .osw-rail-bottom .osw-rail-action:first-child {
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+html.onigiri-phone .osw-shell .osw-nav-item:last-child,
+html.onigiri-phone .osw-shell .osw-rail-bottom .osw-rail-action:nth-last-child(2) {
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+    box-shadow: none;
+}
+
+/* the › of a row that opens a page */
+html.onigiri-phone .osw-shell .osw-nav-item::after {
+    content: "";
+    flex: 0 0 auto;
+    width: 8px;
+    height: 8px;
+    margin-left: auto;
+    border-top: 2px solid var(--osw-fg-faint);
+    border-right: 2px solid var(--osw-fg-faint);
+    transform: rotate(45deg);
+    opacity: 0.7;
+}
+
+html.onigiri-phone .osw-shell .osw-nav-label {
+    flex: 1 1 auto;
+}
+
+/* Donate / Report Bugs: the last group; the status line under it. */
+html.onigiri-phone .osw-shell .osw-rail-bottom {
+    position: static;
+    margin: 22px 16px 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+}
+
+html.onigiri-phone .osw-shell .osw-rail-bottom .osw-rail-action {
+    width: 100%;
+    justify-content: flex-start;
+}
+
+html.onigiri-phone .osw-shell .osw-rail-commit {
+    margin-top: 14px;
+    padding: 0;
+    justify-content: center;
+}
+
+html.onigiri-phone .osw-shell #oswDone {
+    display: none !important;
+}
+
+/* The page: full screen, sliding in from the right. */
+html.onigiri-phone.onigiri-settings-page .osw-shell .osw-main {
+    animation: onigiri-page-in 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@keyframes onigiri-page-in {
+    from { transform: translateX(40%); opacity: 0.4; }
+    to { transform: none; opacity: 1; }
+}
+
+html.onigiri-phone .osw-shell .osw-page-scroll {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    overflow-x: hidden;
+    padding-bottom: calc(24px + var(--onigiri-safe-bottom));
+}
+
 html.onigiri-phone .osw-shell .osw-nav-item {
-    min-height: 44px;
+    min-height: 48px;
 }
 
 .onigiri-settings-back {
@@ -1277,4 +1420,141 @@ html.onigiri-phone body #outer button.onigiri-other-btn.onigiri-more-btn:not(.on
 html.onigiri-phone #outer button.onigiri-show-answer-btn,
 html.onigiri-phone #outer button[data-onigiri-ease] {
     min-height: 48px !important;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Onigiri Settings on phones: controls that fit                             */
+/* ------------------------------------------------------------------------- */
+
+/* Segmented controls share the width instead of running off the screen. */
+html.onigiri-phone .osw-shell :has(> .osw-segment-btn):not(.osw-subtabs *):not(.osw-subtabs) {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+}
+
+html.onigiri-phone .osw-shell .osw-segment-btn:not(.osw-subtabs *) {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    min-height: 36px;
+    padding: 6px 4px !important;
+    white-space: normal !important;
+    text-align: center;
+    letter-spacing: 0 !important;
+    font-size: 12.5px !important;
+}
+
+html.onigiri-phone .osw-shell .osw-segment-btn:not(.osw-subtabs *) .osw-segment-label {
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+}
+
+/* Rows of action chips wrap under their title. */
+html.onigiri-phone .osw-shell :has(> .osw-themes-actions),
+html.onigiri-phone .osw-shell .osw-themes-actions {
+    flex-wrap: wrap !important;
+    row-gap: 10px;
+}
+
+html.onigiri-phone .osw-shell .osw-themes-actions {
+    flex: 1 1 100% !important;
+}
+
+html.onigiri-phone .osw-shell :has(> .osw-themes-actions) > :not(.osw-themes-actions) {
+    flex: 1 1 100% !important;
+    min-width: 0 !important;
+}
+
+/* Preview cards: the controls go under the card's title. */
+html.onigiri-phone .osw-shell :has(> .osw-preview-head-controls) {
+    flex-wrap: wrap !important;
+    row-gap: 10px;
+}
+
+html.onigiri-phone .osw-shell .osw-preview-head-controls {
+    flex: 1 1 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    flex-wrap: wrap !important;
+    row-gap: 8px;
+    margin-left: 0 !important;
+}
+
+html.onigiri-phone .osw-shell .osw-preview-head-controls > * {
+    min-width: 0;
+    max-width: 100%;
+}
+
+/* Sub-page tab strips (Reviewer: Background, icons...) scroll sideways
+   inside themselves, never the page. */
+html.onigiri-phone .osw-shell .osw-subtabs,
+html.onigiri-phone .osw-shell .osw-subtabs-strip {
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+}
+
+html.onigiri-phone .osw-shell .osw-page {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* Inputs: 16px text (no iOS focus zoom), 44pt rows. */
+html.onigiri-touch .osw-shell :is(input[type="text"], input[type="search"], input[type="number"], input:not([type]), select, textarea) {
+    font-size: 16px !important;
+    min-height: 40px;
+}
+
+/* Themes on touch: tap to pick, then Apply. */
+html.onigiri-touch .osw-theme-tile.is-tap-to-pick .osw-theme-hold-hint,
+html.onigiri-touch .osw-theme-tile.is-tap-to-pick .osw-theme-hold-progress {
+    display: none !important;
+}
+
+.osw-theme-tile.is-picked .osw-theme-art-wrap {
+    outline: 3px solid var(--osw-accent, #0a84ff);
+    outline-offset: 1px;
+    border-radius: inherit;
+}
+
+.osw-theme-tile.is-picked .osw-theme-name::after {
+    content: " \2713";
+    color: var(--osw-accent, #0a84ff);
+    font-weight: 700;
+}
+
+.osw-theme-apply-bar {
+    position: fixed;
+    z-index: 50;
+    left: calc(16px + var(--onigiri-safe-left, 0px));
+    right: calc(16px + var(--onigiri-safe-right, 0px));
+    bottom: calc(14px + var(--onigiri-safe-bottom, 0px));
+    transform: translateY(140%);
+    transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+    pointer-events: none;
+}
+
+.osw-theme-apply-bar.is-visible {
+    transform: none;
+    pointer-events: auto;
+}
+
+.osw-theme-apply-bar .osw-theme-apply-btn {
+    width: 100%;
+    min-height: 50px;
+    border-radius: 14px !important;
+    font-size: 17px !important;
+    font-weight: 600 !important;
+    justify-content: center;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+}
+
+html.onigiri-phone .osw-shell #oswPageTabs {
+    margin-left: 0 !important;
+    margin-right: auto !important;
+    max-width: 100%;
 }

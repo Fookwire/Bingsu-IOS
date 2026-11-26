@@ -14048,6 +14048,35 @@
       return !!(target && target.closest && (target.closest(".osw-gal-del") || target.closest(".osw-gal-confirm")));
     }
 
+    // Touch: the Apply bar for the theme picked with a tap (null hides it).
+    function showThemeApplyBar(pick) {
+      let bar = document.getElementById("oswThemeApplyBar");
+      if (!pick) {
+        if (bar) bar.classList.remove("is-visible");
+        return;
+      }
+      if (!bar) {
+        bar = el("div", "osw-theme-apply-bar");
+        bar.id = "oswThemeApplyBar";
+        const btn = el("button", "osw-btn osw-btn-primary osw-theme-apply-btn");
+        btn.type = "button";
+        bar.appendChild(btn);
+        (document.querySelector(".osw-main") || document.body).appendChild(bar);
+      }
+      const btn = bar.querySelector("button");
+      btn.textContent = str("theme_apply_named", "Apply") + " " + pick.name;
+      btn.onclick = function () {
+        btn.disabled = true;
+        bridge("osw:haptic:2");
+        Promise.resolve(pick.apply()).then(function () {
+          btn.disabled = false;
+          bar.classList.remove("is-visible");
+          document.querySelectorAll(".osw-theme-tile.is-picked").forEach(function (t) { t.classList.remove("is-picked"); });
+        });
+      };
+      requestAnimationFrame(function () { bar.classList.add("is-visible"); });
+    }
+
     // Hold for 3 seconds (the card trembles the whole time) — release while
     // it's trembling fast (.is-ready) to apply, release early to cancel.
     // Same shape as the Reset hold below, just per-card and with a tremble
@@ -14148,23 +14177,46 @@
         if (isReady) {
           isReady = false;
           bridge("osw:haptic:2");
-          tile.classList.add("is-busy");
           resetProgressBar();
-          call("osw:theme_apply:" + JSON.stringify({ kind: kind, name: theme.name })).then(function (res) {
-            tile.classList.remove("is-busy");
-            if (!res || !res.ok) { toast((res && res.error) || str("autosave_error", "Could not save")); return; }
-            if (res.palettes) {
-              CTX.thingsPreview = CTX.thingsPreview || {};
-              CTX.thingsPreview.palettes = res.palettes;
-            }
-            if (res.accent) CTX.accent = res.accent;
-            applyTheme();
-            applyThemeRefresh(res.refresh, res.preview);
-            toast(str("theme_applied_toast", "Theme applied:") + " " + theme.name);
-          });
+          applyThisTheme();
         } else {
           resetProgressBar();
         }
+      }
+
+      function applyThisTheme() {
+        tile.classList.add("is-busy");
+        return call("osw:theme_apply:" + JSON.stringify({ kind: kind, name: theme.name })).then(function (res) {
+          tile.classList.remove("is-busy");
+          if (!res || !res.ok) { toast((res && res.error) || str("autosave_error", "Could not save")); return; }
+          if (res.palettes) {
+            CTX.thingsPreview = CTX.thingsPreview || {};
+            CTX.thingsPreview.palettes = res.palettes;
+          }
+          if (res.accent) CTX.accent = res.accent;
+          applyTheme();
+          applyThemeRefresh(res.refresh, res.preview);
+          toast(str("theme_applied_toast", "Theme applied:") + " " + theme.name);
+        });
+      }
+
+      // Touch screens (iPhone/iPad): a 3 s hold fights scrolling and iOS's
+      // own long-press. A tap picks the theme (checkmark) and an Apply bar
+      // at the bottom applies it.
+      if (window.OnigiriMobile && window.OnigiriMobile.isTouch()) {
+        tile.classList.add("is-tap-to-pick");
+        tile.addEventListener("click", function (event) {
+          if (isDeleteControl(event.target) || tile.classList.contains("is-confirming")) return;
+          document.querySelectorAll(".osw-theme-tile.is-picked").forEach(function (other) {
+            if (other !== tile) other.classList.remove("is-picked");
+          });
+          const picked = !tile.classList.contains("is-picked");
+          tile.classList.toggle("is-picked", picked);
+          bridge("osw:haptic:1");
+          showThemeApplyBar(picked ? { name: theme.name, apply: applyThisTheme } : null);
+        });
+        if (onDelete) attachDelete();
+        return tile;
       }
 
       function cancelHold() {
@@ -14182,7 +14234,9 @@
       tile.addEventListener("touchend", endHold);
       tile.addEventListener("touchcancel", cancelHold);
 
-      if (onDelete) {
+      if (onDelete) attachDelete();
+
+      function attachDelete() {
         const del = el("span", "osw-gal-del");
         del.setAttribute("role", "button");
         del.innerHTML = ICON_CLOSE;
