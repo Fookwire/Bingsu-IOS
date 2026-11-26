@@ -1162,9 +1162,30 @@ def on_sync_will_start():
     if onigiri_sync.is_enabled():
         onigiri_sync.pack_user_files()
 
+def _full_home_refresh_after_sync():
+    """Deck-list updates after a sync are partial (decks/tree_updater.py):
+    the Home widgets (Studied, Time, heatmap) kept the counts from before
+    the sync brought in reviews made on another device."""
+    try:
+        if mw.state == "deckBrowser" and mw.deckBrowser and mw.col:
+            mw.deckBrowser.refresh()
+    except Exception as e:
+        print(f"Onigiri: home refresh after sync failed: {e}")
+
+
 def on_sync_did_finish():
     """Called after Anki sync finishes - check for new Onigiri data."""
     update_sync_status_indicator()
+    try:
+        from .rendering import onigiri_renderer as _renderer
+
+        _renderer._DASHBOARD_STATS_CACHE.clear()
+        from .rendering import heatmap as _heatmap
+
+        _heatmap.invalidate_heatmap_cache()
+    except Exception:
+        pass
+    QTimer.singleShot(300, _full_home_refresh_after_sync)
     if not onigiri_sync.is_enabled():
         return
 
@@ -1372,6 +1393,19 @@ gui_hooks.profile_did_open.append(_hashi_notes_purge)
 gui_hooks.webview_will_set_content.append(inject_menu_files)
 
 
+_ONIGIRI_PAGE_CONTEXTS = {
+    "DeckBrowser", "Overview", "Reviewer", "ReviewerBottomBar", "BottomBar",
+    "DeckBrowserBottomBar", "OverviewBottomBar", "TopToolbar", "Toolbar",
+}
+
+
+def _is_onigiri_page(context) -> bool:
+    if context is None:
+        return False
+    cls = type(context)
+    return cls.__name__ in _ONIGIRI_PAGE_CONTEXTS or cls.__module__.startswith(__name__)
+
+
 def inject_mobile_assets(web_content, context):
     """Touch/phone support on every page (iPhone/iPad via Kioku).
 
@@ -1383,6 +1417,10 @@ def inject_mobile_assets(web_content, context):
     from .core import platform as onigiri_platform
 
     classes = onigiri_platform.body_classes()
+    if classes and _is_onigiri_page(context):
+        # Onigiri's own screens get the app treatment (no text selection,
+        # no sticky hover, edge colours); other add-ons' pages don't.
+        classes += " onigiri-app"
     boot = ""
     if classes:
         boot = (
@@ -1399,6 +1437,28 @@ def inject_mobile_assets(web_content, context):
 
 
 gui_hooks.webview_will_set_content.append(inject_mobile_assets)
+
+
+def _on_native_cmd(handled, cmd, context):
+    """onigiri_native:* from web/mobile.js (edge colour, haptics, bounce)."""
+    if isinstance(cmd, str) and cmd.startswith("onigiri_native:"):
+        from .core import ios_native
+
+        ios_native.handle_command(cmd)
+        return (True, None)
+    return handled
+
+
+gui_hooks.webview_did_receive_js_message.append(_on_native_cmd)
+
+
+def _install_ios_native():
+    from .core import ios_native
+
+    ios_native.install()
+
+
+_install_ios_native()
 gui_hooks.deck_browser_will_render_content.append(
     on_things_deck_browser_will_render_content
 )

@@ -75,6 +75,67 @@ html.onigiri-touch .onigiri-quick-menu {
     user-select: none;
 }
 
+/* ------------------------------------------------------------------------- */
+/* App feel on Onigiri's own screens (html.onigiri-app)                       */
+/* ------------------------------------------------------------------------- */
+
+/* No double-tap zoom or 300 ms tap delay; pinch-zoom on cards still works. */
+html.onigiri-touch.onigiri-app,
+html.onigiri-touch.onigiri-app body {
+    touch-action: manipulation;
+    overflow-x: hidden;
+    overflow-x: clip;
+    overscroll-behavior: none;
+}
+
+/* A drag inside a list ends at the list's edge instead of pulling the page
+   (and with it the whole interface) along. */
+html.onigiri-touch.onigiri-app body * {
+    overscroll-behavior: contain;
+}
+
+/* Labels, buttons and lists are not text: no selection handles, no
+   Copy/Look Up callout on long-press. Text fields and card content are. */
+html.onigiri-touch.onigiri-app body {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+html.onigiri-touch.onigiri-app :is(input, textarea, select, [contenteditable]:not([contenteditable="false"]),
+    #qa, .selectable) {
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+html.onigiri-touch.onigiri-app :is(#qa, #qa *, [contenteditable]:not([contenteditable="false"]) *) {
+    -webkit-user-select: text;
+    user-select: text;
+    -webkit-touch-callout: default;
+}
+
+/* A tapped control shows no focus ring (a keyboard still gets one). */
+html.onigiri-touch.onigiri-app :focus:not(:focus-visible) {
+    outline: none !important;
+}
+
+/* Pressed: native controls dim the moment the finger lands (mobile.js
+   sets .onigiri-pressed on pointerdown) and fade back on release. */
+html.onigiri-touch.onigiri-app .onigiri-pressed {
+    opacity: 0.55 !important;
+    transition: none !important;
+}
+
+html.onigiri-touch.onigiri-app :is(button, a, [role="button"], .menu-item, summary):not(.onigiri-pressed) {
+    transition-property: opacity, background-color, color, transform, border-color, box-shadow;
+}
+
+/* List rows highlight instead of fading (like a table cell). */
+html.onigiri-touch.onigiri-app :is(tr.deck, .quick-menu-item, .osw-nav-item).onigiri-pressed {
+    opacity: 1 !important;
+    background-color: var(--highlight-bg, rgba(127, 127, 127, 0.16)) !important;
+}
+
 html.onigiri-touch tr.deck.onigiri-pressing {
     background-color: var(--highlight-bg) !important;
     transition: background-color 0.4s ease;
@@ -123,8 +184,12 @@ html.onigiri-touch .onigiri-row-more-cell {
     cursor: pointer;
 }
 
+.onigiri-row-more,
+.onigiri-row-more:focus,
 .onigiri-row-more:active {
-    background: var(--highlight-bg, rgba(127, 127, 127, 0.15));
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
 }
 
 html.onigiri-select-mode .onigiri-row-more-cell,

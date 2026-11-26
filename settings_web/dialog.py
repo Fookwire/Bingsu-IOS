@@ -1006,6 +1006,17 @@ def open_settings(initial_page=0, parent=None, addon_path=None):
 
 
 def _trigger_mac_haptic_native(pattern=0):
+    import sys
+
+    if sys.platform == "ios":
+        try:
+            from ..core import ios_native
+
+            # macOS patterns: 0 generic, 1 alignment, 2 level change
+            ios_native.haptic({1: "selection", 2: "medium"}.get(int(pattern or 0), "light"))
+        except Exception:
+            pass
+        return
     if not mac_titlebar.is_supported():
         return
     try:

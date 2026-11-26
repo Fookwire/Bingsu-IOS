@@ -1,4 +1,4 @@
-"""Small, safe macOS haptic bridge shared by the mini-games."""
+"""Small, safe haptic bridge shared by the mini-games (macOS trackpad, iPhone)."""
 
 from __future__ import annotations
 

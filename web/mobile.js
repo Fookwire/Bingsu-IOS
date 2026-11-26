@@ -14,6 +14,11 @@
  *   Ctrl/Shift+click).
  * - Phone home screen: a bottom tab bar switching between the deck sidebar
  *   and the widget dashboard, which no longer fit side by side.
+ * - App feel on Onigiri's own screens (<html class="onigiri-app">, set by
+ *   __init__.inject_mobile_assets): no sticky :hover (hover rules are
+ *   removed on screens without a mouse or trackpad), instant press
+ *   feedback, the screen edges in the page's colour, no rubber band and
+ *   haptics through Kioku (core/ios_native.py, "onigiri_native:*").
  */
 (function () {
     'use strict';
@@ -94,7 +99,7 @@
                 press = null;
                 p.el.classList.remove('onigiri-pressing');
                 suppressClickUntil = Date.now() + 800;
-                try { if (navigator.vibrate) navigator.vibrate(10); } catch (e) {}
+                haptic('medium');
                 var evt = new MouseEvent('contextmenu', {
                     bubbles: true,
                     cancelable: true,
@@ -139,6 +144,220 @@
     document.addEventListener('contextmenu', function (event) {
         if (!event.onigiriLongPress) cancelPress();
     }, true);
+
+
+    // --- App feel: native bridge (core/ios_native.py) ----------------------------
+
+    function nativeCmd(what) {
+        if (!root.classList.contains('onigiri-ios')) return;
+        try { if (typeof pycmd === 'function') pycmd('onigiri_native:' + what); } catch (e) {}
+    }
+
+    function haptic(kind) {
+        if (root.classList.contains('onigiri-ios')) {
+            nativeCmd('haptic:' + (kind || 'light'));
+        } else {
+            try { if (navigator.vibrate) navigator.vibrate(10); } catch (e) {}
+        }
+    }
+
+    // --- App feel: no sticky hover -------------------------------------------------
+    // On a touch screen a tap leaves :hover on the element until the next tap
+    // somewhere else: tapped rows stayed highlighted, buttons stayed lit.
+    // Without a mouse or trackpad, :hover rules are dropped from Onigiri's
+    // stylesheets (`:not(:hover)` always holds then, so it is just removed).
+
+    function hasMousePointer() {
+        return mq('(any-hover: hover)') || mq('(any-pointer: fine)');
+    }
+
+    function splitSelectors(text) {
+        var out = [];
+        var depth = 0;
+        var start = 0;
+        for (var i = 0; i < text.length; i++) {
+            var c = text.charAt(i);
+            if (c === '(' || c === '[') depth++;
+            else if (c === ')' || c === ']') depth--;
+            else if (c === ',' && depth === 0) {
+                out.push(text.slice(start, i));
+                start = i + 1;
+            }
+        }
+        out.push(text.slice(start));
+        return out;
+    }
+
+    function stripHoverRules(list) {
+        if (!list) return 0;
+        var removed = 0;
+        for (var i = list.length - 1; i >= 0; i--) {
+            var rule = list[i];
+            try {
+                if (rule.cssRules && rule.type !== 1) {
+                    // @media/@supports/@layer: leave explicit hover queries alone
+                    var cond = rule.conditionText || (rule.media && rule.media.mediaText) || '';
+                    if (!/hover\s*:\s*hover|pointer\s*:\s*fine/.test(cond)) removed += stripHoverRules(rule.cssRules);
+                    continue;
+                }
+                if (rule.type === 3 && rule.styleSheet) { // @import
+                    removed += stripHoverRules(rule.styleSheet.cssRules);
+                    continue;
+                }
+                var sel = rule.selectorText;
+                if (!sel || sel.indexOf(':hover') < 0) continue;
+                var keep = splitSelectors(sel).map(function (part) {
+                    return part.replace(/:not\(\s*:hover\s*\)/g, '');
+                }).filter(function (part) {
+                    return part.trim() && part.indexOf(':hover') < 0;
+                });
+                if (!keep.length) {
+                    (rule.parentRule || rule.parentStyleSheet).deleteRule(i);
+                } else {
+                    rule.selectorText = keep.map(function (p) {
+                        p = p.trim();
+                        return /^[>+~]/.test(p) || p === '' ? '*' + p : p;
+                    }).join(', ');
+                }
+                removed++;
+            } catch (e) {}
+        }
+        return removed;
+    }
+
+    var strippedSheets = typeof WeakSet !== 'undefined' ? new WeakSet() : null;
+
+    function stripHover() {
+        if (!root.classList.contains('onigiri-app') || !root.classList.contains('onigiri-touch')) return;
+        if (hasMousePointer()) return;
+        var sheets = document.styleSheets;
+        for (var i = 0; i < sheets.length; i++) {
+            var sheet = sheets[i];
+            if (strippedSheets && strippedSheets.has(sheet)) continue;
+            var rules;
+            try { rules = sheet.cssRules; } catch (e) { continue; } // not loaded / cross-origin
+            if (!rules) continue;
+            stripHoverRules(rules);
+            if (strippedSheets) strippedSheets.add(sheet);
+        }
+    }
+
+    function watchStylesheets() {
+        if (typeof MutationObserver === 'undefined') return;
+        var pending = false;
+        var obs = new MutationObserver(function (records) {
+            for (var r = 0; r < records.length; r++) {
+                var nodes = records[r].addedNodes;
+                for (var n = 0; n < nodes.length; n++) {
+                    var node = nodes[n];
+                    if (node.nodeName === 'LINK') node.addEventListener('load', stripHover);
+                    if ((node.nodeName === 'STYLE' || node.nodeName === 'LINK') && !pending) {
+                        pending = true;
+                        setTimeout(function () { pending = false; stripHover(); }, 0);
+                    }
+                }
+            }
+        });
+        obs.observe(document.documentElement, { childList: true, subtree: true });
+    }
+
+    // --- App feel: press feedback --------------------------------------------------
+    // iOS WebKit applies :active only when a touch listener exists, and a
+    // web page lights a button only after the finger lifts. Native controls
+    // dim the moment they are touched.
+
+    var PRESSABLE = 'button, a[href], a[onclick], [role="button"], [role="tab"], [role="menuitem"], summary, ' +
+        '.menu-item, tr.deck, .quick-menu-item, .osw-nav-item, .deck-header-btn, [onclick]';
+    var pressed = null;
+    var pressedAt = null;
+
+    function clearPressed(delay) {
+        var el = pressed;
+        pressed = null;
+        pressedAt = null;
+        if (!el) return;
+        if (delay) setTimeout(function () { el.classList.remove('onigiri-pressed'); }, delay);
+        else el.classList.remove('onigiri-pressed');
+    }
+
+    document.addEventListener('touchstart', function () {}, { passive: true });
+
+    document.addEventListener('pointerdown', function (event) {
+        if (event.pointerType === 'mouse' || !root.classList.contains('onigiri-app')) return;
+        var el = event.target.closest && event.target.closest(PRESSABLE);
+        if (!el || el.closest('#qa') || el.disabled) return;
+        // a whole panel with an onclick is not a button
+        var r = el.getBoundingClientRect();
+        if (r.height > 160 && r.width > window.innerWidth * 0.6) return;
+        clearPressed();
+        pressed = el;
+        pressedAt = { x: event.clientX, y: event.clientY };
+        el.classList.add('onigiri-pressed');
+    }, true);
+
+    document.addEventListener('pointermove', function (event) {
+        if (!pressedAt) return;
+        if (Math.abs(event.clientX - pressedAt.x) > 8 || Math.abs(event.clientY - pressedAt.y) > 8) clearPressed();
+    }, true);
+    document.addEventListener('pointerup', function () { clearPressed(90); }, true);
+    document.addEventListener('pointercancel', function () { clearPressed(); }, true);
+    document.addEventListener('scroll', function () { clearPressed(); }, true);
+
+    // --- App feel: screen edges ------------------------------------------------------
+    // Kioku pads <html> by the home indicator / notch and the main window's
+    // margins fill the status bar strip: both showed Anki grey. <html> takes
+    // the page's own colour and the main screens report it to the window.
+
+    function opaqueBackground(el) {
+        if (!el) return '';
+        var bg = '';
+        try { bg = getComputedStyle(el).backgroundColor; } catch (e) { return ''; }
+        if (!bg || bg === 'transparent') return '';
+        var m = bg.match(/rgba?\(([^)]+)\)/);
+        if (m) {
+            var parts = m[1].split(/[\s,\/]+/).filter(Boolean);
+            if (parts.length > 3 && parseFloat(parts[3]) < 0.5) return '';
+        }
+        return bg;
+    }
+
+    var MAIN_SCREEN = '.container.modern-main-menu, .ba-home, .ba-side, body.onigiri-overview, #qa';
+    var lastEdge = '';
+
+    function paintEdges() {
+        if (!root.classList.contains('onigiri-app') || !document.body) return;
+        root.style.backgroundColor = '';
+        var color = opaqueBackground(document.body) ||
+            opaqueBackground(document.querySelector('.container.modern-main-menu, .ba-home, #outer')) ||
+            opaqueBackground(root);
+        if (!color) return;
+        root.style.backgroundColor = color;
+        if (document.querySelector(MAIN_SCREEN) && color !== lastEdge) {
+            lastEdge = color;
+            nativeCmd('edge:' + color.replace(/\s+/g, ''));
+        }
+    }
+
+    // --- Debug: what is wider than the screen? ----------------------------------------
+
+    function findOverflow() {
+        var w = document.documentElement.clientWidth;
+        var out = [];
+        document.querySelectorAll('body *').forEach(function (el) {
+            var r = el.getBoundingClientRect();
+            if (r.width && (r.right > w + 1 || r.left < -1)) {
+                var style = getComputedStyle(el);
+                if (style.position === 'fixed' && style.visibility === 'hidden') return;
+                out.push({
+                    el: el.tagName.toLowerCase() + (el.id ? '#' + el.id : '') +
+                        (typeof el.className === 'string' && el.className ? '.' + el.className.trim().split(/\s+/).join('.') : ''),
+                    left: Math.round(r.left),
+                    right: Math.round(r.right),
+                });
+            }
+        });
+        return out;
+    }
 
     // --- Deck list: "more" buttons and Select mode -------------------------------
 
@@ -361,6 +580,10 @@
     function onReady() {
         updateClasses();
         lockZoom();
+        stripHover();
+        watchStylesheets();
+        paintEdges();
+        nativeCmd('ready');
         setupSettingsDrillDown();
         addPhoneTabs();
         addSelectToggle();
@@ -389,6 +612,12 @@
     } else {
         onReady();
     }
+    window.addEventListener('load', function () {
+        stripHover();
+        paintEdges();
+        // themes and backgrounds settle after load
+        setTimeout(paintEdges, 600);
+    });
 
     window.OnigiriMobile = {
         isTouch: function () { return root.classList.contains('onigiri-touch'); },
@@ -398,6 +627,9 @@
         },
         setSelectMode: setSelectMode,
         showTab: applyTab,
-        refresh: function () { updateClasses(); decorateDeckRows(); addSelectToggle(); },
+        refresh: function () { updateClasses(); decorateDeckRows(); addSelectToggle(); stripHover(); paintEdges(); },
+        haptic: haptic,
+        paintEdges: paintEdges,
+        findOverflow: findOverflow,
     };
 })();
