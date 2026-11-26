@@ -770,7 +770,7 @@ window.OnigiriEngine = {
 
         document.addEventListener('click', (event) => {
             if (this._multiSelectedDecks.size === 0) return;
-            if (event.target.closest('#deck-list-container, .onigiri-quick-menu, #onigiri-multiselect-badge')) return;
+            if (event.target.closest('#deck-list-container, .onigiri-quick-menu, #onigiri-multiselect-badge, #onigiri-edit-toolbar, #onigiri-select-toggle, #onigiri-sheet-backdrop')) return;
             this.clearMultiSelection();
         });
 

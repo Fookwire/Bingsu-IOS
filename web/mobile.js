@@ -414,14 +414,56 @@
 
     var selectMode = false;
 
+    // Edit mode (like Reminders/Files): reorder handles and selection circles
+    // appear, taps select, and a toolbar with Actions and Done replaces the
+    // tab bar. Outside it there are no handles, so a drag always scrolls.
     function setSelectMode(on) {
         selectMode = !!on;
         root.classList.toggle('onigiri-select-mode', selectMode);
         var btn = document.getElementById('onigiri-select-toggle');
-        if (btn) btn.setAttribute('aria-pressed', selectMode ? 'true' : 'false');
+        if (btn) {
+            btn.setAttribute('aria-pressed', selectMode ? 'true' : 'false');
+            btn.textContent = selectMode ? t('done', 'Done') : t('edit', 'Edit');
+        }
         if (!selectMode && window.OnigiriEngine && OnigiriEngine.clearMultiSelection) {
             try { OnigiriEngine.clearMultiSelection(); } catch (e) {}
         }
+        if (selectMode) ensureEditToolbar();
+        updateEditToolbar();
+    }
+
+    function selectedDids() {
+        try { return Array.from(OnigiriEngine._multiSelectedDecks || []); } catch (e) { return []; }
+    }
+
+    function ensureEditToolbar() {
+        if (document.getElementById('onigiri-edit-toolbar')) return;
+        var bar = document.createElement('div');
+        bar.id = 'onigiri-edit-toolbar';
+        bar.innerHTML = '<button type="button" data-act="actions"></button>' +
+            '<span class="onigiri-edit-count"></span>' +
+            '<button type="button" data-act="done"></button>';
+        bar.querySelector('[data-act="actions"]').textContent = t('actions', 'Actions');
+        bar.querySelector('[data-act="done"]').textContent = t('done', 'Done');
+        bar.addEventListener('click', function (event) {
+            var b = event.target.closest('button[data-act]');
+            if (!b) return;
+            if (b.dataset.act === 'done') { setSelectMode(false); return; }
+            var dids = selectedDids();
+            if (!dids.length || !window.OnigiriEngine) return;
+            var rect = b.getBoundingClientRect();
+            if (dids.length > 1) OnigiriEngine.showBulkDeckContextMenu(rect.left, rect.top);
+            else OnigiriEngine.showDeckContextMenu(rect.left, rect.top, dids[0]);
+        });
+        document.body.appendChild(bar);
+    }
+
+    function updateEditToolbar() {
+        var bar = document.getElementById('onigiri-edit-toolbar');
+        if (!bar) return;
+        var n = selectedDids().length;
+        bar.querySelector('.onigiri-edit-count').textContent = n ? n + ' ' + t('selected', 'selected') : t('select_decks', 'Select decks');
+        bar.querySelector('[data-act="actions"]').disabled = n === 0;
     }
 
     function addSelectToggle() {
@@ -433,7 +475,7 @@
         btn.id = 'onigiri-select-toggle';
         btn.className = 'deck-header-btn onigiri-select-toggle';
         btn.setAttribute('aria-pressed', 'false');
-        btn.textContent = t('select', 'Select');
+        btn.textContent = t('edit', 'Edit');
         btn.addEventListener('click', function (event) {
             event.preventDefault();
             event.stopPropagation();
@@ -453,8 +495,236 @@
         if (!row || !window.OnigiriEngine || !OnigiriEngine.toggleMultiSelection) return;
         event.preventDefault();
         event.stopImmediatePropagation();
-        OnigiriEngine.toggleMultiSelection(row, event);
+        // a plain tap toggles one row (no Shift/Ctrl range semantics)
+        OnigiriEngine.toggleMultiSelection(row, { shiftKey: false, ctrlKey: true, metaKey: true });
+        haptic('selection');
+        updateEditToolbar();
     }, true);
+
+
+    // --- iOS sheets for Onigiri's menus -------------------------------------------
+    // engine.js shows deck, sort and tag menus as .onigiri-quick-menu; on
+    // phones positionMenu marks them .is-sheet. Here they get what an iOS
+    // sheet has: a dimmed backdrop (tap to close), a grab handle, a swipe
+    // down to dismiss and a Cancel button. Group rows (Markers ›) push their
+    // items inside the sheet (CSS) instead of opening a fly-out.
+
+    function closeMenus() {
+        if (window.OnigiriEngine && OnigiriEngine.closeQuickMenus) {
+            try { OnigiriEngine.closeQuickMenus(); return; } catch (e) {}
+        }
+        document.querySelectorAll('.onigiri-quick-menu').forEach(function (m) { m.remove(); });
+    }
+
+    function backdrop() {
+        var bd = document.getElementById('onigiri-sheet-backdrop');
+        if (!bd) {
+            bd = document.createElement('div');
+            bd.id = 'onigiri-sheet-backdrop';
+            bd.addEventListener('click', function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+                closeMenus();
+            });
+            document.body.appendChild(bd);
+        }
+        return bd;
+    }
+
+    function syncBackdrop() {
+        var open = !!document.querySelector('body > .onigiri-quick-menu.is-sheet');
+        var bd = document.getElementById('onigiri-sheet-backdrop');
+        if (open) backdrop().classList.add('is-visible');
+        else if (bd) bd.classList.remove('is-visible');
+        root.classList.toggle('onigiri-sheet-open', open);
+    }
+
+    function enhanceSheet(menu) {
+        if (menu.dataset.onigiriSheet) return;
+        menu.dataset.onigiriSheet = '1';
+        var grab = document.createElement('div');
+        grab.className = 'onigiri-sheet-grabber';
+        grab.setAttribute('aria-hidden', 'true');
+        menu.insertBefore(grab, menu.firstChild);
+        var cancel = document.createElement('button');
+        cancel.type = 'button';
+        cancel.className = 'onigiri-sheet-cancel';
+        cancel.textContent = t('cancel', 'Cancel');
+        cancel.addEventListener('click', function (event) {
+            event.stopPropagation();
+            closeMenus();
+        });
+        menu.appendChild(cancel);
+        haptic('light');
+        swipeToDismiss(menu);
+    }
+
+    function swipeToDismiss(menu) {
+        var start = null;
+        var dy = 0;
+        var moved = false;
+        menu.addEventListener('pointerdown', function (event) {
+            if (event.pointerType === 'mouse') return;
+            if (menu.scrollTop > 0 && !event.target.closest('.onigiri-sheet-grabber')) return;
+            start = { y: event.clientY, t: Date.now() };
+            dy = 0;
+            moved = false;
+        });
+        menu.addEventListener('pointermove', function (event) {
+            if (!start) return;
+            dy = event.clientY - start.y;
+            if (dy < 0 && !moved) { start = null; return; } // scrolling up the list
+            if (dy > 8) moved = true;
+            if (moved) {
+                menu.style.transition = 'none';
+                menu.style.transform = 'translateY(' + Math.max(0, dy) + 'px)';
+            }
+        });
+        function end() {
+            if (!start) return;
+            var fast = dy > 40 && Date.now() - start.t < 250;
+            start = null;
+            if (!moved) return;
+            menu.style.transition = '';
+            if (dy > 110 || fast) {
+                menu.style.transform = 'translateY(110%)';
+                setTimeout(closeMenus, 180);
+            } else {
+                menu.style.transform = '';
+            }
+        }
+        menu.addEventListener('pointerup', end);
+        menu.addEventListener('pointercancel', end);
+        // a drag that ends on a row must not run it
+        menu.addEventListener('click', function (event) {
+            if (moved) {
+                moved = false;
+                event.preventDefault();
+                event.stopImmediatePropagation();
+            }
+        }, true);
+    }
+
+    function watchSheets() {
+        if (typeof MutationObserver === 'undefined' || !document.body) return;
+        new MutationObserver(function (records) {
+            var changed = false;
+            for (var r = 0; r < records.length; r++) {
+                var nodes = records[r].addedNodes;
+                for (var n = 0; n < nodes.length; n++) {
+                    var node = nodes[n];
+                    if (node.nodeType === 1 && node.classList.contains('onigiri-quick-menu') &&
+                        node.classList.contains('is-sheet')) enhanceSheet(node);
+                }
+                if (records[r].removedNodes.length || nodes.length) changed = true;
+            }
+            if (changed) syncBackdrop();
+        }).observe(document.body, { childList: true });
+    }
+
+    // A sheet built here from existing elements (the More actions): each row
+    // runs the original element's click.
+    function showActionSheet(elements, anchor) {
+        if (!window.OnigiriEngine || !OnigiriEngine.positionMenu) return;
+        closeMenus();
+        var menu = document.createElement('div');
+        menu.className = 'onigiri-quick-menu onigiri-action-sheet';
+        elements.forEach(function (el) {
+            var label = el.querySelector('span');
+            var row = document.createElement('div');
+            row.className = 'quick-menu-item';
+            var host = document.createElement('span');
+            host.className = 'onigiri-action-icon-host ' + Array.prototype.filter.call(el.classList, function (c) {
+                return c.indexOf('action-') === 0;
+            }).join(' ');
+            var icon = el.querySelector('.icon');
+            if (icon) host.appendChild(icon.cloneNode(true));
+            row.appendChild(host);
+            var text = document.createElement('span');
+            text.textContent = (label ? label.textContent : el.textContent).trim();
+            row.appendChild(text);
+            row.addEventListener('click', function (event) {
+                event.stopPropagation();
+                closeMenus();
+                el.click();
+            });
+            menu.appendChild(row);
+        });
+        var rect = anchor.getBoundingClientRect();
+        OnigiriEngine.positionMenu(menu, rect.left, rect.bottom);
+    }
+
+    // --- Home: action tiles ------------------------------------------------------------
+    // Phones show one row of five tiles: the first four actions and More.
+    // Settings, Onigiri Games and the old More fly-out (Get Shared, Create
+    // Deck, Import) open from More as a labelled sheet.
+
+    function setupActionTiles() {
+        var section = document.querySelector('.modern-main-menu .onigiri-sidebar-actions-section');
+        if (!section || section.dataset.onigiriTiles) return;
+        section.dataset.onigiriTiles = '1';
+        var items = Array.prototype.filter.call(section.children, function (el) {
+            return el.classList.contains('menu-item');
+        });
+        var group = section.querySelector(':scope > details.menu-group');
+        var overflow = items.slice(4);
+        overflow.forEach(function (el) { el.classList.add('onigiri-action-overflow'); });
+        var groupItems = group ? Array.prototype.slice.call(group.querySelectorAll('.menu-group-items > .menu-item')) : [];
+        var summary = group && group.querySelector('summary');
+        if (!summary) return;
+        summary.addEventListener('click', function (event) {
+            if (!root.classList.contains('onigiri-phone')) return;
+            event.preventDefault();
+            event.stopPropagation();
+            group.open = false;
+            showActionSheet(overflow.concat(groupItems), summary);
+        }, true);
+    }
+
+    // --- Home: readable profile name ---------------------------------------------------
+    // The name is drawn over the profile bar's colour; some themes paint
+    // both in near shades (Catppuccin: lavender on lavender).
+
+    function luminance(rgb) {
+        var c = rgb.map(function (v) {
+            v /= 255;
+            return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+        });
+        return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+    }
+
+    function rgbOf(text) {
+        var m = (text || '').match(/rgba?\(([^)]+)\)/);
+        if (!m) return null;
+        var p = m[1].split(/[\s,\/]+/).filter(Boolean).map(Number);
+        if (p.length > 3 && p[3] < 0.5) return null;
+        return p.slice(0, 3);
+    }
+
+    function fixProfileContrast() {
+        document.querySelectorAll('.profile-bar').forEach(function (bar) {
+            var name = bar.querySelector('.profile-name');
+            if (!name) return;
+            var bg = rgbOf(getComputedStyle(bar).backgroundColor);
+            var fg = rgbOf(getComputedStyle(name).color);
+            if (!bg || !fg) return;
+            var a = luminance(bg);
+            var b = luminance(fg);
+            var ratio = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+            if (ratio >= 3) return;
+            name.style.setProperty('color', a > 0.4 ? '#1c1c1e' : '#ffffff', 'important');
+        });
+    }
+
+    // --- Home: "Decks" as a large title -------------------------------------------------
+
+    function titleCaseHeader() {
+        var h = document.querySelector('#deck-list-header h2');
+        if (!h || h.dataset.onigiriTitle) return;
+        h.dataset.onigiriTitle = '1';
+        var text = h.textContent.trim();
+        if (/^[A-Z][A-Z ]+$/.test(text)) h.textContent = text.charAt(0) + text.slice(1).toLowerCase();
+    }
 
     // --- Phone tab bar (deck browser) --------------------------------------------
 
@@ -588,6 +858,12 @@
         addPhoneTabs();
         addSelectToggle();
         decorateDeckRows();
+        watchSheets();
+        if (root.classList.contains('onigiri-touch')) {
+            setupActionTiles();
+            titleCaseHeader();
+            fixProfileContrast();
+        }
         // Kome builds its sidebar after load: add the tabs once it appears.
         if (!document.getElementById('onigiri-phone-tabs') && typeof MutationObserver !== 'undefined' && document.body) {
             var tabsObserver = new MutationObserver(function () {
@@ -603,6 +879,7 @@
         if (container && typeof MutationObserver !== 'undefined') {
             new MutationObserver(function () {
                 decorateDeckRows();
+                updateEditToolbar();
             }).observe(container, { childList: true, subtree: true });
         }
     }
@@ -627,6 +904,8 @@
         },
         setSelectMode: setSelectMode,
         showTab: applyTab,
+        showActionSheet: showActionSheet,
+        closeMenus: closeMenus,
         refresh: function () { updateClasses(); decorateDeckRows(); addSelectToggle(); stripHover(); paintEdges(); },
         haptic: haptic,
         paintEdges: paintEdges,

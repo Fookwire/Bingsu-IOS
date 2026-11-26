@@ -13,7 +13,7 @@
     --onigiri-safe-bottom: var(--kioku-safe-bottom, 0px);
     --onigiri-safe-left: var(--kioku-safe-left, 0px);
     --onigiri-safe-right: var(--kioku-safe-right, 0px);
-    --onigiri-phone-tabs-h: 56px;
+    --onigiri-phone-tabs-h: 60px;
 }
 
 /* ------------------------------------------------------------------------- */
@@ -141,12 +141,29 @@ html.onigiri-touch tr.deck.onigiri-pressing {
     transition: background-color 0.4s ease;
 }
 
-/* Hover-only affordances become always visible on touch. */
-html.onigiri-touch tr.deck .drag-handle {
-    opacity: 0.45;
-    width: 28px;
-    min-width: 28px;
-    height: 32px;
+/* Reorder handles only in Edit mode (as in iOS lists): outside it a drag
+   on a row always scrolls. In Edit mode they sit at the row's end. */
+html.onigiri-touch #deck-list-container tr.deck .drag-handle {
+    display: none !important;
+}
+
+html.onigiri-touch.onigiri-select-mode #deck-list-container tr.deck .drag-handle {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    order: 50;
+    flex: 0 0 auto;
+    width: 40px;
+    min-width: 40px;
+    height: 44px;
+    margin: 0 -6px 0 4px;
+    opacity: 0.55;
+    visibility: visible;
+}
+
+html.onigiri-touch.onigiri-select-mode #deck-list-container tr.deck .drag-handle svg {
+    width: 16px;
+    height: 16px;
 }
 
 /* A tap leaves :hover on the element until the next tap elsewhere. */
@@ -192,32 +209,163 @@ html.onigiri-touch .onigiri-row-more-cell {
     outline: none !important;
 }
 
-html.onigiri-select-mode .onigiri-row-more-cell,
-html.onigiri-select-mode tr.deck .drag-handle {
-    visibility: hidden;
+html.onigiri-select-mode .onigiri-row-more-cell {
+    display: none !important;
+}
+
+/* Edit mode: a selection circle leads each row. */
+html.onigiri-touch.onigiri-select-mode #deck-list-container tr.deck td.decktd::before {
+    content: "";
+    flex: 0 0 auto;
+    width: 22px;
+    height: 22px;
+    margin-right: 10px;
+    box-sizing: border-box;
+    border-radius: 50%;
+    border: 2px solid var(--fg-subtle, rgba(127, 127, 127, 0.6));
+}
+
+html.onigiri-touch.onigiri-select-mode #deck-list-container tr.deck.is-multi-selected td.decktd::before {
+    border-color: var(--accent-color, #0a84ff);
+    background: var(--accent-color, #0a84ff) center / 14px 14px no-repeat
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4 4L19 7' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+html.onigiri-touch.onigiri-select-mode #deck-list-container tr.deck.is-multi-selected {
+    background-color: transparent !important;
+}
+
+/* The desktop "N selected" chip: the Edit toolbar shows the count. */
+html.onigiri-touch #onigiri-multiselect-badge {
+    display: none !important;
 }
 
 .onigiri-select-toggle {
     width: auto !important;
-    padding: 0 10px !important;
+    min-width: 44px;
+    padding: 0 8px !important;
     font: inherit;
-    font-size: 13px !important;
-    color: var(--fg-subtle, #888);
+    font-size: 16px !important;
+    color: var(--accent-color, var(--fg));
 }
 
 .onigiri-select-toggle[aria-pressed="true"] {
-    color: var(--accent-color, var(--fg));
     font-weight: 600;
+}
+
+/* Edit toolbar: replaces the tab bar while editing. */
+#onigiri-edit-toolbar {
+    display: none;
+}
+
+html.onigiri-touch.onigiri-select-mode #onigiri-edit-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    z-index: 9001;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    min-height: 52px;
+    padding: 4px calc(12px + var(--onigiri-safe-right)) calc(4px + var(--onigiri-safe-bottom)) calc(12px + var(--onigiri-safe-left));
+    box-sizing: border-box;
+    background: var(--onigiri-bar-bg, var(--canvas, #fff));
+    border-top: 0.5px solid var(--border, rgba(127, 127, 127, 0.3));
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
+}
+
+html #onigiri-edit-toolbar button {
+    -webkit-appearance: none;
+    appearance: none;
+    min-width: 64px;
+    min-height: 44px;
+    padding: 0 6px;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: var(--accent-color, #0a84ff) !important;
+    font: inherit;
+    font-size: 17px;
+}
+
+html #onigiri-edit-toolbar button[data-act="done"] {
+    font-weight: 600;
+    text-align: right;
+}
+
+html #onigiri-edit-toolbar button:disabled {
+    opacity: 0.35;
+}
+
+.onigiri-edit-count {
+    color: var(--fg-subtle, #888);
+    font-size: 13px;
+}
+
+html.onigiri-select-mode #onigiri-phone-tabs {
+    display: none !important;
 }
 
 /* Touch-sized deck rows and header buttons. */
 html.onigiri-touch #deck-list-container tr.deck {
-    min-height: 44px;
+    min-height: 48px;
 }
 
 html.onigiri-touch #deck-list-header .deck-header-btn {
-    min-width: 36px;
-    min-height: 36px;
+    min-width: 44px;
+    min-height: 44px;
+}
+
+/* Names end in "…" before the count pills; the desktop runs the name under
+   the first pill and fades it, which on a phone read as overlapping text. */
+html.onigiri-touch #deck-list-container {
+    --onigiri-name-overlap: 0px;
+}
+
+html.onigiri-touch #deck-list-container a.deck .deck-name {
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+html.onigiri-touch #deck-list-container tr.deck .deck-counts {
+    flex: 0 0 auto !important;
+    max-width: none !important;
+    margin-left: 8px !important;
+}
+
+html.onigiri-touch #deck-list-container tr.deck .deck-counts .zero {
+    display: none !important;
+}
+
+/* Collapse chevrons: a 44pt target around the 16px glyph. */
+html.onigiri-touch #deck-list-container tr.deck .collapse {
+    position: relative;
+}
+
+html.onigiri-touch #deck-list-container tr.deck a.collapse::after {
+    content: "";
+    position: absolute;
+    inset: -14px -10px;
+}
+
+/* "Decks" as an iOS large title over the list. */
+html.onigiri-phone #deck-list-header {
+    min-height: 52px;
+    align-items: center;
+}
+
+html.onigiri-phone #deck-list-header h2 {
+    font-size: 28px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.01em !important;
+    text-transform: none !important;
+    color: var(--fg) !important;
+    opacity: 1 !important;
 }
 
 /* ------------------------------------------------------------------------- */
@@ -243,40 +391,177 @@ html.onigiri-touch .onigiri-quick-menu .quick-menu-group.is-open > .quick-menu-a
     transform: rotate(90deg);
 }
 
+/* iOS sheet: flush with the bottom of the screen, rounded top, grab
+   handle, Cancel. mobile.js adds the backdrop, handle, Cancel and swipe. */
 .onigiri-quick-menu.is-sheet {
-    left: calc(8px + var(--onigiri-safe-left)) !important;
-    right: calc(8px + var(--onigiri-safe-right)) !important;
+    left: var(--onigiri-safe-left) !important;
+    right: var(--onigiri-safe-right) !important;
     top: auto !important;
-    bottom: calc(8px + var(--onigiri-safe-bottom)) !important;
+    bottom: 0 !important;
+    z-index: 100001 !important;
     min-width: 0;
-    max-height: 72vh;
-    max-height: 72dvh;
+    max-height: 82vh;
+    max-height: 82dvh;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    border-radius: 16px;
-    padding: 8px;
-    box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.28);
-    animation: onigiri-sheet-in 0.18s ease-out;
+    overscroll-behavior: contain;
+    box-sizing: border-box;
+    border-radius: 14px 14px 0 0 !important;
+    border-width: 0.5px 0 0 !important;
+    padding: 6px 10px calc(10px + var(--onigiri-safe-bottom)) !important;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3) !important;
+    animation: onigiri-sheet-in 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+    transition: transform 0.2s ease;
 }
 
-/* In a sheet, submenus open inline below their group. */
+.onigiri-quick-menu.is-sheet .onigiri-sheet-grabber {
+    width: 36px;
+    height: 5px;
+    margin: 2px auto 10px;
+    border-radius: 3px;
+    background: var(--fg-subtle, rgba(127, 127, 127, 0.5));
+    opacity: 0.5;
+}
+
+/* Grab handle area also starts the swipe. */
+.onigiri-quick-menu.is-sheet .onigiri-sheet-grabber::before {
+    content: "";
+    display: block;
+    height: 24px;
+    margin: -10px -60px 0;
+}
+
+html.onigiri-touch .onigiri-quick-menu.is-sheet .quick-menu-item {
+    min-height: 50px;
+    padding-left: 12px;
+    padding-right: 12px;
+    border-radius: 10px;
+    font-size: 17px;
+    gap: 14px;
+}
+
+html.onigiri-touch .onigiri-quick-menu.is-sheet .quick-menu-icon,
+html.onigiri-touch .onigiri-quick-menu.is-sheet .onigiri-action-icon-host .icon {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+}
+
+.onigiri-quick-menu.is-sheet hr {
+    margin: 6px 12px;
+    opacity: 0.6;
+}
+
+.onigiri-sheet-cancel {
+    display: none;
+}
+
+html .onigiri-quick-menu.is-sheet .onigiri-sheet-cancel {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0 12px;
+    min-height: 50px;
+    margin: 10px 0 0;
+    border: 0 !important;
+    border-radius: 12px;
+    background: var(--highlight-bg, rgba(127, 127, 127, 0.14)) !important;
+    box-shadow: none !important;
+    color: var(--accent-color, var(--fg)) !important;
+    font: inherit;
+    font-size: 17px;
+    font-weight: 600;
+}
+
+/* Group rows (Markers ›) push their items inside the sheet: the other rows
+   go and the group row becomes the back row ‹ Markers. */
+.onigiri-quick-menu.is-sheet:has(> .quick-menu-group.is-open) > :is(.quick-menu-item:not(.is-open), hr) {
+    display: none !important;
+}
+
 .onigiri-quick-menu.is-sheet .quick-menu-group {
     flex-wrap: wrap;
+}
+
+.onigiri-quick-menu.is-sheet .quick-menu-group.is-open {
+    justify-content: flex-start !important;
+    gap: 6px !important;
+    background: transparent !important;
+    font-weight: 600;
+}
+
+.onigiri-quick-menu.is-sheet .quick-menu-group.is-open > span:not(.quick-menu-arrow):not(.quick-menu-icon) {
+    flex: 0 1 auto !important;
+    margin: 0 !important;
+    order: 0;
+}
+
+.onigiri-quick-menu.is-sheet .quick-menu-group.is-open > .quick-menu-arrow {
+    order: -1;
+    margin: 0 !important;
+    transform: rotate(180deg) !important;
+    color: var(--accent-color, currentColor);
+}
+
+.onigiri-quick-menu.is-sheet .quick-menu-group.is-open > .quick-menu-icon {
+    display: none;
 }
 
 .onigiri-quick-menu.is-sheet .quick-menu-submenu {
     position: static !important;
     flex-basis: 100%;
-    margin: 6px 0 2px 18px;
-    box-shadow: none;
-    border: 0;
-    background: transparent;
-    animation: none;
+    margin: 8px -12px 0;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: 0 !important;
+    background: transparent !important;
+    animation: onigiri-push-in 0.22s ease-out;
+    font-weight: 400;
+}
+
+#onigiri-sheet-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+    background: rgba(0, 0, 0, 0.32);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s ease;
+}
+
+#onigiri-sheet-backdrop.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* The row whose menu is open stays lit under the backdrop, not above it. */
+html.onigiri-sheet-open tr.deck.ctx-row-active {
+    z-index: auto !important;
 }
 
 @keyframes onigiri-sheet-in {
-    from { transform: translateY(24px); opacity: 0; }
+    from { transform: translateY(100%); }
+    to { transform: none; }
+}
+
+@keyframes onigiri-push-in {
+    from { transform: translateX(24px); opacity: 0; }
     to { transform: none; opacity: 1; }
+}
+
+/* More actions sheet: icons drawn by their action-* class. */
+.onigiri-action-icon-host {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.onigiri-action-icon-host .icon {
+    display: block;
+    margin: 0 !important;
 }
 
 /* ------------------------------------------------------------------------- */
@@ -301,7 +586,7 @@ html.onigiri-phone .container.modern-main-menu.modern-main-menu {
     overflow-x: hidden !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
-    padding-bottom: calc(var(--onigiri-phone-tabs-h) + 16px);
+    padding-bottom: calc(var(--onigiri-phone-tabs-h) + var(--onigiri-safe-bottom) + 28px);
     box-sizing: border-box;
 }
 
@@ -368,12 +653,21 @@ html.onigiri-phone .modern-main-menu .onigiri-sidebar-profile-section .profile-b
     min-height: 0;
 }
 
-/* Actions as a 4-column grid of icon tiles instead of a tall list. */
+/* Actions: one row of five tiles (first four actions + More); the rest
+   open from More as a sheet (mobile.js setupActionTiles). */
 html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section:not(:empty) {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 6px;
     margin: 6px 0 10px;
+}
+
+html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > .onigiri-action-overflow {
+    display: none !important;
+}
+
+html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > details.menu-group > .menu-group-items {
+    display: none !important;
 }
 
 html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > .menu-item,
@@ -383,11 +677,12 @@ html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > details.
     align-items: center;
     gap: 5px;
     margin: 0;
-    padding: 9px 2px 7px;
-    min-height: 60px;
+    padding: 9px 2px 7px !important;
+    min-height: 62px;
     box-sizing: border-box;
     border-radius: 14px;
-    font-size: 11.5px;
+    font-size: 12px !important;
+    letter-spacing: -0.01em;
     line-height: 1.15;
     text-align: center;
     background: var(--highlight-bg, rgba(127, 127, 127, 0.08));
@@ -415,37 +710,6 @@ html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > details.
     display: none;
 }
 
-/* Open "More": the group spans the row, its tile stays first and the
-   extra actions follow as a list across the full width. */
-html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > details.menu-group[open] {
-    grid-column: 1 / -1;
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 6px;
-}
-
-html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > details.menu-group[open] > .menu-group-items {
-    grid-column: 1 / -1;
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 4px;
-    width: auto !important;
-    height: auto !important;
-    max-height: none !important;
-    opacity: 1 !important;
-    position: static !important;
-    transform: none !important;
-}
-
-html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > details.menu-group[open] > .menu-group-items > .menu-item > span {
-    display: inline !important;
-}
-
-html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > details.menu-group[open] > .menu-group-items > .menu-item {
-    margin: 0;
-    font-size: 14px;
-}
-
 /* Tabs: one pane at a time. */
 html.onigiri-phone.onigiri-has-phone-tabs.onigiri-phone-tab-decks .container.modern-main-menu .main-content.main-content {
     display: none !important;
@@ -459,23 +723,26 @@ html.onigiri-phone.onigiri-has-phone-tabs.onigiri-phone-tab-home .container.mode
     display: none;
 }
 
+/* Tab bar: a floating bar (iOS 26) just above the home indicator, with
+   full-size icons. Content scrolls behind it (the lists are padded so the
+   last row clears it). */
 html.onigiri-phone #onigiri-phone-tabs {
     display: flex;
     position: fixed;
     z-index: 9000;
-    left: calc(12px + var(--onigiri-safe-left));
-    right: calc(12px + var(--onigiri-safe-right));
-    bottom: calc(8px + var(--onigiri-safe-bottom));
+    left: calc(14px + var(--onigiri-safe-left));
+    right: calc(14px + var(--onigiri-safe-right));
+    bottom: calc(6px + var(--onigiri-safe-bottom));
     height: var(--onigiri-phone-tabs-h);
     padding: 4px;
-    gap: 4px;
+    gap: 2px;
     box-sizing: border-box;
-    border-radius: 18px;
-    background: var(--onigiri-quick-menu-bg, var(--canvas-overlay, var(--canvas, #fff)));
-    border: 1px solid var(--border, rgba(127, 127, 127, 0.25));
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.16);
-    -webkit-backdrop-filter: blur(16px);
-    backdrop-filter: blur(16px);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--onigiri-quick-menu-bg, var(--canvas, #fff)) 82%, transparent);
+    border: 0.5px solid var(--border, rgba(127, 127, 127, 0.25));
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
 }
 
 #onigiri-phone-tabs button {
@@ -484,21 +751,27 @@ html.onigiri-phone #onigiri-phone-tabs {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2px;
+    gap: 1px;
+    min-height: 44px;
     border: 0;
-    border-radius: 14px;
+    border-radius: 999px;
     background: transparent;
     color: var(--fg-subtle, #888);
     font: inherit;
-    font-size: 11px;
-    font-weight: 500;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
     cursor: pointer;
+}
+
+#onigiri-phone-tabs button svg {
+    width: 24px;
+    height: 24px;
 }
 
 /* Themes style bare <button>s (Anki's .fancy gradient, Kome's accent):
    the tabs keep their own look everywhere. */
 html #onigiri-phone-tabs button,
-html #onigiri-phone-tabs button:hover,
 html #onigiri-phone-tabs button:focus {
     -webkit-appearance: none;
     appearance: none;
@@ -510,8 +783,8 @@ html #onigiri-phone-tabs button:focus {
 }
 
 html #onigiri-phone-tabs button[aria-selected="true"] {
-    color: var(--fg, var(--rf-ink, #111)) !important;
-    background: rgba(127, 127, 127, 0.14) !important;
+    color: var(--accent-color, var(--fg, #111)) !important;
+    background: rgba(127, 127, 127, 0.16) !important;
 }
 
 /* The widget grid reflows itself to the available width
