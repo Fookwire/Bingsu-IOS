@@ -218,21 +218,25 @@ html.onigiri-touch .onigiri-quick-menu .quick-menu-group.is-open > .quick-menu-a
 /* Home screen: phone layout                                                  */
 /* ------------------------------------------------------------------------- */
 
-html.onigiri-phone body:has(.modern-main-menu) {
-    height: 100vh;
-    height: 100dvh;
+/* Kioku pads <html> by the bottom safe area (home indicator) and the side
+   ones in landscape. Onigiri's home is 100vh tall, so its bottom ran under
+   the home indicator and the screen's rounded corners: subtract the pad. */
+html.onigiri-touch body:has(.modern-main-menu),
+html.onigiri-touch body:has(.modern-main-menu) .container.modern-main-menu {
+    height: calc(100vh - var(--onigiri-safe-bottom));
+    height: calc(100dvh - var(--onigiri-safe-bottom));
 }
 
 html.onigiri-phone .container.modern-main-menu.modern-main-menu {
     flex-direction: column !important;
     justify-content: flex-start !important;
     align-items: stretch !important;
-    height: 100vh;
-    height: 100dvh;
+    height: calc(100vh - var(--onigiri-safe-bottom));
+    height: calc(100dvh - var(--onigiri-safe-bottom));
     overflow-x: hidden !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
-    padding-bottom: calc(var(--onigiri-phone-tabs-h) + var(--onigiri-safe-bottom) + 8px);
+    padding-bottom: calc(var(--onigiri-phone-tabs-h) + 16px);
     box-sizing: border-box;
 }
 

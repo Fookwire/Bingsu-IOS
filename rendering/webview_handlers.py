@@ -515,6 +515,28 @@ def _build_create_deck_payload() -> dict:
 
     return {"destinations": destinations}
 
+def show_app_menu() -> None:
+    """Anki's menus (File, Edit, View, Tools, Help, Onigiri) as one popup.
+
+    On iPhone/iPad the desktop menu row is hidden (Bingsu) or cramped
+    (Kioku); the phone tab bar's Menu button opens this instead, at the tap
+    (Kioku moves QCursor to where a page was tapped).
+    """
+    from aqt.qt import QCursor, QMenu
+
+    menubar = getattr(getattr(mw, "form", None), "menubar", None) or mw.menuBar()
+    if menubar is None:
+        return
+    menu = QMenu(mw)
+    for action in menubar.actions():
+        sub = action.menu()
+        if sub is not None:
+            menu.addMenu(sub)
+        elif not action.isSeparator() and action.isVisible():
+            menu.addAction(action)
+    menu.exec(QCursor.pos())
+
+
 def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bool, Any]:
     """
     Centralized handler for webview commands from the deck browser.
@@ -525,6 +547,10 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
     parent = getattr(context, "parent", None)
     if parent and callable(parent) and type(parent()).__name__ == "OnigimonWebDialog":
         return handled
+
+    if cmd == "onigiri_app_menu":
+        show_app_menu()
+        return (True, None)
 
     if cmd.startswith("onigiri_more_menu:"):
         from . import reviewer_more_menu

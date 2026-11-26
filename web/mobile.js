@@ -265,6 +265,8 @@
     var DECKS_SVG = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="7" width="16" height="13" rx="2.5"/><path d="M7 4h10"/></svg>';
     var HOME_SVG = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1.8"/><rect x="13" y="4" width="7" height="7" rx="1.8"/><rect x="4" y="13" width="7" height="7" rx="1.8"/><rect x="13" y="13" width="7" height="7" rx="1.8"/></svg>';
 
+    var MENU_SVG = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14"/></svg>';
+
     function addPhoneTabs() {
         // Classic/Shima home (.modern-main-menu) or the Kome theme (.ba-side).
         var container = document.querySelector('.container.modern-main-menu, .ba-side');
@@ -275,13 +277,23 @@
         [
             ['decks', DECKS_SVG, t('decks', 'Decks')],
             ['home', HOME_SVG, t('home', 'Home')],
+            ['menu', MENU_SVG, t('menu', 'Menu')],
         ].forEach(function (spec) {
             var b = document.createElement('button');
             b.type = 'button';
             b.dataset.tab = spec[0];
             b.setAttribute('role', 'tab');
             b.innerHTML = spec[1] + '<span>' + spec[2] + '</span>';
-            b.addEventListener('click', function () { applyTab(spec[0]); });
+            if (spec[0] === 'menu') {
+                // Not a tab: Anki's menus (File, Tools, Help, ...) as a
+                // popup, since the desktop menu row is hidden on phones.
+                b.removeAttribute('role');
+                b.addEventListener('click', function () {
+                    if (typeof pycmd === 'function') pycmd('onigiri_app_menu');
+                });
+            } else {
+                b.addEventListener('click', function () { applyTab(spec[0]); });
+            }
             bar.appendChild(b);
         });
         document.body.appendChild(bar);
@@ -322,8 +334,33 @@
         }
     }
 
+    // --- App feel: no pinch-zoom on Onigiri's own screens ----------------------
+    // A pinch or a drag moved the whole home screen around like a web page.
+    // Reviewer cards (#qa) keep pinch-zoom (images, small print). Kioku keeps
+    // the page's own viewport in data-kioku-viewport and scales it by its
+    // "User interface size" (kioku/webscripts.py ZOOM_JS), so the limits are
+    // set there and in the live tag, scaled by the current zoom.
+    var NO_ZOOM = 'width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no';
+
+    function lockZoom() {
+        if (!root.classList.contains('onigiri-mobile')) return;
+        if (document.getElementById('qa')) return;
+        var meta = document.querySelector('meta[name="viewport"]');
+        if (!meta) {
+            if (!document.head) return;
+            meta = document.createElement('meta');
+            meta.name = 'viewport';
+            document.head.appendChild(meta);
+        }
+        if (meta.hasAttribute('data-kioku-viewport')) meta.setAttribute('data-kioku-viewport', NO_ZOOM);
+        var z = Number(window.__kiokuZoom) || 1;
+        meta.content = z === 1 ? NO_ZOOM
+            : 'initial-scale=' + z + ', minimum-scale=' + z + ', maximum-scale=' + z + ', user-scalable=no';
+    }
+
     function onReady() {
         updateClasses();
+        lockZoom();
         setupSettingsDrillDown();
         addPhoneTabs();
         addSelectToggle();
