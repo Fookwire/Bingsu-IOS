@@ -587,6 +587,7 @@ body {
     padding: 4px 10px;
     border-radius: 999px;
     background: var(--rl-chip-bg, rgba(255, 255, 255, 0.16));
+    -webkit-backdrop-filter: blur(4px);
     backdrop-filter: blur(4px);
     color: var(--rl-chip-text, inherit);
     font-size: 12px;
@@ -1769,6 +1770,7 @@ body.onigiri-is-dragging * {
     color: var(--onigiri-drag-fg, var(--fg));
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.32);
     overflow: hidden;
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
 }
 

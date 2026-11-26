@@ -37,6 +37,7 @@
     grid-template-columns: auto 1fr;
     gap: 12px;
     align-items: center;
+    -webkit-backdrop-filter: blur(18px);
     backdrop-filter: blur(18px);
     border-radius: 16px;
     padding: 14px 16px;
@@ -180,6 +181,7 @@ html.night-mode .onigiri-notification-card[data-variant="mochi"] .onigiri-notifi
     justify-content: center;
     gap: 8px;
     border-radius: var(--onigiri-box-effect-radius, 8px);
+    -webkit-backdrop-filter: blur(18px);
     backdrop-filter: blur(18px);
     background: var(--onigiri-notification-bg-light);
     color: var(--onigiri-notification-text-light);

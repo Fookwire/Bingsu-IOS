@@ -2699,6 +2699,7 @@ html body .osw-profile-preview-toggle-btn:active {
   padding: 4px 10px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.16);
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
   color: inherit;
   font-size: 12px;
