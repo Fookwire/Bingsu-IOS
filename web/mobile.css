@@ -2010,3 +2010,25 @@ html.onigiri-touch .heatmap-day-cell.is-tip-open::after {
         animation: none !important;
     }
 }
+
+/* The screen being left: moves off before the next one slides in. */
+html.onigiri-leave-forward body {
+    transform: translateX(-18%);
+    opacity: 0.35;
+    transition: transform 0.26s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.26s ease;
+}
+
+html.onigiri-leave-back body {
+    transform: translateX(18%);
+    opacity: 0.35;
+    transition: transform 0.26s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.26s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html.onigiri-leave-forward body,
+    html.onigiri-leave-back body {
+        transform: none;
+        opacity: 1;
+        transition: none;
+    }
+}

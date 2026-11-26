@@ -1393,6 +1393,8 @@ gui_hooks.profile_did_open.append(_hashi_notes_purge)
 gui_hooks.webview_will_set_content.append(inject_menu_files)
 
 
+_SCREEN_STATE: dict = {}
+
 _ONIGIRI_PAGE_CONTEXTS = {
     "DeckBrowser", "Overview", "Reviewer", "ReviewerBottomBar", "BottomBar",
     "DeckBrowserBottomBar", "OverviewBottomBar", "TopToolbar", "Toolbar",
@@ -1424,6 +1426,14 @@ def inject_mobile_assets(web_content, context):
         screen = {"DeckBrowser": "decks", "Overview": "overview", "Reviewer": "review"}.get(type(context).__name__)
         if screen:
             classes += f" onigiri-screen-{screen}"
+            # Python knows the screen before this one (the page can't count
+            # on storage surviving a page load in Kioku): deeper slides in
+            # from the right, back from the left.
+            order = {"decks": 0, "overview": 1, "review": 2}
+            previous = _SCREEN_STATE.get("last")
+            _SCREEN_STATE["last"] = screen
+            if previous and previous != screen:
+                classes += " onigiri-enter-forward" if order[screen] > order[previous] else " onigiri-enter-back"
     boot = ""
     if classes:
         boot = (
