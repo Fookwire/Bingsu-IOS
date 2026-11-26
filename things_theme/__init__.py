@@ -3302,6 +3302,16 @@ def _embed_enabled(key: str) -> bool:
     """Inline windows (Add / Browse / Stats / Settings) live to the right
     of the sidebar rail, so they only make sense while the sidebar is on;
     each also has its own Settings toggle."""
+    # iOS (Kioku): web views are native views drawn above every Qt widget,
+    # so an embed laid over mw.web would be hidden behind it. Anki's own
+    # windows are full-screen there with a Close bar.
+    try:
+        from ..core.platform import IS_MOBILE
+
+        if IS_MOBILE:
+            return False
+    except Exception:
+        pass
     cfg = _config()
     if not cfg.get("sidebar_nav", True):
         return False

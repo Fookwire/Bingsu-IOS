@@ -288,8 +288,42 @@
         applyTab(readTab());
     }
 
+    // --- Onigiri Settings on phones: list -> page drill-down --------------------
+
+    var BACK_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>';
+
+    function setupSettingsDrillDown() {
+        var shell = document.querySelector('.osw-shell');
+        if (!shell || shell.dataset.onigiriDrill) return;
+        shell.dataset.onigiriDrill = '1';
+        var row = document.querySelector('.osw-page-head-row');
+        if (row && !row.querySelector('.onigiri-settings-back')) {
+            var back = document.createElement('button');
+            back.type = 'button';
+            back.className = 'onigiri-settings-back';
+            back.innerHTML = BACK_SVG + '<span>' + t('settings_title', 'Settings') + '</span>';
+            back.addEventListener('click', function () {
+                root.classList.remove('onigiri-settings-page');
+            });
+            row.insertBefore(back, row.firstChild);
+        }
+        // Opening a page (nav item or search result) shows it full width.
+        shell.addEventListener('click', function (event) {
+            if (event.target.closest('[data-nav-item], .osw-search-results [data-page], .osw-search-result')) {
+                root.classList.add('onigiri-settings-page');
+            }
+        });
+        var search = shell.querySelector('.osw-search input');
+        if (search) {
+            search.addEventListener('input', function () {
+                if (search.value.trim()) root.classList.add('onigiri-settings-page');
+            });
+        }
+    }
+
     function onReady() {
         updateClasses();
+        setupSettingsDrillDown();
         addPhoneTabs();
         addSelectToggle();
         decorateDeckRows();

@@ -86,3 +86,27 @@ def body_classes() -> str:
     if IS_IOS:
         classes.append("onigiri-ios")
     return " ".join(classes)
+
+
+def make_managed_window(widget) -> bool:
+    """Turn a floating Tool/frameless/translucent window into a plain dialog
+    on mobile. Returns True when it did.
+
+    Kioku fills the screen with every top-level Window/Dialog and gives it a
+    title bar with a Close button (kioku/windows.py). It leaves Tool windows
+    alone, so those would open at their desktop size with no way to close
+    them. Size floors and caps are cleared so the window can fill the screen.
+    """
+    if not IS_MOBILE:
+        return False
+    try:
+        from aqt.qt import Qt
+
+        widget.setWindowFlags(Qt.WindowType.Dialog)
+        widget.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, False)
+        widget.setMinimumSize(0, 0)
+        widget.setMaximumSize(16777215, 16777215)
+        return True
+    except Exception as exc:
+        print(f"Onigiri: could not adapt window for mobile: {exc}")
+        return False

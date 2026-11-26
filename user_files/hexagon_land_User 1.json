@@ -1,0 +1,89 @@
+{
+  "hex_coins": 75,
+  "pending_hex_coins": 0,
+  "hex_coin_fraction": 0.0,
+  "materials": {
+    "wood": 8,
+    "stone": 3,
+    "sand": 2,
+    "crystal": 0
+  },
+  "pending_materials": {},
+  "tiles": {
+    "0,0": {
+      "terrain": "grass",
+      "building": "cottage",
+      "height": 1,
+      "parts": [],
+      "spots": {
+        "top_left": {
+          "category": "decor",
+          "item": "flower_yellow"
+        }
+      }
+    },
+    "1,0": {
+      "terrain": "grass",
+      "height": 1,
+      "parts": [],
+      "spots": {
+        "center": {
+          "category": "decor",
+          "item": "tree_green"
+        }
+      }
+    },
+    "-1,0": {
+      "terrain": "grass",
+      "height": 1,
+      "parts": [],
+      "spots": {
+        "center": {
+          "category": "decor",
+          "item": "pine_green"
+        }
+      }
+    },
+    "0,1": {
+      "terrain": "sand",
+      "height": 1,
+      "parts": [],
+      "spots": {}
+    },
+    "0,-1": {
+      "terrain": "grass",
+      "height": 1,
+      "parts": [],
+      "spots": {
+        "top_left": {
+          "category": "decor",
+          "item": "flower_blue"
+        }
+      }
+    },
+    "1,-1": {
+      "terrain": "stone",
+      "height": 1,
+      "parts": [],
+      "spots": {}
+    },
+    "-1,1": {
+      "terrain": "water",
+      "height": 1,
+      "parts": [],
+      "spots": {}
+    }
+  },
+  "island_name": "Hexagon Land",
+  "keys_of_the_island": false,
+  "lifetime_reviews": 0,
+  "today_reviews": 0,
+  "current_streak": 0,
+  "last_study_day": "",
+  "last_message": "",
+  "created_at": "2026-11-26T02:01:27.348318",
+  "updated_at": "2026-11-26T02:01:27.348332",
+  "widget_offset_x": 0.0,
+  "widget_offset_y": 0.0,
+  "widget_scale": 0.0
+}

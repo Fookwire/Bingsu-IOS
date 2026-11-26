@@ -907,6 +907,9 @@ class HashiNotePopup(QDialog, _HashiNoteEditorMixin):
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
         self.resize(510, 660)
         self.setMinimumSize(390, 500)
+        from ..core.platform import make_managed_window
+
+        make_managed_window(self)
 
         outer = QVBoxLayout(self)
         outer.setContentsMargins(0, 0, 0, 0)

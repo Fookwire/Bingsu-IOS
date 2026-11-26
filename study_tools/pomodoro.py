@@ -1159,6 +1159,9 @@ class PomodoroWidget(QDialog):
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
         self.setFixedSize(*get_preset(self.timer.settings)["window"])
+        from ..core.platform import make_managed_window
+
+        make_managed_window(self)
 
         outer = QVBoxLayout(self)
         outer.setContentsMargins(8, 8, 8, 8)
@@ -1190,6 +1193,11 @@ class PomodoroWidget(QDialog):
         self.timer.apply_settings(get_settings())
         self.pal = _palette(self.dark, self.timer.settings)
         self.setFixedSize(*get_preset(self.timer.settings)["window"])
+        from ..core.platform import IS_MOBILE
+
+        if IS_MOBILE:
+            self.setMinimumSize(0, 0)
+            self.setMaximumSize(16777215, 16777215)
         self.shell.apply_settings(self.timer.settings, self.dark)
         self.topbar = self.shell.topbar
         self._refresh_full()
@@ -1203,6 +1211,11 @@ class PomodoroWidget(QDialog):
         transparency, not hide()/show(), so an active drag's mouse grab
         isn't dropped) for the instant of the capture so it doesn't capture
         itself."""
+        from ..core.platform import IS_MOBILE
+
+        if IS_MOBILE:
+            # No screen capture on iOS (and the window is full screen).
+            return None, None
         screen = self.screen() or QApplication.primaryScreen()
         if screen is None:
             return None, None

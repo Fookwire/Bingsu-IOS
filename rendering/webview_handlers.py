@@ -358,6 +358,11 @@ def _run_deck_icon_color_picker(context, current: str):
     webview's native surface would otherwise paint over a picker parented to
     it directly."""
     from ..ui_kit.onigiri_color_picker import OnigiriColorDialog
+    from ..core.platform import IS_MOBILE
+
+    if IS_MOBILE:
+        # Full-screen dialog on iOS; no floating host window needed.
+        return OnigiriColorDialog.getColor(current, mw)
 
     host = QWidget(None)
     host.setWindowFlags(

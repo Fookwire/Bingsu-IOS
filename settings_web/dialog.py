@@ -78,7 +78,14 @@ _dialog = None
 class SettingsWebDialog(QDialog):
     def __init__(self, parent=None, addon_path=None, initial_page=None):
         # Keep Settings above Anki while autosave redraws the main window.
-        super().__init__(parent or mw, Qt.WindowType.Tool)
+        from ..core.platform import IS_MOBILE
+
+        # iOS (Kioku) only manages Window/Dialog types: a Tool window would
+        # open at desktop size with no Close button.
+        super().__init__(
+            parent or mw,
+            Qt.WindowType.Dialog if IS_MOBILE else Qt.WindowType.Tool,
+        )
         self.addon_path = addon_path or render.ADDON_ROOT
         self.store = Store()
         self.store.register(
@@ -161,6 +168,12 @@ class SettingsWebDialog(QDialog):
     # ─── window ────────────────────────────────────────────────────────────────
 
     def _apply_proportional_size(self):
+        from ..core.platform import IS_MOBILE
+
+        if IS_MOBILE:
+            # Kioku sizes it to the screen; desktop floors (1080px) would
+            # only get in the way.
+            return
         screen = (self.screen() if hasattr(self, "screen") else None) or (mw.app.primaryScreen() if mw and mw.app else None)
         if screen is None:
             self.setMinimumSize(1080, 480)
@@ -875,6 +888,12 @@ class SettingsWebDialog(QDialog):
         Giving it its own top-level host puts it above. (Same trick as the Hashi
         Notes editor — see hashi_notes._HashiNoteEditorMixin._open_color_dialog.)
         """
+        from ..core.platform import IS_MOBILE
+
+        if IS_MOBILE:
+            # The picker is its own full-screen dialog on iOS; an invisible
+            # always-on-top host would only swallow taps.
+            return self
         host = QWidget(None)
         host.setWindowFlags(
             Qt.WindowType.Tool
@@ -889,6 +908,8 @@ class SettingsWebDialog(QDialog):
         return host
 
     def _release_picker_host(self, host):
+        if host is self:
+            return
         try:
             host.close()
             host.deleteLater()

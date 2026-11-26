@@ -626,3 +626,73 @@ html.onigiri-phone #outer button.onigiri-more-btn::before {
     font-size: 22px;
     line-height: 1;
 }
+
+/* ------------------------------------------------------------------------- */
+/* Onigiri Settings: phone drill-down (rail list -> full-width page)          */
+/* ------------------------------------------------------------------------- */
+
+html.onigiri-phone .osw-shell {
+    --osw-shell-pad: 8px;
+    --osw-gutter: 16px;
+}
+
+html.onigiri-phone .osw-shell .osw-rail,
+html.onigiri-phone .osw-shell.is-collapsed .osw-rail {
+    flex: 1 1 auto;
+    width: auto;
+}
+
+html.onigiri-phone .osw-shell.is-collapsed .osw-search { display: flex; }
+html.onigiri-phone .osw-shell.is-collapsed .osw-rail-action-label { display: inline; }
+html.onigiri-phone .osw-shell .osw-rail-toggle { display: none; }
+
+html.onigiri-phone:not(.onigiri-settings-page) .osw-shell .osw-main {
+    display: none;
+}
+
+html.onigiri-phone.onigiri-settings-page .osw-shell .osw-rail {
+    display: none;
+}
+
+html.onigiri-phone .osw-shell .osw-nav-item {
+    min-height: 44px;
+}
+
+.onigiri-settings-back {
+    display: none;
+}
+
+html.onigiri-phone .onigiri-settings-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    flex: 0 0 auto;
+    height: 36px;
+    margin: 0 6px 0 -8px;
+    padding: 0 10px 0 4px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--osw-accent, currentColor);
+    font: inherit;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+html.onigiri-phone .onigiri-settings-back svg {
+    width: 20px;
+    height: 20px;
+}
+
+html.onigiri-phone .osw-page-head {
+    padding-top: 14px;
+}
+
+html.onigiri-phone .osw-page-head-row {
+    flex-wrap: wrap;
+    row-gap: 8px;
+}
+
+html.onigiri-phone .osw-page-head h1 {
+    font-size: 21px;
+}
