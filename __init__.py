@@ -1421,6 +1421,9 @@ def inject_mobile_assets(web_content, context):
         # Onigiri's own screens get the app treatment (no text selection,
         # no sticky hover, edge colours); other add-ons' pages don't.
         classes += " onigiri-app"
+        screen = {"DeckBrowser": "decks", "Overview": "overview", "Reviewer": "review"}.get(type(context).__name__)
+        if screen:
+            classes += f" onigiri-screen-{screen}"
     boot = ""
     if classes:
         boot = (

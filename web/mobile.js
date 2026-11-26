@@ -53,6 +53,25 @@
 
     updateClasses();
     window.addEventListener('resize', updateClasses, { passive: true });
+
+    // --- Screen transitions --------------------------------------------------------
+    // Decks -> overview -> study is a page load each time. The new page
+    // slides in from the right going deeper and from the left coming back,
+    // like iOS navigation. <html> carries onigiri-screen-* (set by
+    // __init__.inject_mobile_assets before this runs), so the class is on
+    // before the body is drawn: no flash of the unanimated page.
+    (function screenTransition() {
+        var m = root.className.match(/onigiri-screen-(decks|overview|review)/);
+        if (!m || !root.classList.contains('onigiri-mobile')) return;
+        var order = { decks: 0, overview: 1, review: 2 };
+        var key = 'onigiriScreen';
+        var previous = null;
+        try { previous = sessionStorage.getItem(key); sessionStorage.setItem(key, m[1]); } catch (e) {}
+        if (!previous || previous === m[1] || !(previous in order)) return;
+        var cls = order[m[1]] > order[previous] ? 'onigiri-enter-forward' : 'onigiri-enter-back';
+        root.classList.add(cls);
+        setTimeout(function () { root.classList.remove(cls); }, 520);
+    })();
     window.addEventListener('orientationchange', function () { setTimeout(updateClasses, 50); });
 
     // --- Long-press -> contextmenu ------------------------------------------------
@@ -891,7 +910,6 @@
                 var cmd = el.getAttribute('onclick') || '';
                 return cmd.indexOf("pycmd('decks')") < 0;
             });
-            items.push({ label: t('menu', 'Menu'), icon: null, run: function () { pycmd('onigiri_app_menu'); } });
             showActionSheet(items, more);
         });
         nav.appendChild(back);
