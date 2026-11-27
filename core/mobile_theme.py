@@ -178,6 +178,86 @@ def refresh():
     paint_initial_edges()
 
 
+# ── Anki's own web pages (audit 2, R2-15) ──────────────────────────────────────
+# Deck Options, Statistics and the note editor draw their own neutral greys and
+# Anki's blue inside the themed window. They are built from a set of CSS
+# variables on :root, so the theme's values for those same variables make them
+# follow the app theme without touching their code.
+
+ANKI_PAGE_KINDS = ("DECK_OPTIONS", "DECK_STATS", "LEGACY_DECK_STATS", "EDITOR", "CHANGE_NOTETYPE", "BROWSER_CARD_INFO")
+
+
+def anki_page_css(dark=None, palette=None):
+    """Anki's page variables (the names its stylesheets use on :root) set to the
+    theme tokens. Pure: tokens in, a CSS string out."""
+    t = tokens(dark, palette)
+    from ..rendering.theme_palette import rgb
+
+    def rgba(hex_color, alpha):
+        r, g, b = rgb(hex_color)
+        return f"rgba({r}, {g}, {b}, {alpha})"
+
+    values = {
+        "--fg": t["text"],
+        "--fg-subtle": t["secondary"],
+        "--fg-disabled": t["faint"],
+        "--fg-faint": t["faint"],
+        "--fg-link": t["accent"],
+        "--canvas": t["background"],
+        "--canvas-elevated": t["surface"],
+        "--canvas-inset": t["inset"],
+        "--canvas-overlay": t["raised"],
+        "--border": t["separator"],
+        "--border-subtle": t["separator_soft"],
+        "--border-strong": t["faint"],
+        "--border-focus": t["accent"],
+        "--button-bg": t["inset"],
+        "--button-gradient-start": t["inset_hover"],
+        "--button-gradient-end": t["inset"],
+        "--button-hover-border": t["faint"],
+        "--button-primary-bg": t["accent"],
+        "--button-primary-gradient-start": t["accent"],
+        "--button-primary-gradient-end": t["accent"],
+        "--selected-bg": rgba(t["accent"], 0.22),
+        "--highlight-bg": rgba(t["accent"], 0.4),
+        "--accent-danger": t["destructive"],
+    }
+    body = "".join(f"{name}: {value};" for name, value in values.items())
+    # both selectors: Anki sets its night-mode values on :root.night-mode
+    return f":root, :root.night-mode {{ {body} }}"
+
+
+def anki_page_style_tag(context):
+    """A <style> for pages Anki builds with set_content (the note editor) that
+    the injection hook above does not reach. Empty off a phone or for other pages."""
+    if not active() or type(context).__name__ not in ("Editor",):
+        return ""
+    try:
+        return '<style id="onigiri-anki-theme">' + anki_page_css() + "</style>"
+    except Exception:
+        return ""
+
+
+def inject_anki_page_theme(webview):
+    """webview_did_inject_style_into_page: theme Anki's own pages on phones."""
+    if not active():
+        return
+    try:
+        kind = getattr(getattr(webview, "kind", None), "name", None)
+        if kind not in ANKI_PAGE_KINDS:
+            return
+        import json
+
+        js = (
+            "(function(){var s=document.getElementById('onigiri-anki-theme');"
+            "if(!s){s=document.createElement('style');s.id='onigiri-anki-theme';document.head.appendChild(s);}"
+            "s.textContent=%s;})();" % json.dumps(anki_page_css())
+        )
+        webview.eval(js)
+    except Exception as exc:
+        print(f"Onigiri iOS: Anki page theme failed: {exc}")
+
+
 # ── Toasts (audit INT-02) ─────────────────────────────────────────────────────
 # Anki's tooltip is a desktop label at the bottom-left of the active window:
 # on a phone it sat over the tab bar and caught the taps meant for it. Kioku
@@ -274,6 +354,10 @@ def install():
 
     gui_hooks.profile_did_open.append(later)
     gui_hooks.theme_did_change.append(later)
+    try:
+        gui_hooks.webview_did_inject_style_into_page.append(inject_anki_page_theme)
+    except Exception:
+        pass
     install_toast()
     try:
         gui_hooks.editor_did_init.append(_one_dismiss_for_editor)

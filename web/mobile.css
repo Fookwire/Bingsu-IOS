@@ -2956,3 +2956,19 @@ html.onigiri-phone body .osw-organize-tile-remove.is-confirming {
     border-radius: 14px !important;
 }
 
+
+/* Add-on widgets revealed on the overview (a third-party heatmap, streaks...)
+   were laid out for a wide page and ran past the right edge ("Current streak"
+   clipped, "175 days" broken). Keep them inside the screen: wide content
+   scrolls sideways within its own box and never widens the page (audit 2,
+   R2-20). Their colours are theirs. */
+html.onigiri-phone .overview-center-container .onigiri-external-overview-addon {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+}

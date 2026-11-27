@@ -95,5 +95,55 @@ class ShowAnswerAccentTests(unittest.TestCase):
         self.assertFalse(self.mt.show_answer_uses_accent(conf, "light"))
 
 
+class AnkiPageThemeTests(unittest.TestCase):
+    """Audit 2, R2-15: Anki's own pages follow the app theme through their CSS variables."""
+
+    def setUp(self):
+        self.mods = load()
+        self.mt = self.mods["mobile_theme"]
+
+    def _palette(self):
+        return {"--bg": "#2b2020", "--fg": "#e8d9c8", "--accent-color": "#5aa9a0", "--fg-subtle": "#a89c90"}
+
+    def test_css_sets_the_variables_anki_pages_read(self):
+        css = self.mt.anki_page_css(True, self._palette())
+        for name in ("--canvas:", "--canvas-elevated:", "--fg:", "--border:", "--button-primary-bg:"):
+            self.assertIn(name, css)
+        self.assertIn("#2b2020", css.lower())   # background
+        self.assertIn("#5aa9a0", css.lower())   # accent on primary buttons
+        self.assertTrue(css.startswith(":root, :root.night-mode {"))
+
+    def test_hook_does_nothing_off_a_phone(self):
+        class View:
+            kind = types.SimpleNamespace(name="DECK_OPTIONS")
+
+            def eval(self, _js):
+                raise AssertionError("must not run off a phone")
+
+        with patch.object(self.mt.onigiri_platform, "IS_MOBILE", False):
+            self.mt.inject_anki_page_theme(View())
+
+    def test_hook_themes_only_the_listed_pages(self):
+        calls = []
+
+        class View:
+            def __init__(self, kind):
+                self.kind = types.SimpleNamespace(name=kind)
+
+            def eval(self, js):
+                calls.append(js)
+
+        real_tokens = self.mt.tokens
+        palette = self._palette()
+        with patch.object(self.mt.onigiri_platform, "IS_MOBILE", True), patch.object(
+            self.mt, "tokens", lambda dark=None, palette_=None: real_tokens(True, palette)
+        ):
+            self.mt.inject_anki_page_theme(View("MAIN"))
+            self.assertEqual(calls, [])
+            self.mt.inject_anki_page_theme(View("DECK_OPTIONS"))
+            self.assertEqual(len(calls), 1)
+            self.assertIn("onigiri-anki-theme", calls[0])
+
+
 if __name__ == "__main__":
     unittest.main()

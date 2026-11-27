@@ -1432,6 +1432,16 @@ def _is_onigiri_page(context) -> bool:
     return cls.__name__ in _ONIGIRI_PAGE_CONTEXTS or cls.__module__.startswith(__name__)
 
 
+def _anki_page_style(context):
+    """The app theme's colours for Anki's own note editor page on phones."""
+    try:
+        from .core import mobile_theme
+
+        return mobile_theme.anki_page_style_tag(context)
+    except Exception:
+        return ""
+
+
 def inject_mobile_assets(web_content, context):
     """Touch/phone support on every page (iPhone/iPad via Kioku).
 
@@ -1471,6 +1481,7 @@ def inject_mobile_assets(web_content, context):
         + f'<script src="{versioned_web_asset("mobile.js")}"></script>'
         + web_content.head
         + stylesheet_link("mobile.css")
+        + _anki_page_style(context)
     )
 
 
