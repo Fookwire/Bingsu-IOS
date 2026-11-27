@@ -1,0 +1,31 @@
+name: Release
+
+# Manual: creates a GitHub release (and its tag) from the add-on package
+# committed at dist/Onigiri-iOS.ankiaddon. Does not build anything.
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version, e.g. 1.0.0 (must match manifest.json)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check manifest version
+        run: |
+          v=$(python3 -c "import json;print(json.load(open('manifest.json'))['version'])")
+          [ "$v" = "${{ inputs.version }}" ] || { echo "manifest is $v"; exit 1; }
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${{ inputs.version }}" dist/Onigiri-iOS.ankiaddon \
+            --target "${{ github.sha }}" \
+            --title "Bingsu: Onigiri for iOS ${{ inputs.version }}" \
+            --notes-file CHANGELOG.md
