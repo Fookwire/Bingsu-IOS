@@ -177,6 +177,13 @@ class AuditStepOneTests(unittest.TestCase):
             self.native.flush_on_background("suspended")
             self.assertEqual(flushed, [1])
 
+    def test_play_sound_is_a_noop_off_ios_and_safe_without_rubicon(self):
+        with patch.object(self.native.onigiri_platform, "IS_IOS", False):
+            self.assertFalse(self.native.play_sound("/x.wav"))
+        with patch.object(self.native.onigiri_platform, "IS_IOS", True), \
+                patch.dict(sys.modules, {"rubicon": None, "rubicon.objc": None}):
+            self.assertFalse(self.native.play_sound("/x.wav"))
+
 
 if __name__ == "__main__":
     unittest.main()

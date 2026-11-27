@@ -295,16 +295,22 @@ class OnigiriInfoDialog(QDialog):
         logo = _info_dialog_icon_pixmap(size=36)
         if not logo.isNull():
             self.setWindowIcon(QIcon(logo))
+        from ..core.platform import IS_MOBILE
+
         self.setWindowFlags(Qt.WindowType.Dialog | Qt.WindowType.FramelessWindowHint)
-        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
+        # A see-through window with a rounded panel inside is a desktop look:
+        # on iPhone/iPad Kioku fills the screen with this dialog, so it is a
+        # solid page of the panel's colour with no width limits.
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, not IS_MOBILE)
         self.setModal(True)
-        self.setMinimumWidth(390)
-        self.setMaximumWidth(520)
+        if not IS_MOBILE:
+            self.setMinimumWidth(390)
+            self.setMaximumWidth(520)
 
         palette = _info_dialog_palette()
         self.setStyleSheet(f"""
             QDialog {{
-                background: transparent;
+                background: {palette["panel"] if IS_MOBILE else "transparent"};
             }}
             QFrame#onigiriInfoPanel {{
                 background-color: {palette["panel"]};

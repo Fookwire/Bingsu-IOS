@@ -15,7 +15,10 @@ class CreditsDialog(CenteredInfoDialog):
         super().__init__(parent)
         self.setWindowTitle(tr("credits_title"))
         self.setMinimumSize(600, 500)
-        self.setMaximumSize(700, 600)
+        from ..core.platform import IS_MOBILE
+
+        if not IS_MOBILE:
+            self.setMaximumSize(700, 600)
         self.setModal(True)
 
         # Main layout

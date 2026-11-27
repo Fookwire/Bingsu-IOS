@@ -15,7 +15,10 @@ class DonationsDialog(CenteredInfoDialog):
         super().__init__(parent)
         self.setWindowTitle(tr("donations_title", "Donations"))
         self.setMinimumSize(640, 760)
-        self.setMaximumSize(760, 820)
+        from ..core.platform import IS_MOBILE
+
+        if not IS_MOBILE:
+            self.setMaximumSize(760, 820)
         self.setModal(True)
 
         layout = QVBoxLayout()

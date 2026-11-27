@@ -158,7 +158,22 @@
     document.body.dataset.theme = mode;
   }
   function render() { syncTheme(); if (!data.companion) { $('.onigimon-app').innerHTML = `<p class="no-companion">${(data.labels || {}).noCompanion || 'No Onigimon companion selected.'}</p>`; return; } const c = data.companion, a = data.assets || {}, l = data.labels || {}; applyI18n(document); text('[data-bind="name"]', c.name); text('[data-bind="level"]', `${l.level || 'Level'} ${c.level || 1}`); text('[data-bind="message"]', data.message); image('[data-bind="mart"]', a.mart); image('[data-bind="comet"]', a.comet); image('[data-bind="redeem-icon"]', a.comet); image('[data-bind="star-piece"]', a.starPiece); text('[data-bind="comets"]', data.wallet?.comet_shards || 0); text('[data-bind="stars"]', data.wallet?.star_pieces || 0); text('[data-bind="market-title"]', l.market); text('[data-bind="redeem-title"]', l.redeemTitle); text('[data-bind="redeem-hint"]', l.redeemHint); $('[data-bind="redeem-code"]').placeholder = l.pasteCode || 'Paste code here'; $('.redeem-submit').textContent = l.redeem; const gift = $('[data-action="gift"]'); if (gift) { gift.textContent = data.marketGiftReady ? l.dailyGift : l.giftOpened; gift.disabled = !data.marketGiftReady; } setSprite(c); paintScene(a); renderStatuses(); renderBackpack(); renderMarket(); showGift(data.gift); }
-  function sound(effect) { try { const Ctx = window.AudioContext || window.webkitAudioContext, ctx = new Ctx(), now = ctx.currentTime; const f = {feed:[620,820],play:[820,1080],clean:[360,660],train:[480,940],heal:[523,784]}[effect] || [800,1050]; f.forEach((hz, i) => { const o=ctx.createOscillator(), g=ctx.createGain(); o.frequency.setValueAtTime(hz, now+i*.07); g.gain.setValueAtTime(.0001, now+i*.07); g.gain.exponentialRampToValueAtTime(.075,now+i*.07+.02); g.gain.exponentialRampToValueAtTime(.0001,now+i*.07+.3); o.connect(g).connect(ctx.destination); o.start(now+i*.07); o.stop(now+i*.07+.31); }); setTimeout(()=>ctx.close(),600); } catch (_) {} }
+  // One shared AudioContext, created and resumed from a touch/click. A new
+  // context per effect, made after a round trip to Python, is outside any
+  // user gesture: iOS keeps such a context suspended, so the effects were
+  // silent (and it caps how many contexts a page may open).
+  let audioCtx = null;
+  function ensureAudio() {
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return null;
+      audioCtx = audioCtx || new Ctx();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    } catch (_) {}
+    return audioCtx;
+  }
+  ['pointerdown', 'touchend', 'keydown'].forEach(type => document.addEventListener(type, ensureAudio, { passive: true }));
+  function sound(effect) { try { const ctx = ensureAudio(); if (!ctx) return; const now = ctx.currentTime; const f = {feed:[620,820],play:[820,1080],clean:[360,660],train:[480,940],heal:[523,784]}[effect] || [800,1050]; f.forEach((hz, i) => { const o=ctx.createOscillator(), g=ctx.createGain(); o.frequency.setValueAtTime(hz, now+i*.07); g.gain.setValueAtTime(.0001, now+i*.07); g.gain.exponentialRampToValueAtTime(.075,now+i*.07+.02); g.gain.exponentialRampToValueAtTime(.0001,now+i*.07+.3); o.connect(g).connect(ctx.destination); o.start(now+i*.07); o.stop(now+i*.07+.31); }); } catch (_) {} }
   function bopSprite() {
     const sprite = $('.companion-sprite');
     if (!sprite || matchMedia('(prefers-reduced-motion: reduce)').matches) return;

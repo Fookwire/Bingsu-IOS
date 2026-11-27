@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 import shutil
 import uuid
 from datetime import date, datetime, timedelta, timezone
@@ -444,6 +445,14 @@ def _play_sound(settings, event="end"):
     if _play_sound_macos(abs_path):
         return
     try:
+        # iPhone/iPad: its own player, so the card's audio isn't cut off
+        from ..core import ios_native
+
+        if ios_native.play_sound(abs_path):
+            return
+    except Exception:
+        pass
+    try:
         from PyQt6.QtCore import QUrl
         from PyQt6.QtMultimedia import QAudioOutput, QMediaPlayer
 
@@ -620,6 +629,7 @@ class PomodoroTimer(QObject):
         self._qtimer = QTimer(self)
         self._qtimer.setInterval(1000)
         self._qtimer.timeout.connect(self._on_tick)
+        self._last_tick = None  # time.monotonic() of the last counted second
 
     def phase_length_seconds(self):
         minutes = {
@@ -643,6 +653,7 @@ class PomodoroTimer(QObject):
         if self.session_type == "focus" and self._phase_started_at is None:
             self._phase_started_at = _now_iso()
         self.running = True
+        self._last_tick = time.monotonic()
         self._qtimer.start()
         if beginning_phase:
             _play_sound(self.settings, "start")
@@ -666,7 +677,14 @@ class PomodoroTimer(QObject):
         self._advance(auto_start=True)
 
     def _on_tick(self):
-        self.remaining_seconds -= 1
+        # Count real time, not ticks: iOS suspends a backgrounded app, so
+        # one tick can arrive minutes after the last and the countdown
+        # stalled. A normal tick is one second.
+        now = time.monotonic()
+        last = self._last_tick if self._last_tick is not None else now - 1
+        elapsed = max(1, int(now - last))
+        self._last_tick = last + elapsed  # keep the sub-second remainder
+        self.remaining_seconds -= elapsed
         if self.remaining_seconds <= 0:
             self._complete_phase()
         else:
@@ -696,6 +714,7 @@ class PomodoroTimer(QObject):
         self.remaining_seconds = self.phase_length_seconds()
         self.running = bool(auto_start)
         if self.running:
+            self._last_tick = time.monotonic()
             self._qtimer.start()
         else:
             self._qtimer.stop()
@@ -1314,7 +1333,11 @@ class PomodoroWidget(QDialog):
         return self.topbar.rect().contains(self.topbar.mapFrom(self, pos))
 
     def mousePressEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton and self._topbar_at(event):
+        # On iPhone/iPad this window fills the screen (Kioku): a finger on
+        # the top bar must not drag it away from the edges.
+        from ..core.platform import IS_MOBILE
+
+        if not IS_MOBILE and event.button() == Qt.MouseButton.LeftButton and self._topbar_at(event):
             self._drag_pos = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
             if self.timer.settings.get("shell_blur", 0) > 0:
                 pixmap, origin = self._grab_screen_pixmap()

@@ -330,6 +330,35 @@ def haptic(kind: str = "light") -> bool:
         return False
 
 
+# --- sound ---------------------------------------------------------------------
+
+_players: list = []
+
+
+def play_sound(path: str) -> bool:
+    """Play a short cue (Pomodoro) through its own AVAudioPlayer, apart from
+    Anki's audio queue: playing it through Anki stopped the card's audio.
+    False if this can't be done (the caller falls back)."""
+    if not active():
+        return False
+    try:
+        from rubicon.objc import ObjCClass, at  # type: ignore
+
+        url = ObjCClass("NSURL").fileURLWithPath_(at(path))
+        player = ObjCClass("AVAudioPlayer").alloc().initWithContentsOfURL_error_(url, None)
+        if player is None:
+            return False
+        player.prepareToPlay()
+        player.play()
+        # the player must stay alive while it plays
+        _players.append(player)
+        del _players[:-4]
+        return True
+    except Exception as exc:
+        _log(f"sound playback failed: {exc}")
+        return False
+
+
 # --- wiring --------------------------------------------------------------------
 
 

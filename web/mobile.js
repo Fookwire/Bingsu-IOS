@@ -920,7 +920,7 @@
 
     function isOverviewPage() {
         return !!(document.body && (document.body.classList.contains('onigiri-overview') ||
-            document.querySelector('.overview-bottom-actions, #onigiri-overview-header')));
+            document.querySelector('.overview-bottom-actions, .congrats-bottom-actions, .congrats-container, #onigiri-overview-header')));
     }
 
     function setupNavBar() {
@@ -1269,11 +1269,15 @@
         var bar = document.createElement('nav');
         bar.id = 'onigiri-phone-tabs';
         bar.setAttribute('role', 'tablist');
+        // The Shima theme is only a deck island: it has no widget pane, so
+        // a Home tab led to a blank screen.
+        // (Kome builds .ba-side first, .ba-home may follow)
+        var hasHome = !!document.querySelector('.main-content, .ba-home, .ba-side');
         [
             ['decks', DECKS_SVG, t('decks', 'Decks')],
-            ['home', HOME_SVG, t('home', 'Home')],
+            hasHome ? ['home', HOME_SVG, t('home', 'Home')] : null,
             ['menu', MENU_SVG, t('menu', 'Menu')],
-        ].forEach(function (spec) {
+        ].filter(Boolean).forEach(function (spec) {
             var b = document.createElement('button');
             b.type = 'button';
             b.dataset.tab = spec[0];
@@ -1293,7 +1297,7 @@
         });
         document.body.appendChild(bar);
         root.classList.add('onigiri-has-phone-tabs');
-        applyTab(readTab());
+        applyTab(hasHome ? readTab() : 'decks');
     }
 
     // --- Onigiri Settings on phones: list -> page drill-down --------------------

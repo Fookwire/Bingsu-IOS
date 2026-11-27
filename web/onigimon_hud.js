@@ -606,11 +606,26 @@
     const grip = document.createElement("span");
     grip.className = "oh-grip";
     grip.innerHTML = GRIP_SVG;
-    grip.addEventListener("dblclick", (e) => {
-      e.stopPropagation();
+    const resetPosition = () => {
       customPosition = null;
       applyShellPosition();
       sendCmd("onigimon_hud:reset_position");
+    };
+    grip.addEventListener("dblclick", (e) => {
+      e.stopPropagation();
+      resetPosition();
+    });
+    // iOS does not reliably send dblclick for a double tap: detect it.
+    let lastGripTap = 0;
+    grip.addEventListener("pointerup", (e) => {
+      if (e.pointerType === "mouse") return;
+      const now = Date.now();
+      if (now - lastGripTap < 350) {
+        lastGripTap = 0;
+        resetPosition();
+      } else {
+        lastGripTap = now;
+      }
     });
 
     const main = buildFighterNodes("main");

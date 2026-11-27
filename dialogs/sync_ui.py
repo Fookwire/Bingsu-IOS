@@ -19,7 +19,11 @@ class SyncConflictDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle(_branded_title(tr("sync_conflict_title")))
         self.setWindowIcon(QIcon(_info_dialog_icon_pixmap(size=36)))
-        self.setFixedWidth(500)
+        from ..core.platform import IS_MOBILE
+
+        if not IS_MOBILE:
+            # on iPhone/iPad Kioku fills the screen with the dialog
+            self.setFixedWidth(500)
         self.result_choice = None # 'local' or 'cloud'
 
         self._setup_ui()

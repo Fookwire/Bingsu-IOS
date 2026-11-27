@@ -2106,3 +2106,58 @@ html.onigiri-touch .onigiri-icon-delete {
     opacity: 1;
     pointer-events: auto;
 }
+
+/* ------------------------------------------------------------------------- */
+/* Finished ("congrats") screen on touch: like the overview                  */
+/* ------------------------------------------------------------------------- */
+
+/* congrats.css fixes the page to 100vh with hidden overflow: content was
+   clipped (large text, landscape) with no way to scroll, and ran under the
+   home indicator. */
+html.onigiri-touch body:has(.congrats-container) {
+    height: auto;
+    min-height: calc(100vh - var(--onigiri-safe-bottom));
+    min-height: calc(100dvh - var(--onigiri-safe-bottom));
+    overflow-y: auto;
+    box-sizing: border-box;
+    padding: 56px 0 24px;
+}
+
+html.onigiri-touch .congrats-bottom-actions .overview-button {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    min-height: 46px;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+/* the nav bar replaces the row of circled icons */
+html.onigiri-phone.onigiri-has-phone-nav body:has(.congrats-container) #onigiri-reviewer-header a.onigiri-reviewer-button,
+html.onigiri-phone.onigiri-has-phone-nav body:has(.congrats-container) #onigiri-reviewer-header .onigiri-rubber-dock {
+    display: none !important;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Deck dialogs (rename, create, subdeck, move, delete) on touch            */
+/* ------------------------------------------------------------------------- */
+
+/* Centred dialogs ended up behind the keyboard when a field was focused:
+   anchored near the top they stay clear of it, and scroll if needed. */
+html.onigiri-touch :is(#onigiri-rename-backdrop, #onigiri-create-deck-backdrop,
+    #onigiri-add-subdeck-backdrop, #onigiri-move-backdrop, #onigiri-delete-backdrop) {
+    align-items: flex-start !important;
+    padding: calc(16px + var(--onigiri-safe-bottom, 0px)) 12px 12px !important;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+html.onigiri-touch :is(#onigiri-rename-backdrop, #onigiri-create-deck-backdrop,
+    #onigiri-add-subdeck-backdrop, #onigiri-move-backdrop, #onigiri-delete-backdrop) :is(button, input) {
+    min-height: 44px;
+}
+
+html.onigiri-touch :is(#onigiri-rename-backdrop, #onigiri-create-deck-backdrop,
+    #onigiri-add-subdeck-backdrop, #onigiri-move-backdrop, #onigiri-delete-backdrop) input {
+    font-size: 16px !important;
+}

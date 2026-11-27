@@ -2487,7 +2487,7 @@ def render_widget_html(grid_style: str = "") -> str:
         # empty string. Returning "" makes the deck-browser grid drop the widget
         # entirely, so a widget placed in the grid would silently vanish.
         return f"""
-    <div class="hex-land-preview disabled" style="{grid_style}" ondblclick="pycmd('openHexagonLand')">
+    <div class="hex-land-preview disabled" style="{grid_style}" ondblclick="pycmd('openHexagonLand')" onclick="if (window.OnigiriMobile &amp;&amp; OnigiriMobile.isTouch()) pycmd('openHexagonLand')">
         <div class="hex-land-copy">
             <h3>{escape(tr('hexland_title'))}</h3>
             <p>{escape(tr('hexland_enable_settings', 'Enable Hexagon Land in Gamification Settings.'))}</p>
@@ -2526,7 +2526,7 @@ def render_widget_html(grid_style: str = "") -> str:
         animation: riskBlink 4s ease-in-out infinite !important;
     }}
     </style>
-    <div class="hex-land-preview" style="{grid_style} --hl-scale: {scale:.3f}; --hl-top: {top_color}; --hl-bottom: {bottom_color};" ondblclick="pycmd('openHexagonLand')"
+    <div class="hex-land-preview" style="{grid_style} --hl-scale: {scale:.3f}; --hl-top: {top_color}; --hl-bottom: {bottom_color};" ondblclick="pycmd('openHexagonLand')" onclick="if (window.OnigiriMobile &amp;&amp; OnigiriMobile.isTouch()) pycmd('openHexagonLand')"
              id="hl-preview-{state.created_at.replace(':', '-')}"
              data-pan-x="{state.widget_offset_x}" data-pan-y="{state.widget_offset_y}" data-scale="{scale:.3f}">
             <div class="hex-land-preview-stage" style="width:{width}px;height:{height}px; transform: translate(calc(-50% + {state.widget_offset_x}px), calc(-50% + {state.widget_offset_y}px)) scale(var(--hl-scale, .72));">
@@ -3048,6 +3048,7 @@ body {
     font-weight: 500;
 }
 .stage-wrap {
+    touch-action: none;
     position: absolute;
     inset: 0;
     overflow: hidden;
@@ -4133,6 +4134,8 @@ let sideTransitionTimer = null;
 function softSound(freq = 420, dur = 0.055, gain = 0.018) {
     try {
         audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        // iOS starts (and re-suspends) a context until a touch resumes it
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
         const g = audioCtx.createGain();
         osc.type = 'sine';
@@ -5262,6 +5265,75 @@ document.addEventListener('pointerup', e => {
         setTimeout(() => { window.wasDragged = false; }, 50);
     }
 });
+
+// Touch: one finger pans, two fingers pinch-zoom. The mouse paths above need
+// the middle or right button or a wheel, which a phone does not have.
+const touchPts = new Map();
+let touchPan = null;
+let pinch = null;
+
+function onStageTouch(e) {
+    return e.pointerType !== 'mouse' && e.target.closest && e.target.closest('.stage-wrap') &&
+        !e.target.closest('button, .tab, .tool');
+}
+
+document.addEventListener('pointerdown', e => {
+    if (!onStageTouch(e)) return;
+    touchPts.set(e.pointerId, {x: e.clientX, y: e.clientY});
+    if (touchPts.size === 1) {
+        touchPan = {x: e.clientX, y: e.clientY, panX: panX, panY: panY, moved: false};
+        window.wasDragged = false;
+    } else if (touchPts.size === 2) {
+        const pts = Array.from(touchPts.values());
+        pinch = {dist: Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y), zoom: zoom};
+        touchPan = null;
+        window.wasDragged = true;
+    }
+});
+
+document.addEventListener('pointermove', e => {
+    if (!touchPts.has(e.pointerId)) return;
+    touchPts.set(e.pointerId, {x: e.clientX, y: e.clientY});
+    if (pinch && touchPts.size >= 2) {
+        const pts = Array.from(touchPts.values());
+        const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+        if (pinch.dist > 0) {
+            const next = Math.round(pinch.zoom * (dist / pinch.dist) * 20) / 20;
+            if (Math.abs(next - zoom) >= 0.05) setZoom(next);
+        }
+        return;
+    }
+    if (touchPan) {
+        const dx = e.clientX - touchPan.x;
+        const dy = e.clientY - touchPan.y;
+        if (!touchPan.moved && Math.max(Math.abs(dx), Math.abs(dy)) > 8) {
+            touchPan.moved = true;
+            window.wasDragged = true;
+        }
+        if (touchPan.moved) {
+            panX = touchPan.panX + dx;
+            panY = touchPan.panY + dy;
+            const stage = document.querySelector('.stage');
+            if (stage) stage.style.transform = `translate(${panX}px, ${panY}px)`;
+        }
+    }
+});
+
+function endStageTouch(e) {
+    if (!touchPts.has(e.pointerId)) return;
+    touchPts.delete(e.pointerId);
+    if (touchPts.size < 2) pinch = null;
+    if (touchPts.size === 0) {
+        if (touchPan && touchPan.moved) {
+            localStorage.setItem('hexLandPanX', String(panX));
+            localStorage.setItem('hexLandPanY', String(panY));
+        }
+        touchPan = null;
+        setTimeout(() => { window.wasDragged = false; }, 50);
+    }
+}
+document.addEventListener('pointerup', endStageTouch);
+document.addEventListener('pointercancel', endStageTouch);
 
 document.addEventListener('contextmenu', e => {
     if (window.wasDragged) {
