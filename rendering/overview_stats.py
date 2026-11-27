@@ -192,6 +192,15 @@ def render_deck_overview_stats(col: Any, surface: str = "overview") -> str:
                 days=days,
                 date=_format_date(stats.estimated_finish),
             )
+            try:
+                from ..core.platform import IS_MOBILE
+
+                if IS_MOBILE:
+                    # "≈ 224 days · 7/9/27" did not say what it estimates
+                    # (audit 2, R2-37): finishing the deck's new cards.
+                    forecast_text = f"{tr('overview_finish_prefix', 'Finish')}: {forecast_text}"
+            except Exception:
+                pass
             forecast_title = tr(
                 "overview_finish_estimate_basis",
                 "Based on {count} new cards/day",

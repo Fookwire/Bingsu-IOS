@@ -2972,3 +2972,13 @@ html.onigiri-phone .overview-center-container .onigiri-external-overview-addon {
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-x: contain;
 }
+
+/* "Nothing studied yet today": a quiet line under the dash (audit 2, R2-35). */
+html.onigiri-phone .stat-card .stat-nodata {
+    margin-top: 2px;
+    font-size: 11px;
+    line-height: 1.3;
+    color: var(--fg-subtle, currentColor);
+    opacity: 0.8;
+}
+

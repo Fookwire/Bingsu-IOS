@@ -1020,3 +1020,71 @@
 [data-particles-animation="true"] .heatmap-day-cell.browsable:is(:hover, :focus-visible, :active) .day-shape {
     transform: none;
 }
+
+/* ------------------------------------------------------------------------- */
+/* Phones (audit 2, R2-36): a readable activity chart                          */
+/* ------------------------------------------------------------------------- */
+
+/* Year: 12px cells in a sideways scroller instead of 53 columns squeezed to
+   the screen width (about 2px each). */
+html.onigiri-phone .heatmap-grid.year-view {
+    overflow-x: auto;
+    max-width: none !important;
+    grid-template-columns: auto max-content;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+}
+
+html.onigiri-phone .heatmap-grid.year-view::-webkit-scrollbar {
+    display: none;
+}
+
+html.onigiri-phone .year-view .heatmap-months {
+    grid-template-columns: repeat(var(--hm-weeks, 53), 12px);
+    column-gap: 2px;
+}
+
+html.onigiri-phone .year-view .heatmap-cells {
+    grid-template-rows: repeat(7, 12px);
+    grid-auto-columns: 12px;
+    gap: 2px;
+}
+
+/* Today stands out in every view. */
+html.onigiri-phone .heatmap-day-cell.today {
+    outline: 1.5px solid var(--fg, currentColor);
+    outline-offset: 1px;
+    border-radius: 3px;
+}
+
+/* The legend under the chart. */
+html.onigiri-phone .heatmap-legend {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    margin-top: 8px;
+    font-size: 11px;
+    color: var(--fg-subtle);
+}
+
+html.onigiri-phone .heatmap-legend-swatch {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+}
+
+html.onigiri-phone .heatmap-legend-swatch[data-level="0"] { background: var(--heatmap-level-0); }
+html.onigiri-phone .heatmap-legend-swatch[data-level="1"] { background: var(--heatmap-level-1); }
+html.onigiri-phone .heatmap-legend-swatch[data-level="2"] { background: var(--heatmap-level-2); }
+html.onigiri-phone .heatmap-legend-swatch[data-level="3"] { background: var(--heatmap-level-3); }
+html.onigiri-phone .heatmap-legend-swatch[data-level="4"] { background: var(--heatmap-level-4, var(--heatmap-level-3)); }
+
+/* The year picker and the arrows are real touch targets. */
+html.onigiri-phone .onigiri-heatmap-header .nav-btn {
+    min-width: 44px;
+    min-height: 44px;
+}
+

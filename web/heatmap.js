@@ -743,9 +743,32 @@ window.OnigiriHeatmap = window.OnigiriHeatmap || {};
     // the bottom edge (the container clips). Shrink-only: a container whose
     // height is driven by its own content — the profile sidebar — never reports
     // an overflow, so it keeps the base sizes.
+    function isPhoneLayout() {
+        return !!(window.OnigiriMobile && OnigiriMobile.isPhone && OnigiriMobile.isPhone());
+    }
+
+    // "Less ▢▢▢▢▢ More": what the shades mean (audit 2, R2-36).
+    function legendHTML(i18n) {
+        const swatches = [0, 1, 2, 3, 4].map(level => `<i class="heatmap-legend-swatch" data-level="${level}"></i>`).join('');
+        return `<div class="heatmap-legend" aria-hidden="true"><span>${(i18n && i18n.less) || 'Less'}</span>${swatches}<span>${(i18n && i18n.more) || 'More'}</span></div>`;
+    }
+
+    // Phones: the year is as wide as it needs to be (readable cells) inside
+    // its own sideways scroller, opened at today, the right-hand end. It used
+    // to be squeezed to the screen width: cells about 2pt wide.
+    function scrollYearToToday(gridContainer) {
+        const go = () => { gridContainer.scrollLeft = gridContainer.scrollWidth; };
+        go();
+        requestAnimationFrame(go);
+    }
+
     function fitGridToContainer(container, gridContainer) {
         gridContainer.style.removeProperty('--hm-cell');
         gridContainer.style.removeProperty('max-width');
+        if (isPhoneLayout() && gridContainer.classList.contains('year-view')) {
+            scrollYearToToday(gridContainer);
+            return;
+        }
 
         const containerStyle = window.getComputedStyle(container);
         const header = container.querySelector('.onigiri-heatmap-header');
@@ -972,6 +995,7 @@ window.OnigiriHeatmap = window.OnigiriHeatmap || {};
                     </div>
                 </div>
                 <div class="heatmap-grid"></div>
+                ${isPhoneLayout() ? legendHTML(i18n) : ''}
             `;
 
             const gridContainer = container.querySelector('.heatmap-grid');

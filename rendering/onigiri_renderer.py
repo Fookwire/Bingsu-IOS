@@ -1157,7 +1157,7 @@ def _weekly_chart_html(color):
     <section class="onigiri-sidebar-profile-chart">
         <div class="onigiri-sidebar-profile-chart-head">
             <h3>{html.escape(tr("profile_panel_weekly_chart", "Weekly Study Chart"))}</h3>
-            <span>{sum(values)}</span>
+            <span>{_weekly_total_text(sum(values))}</span>
         </div>
         {chart_svg}
         <div class="onigiri-sidebar-profile-chart-labels">{labels_html}</div>
@@ -1168,7 +1168,7 @@ def _weekly_chart_html(color):
 def _profile_gamification_summary_html(panel_conf):
     items = []
 
-    if panel_conf.get("show_nook_level", True):
+    if panel_conf.get("show_nook_level", True) and _nook_game_on_or_desktop():
         enabled, level, fraction, color = _nook_level_page_progress()
         if enabled:
             pct = fraction * 100
@@ -1271,6 +1271,13 @@ def _profile_study_summary_html(sidebar_conf):
             streak = things_theme._standing()["streak"]
             minutes = int(seconds or 0) // 60
             duration = f"{minutes // 60}h {minutes % 60}m" if minutes >= 60 else f"{minutes}m"
+            try:
+                from ..core.platform import IS_MOBILE as _phone
+            except Exception:
+                _phone = False
+            if _phone and int(seconds or 0) < 60:
+                # Home says "0 s" under a minute; the same here (audit 2, R2-37)
+                duration = f"{int(seconds or 0)} {tr('seconds_unit', 's')}"
             rows = ((tr("profile_sidebar_reviews", "Reviews"), f"{reviews:,}"),
                     (tr("profile_sidebar_study_time", "Study Time"), duration),
                     (tr("profile_sidebar_streak", "Study Streak"), f'{streak} {tr("profile_sidebar_days", "days")}'))
@@ -1948,6 +1955,37 @@ def _stats_widget_weekly_series() -> dict:
     _DASHBOARD_STATS_CACHE["weekly_series"] = series
     return series
 
+def _nook_game_on_or_desktop() -> bool:
+    """Phones do not list "Nook Level 0" with an empty bar while the Nook Level
+    game is switched off (audit 2, R2-37). Desktop keeps its behaviour."""
+    if not _no_data_wording():
+        return True
+    try:
+        conf = config.get_config_readonly()
+        return bool((conf.get("restaurant_level") or {}).get("enabled", False))
+    except Exception:
+        return True
+
+
+def _weekly_total_text(total) -> str:
+    """The weekly chart's total: a bare "609" does not say what it counts, so
+    phones add the unit ("609 cards", audit 2, R2-37)."""
+    if _no_data_wording():
+        unit = tr("card") if total == 1 else tr("cards")
+        return html.escape(f"{total} {unit}", quote=False)
+    return str(total)
+
+
+def _no_data_wording() -> bool:
+    """Phones say "no data" as a dash instead of a zero (audit 2, R2-35)."""
+    try:
+        from ..core.platform import IS_MOBILE
+
+        return bool(IS_MOBILE)
+    except Exception:
+        return False
+
+
 def _get_onigiri_retention_html(row_span: int = 1, col_span: int = 1) -> str:
     # Query retention directly (fast index on id)
     total_reviews, correct_reviews = mw.col.db.first(
@@ -1965,7 +2003,12 @@ def _get_onigiri_retention_html(row_span: int = 1, col_span: int = 1) -> str:
     elif total_reviews > 0: stars = 1 # Use total_reviews from scope
     else: stars = 0
     
-    if _stats_widget_stars_shown():
+    no_data = total_reviews == 0 and _no_data_wording()
+    if no_data:
+        # Nothing reviewed yet today is not a 0% result with five faint stars
+        # (audit 2, R2-35): a dash and a line saying so.
+        star_rating_html = f'<div class="stat-nodata">{html.escape(tr("nothing_studied_yet_today"), quote=False)}</div>'
+    elif _stats_widget_stars_shown():
         star_html = "".join(_stats_widget_star_html(i >= stars) for i in range(5))
         star_rating_html = f'<div class="star-rating">{star_html}</div>'
     else:
@@ -1976,7 +2019,7 @@ def _get_onigiri_retention_html(row_span: int = 1, col_span: int = 1) -> str:
         tr("retention"),
         # The percent sign is part of the number here, not a unit: hiding it
         # with the "Show units" switch would leave a bare, ambiguous figure.
-        f"{retention_percentage:.0f}%",
+        "\u2014" if no_data else f"{retention_percentage:.0f}%",
         unit="",
         extra_body=star_rating_html,
         series=_stats_widget_weekly_series().get("retention"),
@@ -2367,8 +2410,10 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
             row_span=rs, col_span=cs,
         ),
         "pace": lambda rs=1, cs=1: _stats_widget_card_html(
-            "pace", tr("pace"), f"{seconds_per_card:.1f}",
-            f"{tr('seconds_unit')}/{tr('card')}",
+            "pace", tr("pace"),
+            # no cards today: a dash, not "0.0 s/card" (audit 2, R2-35)
+            ("\u2014" if cards_today == 0 and _no_data_wording() else f"{seconds_per_card:.1f}"),
+            ("" if cards_today == 0 and _no_data_wording() else f"{tr('seconds_unit')}/{tr('card')}"),
             series=_stats_widget_weekly_series().get("pace"),
             row_span=rs, col_span=cs,
         ),

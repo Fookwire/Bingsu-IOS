@@ -21305,6 +21305,8 @@ mochi_cheer_desc|Mochi cheers you on as you review.|Mochi torce por você enquan
 undo_nothing_to_undo|Nothing to undo|Nada para desfazer|Nada que deshacer|没有可撤销的操作|元に戻す操作はありません|Rien à annuler|실행 취소할 항목이 없습니다|Nichts rückgängig zu machen
 undo_show_question_again|Show Question Again|Mostrar a pergunta novamente|Mostrar la pregunta de nuevo|重新显示问题|もう一度問題を表示|Afficher à nouveau la question|질문 다시 보기|Frage erneut anzeigen
 menu_appearance|Appearance|Aparência|Apariencia|外观|外観|Apparence|화면 설정|Darstellung
+nothing_studied_yet_today|Nothing studied yet today|Nada estudado hoje ainda|Nada estudiado todavía hoy|今天还没有学习|今日はまだ学習していません|Rien étudié aujourd'hui|오늘은 아직 학습하지 않았습니다|Heute noch nichts gelernt
+overview_finish_prefix|Finish|Concluir|Terminar|完成|完了|Fin|완료|Fertig
 """
 
 ALIASES = {
