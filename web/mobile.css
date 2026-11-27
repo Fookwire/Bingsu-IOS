@@ -1541,6 +1541,30 @@ html.onigiri-phone .osw-shell .osw-preview-head-controls > * {
     max-width: 100%;
 }
 
+/* A labelled number ("Font Size  [14] px") on a card header gets its own
+   full-width row. settings.css gave it flex: 1 1 0, so it asked for no width,
+   never wrapped, and was squeezed into a tiny square with its label and unit
+   printed over each other (audit 2, R2-13). */
+html.onigiri-phone .osw-shell .osw-preview-head-controls > .osw-preview-number-ctl,
+html.onigiri-phone .osw-shell .osw-preview-kind-prep_widget .osw-preview-head-controls > .osw-preview-number-ctl {
+    flex: 1 0 100% !important;
+    max-width: 100% !important;
+    order: -1;
+    overflow: visible;
+    justify-content: space-between;
+}
+
+html.onigiri-phone .osw-shell .osw-preview-number-ctl .osw-organize-ctl-label {
+    white-space: nowrap !important;
+    flex: 0 0 auto;
+}
+
+html.onigiri-phone .osw-shell .osw-preview-number-ctl .osw-organize-ctl-box {
+    flex: 0 0 auto;
+    margin-left: auto;
+    white-space: nowrap;
+}
+
 /* Sub-page tab strips (Reviewer: Background, icons...) scroll sideways
    inside themselves, never the page. */
 html.onigiri-phone .osw-shell .osw-subtabs,
@@ -2271,13 +2295,13 @@ html.onigiri-touch .onigiri-quick-menu {
 
 /* A row whose control is a segmented choice, a text field or a select puts
    the control on its own full-width line under the label. */
-html.onigiri-phone .osw-shell .osw-row:has(.osw-segmented-control, .osw-text-input, select),
+html.onigiri-phone .osw-shell .osw-row:has(.osw-segmented-control, .osw-text-input, .osw-textarea-input, select),
 html.onigiri-phone .osw-shell :has(> .osw-segmented-control):not(.osw-subtabs) {
     flex-wrap: wrap !important;
     row-gap: 10px;
 }
 
-html.onigiri-phone .osw-shell .osw-row-control:has(.osw-segmented-control, .osw-text-input, select) {
+html.onigiri-phone .osw-shell .osw-row-control:has(.osw-segmented-control, .osw-text-input, .osw-textarea-input, select) {
     flex: 1 1 100% !important;
     min-width: 0 !important;
     max-width: 100%;
@@ -2285,6 +2309,7 @@ html.onigiri-phone .osw-shell .osw-row-control:has(.osw-segmented-control, .osw-
 
 html.onigiri-phone .osw-shell .osw-segmented-control:not(.osw-subtabs *),
 html.onigiri-phone .osw-shell .osw-row-control .osw-text-input,
+html.onigiri-phone .osw-shell .osw-row-control .osw-textarea-input,
 html.onigiri-phone .osw-shell .osw-row-control select {
     flex: 1 1 100% !important;
     width: 100% !important;
@@ -2790,3 +2815,106 @@ html.onigiri-phone .main-content .stat-card.onigiri-stat-card .stat-unit {
     margin-left: 4px;
     opacity: 0.7;
 }
+
+/* ------------------------------------------------------------------------- */
+/* Settings previews that match what a phone really shows (audit 2, R2-18)    */
+/* ------------------------------------------------------------------------- */
+/* Stats Widgets: the Home tab lays its cards out two per row on a phone, but
+   the preview squeezed four into one row (~75pt each), which broke labels
+   mid-word ("STUD/IED") and printed one letter per line in Expressive style. */
+html.onigiri-phone .osw-shell .osw-preview-swidget-row {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+html.onigiri-phone .osw-shell .osw-preview-swidget-row .stat-card.onigiri-stat-card {
+    flex: none;
+    width: auto;
+    min-width: 0;
+}
+
+/* Onigimon HUD: ally and enemy stacked, so names and numbers have a full row
+   each instead of overprinting one another. */
+html.onigiri-phone .osw-shell .osw-onihud-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+}
+
+html.onigiri-phone .osw-shell .osw-onihud-row > .osw-onihud-divider {
+    display: none;
+}
+
+html.onigiri-phone .osw-shell .osw-onihud-info {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+/* Modes slider: the caption may take two lines and the three stops are named
+   under the track (audit 2, R2-21). */
+html.onigiri-phone .osw-shell .osw-ladder-caption {
+    height: auto;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+}
+
+html.onigiri-phone .osw-shell .osw-ladder-stops {
+    display: flex;
+    justify-content: space-between;
+    gap: 4px;
+    margin-top: 10px;
+    grid-column: 1 / -1;
+}
+
+html.onigiri-phone .osw-shell .osw-ladder-stop {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 36px;
+    padding: 0 2px;
+    border: 0;
+    background: none;
+    color: var(--osw-fg-muted);
+    font: inherit;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+html.onigiri-phone .osw-shell .osw-ladder-stop.is-active {
+    color: var(--osw-fg);
+    font-weight: 600;
+}
+
+/* Theme names: two lines before an ellipsis ("Catppuccin Frappé", "Catppuccin
+   Macchiato" were cut after the same word), audit 2, R2-23. */
+html.onigiri-phone .osw-shell .osw-theme-name {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    white-space: normal;
+    overflow: hidden;
+}
+
+/* Tab strips that scroll sideways fade out at the right edge. */
+html.onigiri-phone .osw-shell .osw-subtabs.is-scrollable:not(.is-at-end),
+html.onigiri-phone .osw-shell .osw-subtabs-strip.is-scrollable:not(.is-at-end) {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+}
+
+/* Remove buttons on widget tiles: 28pt, not 18 (audit 2, R2-23). */
+html.onigiri-phone body .osw-organize-tile-remove,
+html.onigiri-phone body .osw-organize-tile-remove:hover {
+    width: 28px !important;
+    height: 28px !important;
+}
+
+html.onigiri-phone body .osw-organize-tile-remove svg {
+    width: 14px;
+    height: 14px;
+}
+

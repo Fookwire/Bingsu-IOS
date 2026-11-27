@@ -25,7 +25,7 @@ ANKIMON_ADDON_IDS = ("1908235722", "Ankimon")
 
 ONIGIMON_DIFFICULTY_SETTINGS = {
     "bulbassaur": {
-        "label": "Bulbassaur",
+        "label": "Bulbasaur",
         "reward_multiplier": 0.75,
         "missed_day_decay": 10,
         "wrong_answer_penalty": 2,

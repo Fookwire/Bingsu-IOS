@@ -235,3 +235,16 @@ Done:
 Checked: unit tests at the known 87 failures (the two `.cjs` and two Bento contract tests that differ from `baseline.txt` fail the same on the previous commit); Settings sweep at 390pt: 52 pages, 0 off-screen, all open at the top; card answered in the harness: revlog +1, reps +1, undo available, no tracebacks.
 Needs the phone: Kioku version is at least v0.2.12 and Settings shows one header; the editor toolbar in WebKit; the overview with Deck details and widgets open; the bars and home-indicator strip change at once on Apply theme and on forcing light mode; Show Answer is accent filled after applying any theme.
 **Update Kioku on the phone to v0.2.12 or newer.** The single Settings header only appears with that version.
+
+### Phase 2 (build 1.1.0-beta.2), done in emulation
+Done:
+- R2-13 Font Size (Prep Station, Study Plans Widget): a number control in a card header takes its own full-width row (label left, field and unit right) instead of being squeezed into a square.
+- R2-17 Bio: the multiline text area joins the stacked, full-width phone rules (it kept a 220px minimum width and ran out of its card).
+- R2-18 previews: the Stats Widgets preview is two cards per row like the Home tab (labels no longer break mid-word); the Onigimon HUD preview stacks ally and enemy; the Bento logos for Focumon and Senchado are looked up by their real lowercase file names (`focumon.png`, `senchado.png`; the old names only worked on a case-insensitive disk) and a logo that fails to load is hidden, not shown as "?".
+- R2-19/R2-21 phone schema: a section whose controls were all desktop-only is dropped (the empty "Independent" heading on Modes); the Action Buttons position chooser and the house-icon setting become hidden fields on phones (their stored values still drive the other settings' `show_when`); "Stats Numbers: Hover" is labelled "Always" (same stored value, since touch screens always show the numbers); the English word "Sidebar" is shown as "Deck list" (and "Profile Sidebar" as "Profile panel") on phones through `core/phone_labels.py`, other languages keep their text. The Modes slider names its stops (Off, Focus, Flow, Zen), tappable, and its caption may wrap.
+- R2-22 text: Mochi's description is a full sentence (new key `mochi_cheer_desc`); "Bulbassaur" is shown as "Bulbasaur" (the stored value `bulbassaur` is unchanged); "Particles Heatmap Animation".
+- R2-23: Gallery tiles that read the same get a hint from the setting's id ("Organize Widgets — Title background" / "— Widget box"); theme names take two lines; sideways tab strips fade at the right edge while there is more; widget remove buttons are 28px.
+- R2-24: each game's option sections (Onigimon, Hexagon Land, Focus Dango, Mochi) show only while its switch is on, like Nook Level.
+Checked: Settings sweep at 375, 393 and 430pt: 52 pages, 0 off-screen, all open at the top; game pages with the switch off show only their header card.
+Not done: previews that have nothing to show (Main Menu background) are not shrunk, no selector identified them safely. Other languages keep "Sidebar" in their own words.
+Needs the phone: all of the above in WebKit.

@@ -1443,11 +1443,31 @@
         var schedule = function () {
             if (pending) return;
             pending = true;
-            requestAnimationFrame(function () { pending = false; fitSegments(); mergeToneRows(); });
+            requestAnimationFrame(function () { pending = false; fitSegments(); mergeToneRows(); markScrollableStrips(); });
         };
         new MutationObserver(schedule).observe(shell, { childList: true, subtree: true });
         window.addEventListener('resize', schedule);
+        // A tab strip that scrolls sideways fades at its right edge while there
+        // is more to see (audit 2, R2-23).
+        shell.addEventListener('scroll', function (event) {
+            var t = event.target;
+            if (t && t.classList && t.classList.contains('is-scrollable')) markScrollEdge(t);
+        }, true);
         schedule();
+    }
+
+    function markScrollEdge(strip) {
+        strip.classList.toggle('is-at-end', strip.scrollLeft + strip.clientWidth >= strip.scrollWidth - 2);
+    }
+
+    function markScrollableStrips() {
+        var strips = document.querySelectorAll('.osw-shell .osw-subtabs, .osw-shell .osw-subtabs-strip');
+        for (var i = 0; i < strips.length; i++) {
+            var strip = strips[i];
+            var scrolls = strip.scrollWidth > strip.clientWidth + 2;
+            strip.classList.toggle('is-scrollable', scrolls);
+            if (scrolls) markScrollEdge(strip);
+        }
     }
 
     function setupSettingsDrillDown() {

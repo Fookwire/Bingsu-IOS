@@ -636,6 +636,8 @@ def _onigimon_page():
             },
             {
                 "id": "onigimon_companions",
+                # Only meaningful while the game is on (audit 2, R2-24).
+                "show_when": {"field": "g_onigimon_enabled", "values": [True]},
                 "title": tr("onigimon_companion_title", "Companion"),
                 "layout": "onigimon_companions",
                 "fields": [
@@ -667,6 +669,8 @@ def _onigimon_page():
             },
             {
                 "id": "onigimon_scene",
+                # Only meaningful while the game is on (audit 2, R2-24).
+                "show_when": {"field": "g_onigimon_enabled", "values": [True]},
                 "title": tr("onigimon_scene_title", "Scene"),
                 "layout": "designer_preview",
                 "preview_kind": "onigimon_scene",
@@ -784,6 +788,8 @@ def _onigimon_page():
             },
             {
                 "id": "onigimon_reviewer_hud",
+                # Only meaningful while the game is on (audit 2, R2-24).
+                "show_when": {"field": "g_onigimon_enabled", "values": [True]},
                 "title": tr(
                     "onigimon_reviewer_hud_title",
                     "Reviewer HUD",
@@ -907,6 +913,8 @@ def _onigimon_page():
             },
             {
                 "id": "onigimon_difficulty",
+                # Only meaningful while the game is on (audit 2, R2-24).
+                "show_when": {"field": "g_onigimon_enabled", "values": [True]},
                 "title": tr("onigimon_difficulty_title", "Difficulty"),
                 "fields": [
                     _note("g_onigimon_difficulty_note", "", tr("onigimon_difficulty_note", "")),
@@ -918,7 +926,7 @@ def _onigimon_page():
                         "default": "pikachu",
                         "options": [
                             {
-                                "value": "bulbassaur", "label": "Bulbassaur",
+                                "value": "bulbassaur", "label": "Bulbasaur",
                                 "desc": tr("onigimon_diff_easy_desc", ""),
                                 "image": _image("onigimon/bulbasaur_pixel.webp"),
                                 "accent": "#4CAF50",
@@ -941,6 +949,8 @@ def _onigimon_page():
             },
             {
                 "id": "onigimon_reviewer_notifications",
+                # Only meaningful while the game is on (audit 2, R2-24).
+                "show_when": {"field": "g_onigimon_enabled", "values": [True]},
                 "title": tr(
                     "onigimon_reviewer_notifications_title",
                     "Reviewer notifications",
@@ -968,6 +978,8 @@ def _onigimon_page():
                 # about, just how kindly it says it. Copy lives in
                 # translations.py, keyed `onigimon_tone_<message>_<tone>`.
                 "id": "onigimon_tone",
+                # Only meaningful while the game is on (audit 2, R2-24).
+                "show_when": {"field": "g_onigimon_enabled", "values": [True]},
                 "title": tr("onigimon_tone_title", "Notification tone"),
                 "fields": [
                     _note("g_onigimon_tone_note", "", tr("onigimon_tone_note", "")),
@@ -1002,6 +1014,8 @@ def _onigimon_page():
             },
             {
                 "id": "onigimon_bridge",
+                # Only meaningful while the game is on (audit 2, R2-24).
+                "show_when": {"field": "g_onigimon_enabled", "values": [True]},
                 "title": tr("onigimon_bridge_title", "Ankimon bridge"),
                 "fields": [
                     _toggle("g_onigimon_ankimon_updates", tr("onigimon_bridge_toggle", ""),
@@ -1053,6 +1067,8 @@ def _hexagon_page():
             },
             {
                 "id": "hexagon_builder",
+                # Only meaningful while the game is on (audit 2, R2-24).
+                "show_when": {"field": "g_hexagon_enabled", "values": [True]},
                 "title": tr("hexagon_builder_title"),
                 "fields": [
                     _note(
@@ -1065,6 +1081,8 @@ def _hexagon_page():
             },
             {
                 "id": "hexagon_keys",
+                # Only meaningful while the game is on (audit 2, R2-24).
+                "show_when": {"field": "g_hexagon_enabled", "values": [True]},
                 "title": tr("hexagon_keys_title", "Keys of the Island"),
                 "layout": "hexagon_keys",
                 "description": tr(
@@ -1145,6 +1163,8 @@ def _focus_dango_page():
             },
             {
                 "id": "dango_messages",
+                # Only meaningful while the game is on (audit 2, R2-24).
+                "show_when": {"field": "g_dango_enabled", "values": [True]},
                 "title": tr("focus_dango_messages", "Messages"),
                 "fields": [
                     {
@@ -1164,6 +1184,8 @@ def _focus_dango_page():
             },
             {
                 "id": "dango_lock_mode",
+                # Only meaningful while the game is on (audit 2, R2-24).
+                "show_when": {"field": "g_dango_enabled", "values": [True]},
                 "title": tr("focus_dango_lock_mode", "Lock Mode"),
                 "fields": [
                     _note("g_dango_lock_note", "", tr(
@@ -1214,7 +1236,7 @@ def _mochi_page():
                     _game_hero_toggle(
                         "g_mochi_enabled",
                         tr("mochi_messages_title", "Mochi Messages"),
-                        tr("mochi_cheer_on", ""),
+                        tr("mochi_cheer_desc", "Mochi cheers you on as you review."),
                         ("mochi_messages", "enabled"),
                         _image("mochi_messenger.webp"),
                         ACCENTS["mochi"],
@@ -1223,6 +1245,8 @@ def _mochi_page():
             },
             {
                 "id": "mochi_timing",
+                # Only meaningful while the game is on (audit 2, R2-24).
+                "show_when": {"field": "g_mochi_enabled", "values": [True]},
                 "title": tr("settings", "Settings"),
                 "fields": [
                     {
@@ -1237,6 +1261,8 @@ def _mochi_page():
             },
             {
                 "id": "mochi_looks",
+                # Only meaningful while the game is on (audit 2, R2-24).
+                "show_when": {"field": "g_mochi_enabled", "values": [True]},
                 "title": tr("mochi_looks_title", "Messenger Looks"),
                 "layout": "designer_preview",
                 "preview_kind": "mochi_message",
@@ -1317,6 +1343,8 @@ def _mochi_page():
             },
             {
                 "id": "mochi_message_list",
+                # Only meaningful while the game is on (audit 2, R2-24).
+                "show_when": {"field": "g_mochi_enabled", "values": [True]},
                 "title": tr("mochi_messages_title", "Messages"),
                 "fields": [
                     {

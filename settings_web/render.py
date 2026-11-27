@@ -184,6 +184,16 @@ STRING_KEYS = (
 def _strings():
     out = dict(TRANSLATIONS[current_language()])
     out.update({key: tr(key) for key in STRING_KEYS})
+    try:
+        from ..core.platform import IS_MOBILE
+
+        if IS_MOBILE:
+            # "Sidebar" is a desktop word (audit 2, R2-19); English text only.
+            from ..core.phone_labels import phone_text
+
+            out = {k: phone_text(v) for k, v in out.items()}
+    except Exception:
+        pass
     out["cancel"] = tr("cancel")
     out["collapse_sidebar"] = tr("settings_web_collapse_rail", "Collapse sidebar")
     out["expand_sidebar"] = tr("settings_web_expand_rail", "Pin sidebar open")

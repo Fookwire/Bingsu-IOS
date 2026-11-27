@@ -21300,6 +21300,8 @@ storage_collection_backup_error|Onigiri could not back up your collection settin
 storage_upgrade_backup_error|The pre-upgrade backup could not be created: {error}|Não foi possível criar o backup antes da atualização: {error}|No se pudo crear la copia previa a la actualización: {error}|无法创建更新前备份：{error}|更新前のバックアップを作成できませんでした: {error}|Impossible de créer la sauvegarde avant mise à jour : {error}|업데이트 전 백업을 만들 수 없습니다: {error}|Backup vor der Aktualisierung konnte nicht erstellt werden: {error}
 storage_mochi_label|Your Mochi messages|Suas mensagens Mochi|Tus mensajes Mochi|你的 Mochi 消息|Mochi のメッセージ|Vos messages Mochi|Mochi 메시지|Deine Mochi-Nachrichten
 storage_progress_label|Your Onigiri progress|Seu progresso no Onigiri|Tu progreso en Onigiri|你的 Onigiri 进度|Onigiri の進捗|Votre progression Onigiri|Onigiri 진행 상황|Dein Onigiri-Fortschritt
+stats_numbers_always_short|Always|Sempre|Siempre|始终|常に|Toujours|항상|Immer
+mochi_cheer_desc|Mochi cheers you on as you review.|Mochi torce por você enquanto você estuda.|Mochi te anima mientras repasas.|复习时，Mochi 会为你加油。|復習中、Mochi があなたを応援します。|Mochi vous encourage pendant vos révisions.|복습하는 동안 Mochi가 응원해 줍니다.|Mochi feuert dich beim Lernen an.
 """
 
 ALIASES = {

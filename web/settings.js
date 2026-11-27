@@ -12507,6 +12507,8 @@
         const img = document.createElement("img");
         img.src = game.logo;
         img.alt = "";
+        // A logo that does not load leaves the tile empty rather than a "?".
+        img.addEventListener("error", function () { img.style.display = "none"; });
         thumb.appendChild(img);
       }
       column.appendChild(thumb);
@@ -13341,6 +13343,22 @@
     track.appendChild(marks);
     track.appendChild(thumb);
     card.appendChild(track);
+    // Phones: the three stops of the track are named under it and can be
+    // tapped (audit 2, R2-21: they were unlabelled).
+    const stopButtons = [];
+    if (window.OnigiriMobile && OnigiriMobile.isPhone && OnigiriMobile.isPhone()) {
+      const stops = el("div", "osw-ladder-stops");
+      [str("immersion_off", "Off")].concat(fields.map(function (f) { return f.label; })).forEach(function (name, i) {
+        const b = el("button", "osw-ladder-stop", name);
+        b.type = "button";
+        b.addEventListener("click", function (ev) { ev.stopPropagation(); setLevel(i); });
+        // the slider's own pointer handling must not start a drag from a label
+        b.addEventListener("pointerdown", function (ev) { ev.stopPropagation(); });
+        stopButtons.push(b);
+        stops.appendChild(b);
+      });
+      card.appendChild(stops);
+    }
     head.appendChild(card);
     host.appendChild(head);
 
@@ -13403,6 +13421,7 @@
         ? (activeField.desc || "")
         : str("immersion_off_caption", "Anki looks the way it always does.");
       host.classList.toggle("is-off", level === 0);
+      stopButtons.forEach(function (b, i) { b.classList.toggle("is-active", i === level); });
 
       notesList.innerHTML = "";
       const notes = (activeField && activeField.notes || []).filter(function (note) { return !!note; });

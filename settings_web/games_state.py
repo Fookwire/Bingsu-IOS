@@ -361,9 +361,9 @@ def hexagon_context():
 
 BENTO_GAME_STYLE = {
     # add-on id -> (logo file under system_files/peace_logos, accent)
-    "516325516": ("Focumon.png", "#F2B705"),
+    "516325516": ("focumon.png", "#F2B705"),
     "1799253175": ("lofi_town.png", "#9EAC32"),
-    "585575504": ("Senchado.png", "#58A866"),
+    "585575504": ("senchado.png", "#58A866"),
 }
 
 

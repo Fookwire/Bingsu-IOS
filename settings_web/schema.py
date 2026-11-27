@@ -4192,7 +4192,7 @@ def _mainmenu_heatmap_section():
             },
             {
                 "id": "heatmapParticlesAnimation", "type": "toggle",
-                "label": "Particles Hetamap Animation",
+                "label": "Particles Heatmap Animation",
                 "bind": {"kind": "config", "key": "heatmapParticlesAnimation"}, "default": False,
             },
             {
@@ -5900,6 +5900,38 @@ def _color_bindings(field, fields_by_id):
     return tuple(sorted(set(bindings)))
 
 
+def _gallery_hint(field_id, section_title):
+    """A short readable hint from a setting id: "modern_menu_title_background_color"
+    becomes "Title background". Words the section title already says are left out."""
+    words = field_id
+    for prefix in ("gallery_", "modern_menu_", "onigiri_"):
+        words = words.replace(prefix, "", 1) if words.startswith(prefix) else words
+    if words.endswith("_color"):
+        words = words[: -len("_color")]
+    parts = [w for w in words.split("_") if w]
+    title_words = {w.lower() for w in str(section_title or "").split()}
+    kept = [w for w in parts if w.lower() not in title_words] or parts
+    text = " ".join(kept).strip()
+    return text[:1].upper() + text[1:] if text else ""
+
+
+def _tell_gallery_tiles_apart(page_fields):
+    """Two colours of one section with the same label made identical Gallery
+    tiles ("Organize Widgets / Color" twice). Add a hint from the setting's id
+    to the tiles that would read the same (audit 2, R2-23)."""
+    groups = {}
+    for field in page_fields:
+        groups.setdefault((field.get("desc") or "", field.get("label") or ""), []).append(field)
+    for (desc, _label), fields in groups.items():
+        if len(fields) < 2:
+            continue
+        for field in fields:
+            raw_id = str(field.get("id", "")).split("_", 2)[-1]  # gallery_<page>_<id>
+            hint = _gallery_hint(raw_id, desc)
+            if hint:
+                field["desc"] = (desc + " — " + hint) if desc else hint
+
+
 def _gallery_color_sections(source_pages):
     """Build one editable Gallery inventory from all colour settings.
 
@@ -5953,6 +5985,8 @@ def _gallery_color_sections(source_pages):
                     context.append(field["desc"])
                 gallery_field["desc"] = " — ".join(context)
             page_fields.append(gallery_field)
+
+        _tell_gallery_tiles_apart(page_fields)
 
         if page_fields:
             sections.append({
@@ -6110,11 +6144,21 @@ def build_pages():
     return pages
 
 
+# Controls that mean nothing on a phone but whose stored values other settings
+# read (show_when), so they stay in the page as hidden fields instead of going.
+_PHONE_HIDDEN_FIELDS = {
+    "sidebarActionsMode",          # the Add/Browse/Stats/Sync row replaces it
+    "modern_menu_icon_header_home",  # the house icon is gone on phones
+}
+
+
 def _adapt_for_phone(pages):
     """iPhone/iPad (Kioku): leave out controls that only do something on a
     desktop (window chrome, sidebar placement and resizing) and the "restart
     Anki" notes. Only the controls go; their stored values are untouched, so a
     desktop that syncs the same settings keeps them."""
+    from ..core.phone_labels import phone_text
+
     restart = tr("restart_anki_note", "")
     for page in pages:
         if page.get("id") == "sidebar":
@@ -6133,15 +6177,49 @@ def _adapt_for_phone(pages):
                     "default": False,
                 }],
             })
+        kept_sections = []
         for section in page.get("sections") or []:
             fields = section.get("fields")
+            had_fields = isinstance(fields, list) and bool(fields)
             if isinstance(fields, list):
                 section["fields"] = [
                     f for f in fields if not (isinstance(f, dict) and f.get("desktop_only"))
                 ]
                 for f in section["fields"]:
-                    if isinstance(f, dict) and isinstance(f.get("notes"), list) and restart:
+                    if not isinstance(f, dict):
+                        continue
+                    if isinstance(f.get("notes"), list) and restart:
                         f["notes"] = [n for n in f["notes"] if n != restart]
+                    if f.get("id") in _PHONE_HIDDEN_FIELDS:
+                        # keep the value, show nothing
+                        f["type"] = "hidden"
+                        f["label"] = ""
+                        f.pop("desc", None)
+                        f.pop("show_when", None)
+                    if f.get("id") == "bbar_stattxt_mode":
+                        # There is no hover on a touch screen: numbers are
+                        # always visible there. Same stored value, honest label.
+                        for opt in f.get("options") or []:
+                            if isinstance(opt, dict) and opt.get("value") == "hover":
+                                opt["label"] = tr("stats_numbers_always_short", "Always")
+                # a section whose controls were all desktop-only has nothing left
+                # to show: no heading over an empty card (audit 2, R2-21)
+                if had_fields and not section["fields"] and not (
+                    section.get("layout") or section.get("cards") or section.get("folders")
+                ):
+                    continue
+            kept_sections.append(section)
+            # "sidebar" is a desktop word (audit 2, R2-19)
+            for key in ("title", "desc"):
+                if isinstance(section.get(key), str):
+                    section[key] = phone_text(section[key])
+            for f in section.get("fields") or []:
+                if isinstance(f, dict):
+                    for key in ("label", "desc"):
+                        if isinstance(f.get(key), str):
+                            f[key] = phone_text(f[key])
+        if "sections" in page:
+            page["sections"] = kept_sections
 
 
 NAV_GROUPS = [
