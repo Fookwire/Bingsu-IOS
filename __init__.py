@@ -1491,10 +1491,11 @@ gui_hooks.webview_did_receive_js_message.append(_on_native_cmd)
 
 
 def _install_ios_native():
-    from .core import ios_native, mobile_theme
+    from .core import ios_native, mobile_theme, phone_windows
 
     ios_native.install()
     mobile_theme.install()
+    phone_windows.install()
 
 
 _install_ios_native()
