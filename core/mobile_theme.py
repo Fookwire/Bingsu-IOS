@@ -48,7 +48,7 @@ def is_dark():
 
 def tokens(dark=None, palette=None):
     """Semantic colours derived from the theme palette (hex strings)."""
-    from ..rendering.theme_palette import contrast, mix, readable_text, visible_color
+    from ..rendering.theme_palette import mix, readable_text
 
     dark = is_dark() if dark is None else bool(dark)
     pal = palette if palette is not None else _mode_palette(dark)
@@ -56,32 +56,18 @@ def tokens(dark=None, palette=None):
     fg = pal.get("--fg") or ("#f1f2f4" if dark else "#202124")
     accent = pal.get("--accent-color") or "#00a982"
     secondary = pal.get("--fg-subtle") or mix(fg, bg, 0.65)
-    faint = mix(fg, bg, 0.45)
-    surface = mix(fg, bg, 0.05)
-    separator = mix(fg, bg, 0.16)
-    separator_soft = mix(fg, bg, 0.10)
-    if not dark:
-        # Light themes (audit 3, R3-17): pale backgrounds made cards, hints and
-        # lines nearly vanish. Secondary text must be readable, a card must
-        # stand off the background, lines must show. Dark themes are unchanged.
-        secondary = visible_color(secondary, bg, 4.5)
-        faint = visible_color(faint, bg, 3.0)
-        if contrast(surface, bg) < 1.08:
-            surface = mix("#ffffff", bg, 0.55)
-        separator = visible_color(separator, bg, 1.3)
-        separator_soft = visible_color(separator_soft, bg, 1.15)
     return {
         "dark": dark,
         "background": bg,
-        "surface": surface,
+        "surface": mix(fg, bg, 0.05),
         "raised": mix(fg, bg, 0.08),
         "inset": mix(fg, bg, 0.10),
         "inset_hover": mix(fg, bg, 0.14),
-        "separator": separator,
-        "separator_soft": separator_soft,
+        "separator": mix(fg, bg, 0.16),
+        "separator_soft": mix(fg, bg, 0.10),
         "text": fg,
         "secondary": secondary,
-        "faint": faint,
+        "faint": mix(fg, bg, 0.45),
         "accent": accent,
         "on_accent": readable_text(accent),
         "destructive": "#ef6461" if dark else "#d64545",
@@ -187,55 +173,9 @@ def show_answer_uses_accent(conf, mode):
     return pair == utility
 
 
-def kioku_bar_stylesheet(t):
-    """Stylesheet for Kioku's "‹ Back" bar in the theme's colours (audit 3,
-    R3-01). A widget-level sheet beats the application one Anki rewrites on
-    every theme change, so the button stays readable in light mode."""
-    return (
-        "QPushButton { background: %(inset)s; color: %(text)s; border: none;"
-        " border-radius: 8px; padding: 4px 10px; }"
-        " QPushButton:pressed { background: %(inset_hover)s; }"
-        " QLabel { color: %(text)s; background: transparent; }"
-    ) % t
-
-
-def style_kioku_bar(window):
-    """Colour every Kioku title bar found in `window`. Safe to call repeatedly."""
-    if not active() or window is None:
-        return 0
-    try:
-        from aqt.qt import QColor, QPalette, QWidget
-
-        t = tokens()
-        count = 0
-        for bar in window.findChildren(QWidget, "kiokuTitleBar"):
-            bar.setStyleSheet(kioku_bar_stylesheet(t))
-            pal = bar.palette()
-            pal.setColor(QPalette.ColorRole.Window, QColor(t["background"]))
-            bar.setPalette(pal)
-            bar.setAutoFillBackground(True)
-            count += 1
-        return count
-    except Exception as exc:
-        print(f"Onigiri iOS: Kioku bar style failed: {exc}")
-        return 0
-
-
-def style_all_kioku_bars():
-    try:
-        from aqt.qt import QApplication
-
-        for window in QApplication.topLevelWidgets():
-            if window.isVisible():
-                style_kioku_bar(window)
-    except Exception:
-        pass
-
-
 def refresh():
     apply_qt_palette()
     paint_initial_edges()
-    style_all_kioku_bars()
 
 
 # ── Anki's own web pages (audit 2, R2-15) ──────────────────────────────────────
@@ -282,38 +222,9 @@ def anki_page_css(dark=None, palette=None):
         "--highlight-bg": rgba(t["accent"], 0.4),
         "--accent-danger": t["destructive"],
     }
-    from ..rendering.theme_palette import mix
-
-    accent, on_accent = t["accent"], t["on_accent"]
-    r, g, b = rgb(accent)
-    # Deck Options and other Svelte pages use Bootstrap's blue for primary
-    # buttons, switches and links (audit 3, R3-08): same accent as everywhere.
-    values.update({
-        "--bs-primary": accent,
-        "--bs-primary-rgb": f"{r}, {g}, {b}",
-        "--bs-link-color": accent,
-        "--bs-link-hover-color": accent,
-    })
     body = "".join(f"{name}: {value};" for name, value in values.items())
-    hover = mix("#000000", accent, 0.12)
-    active = mix("#000000", accent, 0.22)
-    bootstrap = (
-        ".btn-primary {"
-        f" --bs-btn-color: {on_accent} !important; --bs-btn-bg: {accent} !important;"
-        f" --bs-btn-border-color: {accent} !important;"
-        f" --bs-btn-hover-color: {on_accent} !important; --bs-btn-hover-bg: {hover} !important;"
-        f" --bs-btn-hover-border-color: {hover} !important;"
-        f" --bs-btn-active-color: {on_accent} !important; --bs-btn-active-bg: {active} !important;"
-        f" --bs-btn-active-border-color: {active} !important;"
-        f" --bs-btn-disabled-color: {on_accent} !important; --bs-btn-disabled-bg: {accent} !important;"
-        f" --bs-btn-disabled-border-color: {accent} !important;"
-        f" --bs-btn-focus-shadow-rgb: {r}, {g}, {b} !important; }}"
-        f" .form-check-input:checked {{ background-color: {accent} !important;"
-        f" border-color: {accent} !important; }}"
-        f" .form-check-input:focus {{ border-color: {accent}; box-shadow: 0 0 0 .2rem rgba({r}, {g}, {b}, .25); }}"
-    )
     # both selectors: Anki sets its night-mode values on :root.night-mode
-    return f":root, :root.night-mode {{ {body} }} {bootstrap}"
+    return f":root, :root.night-mode {{ {body} }}"
 
 
 def anki_page_style_tag(context):
@@ -323,21 +234,6 @@ def anki_page_style_tag(context):
         return ""
     try:
         return '<style id="onigiri-anki-theme">' + anki_page_css() + "</style>"
-    except Exception:
-        return ""
-
-
-def nav_background_style_tag():
-    """The theme background as a CSS variable for Onigiri's own phone screens, so
-    the scrolled header bar never falls back to white (audit 3, R3-07)."""
-    if not active():
-        return ""
-    try:
-        t = tokens()
-        return (
-            '<style id="onigiri-nav-bg">:root{--onigiri-nav-bg:%s;--onigiri-accent:%s;--onigiri-on-accent:%s}</style>'
-            % (t["background"], t["accent"], t["on_accent"])
-        )
     except Exception:
         return ""
 

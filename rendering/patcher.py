@@ -4483,14 +4483,6 @@ def _reviewer_progress_inner_html(settings=None, data=None):
         gauge = f'<span class="orp-track is-segmented">{segments}</span>'
         return gauge + label_html
 
-    try:
-        from ..core.platform import IS_MOBILE as _phone
-    except Exception:
-        _phone = False
-    if _phone and pct <= 0 and label_html:
-        # Nothing done yet: an empty track beside the count read as a broken
-        # control on a phone; the count alone says it (audit 3, R3-32).
-        return label_html
     gauge = (
         '<span class="orp-track">'
         f'<span class="orp-fill" style="width: {pct}%;"></span>'

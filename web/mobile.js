@@ -823,98 +823,6 @@
         reportSheet(true);
     }
 
-    // A sheet with its own content (a text field, a description) instead of rows.
-    // Same container as the action sheets: backdrop, handle, swipe and Cancel
-    // come from enhanceSheet (audit 3, R3-09, R3-33).
-    function mountFormSheet(menu, anchor) {
-        var rect = anchor ? anchor.getBoundingClientRect() : { left: window.innerWidth - 20, bottom: 50 };
-        if (window.OnigiriEngine && OnigiriEngine.positionMenu) {
-            OnigiriEngine.positionMenu(menu, rect.left, rect.bottom);
-        } else {
-            menu.classList.add('is-sheet');
-            document.body.appendChild(menu);
-        }
-        reportSheet(true);
-    }
-
-    function formSheet(title) {
-        closeMenus();
-        var menu = document.createElement('div');
-        menu.className = 'onigiri-quick-menu onigiri-action-sheet onigiri-form-sheet';
-        if (title) {
-            var head = document.createElement('div');
-            head.className = 'onigiri-sheet-title';
-            head.textContent = title;
-            menu.appendChild(head);
-        }
-        return menu;
-    }
-
-    function sheetPrimaryButton(label, onClick) {
-        var btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'onigiri-sheet-primary';
-        btn.textContent = label;
-        btn.addEventListener('click', function (event) {
-            event.stopPropagation();
-            onClick();
-        });
-        return btn;
-    }
-
-    function showRenameSheet(anchor, currentName) {
-        var menu = formSheet(t('rename_deck_title', 'Rename Deck'));
-        var input = document.createElement('input');
-        input.type = 'text';
-        input.className = 'onigiri-sheet-input';
-        input.value = currentName || '';
-        input.setAttribute('autocapitalize', 'sentences');
-        input.setAttribute('autocomplete', 'off');
-        input.setAttribute('enterkeyhint', 'done');
-        function submit() {
-            var name = input.value.trim();
-            closeMenus();
-            if (name && name !== currentName) {
-                try { if (window.pycmd) window.pycmd('onigiri_overview_menu:rename_to:' + encodeURIComponent(name)); } catch (e) {}
-            }
-        }
-        input.addEventListener('keydown', function (event) {
-            if (event.key === 'Enter') { event.preventDefault(); submit(); }
-        });
-        menu.appendChild(input);
-        menu.appendChild(sheetPrimaryButton(t('rename_action', 'Rename'), submit));
-        mountFormSheet(menu, anchor);
-        // the person just chose Rename: the keyboard is what they want
-        setTimeout(function () { try { input.focus(); input.select(); } catch (e) {} }, 60);
-    }
-
-    // The overview's Description button: show what the description says first,
-    // and edit from there (Anki's editor opens straight on a desktop layout).
-    function setupDescriptionSheet() {
-        if (!root.classList.contains('onigiri-screen-overview') || document.documentElement.dataset.onigiriDescSheet) return;
-        document.documentElement.dataset.onigiriDescSheet = '1';
-        document.addEventListener('click', function (event) {
-            var btn = event.target.closest && event.target.closest('a.onigiri-overview-action-description');
-            if (!btn) return;
-            var desc = document.querySelector('.description');
-            var text = desc ? desc.textContent.trim() : '';
-            if (!desc || !text) return; // nothing written yet: the editor, as before
-            event.preventDefault();
-            event.stopImmediatePropagation();
-            var titleEl = document.querySelector('.overview-title, .overview-header h1, h1, h2');
-            var menu = formSheet((titleEl ? titleEl.textContent.trim() : '') || t('description', 'Description'));
-            var body = document.createElement('div');
-            body.className = 'onigiri-sheet-body';
-            body.innerHTML = desc.innerHTML;
-            menu.appendChild(body);
-            menu.appendChild(sheetPrimaryButton(t('description_edit', 'Edit description'), function () {
-                closeMenus();
-                try { if (window.pycmd) window.pycmd('description'); } catch (e) {}
-            }));
-            mountFormSheet(menu, null);
-        }, true);
-    }
-
     // --- Home: action tiles ------------------------------------------------------------
     // Phones show one row of five tiles: the first four actions and More.
     // Settings, Onigiri Games and the old More fly-out (Get Shared, Create
@@ -975,42 +883,6 @@
             if (ratio >= 3) return;
             name.style.setProperty('color', a > 0.4 ? '#1c1c1e' : '#ffffff', 'important');
         });
-    }
-
-    // The pill showed as an empty filled bar after a sync (audit 3, R3-13): its
-    // name colour can come from the theme before the accent behind it has been
-    // applied, so the contrast fix has to run again once styles settle, and the
-    // bar is not drawn until its content is ready (or 1.5 s have passed).
-    function settleProfilePill() {
-        var bars = document.querySelectorAll('.profile-bar');
-        if (!bars.length || !root.classList.contains('onigiri-phone')) return;
-        bars.forEach(function (bar) { bar.classList.add('onigiri-pill-pending'); });
-        var finish = function () {
-            fixProfileContrast();
-            document.querySelectorAll('.profile-bar').forEach(function (bar) {
-                bar.classList.remove('onigiri-pill-pending');
-            });
-        };
-        var pics = Array.prototype.slice.call(document.querySelectorAll('.profile-bar img'));
-        pics.forEach(function (img) {
-            // a picture that cannot load must not leave a hole
-            img.addEventListener('error', function () { img.style.display = 'none'; });
-        });
-        var waiting = pics.filter(function (img) { return !img.complete; });
-        var done = false;
-        var once = function () { if (done) return; done = true; finish(); };
-        if (!waiting.length) requestAnimationFrame(function () { requestAnimationFrame(once); });
-        else {
-            var left = waiting.length;
-            waiting.forEach(function (img) {
-                var one = function () { if (--left <= 0) once(); };
-                img.addEventListener('load', one, { once: true });
-                img.addEventListener('error', one, { once: true });
-            });
-        }
-        setTimeout(once, 1500);
-        [300, 1200, 3000].forEach(function (ms) { setTimeout(fixProfileContrast, ms); });
-        window.addEventListener('load', function () { setTimeout(fixProfileContrast, 50); });
     }
 
     // --- Home: "Decks" as a large title -------------------------------------------------
@@ -1147,11 +1019,7 @@
                 };
             }
             showActionSheet([
-                (function () {
-                    var row = deckRow(t('rename_deck_title', 'Rename Deck'), RENAME_SVG, 'rename');
-                    row.run = function () { showRenameSheet(more, deckName); };
-                    return row;
-                })(),
+                deckRow(t('rename_deck_title', 'Rename Deck'), RENAME_SVG, 'rename'),
                 deckRow(t('ctx_deck_options', 'Deck Options'), OPTIONS_SVG, 'options'),
                 deckRow(t('ctx_export_deck', 'Export Deck'), EXPORT_SVG, 'export'),
             ], more, deckName || t('more', 'More'));
@@ -1170,24 +1038,17 @@
             }
         }, { passive: true });
         hideHeaderButtonsInShadow();
-        var tries = 0;
         function toolsButtonVisibility() {
-            // No Hashi Notes, Pomodoro or add-on buttons: nothing to open. The
-            // wrench is shown until the header has mounted and proves there are
-            // none (it used to appear and vanish while the header loaded, audit 3
-            // R3-32), or the tries run out.
-            if (!isReviewer) return;
-            var has = studyToolButtons().length > 0;
-            var mounted = headerButtons().length > 0;
-            more.style.display = !has && (mounted || tries >= 20) ? 'none' : '';
+            // No Hashi Notes, Pomodoro or add-on buttons: nothing to open.
+            if (isReviewer) more.style.display = studyToolButtons().length ? '' : 'none';
         }
         toolsButtonVisibility();
         // the reviewer mounts its header after load
+        var tries = 0;
         var timer = setInterval(function () {
             hideHeaderButtonsInShadow();
-            tries++;
             toolsButtonVisibility();
-            if (tries > 20) clearInterval(timer);
+            if (++tries > 20) clearInterval(timer);
         }, 250);
     }
 
@@ -1249,41 +1110,15 @@
         var sidebar = document.querySelector('.sidebar-left');
         if (!sidebar || sidebar.dataset.onigiriProfileWatch || typeof MutationObserver === 'undefined') return;
         sidebar.dataset.onigiriProfileWatch = '1';
-        if (!document.getElementById('onigiri-profile-dim') && document.body) {
-            var dim = document.createElement('div');
-            dim.id = 'onigiri-profile-dim';
-            dim.setAttribute('aria-hidden', 'true');
-            document.body.appendChild(dim);
-        }
         var wasOpen = sidebar.classList.contains('profile-sidebar-open');
         new MutationObserver(function () {
             var open = sidebar.classList.contains('profile-sidebar-open');
             if (open === wasOpen) return;
             wasOpen = open;
+            root.classList.toggle('onigiri-profile-open', open);
             var panel = sidebar.querySelector('.onigiri-sidebar-profile');
-            var animated = !!panel && root.classList.contains('onigiri-phone') && !!panel.animate &&
-                !mq('(prefers-reduced-motion: reduce)');
-            if (!open) {
-                // Closing: keep the full-screen sheet in place while it slides
-                // down, then let the page behind it settle (it jumped before).
-                if (!animated) { root.classList.remove('onigiri-profile-open'); return; }
-                sidebar.classList.add('onigiri-profile-closing');
-                var finished = false;
-                var finish = function () {
-                    if (finished) return;
-                    finished = true;
-                    sidebar.classList.remove('onigiri-profile-closing');
-                    if (!sidebar.classList.contains('profile-sidebar-open')) root.classList.remove('onigiri-profile-open');
-                };
-                var closing = panel.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(100%)' }],
-                    { duration: 260, easing: 'cubic-bezier(0.32, 0.72, 0, 1)' });
-                closing.onfinish = finish;
-                setTimeout(finish, 320); // fallback if the animation never reports
-                return;
-            }
-            sidebar.classList.remove('onigiri-profile-closing');
-            root.classList.add('onigiri-profile-open');
-            if (!animated) return;
+            if (!open || !panel || !root.classList.contains('onigiri-phone') || !panel.animate) return;
+            if (mq('(prefers-reduced-motion: reduce)')) return;
             panel.animate([{ transform: 'translateY(100%)' }, { transform: 'translateY(0)' }],
                 { duration: 320, easing: 'cubic-bezier(0.32, 0.72, 0, 1)' });
         }).observe(sidebar, { attributes: true, attributeFilter: ['class'] });
@@ -1346,18 +1181,9 @@
     var CHEVRON_SVG = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>';
     var CHECK_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4 4L19 7"/></svg>';
 
-    function paintTabSelection(selected) {
-        var tabs = document.getElementById('onigiri-phone-tabs');
-        if (!tabs) return;
-        tabs.querySelectorAll('button[data-tab]').forEach(function (b) {
-            b.setAttribute('aria-selected', b.dataset.tab === selected ? 'true' : 'false');
-        });
-    }
-
     function closeAppMenu() {
         var page = document.getElementById('onigiri-app-menu');
         if (!page) return;
-        if (page.classList.contains('is-tab')) paintTabSelection(typeof currentTab === 'string' ? currentTab : 'decks');
         page.classList.add('is-closing');
         root.classList.remove('onigiri-app-menu-open');
         setTimeout(function () { page.remove(); }, 260);
@@ -1373,18 +1199,6 @@
         page.innerHTML = '<div class="oam-bar"><button type="button" class="oam-back"></button>' +
             '<div class="oam-title"></div><button type="button" class="oam-done"></button></div>' +
             '<div class="oam-body"></div>';
-        // Opened from the tab bar, Menu is a tab: the bar stays, Menu is the
-        // selected tab, no Done, and a row's action runs with the page left
-        // open under whatever it opens (audit 3, R3-10). Other callers keep
-        // the full-screen modal.
-        var tabs = document.getElementById('onigiri-phone-tabs');
-        var asTab = !!(window.__onigiriMenuFromTab && tabs && root.classList.contains('onigiri-phone'));
-        window.__onigiriMenuFromTab = false;
-        if (asTab) {
-            page.classList.add('is-tab');
-            page.style.bottom = tabs.offsetHeight + 'px';
-            paintTabSelection('menu');
-        }
         var stack = [{ title: (data && data.title) || t('menu', 'Menu'), items: (data && data.items) || [] }];
         var backBtn = page.querySelector('.oam-back');
         var doneBtn = page.querySelector('.oam-done');
@@ -1448,7 +1262,7 @@
                     }
                     if (item.en === false) return;
                     haptic('light');
-                    if (!asTab) closeAppMenu();
+                    closeAppMenu();
                     // A page command (Create Deck, Get Shared) or a menu action.
                     try { pycmd(item.cmd ? item.cmd : 'onigiri_app_menu_run:' + item.id); } catch (e) {}
                 });
@@ -1461,14 +1275,6 @@
         render(0);
         document.body.appendChild(page);
         root.classList.add('onigiri-app-menu-open');
-        if (asTab) {
-            // Decks and Home are the way out: choosing one closes the page
-            tabs.querySelectorAll('button[data-tab]:not([data-tab="menu"])').forEach(function (b) {
-                b.addEventListener('click', function () {
-                    if (document.getElementById('onigiri-app-menu')) closeAppMenu();
-                }, { capture: true, once: true });
-            });
-        }
     }
 
     // --- Keyboard: fixed bottom bars get out of the way ---------------------------
@@ -1593,12 +1399,9 @@
         if (syncBtn && window.MutationObserver) {
             var paintSync = function () {
                 var needed = syncBtn.classList.contains('sync-needed');
-                // while Anki syncs, the button says so (audit 3, R3-12)
-                var syncing = syncBtn.classList.contains('is-syncing');
                 var caption = syncBtn.querySelector('span');
-                var text = syncing ? t('sync_in_progress', 'Syncing…') : needed ? t('sync_needed', 'To sync') : t('sync', 'Sync');
-                if (caption) caption.textContent = text;
-                syncBtn.setAttribute('aria-label', syncing ? text : needed ? t('sync_changes_to_sync', 'Sync: changes to sync') : t('sync', 'Sync'));
+                if (caption) caption.textContent = needed ? t('sync_needed', 'To sync') : t('sync', 'Sync');
+                syncBtn.setAttribute('aria-label', needed ? t('sync_changes_to_sync', 'Sync: changes to sync') : t('sync', 'Sync'));
             };
             new MutationObserver(paintSync).observe(syncBtn, { attributes: true, attributeFilter: ['class'] });
             paintSync();
@@ -1631,9 +1434,6 @@
                 // popup, since the desktop menu row is hidden on phones.
                 b.removeAttribute('role');
                 b.addEventListener('click', function () {
-                    if (document.getElementById('onigiri-app-menu')) return; // already showing
-                    window.__onigiriMenuFromTab = true;
-                    setTimeout(function () { window.__onigiriMenuFromTab = false; }, 3000);
                     if (typeof pycmd === 'function') pycmd('onigiri_app_menu');
                 });
             } else {
@@ -1703,7 +1503,7 @@
         var schedule = function () {
             if (pending) return;
             pending = true;
-            requestAnimationFrame(function () { pending = false; fitSegments(); mergeToneRows(); markScrollableStrips(); keepActiveTabInView(); });
+            requestAnimationFrame(function () { pending = false; fitSegments(); mergeToneRows(); markScrollableStrips(); });
         };
         new MutationObserver(schedule).observe(shell, { childList: true, subtree: true });
         window.addEventListener('resize', schedule);
@@ -1718,16 +1518,6 @@
 
     function markScrollEdge(strip) {
         strip.classList.toggle('is-at-end', strip.scrollLeft + strip.clientWidth >= strip.scrollWidth - 2);
-        strip.classList.toggle('is-at-start', strip.scrollLeft <= 2);
-    }
-
-    // The tab that was chosen stays fully in view (audit 3, R3-19).
-    function keepActiveTabInView() {
-        var active = document.querySelector('.osw-shell .osw-subtabs-strip .osw-subtab.is-active');
-        if (!active || active.dataset.onigiriSeen === '1') return;
-        document.querySelectorAll('.osw-shell .osw-subtab[data-onigiri-seen]').forEach(function (b) { delete b.dataset.onigiriSeen; });
-        active.dataset.onigiriSeen = '1';
-        try { active.scrollIntoView({ inline: 'nearest', block: 'nearest' }); } catch (e) {}
     }
 
     function markScrollableStrips() {
@@ -1845,14 +1635,12 @@
         watchProfile();
         setupNavBar();
         setupEdgeSwipe();
-        setupDescriptionSheet();
         // injector.js adds the house button after load
         [0, 300, 1200].forEach(function (ms) { setTimeout(addQuickActions, ms); });
         if (root.classList.contains('onigiri-touch')) {
             setupActionTiles();
             titleCaseHeader();
             fixProfileContrast();
-            settleProfilePill();
         }
         // Kome builds its sidebar after load: add the tabs once it appears.
         if (!document.getElementById('onigiri-phone-tabs') && typeof MutationObserver !== 'undefined' && document.body) {

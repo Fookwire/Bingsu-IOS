@@ -63,35 +63,6 @@ def kioku_supports(option: str) -> bool:
 def forget_kioku_support() -> None:
     """For tests."""
     _supports_cache.clear()
-    _version_cache.clear()
-
-
-_version_cache: dict[str, Any] = {}
-
-
-def kioku_version() -> str | None:
-    """The Kioku app's version string (CFBundleShortVersionString), or None when
-    it cannot be read (not on iOS, or no rubicon). Cached. Used only to tell a
-    user which Kioku is running (audit 3, R3-04)."""
-    if "v" in _version_cache:
-        return _version_cache["v"]
-    value = None
-    try:
-        from rubicon.objc import ObjCClass  # type: ignore
-
-        raw = ObjCClass("NSBundle").mainBundle.objectForInfoDictionaryKey_("CFBundleShortVersionString")
-        value = str(raw) if raw is not None else None
-    except Exception:
-        value = None
-    _version_cache["v"] = value
-    return value
-
-
-def kioku_summary() -> str:
-    """"Kioku 0.2.12 · single header: yes" for the Help menu and the log."""
-    version = kioku_version() or "version unknown"
-    single = "yes" if kioku_supports("kioku_hide_titlebar") else "no"
-    return f"Kioku {version} · single header: {single}"
 
 
 # --- helpers -------------------------------------------------------------------
@@ -539,13 +510,6 @@ def install() -> None:
         return
     _state["installed"] = True
     from aqt import gui_hooks
-
-    try:
-        import kioku.windows as kioku_windows  # type: ignore
-
-        _log(f"{kioku_summary()}, OPTIONS={getattr(kioku_windows, 'OPTIONS', None)}")
-    except Exception:
-        _log(f"{kioku_summary()}, OPTIONS=unavailable")
 
     gui_hooks.main_window_did_init.append(_after_main_window)
     gui_hooks.profile_did_open.append(_after_main_window)

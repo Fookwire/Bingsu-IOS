@@ -238,10 +238,9 @@ def bottom_bar_assets() -> str:
             filter: brightness(1.12);
         }
         /* A sheet is open over the card (touch): the rest of the bar waits. */
-        html.onigiri-touch.onigiri-more-sheet-open #outer button:not(.onigiri-more-btn),
-        html.onigiri-touch.onigiri-more-sheet-open #outer .onigiri-show-answer-btn {
-            opacity: 0.35 !important;
-            pointer-events: none !important;
+        html.onigiri-touch.onigiri-more-sheet-open #outer button:not(.onigiri-more-btn) {
+            opacity: 0.35;
+            pointer-events: none;
         }
         @media (prefers-reduced-motion: reduce) {
             #outer button[onclick*="more"] .onigiri-more-chevron,

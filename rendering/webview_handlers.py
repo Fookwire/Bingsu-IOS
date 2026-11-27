@@ -637,16 +637,7 @@ def _onigiri_menu_parts(menu) -> dict:
             if children:
                 parts["rest"].append({"t": _menu_text(action), "sub": children})
         elif not action.isEnabled():
-            entry = _action_entry(action)  # the version line
-            try:
-                from ..core import ios_native
-                from ..core.platform import IS_MOBILE
-
-                if IS_MOBILE:
-                    entry["t"] = entry["t"] + " · " + ios_native.kioku_summary()
-            except Exception:
-                pass
-            parts["info"].append(entry)
+            parts["info"].append(_action_entry(action))  # the version line
         else:
             parts["rest"].append(_action_entry(action))
     return parts
@@ -756,15 +747,6 @@ def _overview_deck_action(action: str) -> None:
             from aqt.exporting import ExportDialog
 
             ExportDialog(mw, did=did)
-        elif action.startswith("rename_to:"):
-            # the phone's Rename sheet sends the new name (audit 3, R3-09):
-            # the same undoable operation as the desktop prompt below
-            from aqt.operations.deck import rename_deck
-
-            old = mw.col.decks.get(did)["name"]
-            new = unquote(action.split(":", 1)[1]).strip()
-            if new and new != old:
-                rename_deck(parent=mw, deck_id=did, new_name=new).run_in_background()
         elif action == "rename":
             from aqt import tr as anki_tr
             from aqt.operations.deck import rename_deck
@@ -1366,10 +1348,7 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
                 "favorites_first": tr("sort_favorites_first"),
                 "custom": tr("sort_custom_order"),
             }
-            from ..core.platform import IS_MOBILE
-
-            if not IS_MOBILE:  # on a phone the sort sheet already shows the checkmark (R3-24)
-                tooltip(tr("deck_sort_toast").format(labels.get(sort_mode, sort_mode)))
+            tooltip(tr("deck_sort_toast").format(labels.get(sort_mode, sort_mode)))
             return (True, None)
         except Exception as e:
             print(f"Onigiri: Error handling sort command: {e}")

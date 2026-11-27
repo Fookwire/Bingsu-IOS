@@ -757,28 +757,9 @@ window.OnigiriHeatmap = window.OnigiriHeatmap || {};
     // its own sideways scroller, opened at today, the right-hand end. It used
     // to be squeezed to the screen width: cells about 2pt wide.
     function scrollYearToToday(gridContainer) {
-        const go = () => { gridContainer.scrollLeft = gridContainer.scrollWidth; trimClippedMonthLabels(gridContainer); };
+        const go = () => { gridContainer.scrollLeft = gridContainer.scrollWidth; };
         go();
         requestAnimationFrame(go);
-        if (!gridContainer.dataset.hmTrim) {
-            gridContainer.dataset.hmTrim = '1';
-            gridContainer.addEventListener('scroll', () => trimClippedMonthLabels(gridContainer), { passive: true });
-        }
-    }
-
-    // A month label cut by the left edge of the sideways scroller read as
-    // a broken word ("ct", audit 3 R3-23): hide the ones that are not fully in
-    // view, show the others.
-    function trimClippedMonthLabels(gridContainer) {
-        const box = gridContainer.getBoundingClientRect();
-        const weekdays = gridContainer.querySelector('.heatmap-weekdays');
-        const sticky = weekdays && window.getComputedStyle(weekdays).position === 'sticky';
-        const left = box.left + (sticky ? weekdays.offsetWidth : 0);
-        gridContainer.querySelectorAll('.month-label').forEach((label) => {
-            const r = label.getBoundingClientRect();
-            const cut = r.left < left - 1 || r.right > box.right + 1;
-            label.style.visibility = cut ? 'hidden' : '';
-        });
     }
 
     function fitGridToContainer(container, gridContainer) {

@@ -21307,11 +21307,6 @@ undo_show_question_again|Show Question Again|Mostrar a pergunta novamente|Mostra
 menu_appearance|Appearance|Aparência|Apariencia|外观|外観|Apparence|화면 설정|Darstellung
 nothing_studied_yet_today|Nothing studied yet today|Nada estudado hoje ainda|Nada estudiado todavía hoy|今天还没有学习|今日はまだ学習していません|Rien étudié aujourd'hui|오늘은 아직 학습하지 않았습니다|Heute noch nichts gelernt
 overview_finish_prefix|Finish|Concluir|Terminar|完成|完了|Fin|완료|Fertig
-window_fields|Fields|Campos|Campos|字段|フィールド|Champs|필드|Felder
-window_card_types|Card Types|Tipos de cartão|Tipos de tarjeta|卡片类型|カードタイプ|Types de cartes|카드 유형|Kartentypen
-rename_action|Rename|Renomear|Renombrar|重命名|名前を変更|Renommer|이름 변경|Umbenennen
-description_edit|Edit description|Editar descrição|Editar descripción|编辑描述|説明を編集|Modifier la description|설명 편집|Beschreibung bearbeiten
-sync_in_progress|Syncing…|Sincronizando…|Sincronizando…|正在同步…|同期中…|Synchronisation…|동기화 중…|Synchronisiere…
 """
 
 ALIASES = {

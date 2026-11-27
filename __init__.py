@@ -330,7 +330,6 @@ def inject_menu_files(web_content, context):
         )
 
         if conf.get("showWelcomePopup", True) and not is_shima:
-            _welcome_seen_on_phone()
             web_content.head += f"""
             <script>
             window.addEventListener("DOMContentLoaded", function() {{
@@ -1433,42 +1432,12 @@ def _is_onigiri_page(context) -> bool:
     return cls.__name__ in _ONIGIRI_PAGE_CONTEXTS or cls.__module__.startswith(__name__)
 
 
-def _welcome_seen_on_phone():
-    """On a phone the welcome screen shows once (audit 3, R3-11): every page
-    render (a sync, a return from a deck) used to bring it back until Continue
-    was tapped, and a launch over a sync it was hidden behind. The Menu's
-    "Welcome message" still shows it again; desktop is unchanged."""
-    try:
-        from .core.platform import IS_MOBILE
-
-        if not IS_MOBILE:
-            return
-        conf = config.get_config()
-        if conf.get("showWelcomePopup", True):
-            conf["showWelcomePopup"] = False
-            config.write_config(conf)
-    except Exception as exc:
-        print(f"Onigiri: could not remember the welcome screen: {exc}")
-
-
 def _anki_page_style(context):
     """The app theme's colours for Anki's own note editor page on phones."""
     try:
         from .core import mobile_theme
 
         return mobile_theme.anki_page_style_tag(context)
-    except Exception:
-        return ""
-
-
-def _nav_background_style(context):
-    """Theme background variable for the scrolled phone header bar (R3-07)."""
-    try:
-        if not _is_onigiri_page(context):
-            return ""
-        from .core import mobile_theme
-
-        return mobile_theme.nav_background_style_tag()
     except Exception:
         return ""
 
@@ -1513,7 +1482,6 @@ def inject_mobile_assets(web_content, context):
         + web_content.head
         + stylesheet_link("mobile.css")
         + _anki_page_style(context)
-        + _nav_background_style(context)
     )
 
 

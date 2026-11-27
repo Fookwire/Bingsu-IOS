@@ -229,18 +229,6 @@ def _accent_color(conf=None):
 def base_chrome_palette(dark):
     mode = "dark" if dark else "light"
     colors = config.get_config_readonly().get("colors", {}).get(mode, {})
-    from ..core.platform import IS_MOBILE
-
-    if IS_MOBILE:
-        # On a phone the timer card takes the app's theme tokens, like the other
-        # Qt surfaces (audit 3, R3-05): one set of colours, no separate greys.
-        try:
-            from ..core import mobile_theme
-            from ..rendering.theme_palette import add_utility_aliases
-
-            return add_utility_aliases(mobile_theme.settings_palette(colors, dark))
-        except Exception:
-            pass
     return utility_chrome_palette(colors, dark)
 
 
@@ -877,12 +865,9 @@ class PomodoroIslandView(_PomoShellFrame):
     def _build(self):
         if self._body is not None:
             self._outer.removeWidget(self._body)
-            # hide first: deleteLater alone leaves the old body painted on top
-            # of the new one until the event loop runs. (Not setParent(None):
-            # a parentless widget is a top-level window, and Kioku gives every
-            # window its own "Back" bar: the second Back inside the timer
-            # card, audit 3 R3-05.)
-            self._body.hide()
+            # setParent(None) first: deleteLater alone leaves the old body
+            # painted on top of the new one until the event loop runs.
+            self._body.setParent(None)
             self._body.deleteLater()
         preset = self.preset
         # New child widgets, so every refresh() cache is stale.
@@ -1348,27 +1333,6 @@ class PomodoroWidget(QDialog):
         self.raise_()
         self.activateWindow()
         self._refresh_static_backdrop()
-        from ..core.platform import IS_MOBILE
-
-        if IS_MOBILE:
-            # Kioku's "Back" bar is the way out on a phone: no second exit in
-            # the card (R3-05). Its bar comes a moment after show().
-            from aqt.qt import QTimer
-
-            for delay in (0, 200, 700):
-                QTimer.singleShot(delay, self._one_exit_on_phone)
-
-    def _one_exit_on_phone(self):
-        try:
-            bars = self.findChildren(QWidget, "kiokuTitleBar")
-            own = [b for b in bars if b.parent() is self and not b.isHidden()]
-            for bar in bars:
-                if bar.parent() is not self:  # a bar Kioku gave an inner widget
-                    bar.hide()
-            if own and hasattr(self.shell, "close_btn"):
-                self.shell.close_btn.hide()  # Kioku's Back closes the window as the x did
-        except RuntimeError:
-            pass  # window already gone
 
     def _refresh(self):
         timer = self.timer

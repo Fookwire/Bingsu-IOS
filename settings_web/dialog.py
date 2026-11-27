@@ -106,7 +106,7 @@ class SettingsWebDialog(QDialog):
         self._startup_failed = False
         self._closed = False
 
-        self.setWindowTitle(self._window_title())
+        self.setWindowTitle(tr("settings_title"))
         self._apply_proportional_size()
         if IS_MOBILE:
             # Kioku draws its own "Back" title bar above every window. The
@@ -179,16 +179,6 @@ class SettingsWebDialog(QDialog):
         self.web.stdHtml(page_html, context=self)
 
     # ─── window ────────────────────────────────────────────────────────────────
-
-    @staticmethod
-    def _window_title():
-        """On a phone the window is "Appearance", the name the Menu gives it
-        (audit 3, R3-31); desktop keeps its title."""
-        from ..core.platform import IS_MOBILE
-
-        if IS_MOBILE:
-            return tr("menu_appearance", "Appearance")
-        return tr("settings_title")
 
     def _apply_proportional_size(self):
         from ..core.platform import IS_MOBILE
@@ -437,7 +427,7 @@ class SettingsWebDialog(QDialog):
         if "language" in touched:
             self.pages = schema.build_pages()
             self._page_by_id = {page["id"]: page for page in self.pages}
-            self.setWindowTitle(self._window_title())
+            self.setWindowTitle(tr("settings_title"))
             result["localization"] = render.build_context(self.store, self.pages)
         if "onigiri_theme_mode" in touched:
             result["appearance"] = self._appearance_payload()

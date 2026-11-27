@@ -55,34 +55,6 @@ class IosNativeTests(unittest.TestCase):
         self.assertIsNone(p("url(x)"))
         self.assertIsNone(p(""))
 
-    def test_kioku_version_from_bundle_and_cached(self):
-        class Bundle:
-            mainBundle = None
-
-            def objectForInfoDictionaryKey_(self, key):
-                assert key == "CFBundleShortVersionString"
-                return "0.2.9"
-
-        bundle = Bundle()
-        bundle.mainBundle = bundle
-        objc = types.ModuleType("rubicon.objc")
-        objc.ObjCClass = lambda name: bundle
-        rubicon = types.ModuleType("rubicon")
-        rubicon.objc = objc
-        self.native.forget_kioku_support()
-        with patch.dict(sys.modules, {"rubicon": rubicon, "rubicon.objc": objc}):
-            self.assertEqual(self.native.kioku_version(), "0.2.9")
-        # cached: still answers without rubicon
-        self.assertEqual(self.native.kioku_version(), "0.2.9")
-        self.assertIn("Kioku 0.2.9", self.native.kioku_summary())
-        self.assertIn("single header: no", self.native.kioku_summary())
-
-    def test_kioku_version_none_without_rubicon(self):
-        self.native.forget_kioku_support()
-        with patch.dict(sys.modules, {"rubicon": None, "rubicon.objc": None}):
-            self.assertIsNone(self.native.kioku_version())
-            self.assertIn("version unknown", self.native.kioku_summary())
-
     def test_off_ios_everything_is_a_noop(self):
         with patch.object(self.native.onigiri_platform, "IS_IOS", False):
             self.assertFalse(self.native.active())

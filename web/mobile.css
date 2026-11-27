@@ -134,11 +134,6 @@ html.onigiri-touch.onigiri-app :is(tr.deck, .quick-menu-item, .osw-nav-item).oni
     background-color: var(--highlight-bg, rgba(127, 127, 127, 0.16)) !important;
 }
 
-/* Settings rows use the accent, not Anki's blue (audit 3, R3-18). */
-html.onigiri-touch .osw-shell .osw-nav-item.onigiri-pressed {
-    background-color: var(--osw-accent-a14, rgba(127, 127, 127, 0.16)) !important;
-}
-
 html.onigiri-touch tr.deck.onigiri-pressing {
     background-color: var(--highlight-bg) !important;
     transition: background-color 0.4s ease;
@@ -1651,7 +1646,7 @@ html.onigiri-phone .heatmap-grid.month-view {
 /* Profile on phones: a full-screen page                                     */
 /* ------------------------------------------------------------------------- */
 
-html.onigiri-phone .sidebar-left:is(.profile-sidebar-open, .onigiri-profile-closing) .onigiri-sidebar-profile {
+html.onigiri-phone .sidebar-left.profile-sidebar-open .onigiri-sidebar-profile {
     position: fixed !important;
     inset: 0 !important;
     z-index: 9500 !important;
@@ -2270,7 +2265,7 @@ html.onigiri-phone.onigiri-nav-scrolled #onigiri-phone-nav {
     height: 54px;
     padding: 10px calc(10px + var(--onigiri-safe-right)) 0 calc(10px + var(--onigiri-safe-left));
     box-sizing: border-box;
-    background: var(--onigiri-nav-bg, var(--bg, var(--canvas, #fff)));
+    background: var(--canvas, var(--bg, #fff));
     box-shadow: 0 1px 0 rgba(127, 127, 127, 0.25);
 }
 
@@ -2703,7 +2698,7 @@ html.onigiri-phone.onigiri-profile-open .sidebar-expanded-content {
     perspective: none !important;
 }
 
-html.onigiri-phone .sidebar-left:is(.profile-sidebar-open, .onigiri-profile-closing) .onigiri-sidebar-profile {
+html.onigiri-phone .sidebar-left.profile-sidebar-open .onigiri-sidebar-profile {
     height: 100vh !important;
     height: 100dvh !important;
     padding-top: var(--onigiri-safe-top, 0px) !important;
@@ -2940,11 +2935,11 @@ html.onigiri-phone.onigiri-profile-open .container.modern-main-menu {
     overflow: hidden !important;
 }
 
-html.onigiri-phone .sidebar-left:is(.profile-sidebar-open, .onigiri-profile-closing) .onigiri-sidebar-profile {
+html.onigiri-phone .sidebar-left.profile-sidebar-open .onigiri-sidebar-profile {
     scrollbar-width: none;
 }
 
-html.onigiri-phone .sidebar-left:is(.profile-sidebar-open, .onigiri-profile-closing) .onigiri-sidebar-profile::-webkit-scrollbar {
+html.onigiri-phone .sidebar-left.profile-sidebar-open .onigiri-sidebar-profile::-webkit-scrollbar {
     display: none;
 }
 
@@ -2976,11 +2971,6 @@ html.onigiri-phone .overview-center-container .onigiri-external-overview-addon {
     overflow-y: visible;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-x: contain;
-    /* a themed card around the add-on's own content (audit 3, R3-28) */
-    margin: 12px 0;
-    padding: 12px;
-    border-radius: 16px;
-    background: var(--canvas-elevated, var(--onigiri-surface-fill, rgba(127, 127, 127, 0.08)));
 }
 
 /* "Nothing studied yet today": a quiet line under the dash (audit 2, R2-35). */
@@ -2992,141 +2982,3 @@ html.onigiri-phone .stat-card .stat-nodata {
     opacity: 0.8;
 }
 
-
-
-/* Sheets with their own content: the Rename field and the description
-   (audit 3, R3-09, R3-33). */
-html.onigiri-phone .onigiri-form-sheet {
-    padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
-}
-
-html.onigiri-phone .onigiri-form-sheet .onigiri-sheet-input {
-    display: block;
-    box-sizing: border-box;
-    width: calc(100% - 32px);
-    margin: 4px 16px 12px;
-    min-height: 48px;
-    padding: 0 14px;
-    border: 1px solid var(--onigiri-surface-line, rgba(127, 127, 127, 0.35)) !important;
-    border-radius: 12px;
-    background: var(--onigiri-surface-fill, var(--highlight-bg, rgba(127, 127, 127, 0.1))) !important;
-    color: var(--onigiri-surface-ink, var(--fg, inherit)) !important;
-    font: inherit;
-    font-size: 17px; /* 16px or more: iOS does not zoom the page */
-    -webkit-appearance: none;
-    appearance: none;
-    user-select: text;
-    -webkit-user-select: text;
-}
-
-html.onigiri-phone .onigiri-form-sheet .onigiri-sheet-primary {
-    display: block;
-    box-sizing: border-box;
-    width: calc(100% - 32px);
-    margin: 0 16px;
-    min-height: 50px;
-    border: 0 !important;
-    border-radius: 12px;
-    background: var(--onigiri-accent, var(--accent-color, #0a84ff)) !important;
-    color: var(--onigiri-on-accent, #fff) !important;
-    box-shadow: none !important;
-    font: inherit;
-    font-size: 17px;
-    font-weight: 600;
-    text-transform: none;
-}
-
-html.onigiri-phone .onigiri-form-sheet .onigiri-sheet-body {
-    box-sizing: border-box;
-    max-height: 46vh;
-    overflow-y: auto;
-    margin: 0 16px 14px;
-    padding: 12px 14px;
-    border-radius: 12px;
-    background: var(--onigiri-surface-fill, rgba(127, 127, 127, 0.1));
-    color: var(--onigiri-surface-ink, var(--fg, inherit));
-    font-size: 16px;
-    line-height: 1.45;
-    text-align: left;
-    overscroll-behavior: contain;
-    user-select: text;
-    -webkit-user-select: text;
-}
-
-
-/* Menu opened from the tab bar is a tab (audit 3, R3-10): it sits above the
-   page and under the tab bar, which stays; Done has no place at the root. */
-html.onigiri-phone #onigiri-app-menu.is-tab {
-    inset: 0 0 auto 0;
-    z-index: 8999;
-    animation: none;
-}
-
-html.onigiri-phone #onigiri-app-menu.is-tab .oam-done {
-    visibility: hidden;
-}
-
-html.onigiri-phone #onigiri-app-menu.is-tab.is-closing {
-    transform: none;
-    opacity: 0;
-    transition: opacity 0.16s ease;
-}
-
-
-/* Closing the profile sheet (audit 3, R3-27): the sheet slides down as one
-   piece over a dimmed page; the page behind it does not jump meanwhile. */
-html.onigiri-phone .sidebar-left.onigiri-profile-closing .onigiri-sidebar-profile {
-    opacity: 1 !important;
-    pointer-events: none !important;
-}
-
-#onigiri-profile-dim {
-    display: none;
-}
-
-html.onigiri-phone.onigiri-profile-open #onigiri-profile-dim {
-    display: block;
-    position: fixed;
-    inset: 0;
-    z-index: 9400;
-    background: rgba(0, 0, 0, 0.35);
-    pointer-events: none;
-}
-
-
-/* Restore Default at the end of the page, not in the tab strip (audit 3, R3-19). */
-html.onigiri-phone .osw-shell .osw-page-reset-wrap.is-page-end {
-    display: flex;
-    justify-content: center;
-    margin: 18px 0 8px;
-    overflow: visible !important;
-}
-
-/* Tab strips fade at both edges while there is more to see. */
-html.onigiri-phone .osw-shell .osw-subtabs.is-scrollable:not(.is-at-end):not(.is-at-start),
-html.onigiri-phone .osw-shell .osw-subtabs-strip.is-scrollable:not(.is-at-end):not(.is-at-start) {
-    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
-    mask-image: linear-gradient(to right, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
-}
-
-html.onigiri-phone .osw-shell .osw-subtabs.is-scrollable.is-at-end:not(.is-at-start),
-html.onigiri-phone .osw-shell .osw-subtabs-strip.is-scrollable.is-at-end:not(.is-at-start) {
-    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 28px);
-    mask-image: linear-gradient(to right, transparent 0, #000 28px);
-}
-
-
-/* A background preview with nothing to show takes no space (audit 3, R3-20). */
-html.onigiri-phone .osw-shell .osw-designer-preview-stage.is-empty {
-    display: none !important;
-}
-
-
-/* The profile pill is drawn once its content is ready (audit 3, R3-13). */
-html.onigiri-phone .profile-bar.onigiri-pill-pending {
-    opacity: 0;
-}
-
-html.onigiri-phone .profile-bar {
-    transition: opacity 0.18s ease;
-}

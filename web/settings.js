@@ -6448,7 +6448,6 @@
   function designerPaintBackdrop(stage, vals, isDark, keys) {
     keys = keys || MAIN_BG_KEYS;
     const mode = vals[keys.mode] || "image_color";
-    stage.__bgMode = mode; // the resolved mode ends up here (a "match main" call recurses)
 
     // Matching reads the live source, so subsequent source edits propagate too.
     if (mode === "main" && keys !== MAIN_BG_KEYS) {
@@ -6539,9 +6538,6 @@
   function designerBackgroundPainter(stage, vals, isDark, keys) {
     stage.innerHTML = "";
     const imgLayer = designerPaintBackdrop(stage, vals, isDark, keys);
-    // No image to show and not a colour chosen on purpose: the preview would be
-    // a flat empty box. Phones collapse it (audit 3, R3-20).
-    stage.classList.toggle("is-empty", !imgLayer && stage.__bgMode !== "color");
     if (!imgLayer) return;
 
     // Drag-to-pan: purely visual, not staged/persisted.
@@ -14264,7 +14260,7 @@
       tile.appendChild(wrap);
 
       const foot = el("span", "osw-theme-foot");
-      foot.appendChild(el("span", "osw-theme-name", theme.label || theme.name));
+      foot.appendChild(el("span", "osw-theme-name", theme.name));
       const sub = el("span", "osw-theme-sub");
       const dotA = el("span", "osw-theme-sub-dot");
       dotA.style.background = colors.lightAccent;
@@ -14345,7 +14341,7 @@
           document.querySelectorAll(".osw-theme-tile.is-current").forEach(function (t) { t.classList.remove("is-current"); });
           tile.classList.add("is-current");
           CTX.currentThemeColors = { lightBg: colors.lightBg, darkBg: colors.darkBg, lightAccent: colors.lightAccent, darkAccent: colors.darkAccent };
-          toast(str("theme_applied_toast", "Theme applied:") + " " + (theme.label || theme.name));
+          toast(str("theme_applied_toast", "Theme applied:") + " " + theme.name);
         });
       }
 
@@ -15282,7 +15278,6 @@
     // when this particular header cannot accommodate every destination.
     tabsWrap.classList.remove("is-icons");
     const strip = el("div", "osw-subtabs-strip");
-    let phoneResetWrap = null;
 
     // Main Menu and Sidebar resets live beside their tab strips because each
     // resets the complete page, not merely the currently selected section.
@@ -15376,19 +15371,12 @@
       }
       installResetHold(resetBtn, resetPageSettings, { title: resetBtn.title });
       resetWrap.appendChild(resetBtn);
-      // On a phone the chip took a third of the tab strip's width: it goes to
-      // the end of the page instead, still hold to confirm (audit 3, R3-19).
-      if (document.documentElement.classList.contains("onigiri-phone")) phoneResetWrap = resetWrap;
-      else tabsWrap.appendChild(resetWrap);
+      tabsWrap.appendChild(resetWrap);
     }
     tabsWrap.appendChild(strip);
 
     const body = el("div", "osw-subtab-body");
     host.appendChild(body);
-    if (phoneResetWrap) {
-      phoneResetWrap.classList.add("is-page-end");
-      host.appendChild(phoneResetWrap);
-    }
 
     let activeId = activeTabByPage[page.id];
     if (!sections.some(function (s) { return s.id === activeId; })) activeId = sections[0].id;
