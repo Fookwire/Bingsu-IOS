@@ -1651,7 +1651,7 @@ html.onigiri-phone .heatmap-grid.month-view {
 /* Profile on phones: a full-screen page                                     */
 /* ------------------------------------------------------------------------- */
 
-html.onigiri-phone .sidebar-left.profile-sidebar-open .onigiri-sidebar-profile {
+html.onigiri-phone .sidebar-left:is(.profile-sidebar-open, .onigiri-profile-closing) .onigiri-sidebar-profile {
     position: fixed !important;
     inset: 0 !important;
     z-index: 9500 !important;
@@ -2703,7 +2703,7 @@ html.onigiri-phone.onigiri-profile-open .sidebar-expanded-content {
     perspective: none !important;
 }
 
-html.onigiri-phone .sidebar-left.profile-sidebar-open .onigiri-sidebar-profile {
+html.onigiri-phone .sidebar-left:is(.profile-sidebar-open, .onigiri-profile-closing) .onigiri-sidebar-profile {
     height: 100vh !important;
     height: 100dvh !important;
     padding-top: var(--onigiri-safe-top, 0px) !important;
@@ -2940,11 +2940,11 @@ html.onigiri-phone.onigiri-profile-open .container.modern-main-menu {
     overflow: hidden !important;
 }
 
-html.onigiri-phone .sidebar-left.profile-sidebar-open .onigiri-sidebar-profile {
+html.onigiri-phone .sidebar-left:is(.profile-sidebar-open, .onigiri-profile-closing) .onigiri-sidebar-profile {
     scrollbar-width: none;
 }
 
-html.onigiri-phone .sidebar-left.profile-sidebar-open .onigiri-sidebar-profile::-webkit-scrollbar {
+html.onigiri-phone .sidebar-left:is(.profile-sidebar-open, .onigiri-profile-closing) .onigiri-sidebar-profile::-webkit-scrollbar {
     display: none;
 }
 
@@ -2976,6 +2976,11 @@ html.onigiri-phone .overview-center-container .onigiri-external-overview-addon {
     overflow-y: visible;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-x: contain;
+    /* a themed card around the add-on's own content (audit 3, R3-28) */
+    margin: 12px 0;
+    padding: 12px;
+    border-radius: 16px;
+    background: var(--canvas-elevated, var(--onigiri-surface-fill, rgba(127, 127, 127, 0.08)));
 }
 
 /* "Nothing studied yet today": a quiet line under the dash (audit 2, R2-35). */
@@ -3046,4 +3051,72 @@ html.onigiri-phone .onigiri-form-sheet .onigiri-sheet-body {
     overscroll-behavior: contain;
     user-select: text;
     -webkit-user-select: text;
+}
+
+
+/* Menu opened from the tab bar is a tab (audit 3, R3-10): it sits above the
+   page and under the tab bar, which stays; Done has no place at the root. */
+html.onigiri-phone #onigiri-app-menu.is-tab {
+    inset: 0 0 auto 0;
+    z-index: 8999;
+    animation: none;
+}
+
+html.onigiri-phone #onigiri-app-menu.is-tab .oam-done {
+    visibility: hidden;
+}
+
+html.onigiri-phone #onigiri-app-menu.is-tab.is-closing {
+    transform: none;
+    opacity: 0;
+    transition: opacity 0.16s ease;
+}
+
+
+/* Closing the profile sheet (audit 3, R3-27): the sheet slides down as one
+   piece over a dimmed page; the page behind it does not jump meanwhile. */
+html.onigiri-phone .sidebar-left.onigiri-profile-closing .onigiri-sidebar-profile {
+    opacity: 1 !important;
+    pointer-events: none !important;
+}
+
+#onigiri-profile-dim {
+    display: none;
+}
+
+html.onigiri-phone.onigiri-profile-open #onigiri-profile-dim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 9400;
+    background: rgba(0, 0, 0, 0.35);
+    pointer-events: none;
+}
+
+
+/* Restore Default at the end of the page, not in the tab strip (audit 3, R3-19). */
+html.onigiri-phone .osw-shell .osw-page-reset-wrap.is-page-end {
+    display: flex;
+    justify-content: center;
+    margin: 18px 0 8px;
+    overflow: visible !important;
+}
+
+/* Tab strips fade at both edges while there is more to see. */
+html.onigiri-phone .osw-shell .osw-subtabs.is-scrollable:not(.is-at-end):not(.is-at-start),
+html.onigiri-phone .osw-shell .osw-subtabs-strip.is-scrollable:not(.is-at-end):not(.is-at-start) {
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
+}
+
+html.onigiri-phone .osw-shell .osw-subtabs.is-scrollable.is-at-end:not(.is-at-start),
+html.onigiri-phone .osw-shell .osw-subtabs-strip.is-scrollable.is-at-end:not(.is-at-start) {
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 28px);
+    mask-image: linear-gradient(to right, transparent 0, #000 28px);
+}
+
+
+/* A background preview with nothing to show takes no space (audit 3, R3-20). */
+html.onigiri-phone .osw-shell .osw-designer-preview-stage.is-empty {
+    display: none !important;
 }

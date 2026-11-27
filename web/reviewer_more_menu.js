@@ -390,11 +390,26 @@
         overscroll-behavior: contain;
       }
       .rm-grab { width: 36px; height: 5px; border-radius: 3px; background: var(--rm-border); margin: 2px auto 8px; flex: 0 0 auto; }
-      .rm-cancel { justify-content: center; text-align: center; font-weight: 600; margin-top: 10px; background: var(--rm-elevated); border-radius: 14px; position: sticky; bottom: 0; z-index: 2; box-shadow: 0 0 0 6px var(--rm-surface-solid); }
+      /* The sheet is a column: handle, one scroller, Cancel. Cancel is the last
+         thing on screen and never scrolls away (audit 3, R3-06). */
+      .rm-panel { display: none; flex-direction: column !important; overflow: hidden !important; }
+      .rm-panel.is-visible { display: flex; }
+      .rm-scroll {
+        flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden;
+        overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+        display: flex; flex-direction: column; gap: inherit; scrollbar-width: none;
+      }
+      .rm-scroll::-webkit-scrollbar { display: none; }
+      .rm-cancel { justify-content: center; text-align: center; font-weight: 600; margin-top: 10px; background: var(--rm-elevated); border-radius: 14px; flex: 0 0 auto; position: static; box-shadow: none; }
       .rm-item-btn, .rm-quick-btn, .rm-split-row, .rm-media-btn { min-height: 44px; }
       .rm-item-btn, .rm-quick-label, .rm-split-title, .rm-media-label { font-size: 15px; }
       .rm-flag-btn { height: 44px; }
-      .rm-item-btn:hover, .rm-flag-btn:hover, .rm-quick-btn:hover, .rm-media-btn:hover { background: transparent; }
+      /* No pressed or hover fill while a finger scrolls the list: Delete Note
+         flashed red under it (audit 3, R3-06). */
+      .rm-item-btn:hover, .rm-flag-btn:hover, .rm-quick-btn:hover, .rm-media-btn:hover,
+      .rm-item-btn:active, .rm-flag-btn:active, .rm-quick-btn:active, .rm-media-btn:active,
+      .rm-item-btn.is-danger:hover, .rm-item-btn.is-danger:active { background: transparent !important; }
+      .rm-item-btn, .rm-quick-btn, .rm-media-btn, .rm-flag-btn { -webkit-tap-highlight-color: transparent; }
     `;
   }
 
@@ -994,11 +1009,21 @@
     }
 
     if (asSheet) {
+      // Audio and voice sit with the quick actions; Delete Note ends the list
+      // right above Cancel (audit 3, R3-06).
+      if (quickGrid.parentNode === panel) quickGrid.after(mediaDock);
       const cancel = document.createElement("button");
       cancel.type = "button";
       cancel.className = "rm-item-btn rm-cancel";
       cancel.textContent = labels.cancel || "Cancel";
       cancel.addEventListener("click", () => requestClose());
+      // everything between the handle and Cancel scrolls; Cancel stays put
+      const scroller = document.createElement("div");
+      scroller.className = "rm-scroll";
+      Array.from(panel.children).forEach((child) => {
+        if (!child.classList.contains("rm-grab")) scroller.appendChild(child);
+      });
+      panel.appendChild(scroller);
       panel.appendChild(cancel);
     }
   }

@@ -1206,15 +1206,41 @@
         var sidebar = document.querySelector('.sidebar-left');
         if (!sidebar || sidebar.dataset.onigiriProfileWatch || typeof MutationObserver === 'undefined') return;
         sidebar.dataset.onigiriProfileWatch = '1';
+        if (!document.getElementById('onigiri-profile-dim') && document.body) {
+            var dim = document.createElement('div');
+            dim.id = 'onigiri-profile-dim';
+            dim.setAttribute('aria-hidden', 'true');
+            document.body.appendChild(dim);
+        }
         var wasOpen = sidebar.classList.contains('profile-sidebar-open');
         new MutationObserver(function () {
             var open = sidebar.classList.contains('profile-sidebar-open');
             if (open === wasOpen) return;
             wasOpen = open;
-            root.classList.toggle('onigiri-profile-open', open);
             var panel = sidebar.querySelector('.onigiri-sidebar-profile');
-            if (!open || !panel || !root.classList.contains('onigiri-phone') || !panel.animate) return;
-            if (mq('(prefers-reduced-motion: reduce)')) return;
+            var animated = !!panel && root.classList.contains('onigiri-phone') && !!panel.animate &&
+                !mq('(prefers-reduced-motion: reduce)');
+            if (!open) {
+                // Closing: keep the full-screen sheet in place while it slides
+                // down, then let the page behind it settle (it jumped before).
+                if (!animated) { root.classList.remove('onigiri-profile-open'); return; }
+                sidebar.classList.add('onigiri-profile-closing');
+                var finished = false;
+                var finish = function () {
+                    if (finished) return;
+                    finished = true;
+                    sidebar.classList.remove('onigiri-profile-closing');
+                    if (!sidebar.classList.contains('profile-sidebar-open')) root.classList.remove('onigiri-profile-open');
+                };
+                var closing = panel.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(100%)' }],
+                    { duration: 260, easing: 'cubic-bezier(0.32, 0.72, 0, 1)' });
+                closing.onfinish = finish;
+                setTimeout(finish, 320); // fallback if the animation never reports
+                return;
+            }
+            sidebar.classList.remove('onigiri-profile-closing');
+            root.classList.add('onigiri-profile-open');
+            if (!animated) return;
             panel.animate([{ transform: 'translateY(100%)' }, { transform: 'translateY(0)' }],
                 { duration: 320, easing: 'cubic-bezier(0.32, 0.72, 0, 1)' });
         }).observe(sidebar, { attributes: true, attributeFilter: ['class'] });
@@ -1277,9 +1303,18 @@
     var CHEVRON_SVG = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>';
     var CHECK_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4 4L19 7"/></svg>';
 
+    function paintTabSelection(selected) {
+        var tabs = document.getElementById('onigiri-phone-tabs');
+        if (!tabs) return;
+        tabs.querySelectorAll('button[data-tab]').forEach(function (b) {
+            b.setAttribute('aria-selected', b.dataset.tab === selected ? 'true' : 'false');
+        });
+    }
+
     function closeAppMenu() {
         var page = document.getElementById('onigiri-app-menu');
         if (!page) return;
+        if (page.classList.contains('is-tab')) paintTabSelection(typeof currentTab === 'string' ? currentTab : 'decks');
         page.classList.add('is-closing');
         root.classList.remove('onigiri-app-menu-open');
         setTimeout(function () { page.remove(); }, 260);
@@ -1295,6 +1330,18 @@
         page.innerHTML = '<div class="oam-bar"><button type="button" class="oam-back"></button>' +
             '<div class="oam-title"></div><button type="button" class="oam-done"></button></div>' +
             '<div class="oam-body"></div>';
+        // Opened from the tab bar, Menu is a tab: the bar stays, Menu is the
+        // selected tab, no Done, and a row's action runs with the page left
+        // open under whatever it opens (audit 3, R3-10). Other callers keep
+        // the full-screen modal.
+        var tabs = document.getElementById('onigiri-phone-tabs');
+        var asTab = !!(window.__onigiriMenuFromTab && tabs && root.classList.contains('onigiri-phone'));
+        window.__onigiriMenuFromTab = false;
+        if (asTab) {
+            page.classList.add('is-tab');
+            page.style.bottom = tabs.offsetHeight + 'px';
+            paintTabSelection('menu');
+        }
         var stack = [{ title: (data && data.title) || t('menu', 'Menu'), items: (data && data.items) || [] }];
         var backBtn = page.querySelector('.oam-back');
         var doneBtn = page.querySelector('.oam-done');
@@ -1358,7 +1405,7 @@
                     }
                     if (item.en === false) return;
                     haptic('light');
-                    closeAppMenu();
+                    if (!asTab) closeAppMenu();
                     // A page command (Create Deck, Get Shared) or a menu action.
                     try { pycmd(item.cmd ? item.cmd : 'onigiri_app_menu_run:' + item.id); } catch (e) {}
                 });
@@ -1371,6 +1418,14 @@
         render(0);
         document.body.appendChild(page);
         root.classList.add('onigiri-app-menu-open');
+        if (asTab) {
+            // Decks and Home are the way out: choosing one closes the page
+            tabs.querySelectorAll('button[data-tab]:not([data-tab="menu"])').forEach(function (b) {
+                b.addEventListener('click', function () {
+                    if (document.getElementById('onigiri-app-menu')) closeAppMenu();
+                }, { capture: true, once: true });
+            });
+        }
     }
 
     // --- Keyboard: fixed bottom bars get out of the way ---------------------------
@@ -1530,6 +1585,9 @@
                 // popup, since the desktop menu row is hidden on phones.
                 b.removeAttribute('role');
                 b.addEventListener('click', function () {
+                    if (document.getElementById('onigiri-app-menu')) return; // already showing
+                    window.__onigiriMenuFromTab = true;
+                    setTimeout(function () { window.__onigiriMenuFromTab = false; }, 3000);
                     if (typeof pycmd === 'function') pycmd('onigiri_app_menu');
                 });
             } else {
@@ -1599,7 +1657,7 @@
         var schedule = function () {
             if (pending) return;
             pending = true;
-            requestAnimationFrame(function () { pending = false; fitSegments(); mergeToneRows(); markScrollableStrips(); });
+            requestAnimationFrame(function () { pending = false; fitSegments(); mergeToneRows(); markScrollableStrips(); keepActiveTabInView(); });
         };
         new MutationObserver(schedule).observe(shell, { childList: true, subtree: true });
         window.addEventListener('resize', schedule);
@@ -1614,6 +1672,16 @@
 
     function markScrollEdge(strip) {
         strip.classList.toggle('is-at-end', strip.scrollLeft + strip.clientWidth >= strip.scrollWidth - 2);
+        strip.classList.toggle('is-at-start', strip.scrollLeft <= 2);
+    }
+
+    // The tab that was chosen stays fully in view (audit 3, R3-19).
+    function keepActiveTabInView() {
+        var active = document.querySelector('.osw-shell .osw-subtabs-strip .osw-subtab.is-active');
+        if (!active || active.dataset.onigiriSeen === '1') return;
+        document.querySelectorAll('.osw-shell .osw-subtab[data-onigiri-seen]').forEach(function (b) { delete b.dataset.onigiriSeen; });
+        active.dataset.onigiriSeen = '1';
+        try { active.scrollIntoView({ inline: 'nearest', block: 'nearest' }); } catch (e) {}
     }
 
     function markScrollableStrips() {
