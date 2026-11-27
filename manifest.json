@@ -2,7 +2,7 @@
   "name": "Onigiri for iOS",
   "package": "onigiri_ios",
   "author": "PeaceMonk (iOS fork)",
-  "version": "2.0.3-Bento-ios.24",
+  "version": "2.0.3-Bento-ios.25",
   "homepage": "",
   "conflicts": ["1011095603"]
 }

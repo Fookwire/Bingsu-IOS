@@ -169,3 +169,17 @@ Kioku-owned items are out of scope, apart from a short upstream note: SYS-01 (la
   6. Answer cards in a copy of the collection. The review log, due dates and FSRS values must match desktop Anki after sync, using the existing `harness/answer_test.py` integrity check.
 - **On the iPhone (you):** Phase 1 and Phase 4 each end with a short device checklist. It covers the keyboard, the Settings single header (and which Kioku build has `kioku_hide_titlebar`), edge colours on cold launch, the toast position, the new Add/Browse/Stats/Sync header buttons and the regrouped Menu page. Anything WebKit-only is reported as untested until you confirm it.
 - **Upstream note for Kioku:** list SYS-01, SYS-02 and SYS-05, and the title-bar elision, in `docs/IOS_AUDIT.md` as Kioku items, with no code changes.
+
+---
+
+## Progress log
+
+### Phase 1 (build ios.25), done in emulation, not yet on a device
+Done: LAY-02 (pages open at the top; checked: scrollTop 0 after switching pages, but the bug itself is WebKit-only so only a phone can confirm), NAV-05 (Kioku `kioku_hide_titlebar` set; page shows its own Settings header with Done when the title bar is absent/hidden; the dialog detects Kioku's `TitleBar` child), SET-01 wording (title, subtitle, credit moved to a footer, "this device"), SYS-03/LAY-06 (missing files now say "was missing", the folder-restored notice says settings and game progress were restored and that cards and review history were not affected, and the info dialog is laid out for phones with a short title), THM-07 (add-on name "Onigiri for iOS"), THM-03 (sheet typeface), THM-06 (drawn icons in Settings preview and the Pomodoro window), INT-06 (English wording only), CON-02 (plural, seconds under a minute, "Deck overview" in English).
+
+Not done / differences from the plan:
+- LAY-01: could not reproduce the overlap in Chromium. The overview is now top-aligned with auto margins (centred while it fits, scrolls when it does not); needs a check on the phone with Deck details open.
+- SET-01: dimming the category switches while the main switch is off is moved to Phase 2 (needs a generic "depends on" mechanism for settings rows, which also covers SET-04).
+- INT-06: the choice is not remembered between visits (not implemented).
+- New strings are English in all eight languages (rows in the translation table carry the English text); the old translated wording remains for the keys that were reused.
+- Settings "Done" relies on a Kioku build that honours `kioku_hide_titlebar`; older builds keep today's layout.
