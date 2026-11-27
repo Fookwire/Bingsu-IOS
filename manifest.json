@@ -2,7 +2,7 @@
   "name": "Onigiri for iOS (Kioku)",
   "package": "onigiri_ios",
   "author": "PeaceMonk (iOS fork)",
-  "version": "2.0.3-Bento-ios.20",
+  "version": "2.0.3-Bento-ios.21",
   "homepage": "",
   "conflicts": ["1011095603"]
 }

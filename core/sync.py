@@ -303,7 +303,23 @@ class SyncManager:
                 category = _file_category(relative)
                 if category and enabled.get(category):
                     selected_files.append((relative, source))
-        for relative, source in sorted(selected_files):
+        selected_files.sort()
+        # Reading every user file (fonts, images, sounds) before each sync
+        # froze the app on a phone. The finished signature is remembered for
+        # the same settings and the same files (name, size, modified time):
+        # a hit returns exactly the value a full hash would.
+        stat_key = []
+        for relative, source in selected_files:
+            try:
+                st = os.stat(source)
+                stat_key.append((relative, st.st_size, st.st_mtime_ns))
+            except OSError:
+                stat_key.append((relative, -1, -1))
+        cache_key = (digest.hexdigest(), tuple(stat_key))
+        cached = getattr(self, "_signature_cache", None)
+        if cached is not None and cached[0] == cache_key:
+            return cached[1]
+        for relative, source in selected_files:
             digest.update(relative.encode("utf-8"))
             try:
                 with open(source, "rb") as handle:
@@ -311,7 +327,9 @@ class SyncManager:
                         digest.update(chunk)
             except OSError:
                 continue
-        return digest.hexdigest()
+        result = digest.hexdigest()
+        self._signature_cache = (cache_key, result)
+        return result
 
     def pack_user_files(self, force=False):
         """Build a media zip containing only this device's enabled categories."""
