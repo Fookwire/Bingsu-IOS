@@ -391,10 +391,25 @@ window.OnigiriEngine = {
         window.setTimeout(() => this.updateSidebarProfileMetrics(), 120);
     },
 
+    /** The element that actually scrolls the deck list: on phones the whole
+     *  page column (.container) scrolls and the list itself does not, so
+     *  scroll saving, restoring and drag auto-scroll must use that. */
+    deckScroller: function () {
+        const list = this.deckListContainer;
+        if (!list) return null;
+        const root = document.documentElement;
+        if (root.classList.contains('onigiri-phone')) {
+            const column = document.querySelector('.container.modern-main-menu');
+            if (column && column.scrollHeight > column.clientHeight) return column;
+        }
+        return list;
+    },
+
     /** Saves the current scroll position to session storage. */
     saveScrollPosition: function () {
-        if (this.deckListContainer) {
-            sessionStorage.setItem('deckListScrollTop', this.deckListContainer.scrollTop);
+        const scroller = this.deckScroller();
+        if (scroller) {
+            try { sessionStorage.setItem('deckListScrollTop', scroller.scrollTop); } catch (e) {}
         }
     },
 
@@ -469,9 +484,11 @@ window.OnigiriEngine = {
 
     /** Restores the scroll position from session storage. */
     restoreScrollPosition: function () {
-        const savedScroll = sessionStorage.getItem('deckListScrollTop');
-        if (savedScroll !== null && this.deckListContainer) {
-            this.deckListContainer.scrollTop = parseInt(savedScroll, 10);
+        let savedScroll = null;
+        try { savedScroll = sessionStorage.getItem('deckListScrollTop'); } catch (e) {}
+        const scroller = this.deckScroller();
+        if (savedScroll !== null && scroller) {
+            scroller.scrollTop = parseInt(savedScroll, 10);
         }
     },
 
@@ -681,7 +698,13 @@ window.OnigiriEngine = {
         }, true);
 
         // --- Listener: Keep row hovered while mouse is over it ---
+        // iOS sends mouseenter/mousemove for every tap; the row then kept
+        // its hover highlight after the finger lifted. Only a real pointer
+        // (mouse, trackpad) highlights rows.
+        const hasHover = () => !document.documentElement.classList.contains('onigiri-touch') ||
+            (window.matchMedia && window.matchMedia('(any-hover: hover)').matches);
         this.deckListContainer.addEventListener('mouseenter', (event) => {
+            if (!hasHover()) return;
             const deckRow = event.target.closest('tr.deck');
             if (deckRow) {
                 if (this.currentHoveredRow && this.currentHoveredRow !== deckRow) {
@@ -701,6 +724,7 @@ window.OnigiriEngine = {
         }, true);
 
         this.deckListContainer.addEventListener('mousemove', (event) => {
+            if (!hasHover()) return;
             if (event.target === this._lastMouseTarget) return;
             this._lastMouseTarget = event.target;
             const deckRow = event.target.closest('tr.deck');
@@ -945,15 +969,22 @@ window.OnigiriEngine = {
     },
 
     _dndAutoScroll: function () {
-        if (!this._dnd || !this.deckListContainer) return;
-        const rect = this.deckListContainer.getBoundingClientRect();
+        const scroller = this.deckScroller();
+        if (!this._dnd || !scroller) return;
+        const rect = scroller.getBoundingClientRect();
+        // the part of the scroller you can see: not under the status bar or
+        // the bottom bar (tab bar / edit toolbar)
+        let top = Math.max(rect.top, 0);
+        let bottom = Math.min(rect.bottom, window.innerHeight);
+        const bar = document.getElementById('onigiri-edit-toolbar');
+        if (bar && bar.offsetHeight) bottom = Math.min(bottom, bar.getBoundingClientRect().top);
         const y = this._dnd.lastClientY;
         const zone = 48;
         const maxSpeed = 12;
-        if (y >= rect.top && y - rect.top < zone) {
-            this.deckListContainer.scrollTop -= Math.ceil(maxSpeed * (1 - (y - rect.top) / zone));
-        } else if (y <= rect.bottom && rect.bottom - y < zone) {
-            this.deckListContainer.scrollTop += Math.ceil(maxSpeed * (1 - (rect.bottom - y) / zone));
+        if (y >= top && y - top < zone) {
+            scroller.scrollTop -= Math.ceil(maxSpeed * (1 - (y - top) / zone));
+        } else if (y <= bottom && bottom - y < zone) {
+            scroller.scrollTop += Math.ceil(maxSpeed * (1 - (bottom - y) / zone));
         }
         this._autoScrollRaf = requestAnimationFrame(() => this._dndAutoScroll());
     },

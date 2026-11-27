@@ -163,7 +163,9 @@ class SettingsWebDialog(QDialog):
         self._load_watchdog.setSingleShot(True)
         self._load_watchdog.timeout.connect(self._show_load_error)
         self._load_watchdog.start(5000)
-        self.web.stdHtml(page_html)
+        # context=self: Onigiri's own window, so it gets the iPhone treatment
+        # (no sticky hover, press feedback, no text selection on labels)
+        self.web.stdHtml(page_html, context=self)
 
     # ─── window ────────────────────────────────────────────────────────────────
 

@@ -412,24 +412,54 @@
         send("haptic", "2");
       }
     }
+    // Touch: a vertical swipe starting on the slider scrolls the page; the
+    // value changes on a sideways drag or a tap (a mouse sets it on press).
     var isDragging = false;
-    function onPointerMove(event) {
-      if (isDragging) fromPointer(event);
-    }
-    function finishDrag() {
-      if (!isDragging) return;
-      isDragging = false;
-      slider.classList.remove("is-dragging");
+    var pending = null;
+    function removeListeners() {
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", finishDrag);
-      flush();
+      window.removeEventListener("pointercancel", cancelDrag);
+    }
+    function onPointerMove(event) {
+      if (pending) {
+        var dx = event.clientX - pending.x, dy = event.clientY - pending.y;
+        if (Math.abs(dy) > 8 && Math.abs(dy) > Math.abs(dx)) { pending = null; removeListeners(); return; }
+        if (Math.abs(dx) <= 8) return;
+        pending = null;
+        isDragging = true;
+        slider.classList.add("is-dragging");
+      }
+      if (isDragging) fromPointer(event);
+    }
+    function finishDrag(event) {
+      if (pending) {
+        var at = pending;
+        pending = null;
+        fromPointer({ clientX: at.x });
+        flush();
+      }
+      cancelDrag();
+    }
+    function cancelDrag() {
+      var wasDragging = isDragging;
+      pending = null;
+      isDragging = false;
+      slider.classList.remove("is-dragging");
+      removeListeners();
+      if (wasDragging) flush();
     }
     track.onpointerdown = function (event) {
-      isDragging = true;
-      slider.classList.add("is-dragging");
-      fromPointer(event);
       window.addEventListener("pointermove", onPointerMove);
       window.addEventListener("pointerup", finishDrag);
+      window.addEventListener("pointercancel", cancelDrag);
+      if (event.pointerType === "mouse") {
+        isDragging = true;
+        slider.classList.add("is-dragging");
+        fromPointer(event);
+        return;
+      }
+      pending = { x: event.clientX, y: event.clientY };
     };
     slider.onkeydown = function (event) {
       var change = 0;

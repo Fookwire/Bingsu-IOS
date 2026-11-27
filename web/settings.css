@@ -2268,7 +2268,7 @@ html body .osw-font-preview-card[data-preview-mode="dark"] .osw-font-preview-mod
 
 .osw-slider-card {
   user-select: none;
-  touch-action: none;
+  touch-action: pan-y;
 }
 
 .osw-slider-header {
@@ -2294,7 +2294,7 @@ html body .osw-font-preview-card[data-preview-mode="dark"] .osw-font-preview-mod
   border-radius: 14px;
   overflow: hidden;
   cursor: pointer;
-  touch-action: none;
+  touch-action: pan-y;
   box-sizing: border-box;
   transition: border-color 120ms ease;
 }

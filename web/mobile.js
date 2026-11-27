@@ -104,6 +104,7 @@
     function cancelPress() {
         if (press) {
             clearTimeout(press.timer);
+            clearTimeout(press.cue);
             if (press.el) press.el.classList.remove('onigiri-pressing');
         }
         press = null;
@@ -142,7 +143,10 @@
                 origin.dispatchEvent(evt);
             }, LONG_PRESS_MS),
         };
-        el.classList.add('onigiri-pressing');
+        // the "about to open the menu" cue shows once the finger has stayed
+        // put for a moment, not at the start of every scroll
+        var cueRow = press;
+        press.cue = setTimeout(function () { if (press === cueRow) el.classList.add('onigiri-pressing'); }, 160);
     }, true);
 
     document.addEventListener('pointermove', function (event) {
@@ -297,9 +301,13 @@
         '.menu-item, tr.deck, .quick-menu-item, .osw-nav-item, .deck-header-btn, [onclick]';
     var pressed = null;
     var pressedAt = null;
+    var pressTimer = null;
+    var PRESS_DELAY = 80;
 
     function clearPressed(delay) {
         var el = pressed;
+        clearTimeout(pressTimer);
+        pressTimer = null;
         pressed = null;
         pressedAt = null;
         if (!el) return;
@@ -309,24 +317,39 @@
 
     document.addEventListener('touchstart', function () {}, { passive: true });
 
+    // The pressed look appears after PRESS_DELAY, or when the finger lifts
+    // (a quick tap still flashes): a swipe that starts on a row or tile no
+    // longer flickers it at the start of every scroll.
+    function showPressed(el) {
+        if (pressed !== el) return;
+        // a whole panel with an onclick is not a button
+        var r = el.getBoundingClientRect();
+        if (r.height > 160 && r.width > window.innerWidth * 0.6) { pressed = null; return; }
+        el.classList.add('onigiri-pressed');
+    }
+
     document.addEventListener('pointerdown', function (event) {
         if (event.pointerType === 'mouse' || !root.classList.contains('onigiri-app')) return;
         var el = event.target.closest && event.target.closest(PRESSABLE);
         if (!el || el.closest('#qa') || el.disabled) return;
-        // a whole panel with an onclick is not a button
-        var r = el.getBoundingClientRect();
-        if (r.height > 160 && r.width > window.innerWidth * 0.6) return;
         clearPressed();
         pressed = el;
         pressedAt = { x: event.clientX, y: event.clientY };
-        el.classList.add('onigiri-pressed');
+        pressTimer = setTimeout(function () { pressTimer = null; showPressed(el); }, PRESS_DELAY);
     }, true);
 
     document.addEventListener('pointermove', function (event) {
         if (!pressedAt) return;
         if (Math.abs(event.clientX - pressedAt.x) > 8 || Math.abs(event.clientY - pressedAt.y) > 8) clearPressed();
     }, true);
-    document.addEventListener('pointerup', function () { clearPressed(90); }, true);
+    document.addEventListener('pointerup', function () {
+        if (pressed && pressTimer) {
+            clearTimeout(pressTimer);
+            pressTimer = null;
+            showPressed(pressed);
+        }
+        clearPressed(90);
+    }, true);
     document.addEventListener('pointercancel', function () { clearPressed(); }, true);
     document.addEventListener('scroll', function () { clearPressed(); }, true);
 
@@ -638,6 +661,13 @@
         menu.appendChild(cancel);
         haptic('light');
         swipeToDismiss(menu);
+        // A sheet that fits has nothing to scroll: it takes the whole
+        // gesture itself, so iOS doesn't claim the drag as a native pan
+        // (which cancels pointer events and made the swipe snap back). One
+        // that scrolls keeps native scrolling; its grab handle still drags.
+        requestAnimationFrame(function () {
+            if (menu.scrollHeight <= menu.clientHeight + 1) menu.style.touchAction = 'none';
+        });
     }
 
     function swipeToDismiss(menu) {
@@ -1149,6 +1179,27 @@
         document.body.appendChild(page);
         root.classList.add('onigiri-app-menu-open');
     }
+
+    // --- Keyboard: fixed bottom bars get out of the way ---------------------------
+    // With a text field focused the keyboard covers the bottom of the screen,
+    // and the tab bar / Edit toolbar floated over the content above it.
+
+    var TEXT_FIELD = 'input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=button]):not([type=submit]):not([type=color]), textarea, [contenteditable="true"]';
+    var kbdTimer = null;
+
+    document.addEventListener('focusin', function (event) {
+        if (!event.target.matches || !event.target.matches(TEXT_FIELD)) return;
+        clearTimeout(kbdTimer);
+        root.classList.add('onigiri-keyboard');
+    });
+    document.addEventListener('focusout', function () {
+        clearTimeout(kbdTimer);
+        // focus often moves straight to another field
+        kbdTimer = setTimeout(function () {
+            var a = document.activeElement;
+            if (!(a && a.matches && a.matches(TEXT_FIELD))) root.classList.remove('onigiri-keyboard');
+        }, 120);
+    });
 
     // --- Phone tab bar (deck browser) --------------------------------------------
 

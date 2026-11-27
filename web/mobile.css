@@ -453,6 +453,7 @@ html.onigiri-touch .onigiri-quick-menu .quick-menu-group.is-open > .quick-menu-a
 
 
 .onigiri-quick-menu.is-sheet .onigiri-sheet-grabber {
+    touch-action: none;
     width: 36px;
     height: 5px;
     margin: 2px auto 10px;
@@ -2025,4 +2026,83 @@ html.onigiri-touch .heatmap-day-cell.is-tip-open::after {
         transform: none !important;
         animation: none !important;
     }
+}
+
+/* Keyboard up: the fixed bottom bars step aside. */
+html.onigiri-keyboard #onigiri-phone-tabs,
+html.onigiri-keyboard #onigiri-edit-toolbar {
+    display: none !important;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Touch targets: small controls keep their look; the tap area is 44pt      */
+/* ------------------------------------------------------------------------- */
+
+/* Heatmap previous/next: an invisible 44pt overlay around the 22px button. */
+html.onigiri-touch .heatmap-nav .nav-btn::after {
+    content: "";
+    position: absolute;
+    inset: -11px;
+}
+
+/* Deck search: a 44pt row, 16px text (anything smaller makes iOS zoom into
+   the field on focus), 44pt close target. */
+html.onigiri-touch #onigiri-deck-search-bar {
+    height: 44px;
+    min-height: 44px;
+}
+
+html.onigiri-touch #onigiri-deck-search-input {
+    height: 40px;
+    font-size: 16px;
+}
+
+html.onigiri-touch #onigiri-deck-search-close {
+    position: relative;
+}
+
+html.onigiri-touch #onigiri-deck-search-close::after {
+    content: "";
+    position: absolute;
+    inset: -12px;
+}
+
+/* Every text field on the touch screens: 16px, so focusing it never zooms. */
+html.onigiri-touch.onigiri-app :is(input[type="text"], input[type="search"], input[type="number"],
+    input[type="email"], input[type="url"], input:not([type]), textarea, select) {
+    font-size: max(16px, 1em);
+}
+
+/* Deck search on phones takes the whole header row (the title and buttons
+   made it a sliver: "De" and a tiny pill). */
+html.onigiri-phone #deck-list-header:has(#onigiri-deck-search-bar.is-visible) > .deck-focus-mode-group,
+html.onigiri-phone #deck-list-header:has(#onigiri-deck-search-bar.is-visible) > .deck-header-actions {
+    display: none !important;
+}
+
+html.onigiri-phone #deck-list-header #onigiri-deck-search-bar.is-visible {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    max-width: none !important;
+}
+
+/* Controls that appear on hover only (touch has no hover): always visible
+   and big enough to hit on touch screens. */
+html.onigiri-touch .osw-gal-del {
+    opacity: 0.9;
+    width: 30px;
+    height: 30px;
+    top: 8px;
+    right: 8px;
+}
+
+html.onigiri-touch .osw-gal-del svg {
+    width: 13px;
+    height: 13px;
+}
+
+html.onigiri-touch .osw-organize-tile-remove,
+html.onigiri-touch .onigiri-icon-delete {
+    opacity: 1;
+    pointer-events: auto;
 }

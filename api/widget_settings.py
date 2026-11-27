@@ -380,7 +380,7 @@ class BentoSettingsDialog(QDialog):
             self.web.loadFinished.connect(self._on_load_finished)
         except Exception:
             pass
-        self.web.stdHtml(self._render())
+        self.web.stdHtml(self._render(), context=self)
         self.finished.connect(self._cleanup)
 
     def _on_load_finished(self, ok: bool) -> None:

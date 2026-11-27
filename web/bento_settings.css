@@ -401,7 +401,7 @@ body.fancy .bws-nav-btn { border-radius: var(--bws-radius-control); }
   gap: 12px;
   width: 100%;
   user-select: none;
-  touch-action: none;
+  touch-action: pan-y;
 }
 .bws-slider-track {
   position: relative;
@@ -411,7 +411,7 @@ body.fancy .bws-nav-btn { border-radius: var(--bws-radius-control); }
   border-radius: 14px;
   background: var(--bws-inset);
   cursor: pointer;
-  touch-action: none;
+  touch-action: pan-y;
   box-sizing: border-box;
   transition: border-color 120ms ease;
 }

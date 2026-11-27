@@ -38,7 +38,7 @@ class CreditsDialog(CenteredInfoDialog):
         html_content = html_content.replace("%%ADDON_PACKAGE%%", addon_package)
         html_content = render_html_strings(html_content)
 
-        self.web.stdHtml(html_content)
+        self.web.stdHtml(html_content, context=self)
         self.web.set_bridge_command(self._on_bridge_cmd, self)
     
     def _on_bridge_cmd(self, cmd: str):

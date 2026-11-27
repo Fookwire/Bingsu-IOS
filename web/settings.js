@@ -206,6 +206,74 @@
     });
   }
 
+  // Slider gesture shared by every slider here. A vertical swipe that starts
+  // on a slider row scrolls the page (the old code set the value on
+  // pointerdown and blocked scrolling with touch-action:none, so scrolling
+  // Settings silently changed values). Touch: the value follows a sideways
+  // drag, or jumps to a tap; a mouse sets it on press as before.
+  //   hooks.at(clientX)  set the value for a finger/pointer position
+  //   hooks.begin() / hooks.end()  drag started / finished (cancelled too)
+  function bindSlideGesture(track, hooks) {
+    const SLOP = 8;
+    let pending = null;
+    let dragging = false;
+
+    function detach() {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onCancel);
+    }
+    function stop() {
+      const was = dragging;
+      pending = null;
+      dragging = false;
+      detach();
+      if (was) hooks.end();
+    }
+    function onMove(e) {
+      if (pending) {
+        const dx = e.clientX - pending.x;
+        const dy = e.clientY - pending.y;
+        if (Math.abs(dy) > SLOP && Math.abs(dy) > Math.abs(dx)) {
+          pending = null; // the page is scrolling
+          detach();
+          return;
+        }
+        if (Math.abs(dx) <= SLOP) return;
+        pending = null;
+        dragging = true;
+        hooks.begin();
+      }
+      if (dragging) hooks.at(e.clientX);
+    }
+    function onUp() {
+      if (pending) {
+        const at = pending; // a tap
+        pending = null;
+        hooks.begin();
+        hooks.at(at.x);
+        hooks.end();
+        detach();
+        return;
+      }
+      stop();
+    }
+    function onCancel() { stop(); }
+
+    track.addEventListener("pointerdown", function (e) {
+      window.addEventListener("pointermove", onMove);
+      window.addEventListener("pointerup", onUp);
+      window.addEventListener("pointercancel", onCancel);
+      if (e.pointerType === "mouse") {
+        dragging = true;
+        hooks.begin();
+        hooks.at(e.clientX);
+        return;
+      }
+      pending = { x: e.clientX, y: e.clientY };
+    });
+  }
+
   // ── auto-save ──────────────────────────────────────────────────────────────
 
   function scheduleFlush(delay) {
@@ -1316,28 +1384,11 @@
       valueBadge.textContent = stepped + (field.suffix || "");
     }
 
-    function onPointerDown(e) {
-      isDragging = true;
-      card.classList.add("is-dragging");
-      updateFromClientX(e.clientX);
-      window.addEventListener("pointermove", onPointerMove);
-      window.addEventListener("pointerup", onPointerUp);
-    }
-
-    function onPointerMove(e) {
-      if (!isDragging) return;
-      updateFromClientX(e.clientX);
-    }
-
-    function onPointerUp(e) {
-      if (!isDragging) return;
-      isDragging = false;
-      card.classList.remove("is-dragging");
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("pointerup", onPointerUp);
-    }
-
-    track.addEventListener("pointerdown", onPointerDown);
+    bindSlideGesture(track, {
+      begin: function () { isDragging = true; card.classList.add("is-dragging"); },
+      end: function () { isDragging = false; card.classList.remove("is-dragging"); },
+      at: updateFromClientX,
+    });
 
     // An alpha slider's value lives inside another field's colour, so it has to
     // be repainted whenever that colour — or the theme deciding which colour it
@@ -13270,23 +13321,11 @@
 
     let isDragging = false;
 
-    function onPointerDown(e) {
-      isDragging = true;
-      card.classList.add("is-dragging");
-      setLevel(levelFromClientX(e.clientX));
-      window.addEventListener("pointermove", onPointerMove);
-      window.addEventListener("pointerup", onPointerUp);
-    }
-    function onPointerMove(e) {
-      if (isDragging) setLevel(levelFromClientX(e.clientX));
-    }
-    function onPointerUp() {
-      isDragging = false;
-      card.classList.remove("is-dragging");
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("pointerup", onPointerUp);
-    }
-    track.addEventListener("pointerdown", onPointerDown);
+    bindSlideGesture(track, {
+      begin: function () { isDragging = true; card.classList.add("is-dragging"); },
+      end: function () { isDragging = false; card.classList.remove("is-dragging"); },
+      at: function (x) { setLevel(levelFromClientX(x)); },
+    });
 
     card.addEventListener("keydown", function (e) {
       if (e.key === "ArrowRight" || e.key === "ArrowUp") setLevel(Math.min(maxLevel, currentLevel() + 1));
