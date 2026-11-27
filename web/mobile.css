@@ -2452,3 +2452,24 @@ html.onigiri-phone .osw-shell .onigiri-tone-play {
     min-width: 44px;
     min-height: 40px;
 }
+
+/* The reset chip's own strip wrapper must not shrink it. */
+html.onigiri-phone .osw-shell .osw-subtabs-strip.osw-page-reset-wrap {
+    flex: 0 0 auto !important;
+    max-width: none !important;
+    overflow: visible !important;
+}
+
+/* Compact sliders in designer cards (Pomodoro, Sidebar, …): label and value
+   on one line, the track full width beneath. */
+html.onigiri-phone .osw-shell .osw-designer-deck .osw-slider-card {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    row-gap: 6px;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+}
+
+html.onigiri-phone .osw-shell .osw-designer-deck .osw-slider-track {
+    grid-column: 1 / -1;
+    min-height: 32px;
+}
