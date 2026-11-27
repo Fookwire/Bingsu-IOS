@@ -76,7 +76,7 @@
   #grid.is-swapping { opacity: 0; transform: translateX(var(--swap-dx, 0)); }
   #grid.no-anim { transition: none; }
   @media (prefers-reduced-motion: reduce) { .seg-thumb, #grid { transition: none !important; } }
-  .card { --card-accent: var(--accent); --card-fill: var(--surface); --card-fg: var(--fg); --card-fg2: var(--fg2); --card-fg3: var(--fg3); --card-soft: var(--surface-2); --fold: 0px; position: relative; min-height: 214px; display: flex; flex-direction: column; overflow: hidden; padding: 18px; border: 0; border-radius: 18px; background: linear-gradient(45deg, transparent var(--fold), var(--card-fill) var(--fold)); cursor: pointer; user-select: none; -webkit-user-select: none; touch-action: none; filter: drop-shadow(0 0 4px rgba(24,28,25,.06)) drop-shadow(0 2px 6px rgba(24,28,25,.05)); transition: --fold .34s cubic-bezier(.32,1.32,.5,1), filter .2s, transform .18s cubic-bezier(.32,1.3,.5,1); }
+  .card { --card-accent: var(--accent); --card-fill: var(--surface); --card-fg: var(--fg); --card-fg2: var(--fg2); --card-fg3: var(--fg3); --card-soft: var(--surface-2); --fold: 0px; position: relative; min-height: 214px; display: flex; flex-direction: column; overflow: hidden; padding: 18px; border: 0; border-radius: 18px; background: linear-gradient(45deg, transparent var(--fold), var(--card-fill) var(--fold)); cursor: pointer; user-select: none; -webkit-user-select: none; touch-action: pan-y; filter: drop-shadow(0 0 4px rgba(24,28,25,.06)) drop-shadow(0 2px 6px rgba(24,28,25,.05)); transition: --fold .34s cubic-bezier(.32,1.32,.5,1), filter .2s, transform .18s cubic-bezier(.32,1.3,.5,1); }
   /* Folded-up tip: the corner triangle mirrored across the crease, lit from the crease outward. */
   .card::before { content: ""; position: absolute; left: 0; bottom: 0; width: calc(var(--fold) * 1.4142); height: calc(var(--fold) * 1.4142); z-index: 2; border-radius: 0 100% 0 0; clip-path: polygon(0 0, 100% 0, 100% 100%); background: linear-gradient(45deg, color-mix(in srgb, var(--card-fill) 86%, var(--card-fg) 14%), color-mix(in srgb, var(--card-fill) 99%, var(--card-fg) 1%)); pointer-events: none; }
   .card:hover { --fold: 21px; filter: drop-shadow(0 0 6px rgba(24,28,25,.08)) drop-shadow(0 4px 10px rgba(24,28,25,.06)); }
@@ -378,16 +378,46 @@ const HASHI_DATA = /*__HASHI_DATA__*/null;
   let pending=null,drag=null,suppressClick=false;
   const canArrange=()=>view==="active"&&!query;   // trash and search results stay fixed
   const canMerge=()=>canArrange()&&!openGroup;    // no groups inside groups
+  // Touch: a card is picked up by pressing and holding it (HOLD_MS); a swipe
+  // that starts on a card scrolls the page. (Every swipe used to drag the
+  // card, so the gallery could not be scrolled on a phone.) A mouse drags
+  // after 6 px as before.
+  const HOLD_MS=380;
+  const blockScroll=(event)=>{if(drag&&event.cancelable)event.preventDefault();};
   grid.addEventListener("pointerdown",(event)=>{
     if(event.button!==0||!canArrange())return;
     const card=event.target.closest(".card[data-key]");
     if(!card||event.target.closest("button")||event.target.closest("[contenteditable='true']"))return;
-    pending={card:card,x:event.clientX,y:event.clientY};
+    const touch=event.pointerType!=="mouse";
+    pending={card:card,x:event.clientX,y:event.clientY,lastX:event.clientX,lastY:event.clientY,touch:touch,hold:0};
+    if(touch){
+      pending.hold=setTimeout(()=>{if(!pending||drag)return;
+        try{navigator.vibrate&&navigator.vibrate(10);}catch(e){}
+        startDrag({clientX:pending.lastX,clientY:pending.lastY});updateDrag({clientX:pending.lastX,clientY:pending.lastY});
+      },HOLD_MS);
+      document.addEventListener("touchmove",blockScroll,{passive:false});
+      window.addEventListener("pointercancel",onPointerCancel,{once:true});}
     window.addEventListener("pointermove",onPointerMove);
     window.addEventListener("pointerup",onPointerUp,{once:true});});
   function onPointerMove(event){
-    if(!drag){if(Math.hypot(event.clientX-pending.x,event.clientY-pending.y)<6)return;startDrag(event);}
+    if(!pending)return;
+    pending.lastX=event.clientX;pending.lastY=event.clientY;
+    if(!drag){
+      const moved=Math.hypot(event.clientX-pending.x,event.clientY-pending.y);
+      if(pending.touch){
+        // moved before the hold finished: the finger is scrolling
+        if(moved>8){clearTimeout(pending.hold);pending=null;releaseTouchGuards();}
+        return;}
+      if(moved<6)return;
+      startDrag(event);}
     updateDrag(event);}
+  function releaseTouchGuards(){
+    document.removeEventListener("touchmove",blockScroll);
+    window.removeEventListener("pointermove",onPointerMove);}
+  function onPointerCancel(){
+    if(pending)clearTimeout(pending.hold);
+    if(drag){cancelDrag();}
+    pending=null;releaseTouchGuards();}
   function startDrag(event){const key=pending.card.dataset.key;
     if(!selection.has(key)){selection.clear();syncSelection();}
     const keys=selection.has(key)?renderedItems.map(keyOf).filter((k)=>selection.has(k)):[key];
@@ -450,6 +480,8 @@ const HASHI_DATA = /*__HASHI_DATA__*/null;
     drag.els.forEach((el)=>el.classList.remove("is-dragging"));
     document.body.classList.remove("is-dragging-cards");}
   function onPointerUp(){window.removeEventListener("pointermove",onPointerMove);
+    document.removeEventListener("touchmove",blockScroll);
+    if(pending)clearTimeout(pending.hold);
     if(!drag){pending=null;return;}
     const mergeKey=drag.merge?drag.merge.dataset.key:null,index=dropIndex(),keys=drag.keys;
     endDragVisuals();drag=null;pending=null;
@@ -458,6 +490,7 @@ const HASHI_DATA = /*__HASHI_DATA__*/null;
     persistLayout();render();}
   function cancelDrag(){if(!drag)return;endDragVisuals();drag=null;pending=null;
     window.removeEventListener("pointermove",onPointerMove);
+    document.removeEventListener("touchmove",blockScroll);
     suppressClick=true;setTimeout(()=>{suppressClick=false;},0);render();}
   function applyReorder(keys,index){ensureManual();
     const moving=renderedItems.filter((item)=>keys.includes(keyOf(item)));

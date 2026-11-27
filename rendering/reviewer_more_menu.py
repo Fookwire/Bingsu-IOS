@@ -650,6 +650,16 @@ def open_menu(reviewer: Any) -> None:
             focus_keyboard = QApplication.mouseButtons() == Qt.MouseButton.NoButton
         except Exception:
             focus_keyboard = False
+    try:
+        from ..core.platform import IS_MOBILE
+
+        if IS_MOBILE:
+            # A tap on a web view never presses a Qt mouse button, so this
+            # always read "keyboard": the menu opened in keyboard-focus mode
+            # (a focus ring on the first row). Touch is not a keyboard.
+            focus_keyboard = False
+    except Exception:
+        pass
 
     _is_open = True
     _install_dismiss_filter()

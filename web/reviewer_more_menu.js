@@ -314,7 +314,7 @@
       shadow = host.shadowRoot || host.attachShadow({ mode: "open" });
       const style = document.createElement("style");
       style.id = "onigiri-more-menu-style";
-      style.textContent = cssText();
+      style.textContent = cssText() + touchCssText();
 
       root = document.createElement("div");
       root.id = "onigiri-more-menu-root";
@@ -339,6 +339,26 @@
       shadow.appendChild(root);
     }
     return shadow;
+  }
+
+  // The panel lives in a shadow root, which the page's mobile.css cannot
+  // reach: on touch screens (iPhone/iPad) it gets its own touch rules. No
+  // keyboard-shortcut hints, full-size rows, clear of the home indicator.
+  // --onigiri-safe-bottom is inherited from <html> through the shadow boundary.
+  function touchCssText() {
+    if (!document.documentElement.classList.contains("onigiri-touch")) return "";
+    return `
+      .rm-kbd { display: none !important; }
+      .rm-panel {
+        bottom: calc(10px + var(--onigiri-safe-bottom, 0px));
+        max-height: calc(100dvh - 20px - var(--onigiri-safe-bottom, 0px));
+        overscroll-behavior: contain;
+      }
+      .rm-item-btn, .rm-quick-btn, .rm-split-row, .rm-media-btn { min-height: 44px; }
+      .rm-item-btn, .rm-quick-label, .rm-split-title, .rm-media-label { font-size: 15px; }
+      .rm-flag-btn { height: 44px; }
+      .rm-item-btn:hover, .rm-flag-btn:hover, .rm-quick-btn:hover, .rm-media-btn:hover { background: transparent; }
+    `;
   }
 
   function focusableButtons() {

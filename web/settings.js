@@ -10881,6 +10881,9 @@
         if (canResizeEast && canResizeSouth) addResizeHandle("corner");
 
         wireTileDrag(tile, t);
+        // Touch has no right-click: mobile.js turns a long press on this
+        // attribute into the contextmenu event below.
+        tile.setAttribute("data-onigiri-longpress", "1");
         tile.addEventListener("contextmenu", function (event) {
           event.preventDefault();
           openTileMenu(t, spec, event.clientX, event.clientY);
