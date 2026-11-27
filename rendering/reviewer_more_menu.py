@@ -134,6 +134,59 @@ def _read_menu_css_text() -> str:
     return _cached_css_text
 
 
+def _rgba(hex_color: str, alpha: float) -> str:
+    try:
+        from ..rendering.theme_palette import rgb
+
+        r, g, b = rgb(hex_color)
+        return f"rgba({r}, {g}, {b}, {alpha})"
+    except Exception:
+        return hex_color
+
+
+def mobile_theme_css() -> str:
+    """On phones the panel takes the app theme instead of its own fixed
+    near-black / grey palette (audit 2, R2-27). The panel keeps its --rm-*
+    variables; only their values come from the theme tokens. Empty off mobile."""
+    try:
+        from ..core import mobile_theme
+
+        if not mobile_theme.active():
+            return ""
+
+        def block(selector: str, dark: bool) -> str:
+            t = mobile_theme.tokens(dark)
+            return (
+                f"{selector} {{\n"
+                f"  --rm-surface: {_rgba(t['raised'], 0.98)};\n"
+                f"  --rm-surface-solid: {t['raised']};\n"
+                f"  --rm-elevated: {t['inset']};\n"
+                f"  --rm-elevated-hover: {t['inset_hover']};\n"
+                f"  --rm-row-hover: {t['inset']};\n"
+                f"  --rm-pill-bg: {t['inset']};\n"
+                f"  --rm-pill-hover: {t['inset_hover']};\n"
+                f"  --rm-border: {t['separator']};\n"
+                f"  --rm-border-subtle: {t['separator_soft']};\n"
+                f"  --rm-text: {t['text']};\n"
+                f"  --rm-text-muted: {t['secondary']};\n"
+                f"  --rm-text-faint: {t['faint']};\n"
+                f"  --rm-kbd-bg: {t['inset']};\n"
+                f"  --rm-accent: {t['accent']};\n"
+                f"  --rm-accent-soft: {_rgba(t['accent'], 0.18)};\n"
+                f"  --rm-danger: {t['destructive']};\n"
+                f"  --rm-danger-soft: {_rgba(t['destructive'], 0.14)};\n"
+                f"}}\n"
+            )
+
+        return (
+            "\n/* app theme (phones) */\n"
+            + block("#onigiri-more-menu-root", False)
+            + block(":host(.night-mode) #onigiri-more-menu-root", True)
+        )
+    except Exception:
+        return ""
+
+
 def reviewer_head_assets(addon_package: str, conf: dict[str, Any]) -> str:
     """Return CSS/JS payload injected into the Reviewer card webview head."""
     from . import patcher
@@ -148,6 +201,7 @@ def reviewer_head_assets(addon_package: str, conf: dict[str, Any]) -> str:
         css_text = font_css + "\n" + css_text
     except Exception:
         pass
+    css_text += mobile_theme_css()
     return f"<script>window.onigiriMoreMenuCssText = {json.dumps(css_text)};</script>"
 
 
@@ -182,6 +236,11 @@ def bottom_bar_assets() -> str:
         .nightMode #outer button[onclick*="more"].onigiri-more-menu-open {
             box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.35) !important;
             filter: brightness(1.12);
+        }
+        /* A sheet is open over the card (touch): the rest of the bar waits. */
+        html.onigiri-touch.onigiri-more-sheet-open #outer button:not(.onigiri-more-btn) {
+            opacity: 0.35;
+            pointer-events: none;
         }
         @media (prefers-reduced-motion: reduce) {
             #outer button[onclick*="more"] .onigiri-more-chevron,
@@ -409,6 +468,7 @@ def _localized_labels() -> dict[str, str]:
     due_base = _strip_trailing_ellipsis(_safe_anki_tr("actions_set_due_date", "Set Due Date"))
     copy_base = _strip_trailing_ellipsis(_safe_anki_tr("actions_create_copy", "Create Copy"))
     return {
+        "cancel": _safe_anki_tr("actions_cancel", "Cancel"),
         "flagCard": _safe_anki_tr("studying_flag_card", "Flag Card"),
         "clearFlag": _safe_anki_tr("actions_clear", "Clear"),
         "markNote": _safe_anki_tr("studying_mark_note", "Mark Note"),
@@ -442,6 +502,7 @@ def _shortcut_map(is_mac: bool | None = None) -> dict[str, str]:
         is_mac = sys.platform == "darwin"
     delete_raw = "Ctrl+Backspace" if is_mac else "Ctrl+Delete"
     return {
+        "undo": _format_shortcut("Ctrl+Z", is_mac=is_mac),
         "mark": "*",
         "autoAdvance": _format_shortcut("Shift+A", is_mac=is_mac),
         "options": "O",
@@ -462,6 +523,96 @@ def _shortcut_map(is_mac: bool | None = None) -> dict[str, str]:
         "recordVoice": _format_shortcut("Shift+V", is_mac=is_mac),
         "replayVoice": "V",
     }
+
+
+# The undo step counter when the answer side was shown. While it is unchanged
+# nothing in the collection was edited since the flip, so the most recent
+# thing to undo is the flip itself; after a flag, tag or bury it is that change.
+_answer_step: dict[str, Any] = {"step": None}
+
+
+def _undo_step(mw_ref: Any) -> Any:
+    try:
+        return int(mw_ref.col.undo_status().last_step)
+    except Exception:
+        return None
+
+
+def _remember_answer_step(*_args: Any) -> None:
+    _answer_step["step"] = _undo_step(mw)
+
+
+def _forget_answer_step(*_args: Any) -> None:
+    _answer_step["step"] = None
+
+
+def _can_flip_back(mw_ref: Any, reviewer: Any) -> bool:
+    """The answer is showing and nothing was changed since it was shown."""
+    if getattr(reviewer, "state", None) != "answer":
+        return False
+    recorded = _answer_step["step"]
+    return recorded is not None and _undo_step(mw_ref) == recorded
+
+
+def _undo_state(mw_ref: Any, reviewer: Any) -> dict[str, Any]:
+    """What the menu's Undo row shows: Anki's own text for the last change
+    ("Undo Answer Card", "Undo Bury", ...), or "Show Question Again" when the
+    last thing done was turning the card over."""
+    can = False
+    label = "Undo"
+    try:
+        info = mw_ref.undo_actions_info()
+        can = bool(info.can_undo)
+        # Fluent wraps arguments in invisible bidi isolation marks
+        label = str(info.undo_text or "Undo").replace("\u2068", "").replace("\u2069", "")
+    except Exception:
+        pass
+    answer_shown = getattr(reviewer, "state", None) == "answer"
+    flip = _can_flip_back(mw_ref, reviewer) or (answer_shown and not can)
+    if flip:
+        try:
+            from ..core.translations import tr as _tr
+
+            label = _tr("undo_show_question_again", "Show Question Again")
+        except Exception:
+            label = "Show Question Again"
+    return {"can": can or flip, "label": label, "answerShown": bool(answer_shown), "flip": bool(flip)}
+
+
+def _perform_undo(mw_ref: Any, reviewer: Any) -> str:
+    """Undo, as Ctrl+Z does in desktop Anki, most recent thing first.
+
+    1. The answer was just shown and nothing was edited since: turn the card
+       back to its front. This changes no data.
+    2. Anything that can be undone in the collection (answering a card, bury,
+       suspend, flag, mark, tags, set due date, reset, delete note, edits):
+       run Anki's own Undo action, which restores the card and refreshes.
+    3. The answer is showing and there is nothing to undo: turn it back.
+    4. Otherwise say there is nothing to undo.
+    Returns "question", "undo" or "nothing"."""
+    if _can_flip_back(mw_ref, reviewer):
+        reviewer._showQuestion()
+        return "question"
+    action = None
+    try:
+        action = mw_ref.form.actionUndo
+    except Exception:
+        action = None
+    if action is not None and action.isEnabled():
+        action.trigger()
+        return "undo"
+    if getattr(reviewer, "state", None) == "answer":
+        reviewer._showQuestion()
+        return "question"
+    try:
+        from aqt.utils import tooltip
+
+        from ..core.translations import tr as _tr
+
+        tooltip(_tr("undo_nothing_to_undo", "Nothing to undo"))
+    except Exception:
+        pass
+    return "nothing"
 
 
 def build_menu_payload(
@@ -502,6 +653,7 @@ def build_menu_payload(
         "hasPreviousCard": bool(getattr(reviewer, "previous_card", None)),
         "dark": night_mode,
         "anchorRight": 15,
+        "undo": _undo_state(mw_ref, reviewer),
         "flags": _build_flags_list(mw_ref),
         "labels": _localized_labels(),
         "shortcuts": _shortcut_map(),
@@ -581,6 +733,7 @@ def _cleanup_qmenu() -> None:
 
 
 def _sync_bottom_button_state(open_state: bool) -> None:
+    set_bottom_sheet_state(open_state)
     b_web = getattr(mw, "bottomWeb", None) if mw is not None else None
     if b_web is not None:
         try:
@@ -589,6 +742,23 @@ def _sync_bottom_button_state(open_state: bool) -> None:
             )
         except Exception:
             pass
+
+
+def set_bottom_sheet_state(open_state: bool) -> None:
+    """While a bottom sheet is open over the card, the answer bar below it
+    (a separate web view, so the sheet cannot cover it) is dimmed and
+    inert, so Show Answer or Edit are not tapped by accident (audit 2,
+    R2-26/R2-27). The CSS only applies on touch screens."""
+    b_web = getattr(mw, "bottomWeb", None) if mw is not None else None
+    if b_web is None:
+        return
+    try:
+        b_web.eval(
+            "document.documentElement.classList.toggle('onigiri-more-sheet-open', %s);"
+            % json.dumps(bool(open_state))
+        )
+    except Exception:
+        pass
 
 
 def close_menu(from_js: bool = False, immediate: bool = False) -> None:
@@ -681,6 +851,9 @@ def _run_reviewer_action(reviewer: Any, action_id: str) -> bool:
     """Execute a standard Reviewer action from the custom More menu."""
     if reviewer is None or getattr(reviewer, "card", None) is None:
         return False
+    if action_id == "undo":
+        _perform_undo(getattr(reviewer, "mw", None) or mw, reviewer)
+        return True
     if action_id.startswith("flag:"):
         try:
             flag_idx = int(action_id.split(":", 1)[1])
@@ -785,7 +958,9 @@ def install_reviewer_more_menu_override() -> None:
 
     if not _hooks_installed and gui_hooks is not None:
         gui_hooks.reviewer_did_show_question.append(lambda *_: close_menu(immediate=True))
+        gui_hooks.reviewer_did_show_question.append(_forget_answer_step)
         gui_hooks.reviewer_did_show_answer.append(lambda *_: close_menu(immediate=True))
+        gui_hooks.reviewer_did_show_answer.append(_remember_answer_step)
         gui_hooks.reviewer_will_end.append(lambda *_: close_menu(immediate=True))
         gui_hooks.state_did_change.append(lambda *_: close_menu(immediate=True))
         _hooks_installed = True

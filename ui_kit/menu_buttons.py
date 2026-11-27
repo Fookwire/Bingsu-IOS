@@ -223,6 +223,7 @@ def setup_onigiri_menu(addon_path):
 
     # Create Gamification submenu
     gamification_menu = QMenu(tr("gamification"), mw)
+    gamification_menu.setObjectName("onigiri_games_menu")
 
     nook_level_action = QAction(tr("restaurant_level"), mw)
     nook_level_action.triggered.connect(_open_nook_level_dialog)
@@ -257,6 +258,7 @@ def setup_onigiri_menu(addon_path):
 
     # Create Study Tools submenu
     study_tools_menu = QMenu(tr("study_tools", "Study Tools"), mw)
+    study_tools_menu.setObjectName("onigiri_study_tools_menu")
 
     prep_station_action = QAction(tr("prep_station_title"), mw)
     prep_station_action.triggered.connect(_open_prep_station)
@@ -295,6 +297,7 @@ def setup_onigiri_menu(addon_path):
 
     # Create the 'Settings' action (opens settings to General tab, index 0)
     settings_action = QAction(tr("onigiri_settings"), mw)
+    settings_action.setObjectName("onigiri_settings_action")
     settings_action.triggered.connect(lambda _: open_settings(0))
     onigiri_menu.addAction(settings_action)
 
@@ -302,6 +305,7 @@ def setup_onigiri_menu(addon_path):
 
     # --- ADD THIS BLOCK ---
     info_menu = onigiri_menu.addMenu("Info")
+    info_menu.setObjectName("onigiri_info_menu")
 
     announcements_action = QAction(tr("communications_title", "Announcements"), mw)
     announcements_action.triggered.connect(_open_communications)

@@ -21302,6 +21302,9 @@ storage_mochi_label|Your Mochi messages|Suas mensagens Mochi|Tus mensajes Mochi|
 storage_progress_label|Your Onigiri progress|Seu progresso no Onigiri|Tu progreso en Onigiri|你的 Onigiri 进度|Onigiri の進捗|Votre progression Onigiri|Onigiri 진행 상황|Dein Onigiri-Fortschritt
 stats_numbers_always_short|Always|Sempre|Siempre|始终|常に|Toujours|항상|Immer
 mochi_cheer_desc|Mochi cheers you on as you review.|Mochi torce por você enquanto você estuda.|Mochi te anima mientras repasas.|复习时，Mochi 会为你加油。|復習中、Mochi があなたを応援します。|Mochi vous encourage pendant vos révisions.|복습하는 동안 Mochi가 응원해 줍니다.|Mochi feuert dich beim Lernen an.
+undo_nothing_to_undo|Nothing to undo|Nada para desfazer|Nada que deshacer|没有可撤销的操作|元に戻す操作はありません|Rien à annuler|실행 취소할 항목이 없습니다|Nichts rückgängig zu machen
+undo_show_question_again|Show Question Again|Mostrar a pergunta novamente|Mostrar la pregunta de nuevo|重新显示问题|もう一度問題を表示|Afficher à nouveau la question|질문 다시 보기|Frage erneut anzeigen
+menu_appearance|Appearance|Aparência|Apariencia|外观|外観|Apparence|화면 설정|Darstellung
 """
 
 ALIASES = {

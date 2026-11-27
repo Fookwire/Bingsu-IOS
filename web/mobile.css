@@ -155,7 +155,7 @@ html.onigiri-touch.onigiri-select-mode #deck-list-container tr.deck .drag-handle
     min-width: 40px;
     height: 44px;
     margin: 0 -6px 0 4px;
-    opacity: 0.55;
+    opacity: 0.9; /* audit 2, R2-42: the reorder handles were faint */
     visibility: visible;
 }
 
@@ -2916,5 +2916,43 @@ html.onigiri-phone body .osw-organize-tile-remove:hover {
 html.onigiri-phone body .osw-organize-tile-remove svg {
     width: 14px;
     height: 14px;
+}
+
+/* Destructive rows (Delete Deck) are red on touch screens too, where there is
+   no hover to turn them red (audit 2, R2-28). */
+html.onigiri-phone .onigiri-quick-menu .quick-menu-item.danger,
+html.onigiri-phone .onigiri-quick-menu .quick-menu-item.danger .quick-menu-icon {
+    color: #e5484d;
+}
+
+
+/* Profile sheet (audit 2, R2-16): one scroller. While it is open the page
+   behind it does not scroll (its scrollbar was the long white line drawn
+   across the sheet), and the sheet's own scrollbar is hidden. */
+html.onigiri-phone.onigiri-profile-open,
+html.onigiri-phone.onigiri-profile-open body,
+html.onigiri-phone.onigiri-profile-open .container.modern-main-menu {
+    overflow: hidden !important;
+}
+
+html.onigiri-phone .sidebar-left.profile-sidebar-open .onigiri-sidebar-profile {
+    scrollbar-width: none;
+}
+
+html.onigiri-phone .sidebar-left.profile-sidebar-open .onigiri-sidebar-profile::-webkit-scrollbar {
+    display: none;
+}
+
+/* A widget's remove button waits for a second tap (audit 2, R2-42). */
+html.onigiri-phone body .osw-organize-tile-remove.is-confirming {
+    width: auto !important;
+    min-width: 28px;
+    padding: 0 10px !important;
+    background: #e5484d !important;
+    color: #fff !important;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    border-radius: 14px !important;
 }
 

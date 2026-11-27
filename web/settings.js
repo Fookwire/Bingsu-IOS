@@ -10906,8 +10906,22 @@
         const removeBtn = el("button", "osw-organize-tile-remove");
         removeBtn.type = "button";
         removeBtn.innerHTML = ICON_CLOSE;
+        let removeArmed = null;
         removeBtn.addEventListener("click", function (event) {
           event.stopPropagation();
+          // Phones: a stray tap on a small button must not drop a widget, so
+          // the first tap asks, the second removes (audit 2, R2-42).
+          if (window.OnigiriMobile && OnigiriMobile.isPhone && OnigiriMobile.isPhone() && !removeArmed) {
+            removeBtn.classList.add("is-confirming");
+            removeBtn.textContent = str("remove", "Remove") + "?";
+            removeArmed = setTimeout(function () {
+              removeArmed = null;
+              removeBtn.classList.remove("is-confirming");
+              removeBtn.innerHTML = ICON_CLOSE;
+            }, 3000);
+            return;
+          }
+          if (removeArmed) clearTimeout(removeArmed);
           state.tiles = state.tiles.filter(function (x) { return x !== t; });
           selectedWids.delete(t.wid);
           renderCanvas();

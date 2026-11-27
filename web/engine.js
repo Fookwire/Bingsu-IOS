@@ -1353,6 +1353,18 @@ window.OnigiriEngine = {
         const menu = document.createElement('div');
         menu.className = 'onigiri-quick-menu';
 
+        // On a phone this is a sheet: it says which deck it is about.
+        if (window.OnigiriMobile && OnigiriMobile.isPhone && OnigiriMobile.isPhone() && row) {
+            const nameEl = row.querySelector('.deck-name') || row.querySelector('a.deck');
+            const deckTitle = nameEl ? nameEl.textContent.trim() : '';
+            if (deckTitle) {
+                const head = document.createElement('div');
+                head.className = 'onigiri-sheet-title';
+                head.textContent = deckTitle;
+                menu.appendChild(head);
+            }
+        }
+
         [
             { label: ONIGIRI_T('ctx_rename', 'Rename'), icon: 'rename', command: `onigiri_ctx_rename:${did}` },
             { label: ONIGIRI_T('add_subdeck_title', 'Add Subdeck'), icon: 'add-subdeck', command: `onigiri_ctx_subdeck:${did}` },
@@ -1460,13 +1472,17 @@ window.OnigiriEngine = {
             });
         }
         deckActions.push(
-            { label: ONIGIRI_T('ctx_addon_actions', 'Add-on actions') + '…', icon: 'options', command: `onigiri_ctx_addon_actions:${did}` },
+            { label: ONIGIRI_T('ctx_addon_actions', 'Add-on actions') + '…', icon: 'puzzle', command: `onigiri_ctx_addon_actions:${did}` },
             { label: ONIGIRI_T('ctx_deck_options', 'Deck Options'), icon: 'options', command: `onigiri_ctx_options:${did}` },
             { label: ONIGIRI_T('ctx_export_deck', 'Export Deck'), icon: 'export-deck', command: `onigiri_ctx_export:${did}` },
             { label: ONIGIRI_T('ctx_copy_deck_id', 'Copy Deck ID'), icon: 'copy_id', command: `onigiri_ctx_copy_id:${did}` },
             { label: ONIGIRI_T('ctx_delete_deck', 'Delete Deck'), icon: 'delete', danger: true, command: `onigiri_ctx_delete:${did}` },
         );
-        deckActions.forEach(item => this.appendMenuItem(menu, item));
+        deckActions.forEach(item => {
+            // Delete is set apart from the rest.
+            if (item.danger) menu.appendChild(document.createElement('hr'));
+            this.appendMenuItem(menu, item);
+        });
 
         this.positionMenu(menu, x, y);
     },

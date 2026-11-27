@@ -183,6 +183,15 @@
         ],
         "rm-row-icon"
       ),
+    undo: () =>
+      svgEl(
+        "0 0 24 24",
+        [
+          { d: "M9 14 4 9l5-5" },
+          { d: "M4 9h10.5a5.5 5.5 0 0 1 0 11H11" }
+        ],
+        "rm-row-icon"
+      ),
     copy: () =>
       svgEl(
         "0 0 24 24",
@@ -380,6 +389,8 @@
         max-height: calc(100dvh - 20px - var(--onigiri-safe-bottom, 0px));
         overscroll-behavior: contain;
       }
+      .rm-grab { width: 36px; height: 5px; border-radius: 3px; background: var(--rm-border); margin: 2px auto 8px; flex: 0 0 auto; }
+      .rm-cancel { justify-content: center; text-align: center; font-weight: 600; margin-top: 10px; background: var(--rm-elevated); border-radius: 14px; position: sticky; bottom: 0; z-index: 2; box-shadow: 0 0 0 6px var(--rm-surface-solid); }
       .rm-item-btn, .rm-quick-btn, .rm-split-row, .rm-media-btn { min-height: 44px; }
       .rm-item-btn, .rm-quick-label, .rm-split-title, .rm-media-label { font-size: 15px; }
       .rm-flag-btn { height: 44px; }
@@ -456,6 +467,15 @@
     const customItems = Array.isArray(currentData.customItems) ? currentData.customItems : [];
 
     panel.textContent = "";
+
+    // Touch sheet: a grab handle on top and a Cancel row at the bottom.
+    const asSheet = document.documentElement.classList.contains("onigiri-touch");
+    if (asSheet) {
+      const grab = document.createElement("div");
+      grab.className = "rm-grab";
+      grab.setAttribute("aria-hidden", "true");
+      panel.appendChild(grab);
+    }
 
     if (typeof currentData.anchorRight === "number" && isFinite(currentData.anchorRight)) {
       const clamped = Math.max(8, Math.min(200, Math.round(currentData.anchorRight)));
@@ -724,6 +744,25 @@
       return btn;
     }
 
+    // Undo, as Ctrl+Z in desktop Anki: the last answer or change to the deck
+    // ("Undo Answer Card", "Undo Bury"...), or turning the card back over.
+    const undoState = currentData.undo || {};
+    const undoRow = makeActionRow({
+      icon: ICONS.undo,
+      label: undoState.label || "Undo",
+      shortcut: shortcuts.undo,
+      action: "undo"
+    });
+    undoRow.classList.add("rm-undo-row");
+    if (!undoState.can) {
+      undoRow.classList.add("is-disabled");
+      undoRow.setAttribute("aria-disabled", "true");
+    }
+    actionsSection.appendChild(undoRow);
+    const undoDivider = document.createElement("div");
+    undoDivider.className = "rm-divider";
+    actionsSection.appendChild(undoDivider);
+
     actionsSection.appendChild(
       makeSplitRow(
         ICONS.bury,
@@ -952,6 +991,15 @@
 
       customItems.forEach((item) => buildCustomItem(item, extSection));
       panel.appendChild(extSection);
+    }
+
+    if (asSheet) {
+      const cancel = document.createElement("button");
+      cancel.type = "button";
+      cancel.className = "rm-item-btn rm-cancel";
+      cancel.textContent = labels.cancel || "Cancel";
+      cancel.addEventListener("click", () => requestClose());
+      panel.appendChild(cancel);
     }
   }
 

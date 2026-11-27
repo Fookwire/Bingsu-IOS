@@ -380,6 +380,7 @@ const payload = {
   marked: false,
   autoAdvance: false,
   hasPreviousCard: true,
+  undo: { can: true, label: 'Undo Answer Card', answerShown: false, flip: false },
   dark: true,
   flags: Array.from({length: 7}, (_, i) => ({ index: i + 1, label: 'Flag ' + (i + 1), color: '#fff', shortcut: '⌘' + (i + 1), iconUrl: i === 0 ? '/_addons/1011095603/heart.svg' : '' })),
   labels: { markNote: 'Mark Note', autoAdvance: 'Auto Advance', setDueDate: 'Set Due Date...', deleteNote: 'Delete Note' },
@@ -397,8 +398,16 @@ assert.ok(host.classList.contains('night-mode'));
 
 const panel = host.shadowRoot.children[1].children[1];
 const buttons = panel.querySelectorAll('button');
-// Clear + 7 flags + Mark + Auto + Options + Info + Prev + 2 Bury + 2 Suspend + 4 single + 6 media + Custom + Submenu toggle + Nested = 30 buttons
-assert.equal(buttons.length, 30);
+// Clear + 7 flags + Mark + Auto + Options + Info + Prev + Undo + 2 Bury + 2 Suspend + 4 single + 6 media + Custom + Submenu toggle + Nested = 31 buttons
+assert.equal(buttons.length, 31);
+
+// Undo is the first row of the actions and sends act:undo (kept open for nothing: it closes the menu)
+const undoBtn = buttons.find(b => b.textContent.includes('Undo Answer Card'));
+assert.ok(undoBtn, 'Undo row shows Anki\'s own text');
+undoBtn.click();
+assert.equal(api.isOpen(), false);
+assert.equal(cmds[cmds.length - 1], 'onigiri_more_menu:act:undo');
+api.open(payload, false);
 
 // First flag uses custom icon glyph mask; Set Due Date strips trailing ellipsis
 const flag1Btn = buttons.find(b => b.getAttribute('aria-label') === 'Flag 1');

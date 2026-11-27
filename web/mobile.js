@@ -462,8 +462,13 @@
     // --- Deck list: "more" buttons and Select mode -------------------------------
 
     var TOOLS_SVG = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-        '<rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/>' +
-        '<rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg>';
+        '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>';
+
+    // Row icons for the overview's deck sheet.
+    var SVG_OPEN = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">';
+    var RENAME_SVG = SVG_OPEN + '<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+    var OPTIONS_SVG = SVG_OPEN + '<line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>';
+    var EXPORT_SVG = SVG_OPEN + '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>';
 
     var MORE_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">' +
         '<circle cx="5" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/>' +
@@ -613,7 +618,17 @@
     // down to dismiss and a Cancel button. Group rows (Markers ›) push their
     // items inside the sheet (CSS) instead of opening a fly-out.
 
+    // The reviewer's answer bar is a separate web view below the card: tell
+    // Python when a sheet is open so it can dim the bar (audit 2, R2-26).
+    var sheetReported = false;
+    function reportSheet(open) {
+        if (!root.classList.contains('onigiri-screen-review') || sheetReported === open) return;
+        sheetReported = open;
+        try { if (window.pycmd) window.pycmd('onigiri_sheet_state:' + (open ? '1' : '0')); } catch (e) {}
+    }
+
     function closeMenus() {
+        reportSheet(false);
         if (window.OnigiriEngine && OnigiriEngine.closeQuickMenus) {
             try { OnigiriEngine.closeQuickMenus(); return; } catch (e) {}
         }
@@ -805,6 +820,7 @@
             menu.classList.add('is-sheet');
             document.body.appendChild(menu);
         }
+        reportSheet(true);
     }
 
     // --- Home: action tiles ------------------------------------------------------------
@@ -918,6 +934,22 @@
         return out;
     }
 
+    // Header buttons that are app navigation (the deck list, Add, Browse, Stats,
+    // Sync), not study tools.
+    var NAV_COMMANDS = ['decks', 'add', 'browse', 'stats', 'sync'];
+
+    function isAppNavigation(el) {
+        var cmd = el.getAttribute && el.getAttribute('onclick') || '';
+        for (var i = 0; i < NAV_COMMANDS.length; i++) {
+            if (cmd.indexOf("pycmd('" + NAV_COMMANDS[i] + "')") >= 0) return true;
+        }
+        return false;
+    }
+
+    function studyToolButtons() {
+        return headerButtons().filter(function (el) { return !isAppNavigation(el); });
+    }
+
     function hideHeaderButtonsInShadow() {
         if (!root.classList.contains('onigiri-phone') || !root.classList.contains('onigiri-screen-review')) return;
         var host = document.getElementById('onigiri-reviewer-ui-host');
@@ -966,22 +998,31 @@
         more.innerHTML = isReviewer ? TOOLS_SVG : MORE_SVG;
         more.addEventListener('click', function (event) {
             event.stopPropagation();
-            var items = headerButtons().filter(function (el) {
-                // Decks is the back button now
-                var cmd = el.getAttribute('onclick') || '';
-                return cmd.indexOf("pycmd('decks')") < 0;
-            });
             if (isReviewer) {
-                showActionSheet(items, more, t('study_tools', 'Study Tools'));
+                // Study tools only. Add, Browse, Stats and Sync live on the deck
+                // list and the Menu tab (audit 2, R2-26).
+                showActionSheet(studyToolButtons(), more, t('study_tools', 'Study Tools'));
                 return;
             }
-            // Overview: this deck's own actions first, then the app's.
-            var deckActions = Array.prototype.slice.call(document.querySelectorAll(
-                '.overview-bottom-actions .overview-button:not(#onigiri-reveal-btn)'));
+            // Overview: actions for this deck only. The buttons already on the
+            // page (Options, Custom Study, Description) and the app's own
+            // actions are not repeated here (audit 2, R2-25).
             var titleEl = document.querySelector('.overview-title, .overview-header h1, h1, h2');
             var deckName = titleEl ? titleEl.textContent.trim() : '';
-            showActionSheet(deckActions.length ? deckActions.concat([{ sep: true }], items) : items,
-                more, deckName || t('more', 'More'));
+            function deckRow(label, svg, action) {
+                var icon = document.createElement('span');
+                icon.innerHTML = svg;
+                return {
+                    label: label,
+                    icon: icon,
+                    run: function () { try { if (window.pycmd) window.pycmd('onigiri_overview_menu:' + action); } catch (e) {} },
+                };
+            }
+            showActionSheet([
+                deckRow(t('rename_deck_title', 'Rename Deck'), RENAME_SVG, 'rename'),
+                deckRow(t('ctx_deck_options', 'Deck Options'), OPTIONS_SVG, 'options'),
+                deckRow(t('ctx_export_deck', 'Export Deck'), EXPORT_SVG, 'export'),
+            ], more, deckName || t('more', 'More'));
         });
         nav.appendChild(back);
         nav.appendChild(more);
@@ -997,10 +1038,16 @@
             }
         }, { passive: true });
         hideHeaderButtonsInShadow();
+        function toolsButtonVisibility() {
+            // No Hashi Notes, Pomodoro or add-on buttons: nothing to open.
+            if (isReviewer) more.style.display = studyToolButtons().length ? '' : 'none';
+        }
+        toolsButtonVisibility();
         // the reviewer mounts its header after load
         var tries = 0;
         var timer = setInterval(function () {
             hideHeaderButtonsInShadow();
+            toolsButtonVisibility();
             if (++tries > 20) clearInterval(timer);
         }, 250);
     }
@@ -1346,6 +1393,19 @@
         });
         header.parentNode.insertBefore(row, header.nextSibling);
         home.classList.add('onigiri-replaced');
+        // The red dot on Sync means there are changes to send: say so in words
+        // and for VoiceOver (audit 2, R2-31).
+        var syncBtn = row.querySelector('.action-sync');
+        if (syncBtn && window.MutationObserver) {
+            var paintSync = function () {
+                var needed = syncBtn.classList.contains('sync-needed');
+                var caption = syncBtn.querySelector('span');
+                if (caption) caption.textContent = needed ? t('sync_needed', 'To sync') : t('sync', 'Sync');
+                syncBtn.setAttribute('aria-label', needed ? t('sync_changes_to_sync', 'Sync: changes to sync') : t('sync', 'Sync'));
+            };
+            new MutationObserver(paintSync).observe(syncBtn, { attributes: true, attributeFilter: ['class'] });
+            paintSync();
+        }
     }
 
     function addPhoneTabs() {

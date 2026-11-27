@@ -609,6 +609,40 @@ def _action_entry(action):
     return entry
 
 
+def _onigiri_menu_parts(menu) -> dict:
+    """Split Onigiri's own menu by object name (not by label, which is
+    translated) so its entries can sit in the task groups of the Menu page:
+    Appearance with Settings, Study Tools and Games as their own groups, Info
+    with Help. Anything not recognised stays together under "Onigiri"."""
+    parts = {"appearance": [], "tools": [], "games": [], "info": [], "rest": []}
+    try:
+        menu.aboutToShow.emit()  # the study tools hide themselves per settings
+    except Exception:
+        pass
+    for action in menu.actions():
+        if action.isSeparator() or not action.isVisible():
+            continue
+        sub = action.menu()
+        name = sub.objectName() if sub is not None else action.objectName()
+        if name == "onigiri_settings_action":
+            parts["appearance"].append(_action_entry(action))
+        elif name == "onigiri_study_tools_menu":
+            parts["tools"] = _menu_tree(sub)
+        elif name == "onigiri_games_menu":
+            parts["games"] = _menu_tree(sub)
+        elif name == "onigiri_info_menu":
+            parts["info"] = _menu_tree(sub)
+        elif sub is not None:
+            children = _menu_tree(sub)
+            if children:
+                parts["rest"].append({"t": _menu_text(action), "sub": children})
+        elif not action.isEnabled():
+            parts["info"].append(_action_entry(action))  # the version line
+        else:
+            parts["rest"].append(_action_entry(action))
+    return parts
+
+
 def _grouped_menu_tree(menubar) -> list:
     form = getattr(mw, "form", None)
     placed = set()
@@ -623,15 +657,16 @@ def _grouped_menu_tree(menubar) -> list:
             rows.append(_action_entry(action))
         groups[key] = rows
 
-    # The Onigiri menu's own Settings entry joins Anki's Preferences.
-    onigiri_rows, extra_menus, extra_rows = [], [], []
+    # The Onigiri menu is split over the task groups below.
+    onigiri = {"appearance": [], "tools": [], "games": [], "info": [], "rest": []}
+    extra_menus, extra_rows = [], []
     for top in menubar.actions():
         menu = top.menu()
         if menu is None or not top.isVisible():
             continue
         title = _menu_text(top)
         if title in ("Onigiri",) or menu.objectName() == "onigiri_menu":
-            onigiri_rows = _menu_tree(menu)
+            onigiri = _onigiri_menu_parts(menu)
             continue
         for action in menu.actions():
             if action.isSeparator() or not action.isVisible() or id(action) in placed:
@@ -650,30 +685,81 @@ def _grouped_menu_tree(menubar) -> list:
 
     from ..core.translations import tr
 
-    tree = []
     titles = {
         "settings": tr("settings", "Settings"), "study": tr("study", "Study"),
         "library": "Library", "maintenance": "Maintenance",
         "addons": tr("addons", "Add-ons"), "help": tr("help", "Help"),
         "advanced": "Advanced",
     }
+    tools_title = tr("study_tools", "Study Tools")
+    games_title = tr("games", "Games")
+
+    tree = []
+
+    def add(title, rows):
+        rows = [r for r in rows if r]
+        if rows:
+            tree.append({"head": title})
+            tree.extend(rows)
+
     for key, _title, _names in _MENU_GROUPS:
         rows = list(groups.get(key) or [])
-        if key == "settings" and onigiri_rows:
-            rows.append({"t": "Onigiri", "sub": onigiri_rows})
+        if key == "settings":
+            for entry in onigiri["appearance"]:
+                # Onigiri's own settings, one level up (audit 2, R2-41)
+                rows.append(dict(entry, t=tr("menu_appearance", "Appearance")))
         if key == "library" and getattr(mw, "state", "") == "deckBrowser":
             # Deck-list page commands that used to live only in the house sheet.
             rows[0:0] = [
                 {"t": tr("create_deck", "Create Deck"), "cmd": "onigiri_create_deck"},
                 {"t": tr("get_shared", "Get Shared"), "cmd": "shared"},
             ]
-        if key == "advanced" and extra_rows + extra_menus:
-            tree.append({"head": tr("more", "More")})
-            tree.extend(extra_rows + extra_menus)
-        if rows:
-            tree.append({"head": titles.get(key, _title)})
-            tree.extend(rows)
+        if key == "help":
+            rows = rows + list(onigiri["info"])
+        if key == "advanced":
+            more = list(extra_rows) + list(extra_menus)
+            if onigiri["rest"]:
+                more.append({"t": "Onigiri", "sub": list(onigiri["rest"])})
+            if more:
+                tree.append({"head": tr("more", "More")})
+                tree.extend(more)
+        add(titles.get(key, _title), rows)
+        if key == "study":
+            add(tools_title, onigiri["tools"])
+            add(games_title, onigiri["games"])
     return tree
+
+
+def _overview_deck_action(action: str) -> None:
+    """Rename, export or open the options of the deck shown on the overview.
+    The deck is the collection's current deck, so the page passes no id."""
+    try:
+        did = DeckId(mw.col.decks.get_current_id())
+    except Exception as exc:
+        print(f"Onigiri: overview menu has no current deck: {exc}")
+        return
+    try:
+        if action == "options":
+            from aqt.deckoptions import display_options_for_deck_id
+
+            display_options_for_deck_id(did)
+        elif action == "export":
+            from aqt.exporting import ExportDialog
+
+            ExportDialog(mw, did=did)
+        elif action == "rename":
+            from aqt import tr as anki_tr
+            from aqt.operations.deck import rename_deck
+            from aqt.utils import getOnlyText
+
+            old = mw.col.decks.get(did)["name"]
+            new = getOnlyText(anki_tr.decks_new_deck_name(), parent=mw, default=old)
+            new = (new or "").strip()
+            if new and new != old:
+                rename_deck(parent=mw, deck_id=did, new_name=new).run_in_background()
+    except Exception as exc:
+        print(f"Onigiri: overview deck action {action!r} failed: {exc}")
+        tooltip(str(exc))
 
 
 def show_app_menu(context=None) -> None:
@@ -781,6 +867,18 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
 
     if cmd.startswith("onigiri_app_menu_run:"):
         _run_app_menu_action(cmd.split(":", 1)[1])
+        return (True, None)
+
+    if cmd.startswith("onigiri_overview_menu:"):
+        # The overview's ⋯ sheet: actions for the deck being studied (audit 2, R2-25).
+        _overview_deck_action(cmd.split(":", 1)[1])
+        return (True, None)
+
+    if cmd.startswith("onigiri_sheet_state:"):
+        # a sheet is open over the card: dim the answer bar below it
+        from . import reviewer_more_menu
+
+        reviewer_more_menu.set_bottom_sheet_state(cmd.endswith(":1"))
         return (True, None)
 
     if cmd.startswith("onigiri_more_menu:"):

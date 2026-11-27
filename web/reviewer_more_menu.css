@@ -711,3 +711,9 @@ button:disabled {
     transition: none !important;
   }
 }
+
+/* Undo has nothing to undo: dimmed, still tappable (it says so). */
+.rm-item-btn.is-disabled {
+  opacity: 0.45;
+}
+
