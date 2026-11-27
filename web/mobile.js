@@ -1319,10 +1319,45 @@
             });
             row.insertBefore(back, row.firstChild);
         }
+        // With Kioku's own title bar off (settings_web/dialog.py asks for that),
+        // the list needs its own header: a title and the Done that closes the
+        // window. Shown only when the dialog adds .onigiri-own-header.
+        var rail = document.getElementById('oswRail');
+        if (rail && !rail.querySelector('.onigiri-settings-bar')) {
+            var bar = document.createElement('div');
+            bar.className = 'onigiri-settings-bar';
+            var title = document.createElement('span');
+            title.className = 'onigiri-settings-bar-title';
+            title.textContent = t('settings_title', 'Settings');
+            var done = document.createElement('button');
+            done.type = 'button';
+            done.className = 'onigiri-settings-done';
+            done.textContent = t('done', 'Done');
+            done.addEventListener('click', function () {
+                var real = document.getElementById('oswDone');
+                if (real) real.click();
+            });
+            bar.appendChild(title);
+            bar.appendChild(done);
+            rail.insertBefore(bar, rail.firstChild);
+        }
         // Opening a page (nav item or search result) shows it full width.
         shell.addEventListener('click', function (event) {
             if (event.target.closest('[data-nav-item], .osw-search-results [data-page], .osw-search-result')) {
                 root.classList.add('onigiri-settings-page');
+                // showPage() reset the scroll while .osw-main was still hidden,
+                // and WebKit ignores scroll positions on hidden elements, so a
+                // newly opened page started where the last one ended. Reset it
+                // now that the page is visible, but leave search-result jumps
+                // (which scroll to their target) alone.
+                if (event.target.closest('[data-nav-item]')) {
+                    var resetScroll = function () {
+                        var scroller = document.getElementById('oswPageScroll');
+                        if (scroller) scroller.scrollTop = 0;
+                    };
+                    resetScroll();
+                    requestAnimationFrame(resetScroll);
+                }
             }
         });
         var search = shell.querySelector('.osw-search input');

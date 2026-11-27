@@ -430,10 +430,19 @@ def read_json(path, default=None, label=None, validator=None):
         # Valid empty containers are intentional clears/resets. Resurrecting a
         # nonempty .bak here undoes the user's deletion on the next launch.
         if source:
-            _note(
-                f"{label} was unreadable, so it was restored from the {source}.",
-                key="storage_restored", label=label, source=source,
-            )
+            if os.path.exists(path):
+                _note(
+                    f"{label} was unreadable, so it was restored from the {source}.",
+                    key="storage_restored", label=label, source=source,
+                )
+            else:
+                # Nothing was damaged: the file is simply not there (a fresh
+                # install, or a reinstall by hand). Say so, rather than
+                # "unreadable", which reads like data loss.
+                _note(
+                    f"{label} was missing, so it was restored from the {source}.",
+                    key="storage_restored_missing", label=label, source=source,
+                )
             _repair(path, candidate)
         return data
 
@@ -727,6 +736,10 @@ def stale_anki_backup_path():
     return path if os.path.isdir(path) else None
 
 
+def looks_restored_folder(messages):
+    return any(m.startswith("Your Onigiri settings and game progress were restored") for m in messages)
+
+
 def run_startup_check(profile_name=None):
     """
     Returns a list of human-readable messages about anything repaired or worth
@@ -745,10 +758,11 @@ def run_startup_check(profile_name=None):
         restored = restore_from_mirror()
         if restored:
             messages.append(
-                f"Onigiri's data folder was empty, so {restored} file(s) were "
-                "restored from the backup kept outside the add-on folder. This "
-                "usually means the add-on was reinstalled by hand instead of "
-                "through Anki's updater."
+                "Your Onigiri settings and game progress were restored from the "
+                "backup kept outside the add-on folder, because its data folder "
+                f"was empty ({restored} file(s)). Your cards and review history "
+                "were not affected. This usually means the add-on was reinstalled "
+                "by hand instead of through Anki's updater."
             )
 
     stale = stale_anki_backup_path()
@@ -765,11 +779,17 @@ def run_startup_check(profile_name=None):
         messages[0] = _notice_copy("storage_profile_renamed", messages[0],
                                   {"profiles": ", ".join(adopted)})
     for index, message in enumerate(messages):
-        if message.startswith("Onigiri's data folder was empty"):
+        if message.startswith("Your Onigiri settings and game progress were restored"):
             messages[index] = _notice_copy("storage_folder_restored", message,
                                           {"amount": restored})
         elif message.startswith("Anki left an unfinished"):
             messages[index] = _notice_copy("storage_stale_update", message,
                                           {"path": stale})
-    messages.extend(take_notices())
+    notices = take_notices()
+    if looks_restored_folder(messages):
+        # The folder message already says files came back from the external
+        # backup; repeating it per file ("was missing, so it was restored")
+        # only adds noise.
+        notices = [n for n in notices if " was missing, so it was restored from the " not in n]
+    messages.extend(notices)
     return messages

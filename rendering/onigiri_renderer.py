@@ -2353,12 +2353,16 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
         # a card big enough for it; the loop below re-invokes them with the
         # real spans, these zero-arg defaults are the 1x1 fallback.
         "studied": lambda rs=1, cs=1: _stats_widget_card_html(
-            "studied", tr("studied"), f"{cards_today}", tr("cards"),
+            "studied", tr("studied"), f"{cards_today}", tr("card") if cards_today == 1 else tr("cards"),
             series=_stats_widget_weekly_series().get("studied"),
             row_span=rs, col_span=cs,
         ),
         "time": lambda rs=1, cs=1: _stats_widget_card_html(
-            "time", tr("time"), f"{time_today_minutes:.1f}", tr("minutes_unit"),
+            "time", tr("time"),
+            # Under a minute, whole seconds: "0.2 min" reads oddly, and the
+            # profile sheet already says "0m".
+            (f"{int(time_today_seconds)}" if time_today_seconds < 60 else f"{time_today_minutes:.1f}"),
+            (tr("seconds_unit") if time_today_seconds < 60 else tr("minutes_unit")),
             series=_stats_widget_weekly_series().get("time"),
             row_span=rs, col_span=cs,
         ),

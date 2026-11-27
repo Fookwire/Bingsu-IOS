@@ -1192,6 +1192,40 @@ html.onigiri-phone .osw-shell #oswDone {
     display: none !important;
 }
 
+/* The list's own header, used when Kioku's title bar is off. */
+html.onigiri-phone .osw-shell .onigiri-settings-bar {
+    display: none;
+}
+
+html.onigiri-phone.onigiri-own-header .osw-shell .onigiri-settings-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    min-height: 52px;
+    padding: 4px 16px;
+    background: var(--osw-outer);
+}
+
+html.onigiri-phone .osw-shell .onigiri-settings-bar-title {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+html.onigiri-phone .osw-shell .onigiri-settings-done {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0 6px;
+    border: 0;
+    background: none;
+    color: var(--osw-accent, #0a84ff);
+    font: inherit;
+    font-size: 17px;
+    font-weight: 600;
+}
+
 /* The page: full screen, sliding in from the right. */
 html.onigiri-phone.onigiri-settings-page .osw-shell .osw-main {
     animation: onigiri-page-in 0.32s cubic-bezier(0.32, 0.72, 0, 1);
@@ -2160,4 +2194,39 @@ html.onigiri-touch :is(#onigiri-rename-backdrop, #onigiri-create-deck-backdrop,
 html.onigiri-touch :is(#onigiri-rename-backdrop, #onigiri-create-deck-backdrop,
     #onigiri-add-subdeck-backdrop, #onigiri-move-backdrop, #onigiri-delete-backdrop) input {
     font-size: 16px !important;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Overview: top-aligned so tall content never rises under the nav bar        */
+/* ------------------------------------------------------------------------- */
+/* overview.css centres the body vertically. When "Deck details" (or add-on
+   widgets) made the column taller than the screen it rose under the fixed
+   nav bar and the deck title printed over Back. Auto margins keep the column
+   centred while it fits and top-align it, with the page scrolling, when not. */
+html.onigiri-phone.onigiri-screen-overview body {
+    align-items: flex-start;
+}
+
+html.onigiri-phone.onigiri-screen-overview .overview-center-container,
+html.onigiri-phone.onigiri-screen-overview .overview-container {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Sheets: one typeface on every page                                         */
+/* ------------------------------------------------------------------------- */
+/* Sheet rules set sizes but no family, so on the reviewer the sheet inherited
+   the card's font (Arial-like) while the same sheet on the overview was in
+   Poppins. Set it explicitly, and let sheet controls inherit it. */
+.onigiri-quick-menu,
+.onigiri-quick-menu.is-sheet,
+html.onigiri-touch .onigiri-quick-menu {
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.onigiri-quick-menu button,
+.onigiri-quick-menu input,
+.onigiri-quick-menu .quick-menu-item {
+    font-family: inherit;
 }

@@ -349,6 +349,10 @@
     if (!document.documentElement.classList.contains("onigiri-touch")) return "";
     return `
       .rm-kbd { display: none !important; }
+      /* The panel would otherwise inherit the card's typeface. */
+      .rm-panel, .rm-panel button, .rm-panel input {
+        font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      }
       .rm-panel {
         bottom: calc(10px + var(--onigiri-safe-bottom, 0px));
         max-height: calc(100dvh - 20px - var(--onigiri-safe-bottom, 0px));

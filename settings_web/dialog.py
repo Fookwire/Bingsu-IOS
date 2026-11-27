@@ -108,6 +108,14 @@ class SettingsWebDialog(QDialog):
 
         self.setWindowTitle(tr("settings_title"))
         self._apply_proportional_size()
+        if IS_MOBILE:
+            # Kioku draws its own "Back" title bar above every window. The
+            # Settings page already has its own header (Done / back), so ask
+            # Kioku to leave its bar off; older builds ignore the property.
+            try:
+                self.setProperty("kioku_hide_titlebar", True)
+            except Exception:
+                pass
 
         # Prevent Qt 6 on macOS from inserting safe-area margins/padding at the top of the dialog
         try:
@@ -285,12 +293,37 @@ class SettingsWebDialog(QDialog):
         self.show()
         self.raise_()
         self.activateWindow()
+        self._sync_own_header()
         # Measurements made while a WebView is hidden can be stale on some Qt
         # builds. Re-run only the cheap layout measurements after the first show.
         self._eval_js(
             "window.onigiriSettings && "
             "window.onigiriSettings.afterNativeShow && "
             "window.onigiriSettings.afterNativeShow();"
+        )
+
+    def _sync_own_header(self):
+        """Tell the page whether it is the only header (phones).
+
+        Kioku's title bar is a child widget named TitleBar. When it is absent
+        or hidden, the page's own Done button must be visible; when an older
+        Kioku still shows it, keep today's layout so there are not two.
+        """
+        from ..core.platform import IS_MOBILE
+
+        if not IS_MOBILE:
+            return
+        try:
+            bar = next(
+                (w for w in self.findChildren(QWidget) if type(w).__name__ == "TitleBar"),
+                None,
+            )
+            own = bar is None or bar.isHidden()
+        except Exception:
+            own = False
+        self._eval_js(
+            "document.documentElement.classList.toggle('onigiri-own-header', %s);"
+            % ("true" if own else "false")
         )
 
     def bring_to_front(self, initial_page=None):

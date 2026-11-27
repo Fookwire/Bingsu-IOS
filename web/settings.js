@@ -1214,6 +1214,19 @@
     if (field.tone) note.appendChild(el("span", "osw-note-dot"));
     const body = field.tone ? el("div", "osw-note-body") : note;
     const label = el("div", "osw-note-label", field.label || "");
+    if (field.descLink && field.label && field.label.indexOf(field.descLink.text) !== -1) {
+      // A credit line with a link ("made by h0tp").
+      const parts = field.label.split(field.descLink.text);
+      label.textContent = parts[0];
+      const link = el("a", null, field.descLink.text);
+      link.href = "#";
+      link.addEventListener("click", function (event) {
+        event.preventDefault();
+        bridge("osw:link:" + field.descLink.href);
+      });
+      label.appendChild(link);
+      label.appendChild(document.createTextNode(parts.slice(1).join(field.descLink.text)));
+    }
     const desc = el("div", "osw-note-desc", field.desc || "");
     if (field.label || field.contextKey) body.appendChild(label);
     if (field.desc || field.contextKey) body.appendChild(desc);
@@ -6995,9 +7008,29 @@
       ));
     }
     const controls = el("div", "osw-pomo-controls");
-    controls.appendChild(el("button", "", "⟲"));
-    controls.appendChild(el("button", "osw-pomo-play", source.running ? "⏸" : "▶"));
-    controls.appendChild(el("button", "", "⏭"));
+    // SVG, not the text glyphs ▶ ⏸ ⏭: iOS draws those as coloured emoji tiles.
+    const pomoIcon = function (name) {
+      const paths = {
+        reset: '<path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/>',
+        play: '<path d="M7 4.5v15l12-7.5z" fill="currentColor" stroke="none"/>',
+        pause: '<rect x="6" y="4.5" width="4.2" height="15" rx="1" fill="currentColor" stroke="none"/><rect x="13.8" y="4.5" width="4.2" height="15" rx="1" fill="currentColor" stroke="none"/>',
+        skip: '<path d="M5 5v14l10-7z" fill="currentColor" stroke="none"/><rect x="16.5" y="5" width="3" height="14" rx="1" fill="currentColor" stroke="none"/>'
+      };
+      const span = el("span", "osw-pomo-glyph");
+      span.style.cssText = "display:inline-flex;width:1em;height:1em;pointer-events:none";
+      span.innerHTML = '<svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + paths[name] + '</svg>';
+      return span;
+    };
+    const pomoButton = function (cls, name, label) {
+      const b = el("button", cls);
+      b.type = "button";
+      b.setAttribute("aria-label", label);
+      b.appendChild(pomoIcon(name));
+      return b;
+    };
+    controls.appendChild(pomoButton("", "reset", str("pomodoro_reset", "Reset")));
+    controls.appendChild(pomoButton("osw-pomo-play", source.running ? "pause" : "play", source.running ? "Pause" : "Start"));
+    controls.appendChild(pomoButton("", "skip", str("pomodoro_skip", "Skip")));
     island.appendChild(controls);
     windowFrame.appendChild(island);
     holder.appendChild(windowFrame);
@@ -8412,7 +8445,7 @@
             '<button type="button" tabindex="-1" data-preview-inert="true" class="osw-preview-ovstyle-action-button is-description">' + str("description", "Description") + "</button>" +
           "</div>" +
           '<div class="osw-preview-ovstyle-actions osw-preview-ovstyle-reveal-action">' +
-            '<button type="button" tabindex="-1" data-preview-inert="true" class="osw-preview-ovstyle-action-button is-options osw-preview-ovstyle-reveal-button">' + str("click_to_reveal", "Click to reveal") + "</button>" +
+            '<button type="button" tabindex="-1" data-preview-inert="true" class="osw-preview-ovstyle-action-button is-options osw-preview-ovstyle-reveal-button">' + str("click_to_reveal", "Show add-on widgets") + "</button>" +
           "</div>" +
         "</div>";
     }

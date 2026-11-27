@@ -37,7 +37,7 @@ from aqt.qt import (
     QVBoxLayout,
     QWidget,
 )
-from PyQt6.QtCore import QLocale, QObject, QPoint, QRect, QRectF, QTimer, pyqtSignal
+from PyQt6.QtCore import QLocale, QObject, QPoint, QRect, QRectF, QSize, QTimer, pyqtSignal
 from PyQt6.QtGui import QBrush, QColor, QFont, QFontDatabase, QPainterPath, QPen
 from PyQt6.QtSvg import QSvgRenderer
 from PyQt6.QtWidgets import QGraphicsBlurEffect, QGraphicsPixmapItem, QGraphicsScene
@@ -165,6 +165,33 @@ def _addon_root():
 
 def _system_icon_path(filename):
     return os.path.join(_addon_root(), "system_files", "system_icons", "unavailable_for_users", filename)
+
+
+_CONTROL_SVG = {
+    "reset": '<path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5" fill="none" stroke="{c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+    "play": '<path d="M7 4.5v15l12-7.5z" fill="{c}"/>',
+    "pause": '<rect x="6" y="4.5" width="4.2" height="15" rx="1" fill="{c}"/><rect x="13.8" y="4.5" width="4.2" height="15" rx="1" fill="{c}"/>',
+    "skip": '<path d="M5 5v14l10-7z" fill="{c}"/><rect x="16.5" y="5" width="3" height="14" rx="1" fill="{c}"/>',
+}
+
+
+def _control_icon(kind, color, size=20):
+    """Drawn play/pause/skip/reset icons. The text glyphs ▶ ⏸ ⏭ render as
+    coloured emoji on iOS."""
+    try:
+        svg = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">'
+               + _CONTROL_SVG[kind].format(c=color) + "</svg>")
+        renderer = QSvgRenderer(svg.encode("utf-8"))
+        pixmap = QPixmap(size * 2, size * 2)
+        pixmap.setDevicePixelRatio(2.0)
+        pixmap.fill(Qt.GlobalColor.transparent)
+        painter = QPainter(pixmap)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+        renderer.render(painter, QRectF(0, 0, size, size))
+        painter.end()
+        return QIcon(pixmap)
+    except Exception:
+        return QIcon()
 
 
 def _tinted_icon(path, color, size=16):
@@ -964,7 +991,8 @@ class PomodoroIslandView(_PomoShellFrame):
         controls.setSpacing(10)
 
         self.reset_btn = QToolButton()
-        self.reset_btn.setText("⟲")
+        self.reset_btn.setIcon(_control_icon("reset", self.pal["icon"], round(preset["btn"] / 2)))
+        self.reset_btn.setIconSize(QSize(round(preset["btn"] / 2), round(preset["btn"] / 2)))
         self.reset_btn.setFixedSize(preset["btn"], preset["btn"])
         self.reset_btn.setToolTip(tr("pomodoro_reset", "Reset"))
         self.reset_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -975,7 +1003,8 @@ class PomodoroIslandView(_PomoShellFrame):
         self.play_btn.setCursor(Qt.CursorShape.PointingHandCursor)
 
         self.skip_btn = QToolButton()
-        self.skip_btn.setText("⏭")
+        self.skip_btn.setIcon(_control_icon("skip", self.pal["icon"], round(preset["btn"] / 2)))
+        self.skip_btn.setIconSize(QSize(round(preset["btn"] / 2), round(preset["btn"] / 2)))
         self.skip_btn.setFixedSize(preset["btn"], preset["btn"])
         self.skip_btn.setToolTip(tr("pomodoro_skip", "Skip"))
         self.skip_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -1091,6 +1120,7 @@ class PomodoroIslandView(_PomoShellFrame):
         tiles) is guarded by a signature and only redone when it changed."""
         state = self._state
         pal = self.pal
+        preset_play = round(self.preset["play"] * 0.42)
         icon_value = self.settings.get("icon") or DEFAULT_ICON
 
         icon_sig = (icon_value, pal["accent"], pal["icon"], self.preset["icon"])
@@ -1098,10 +1128,17 @@ class PomodoroIslandView(_PomoShellFrame):
             self._icon_sig = icon_sig
             self.topbar_icon.setPixmap(render_icon_pixmap(_addon_root(), icon_value, pal["accent"], self.preset["icon"]))
             self.stats_btn.setIcon(_tinted_icon(_system_icon_path("stats.svg"), pal["icon"], self.preset["icon"] - 2))
+            half = round(self.preset["btn"] / 2)
+            self.reset_btn.setIcon(_control_icon("reset", pal["icon"], half))
+            self.skip_btn.setIcon(_control_icon("skip", pal["icon"], half))
 
         self.phase_label.setText(self._phase_name(state["phase"]))
         self.time_label.setText(self._format_time(state["remaining"]))
-        self.play_btn.setText("⏸" if state["running"] else "▶")
+        play_sig = (bool(state["running"]), preset_play)
+        if play_sig != getattr(self, "_play_sig", None):
+            self._play_sig = play_sig
+            self.play_btn.setIcon(_control_icon("pause" if state["running"] else "play", "#ffffff", preset_play))
+            self.play_btn.setIconSize(QSize(preset_play, preset_play))
 
         if self.progress_bar is not None:
             # QColor can't parse an "rgba(...)" string - the track needs the

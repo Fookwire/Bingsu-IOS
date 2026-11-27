@@ -396,9 +396,11 @@ def _sync_page():
                     "type": "toggle",
                     "hero": True,
                     "icon": "sync.svg",
-                    "label": tr("sync_title", "AnkiWeb sync"),
-                    "desc": made_by,
-                    "desc_link": {"text": "h0tp", "href": "https://github.com/h0tp-ftw"},
+                    "label": tr("sync_title_clear", "Sync Onigiri settings and progress"),
+                    "desc": tr(
+                        "sync_hero_desc",
+                        "Your cards and review history sync separately through Anki.",
+                    ),
                     "bind": {"kind": "config", "key": "ankiweb_sync_enabled"},
                     "default": True,
                 },
@@ -459,6 +461,12 @@ def _sync_page():
                     "layout": "grid",
                     "items": [tr("sync_bullet_2", ""), tr("sync_bullet_3", "")],
                 },
+                {
+                    "id": "sync_credit",
+                    "type": "note",
+                    "label": made_by,
+                    "desc_link": {"text": "h0tp", "href": "https://github.com/h0tp-ftw"},
+                },
             ],
         }, {
             "id": "sync_categories",
@@ -466,7 +474,7 @@ def _sync_page():
             "title": tr("sync_categories", "Sync categories"),
             "description": tr(
                 "sync_categories_desc",
-                "These choices are local to this computer and are not copied to other devices.",
+                "These choices are local to this device and are not copied to other devices.",
             ),
             "fields": [
                 {

@@ -290,8 +290,19 @@ def brand_message_box(box, title: str = "Onigiri") -> None:
 class OnigiriInfoDialog(QDialog):
     def __init__(self, message: str, title: str = "Onigiri", parent: Any = None):
         super().__init__(parent)
+        raw_title = str(title or "").strip()
         title = _branded_title(title)
-        self.setWindowTitle(title)
+        from ..core.platform import IS_MOBILE as _MOBILE
+        if _MOBILE:
+            # Kioku's title bar does not elide, so "Onigiri · Backup and
+            # recovery" was cut at both ends. Phones use the short title and
+            # ask Kioku to drop its bar: the panel below has its own heading
+            # and an OK button.
+            self.setWindowTitle(raw_title or "Onigiri")
+            self.setProperty("kioku_hide_titlebar", True)
+            title = raw_title or "Onigiri"
+        else:
+            self.setWindowTitle(title)
         logo = _info_dialog_icon_pixmap(size=36)
         if not logo.isNull():
             self.setWindowIcon(QIcon(logo))
@@ -368,9 +379,9 @@ class OnigiriInfoDialog(QDialog):
         layout.setContentsMargins(24, 22, 24, 20)
         layout.setSpacing(18)
 
-        content = QHBoxLayout()
+        content = QVBoxLayout() if IS_MOBILE else QHBoxLayout()
         content.setContentsMargins(0, 0, 0, 0)
-        content.setSpacing(16)
+        content.setSpacing(12 if IS_MOBILE else 16)
 
         icon = QLabel()
         icon.setObjectName("onigiriInfoIcon")
@@ -382,7 +393,7 @@ class OnigiriInfoDialog(QDialog):
             icon.setText("Onigiri")
         else:
             icon.setPixmap(icon_pixmap)
-        content.addWidget(icon, 0, Qt.AlignmentFlag.AlignTop)
+        content.addWidget(icon, 0, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
 
         text_stack = QVBoxLayout()
         text_stack.setContentsMargins(0, 0, 0, 0)
@@ -412,12 +423,21 @@ class OnigiriInfoDialog(QDialog):
         screen = self.screen()
         limit = int(screen.availableGeometry().height() * .7) if screen else 560
         scroll.setMinimumHeight(min(max(90, height), max(90, limit - 110)))
-        layout.addLayout(content)
+        layout.addLayout(content, 1 if IS_MOBILE else 0)
+        if IS_MOBILE:
+            # Top aligned, with the button at the bottom edge of the content.
+            layout.setContentsMargins(20, 24, 20, 20)
+            title_label.setStyleSheet("font-size: 22px; font-weight: 700;")
+            message_label.setStyleSheet("font-size: 17px;")
+            scroll.setMinimumHeight(0)
 
         buttons = QHBoxLayout()
         buttons.setContentsMargins(0, 0, 0, 0)
-        buttons.addStretch()
+        if not IS_MOBILE:
+            buttons.addStretch()
         ok_button = QPushButton("OK")
+        if IS_MOBILE:
+            ok_button.setMinimumHeight(48)
         ok_button.setObjectName("onigiriInfoOk")
         ok_button.setCursor(Qt.CursorShape.PointingHandCursor)
         ok_button.clicked.connect(self.accept)

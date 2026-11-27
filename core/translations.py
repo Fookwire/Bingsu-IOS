@@ -238,7 +238,7 @@ TRANSLATIONS = {
         'main_menu': 'Main Menu',
         'sidebar': 'Sidebar',
         'study_pages': 'Study Pages',
-        'overviewer': 'Overviewer',
+        'overviewer': 'Deck overview',
         'reviewer': 'Reviewer',
         'gamification': 'Gamification',
         'settings': 'Settings',
@@ -354,7 +354,7 @@ TRANSLATIONS = {
         'profile_desc': 'Manage your profile settings.',
         'general_desc': 'Customize appearance, fonts, language, and themes.',
         'menu_desc': 'Configure main menu and sidebar options.',
-        'study_pages_desc': 'Overviewer and Reviewer settings.',
+        'study_pages_desc': 'Deck overview and Reviewer settings.',
         'gamification_desc': 'Manage games and more.',
         'hide_anki_bars': 'Hide native Anki bars',
         'replaces_top_bar': 'Replaces top bar by a modern one',
@@ -635,7 +635,7 @@ TRANSLATIONS = {
         'category_palette': 'Palette',
         'category_main_menu': 'Main Menu',
         'category_sidebar': 'Sidebar',
-        'category_overviewer': 'Overviewer',
+        'category_overviewer': 'Deck overview',
         'category_reviewer': 'Reviewer',
         'light_mode': 'Light Mode',
         'dark_mode': 'Dark Mode',
@@ -653,7 +653,7 @@ TRANSLATIONS = {
         'profile_pictures': 'Profile Pictures',
         'profile_backgrounds': 'Profile Backgrounds',
         'main_menu_backgrounds': 'Main Menu Backgrounds',
-        'main_menu_overviewer_images': 'Main Menu | Overviewer Images',
+        'main_menu_overviewer_images': 'Main Menu | Deck overview Images',
         'sidebar_backgrounds': 'Sidebar Backgrounds',
         'reviewer_backgrounds': 'Reviewer Backgrounds',
         'reviewer_bar_backgrounds': 'Reviewer Bar Backgrounds',
@@ -742,13 +742,13 @@ TRANSLATIONS = {
         'reset_to_default_tooltip': 'Reset to Default',
         'visibility': 'Visibility',
         'profile_sections_visibility': 'Profile Sections Visibility',
-        'overviewer_background_section': 'Overviewer Background',
+        'overviewer_background_section': 'Deck overview Background',
         'use_main_background_radio': 'Use Main Background',
         'sync_main_menu_background': 'Sync with Main Menu Background',
         'solid_color_radio': 'Solid Color',
         'background_blur_label': 'Background Blur:',
         'background_opacity_label': 'Background Opacity:',
-        'reset_overviewer_bg_btn': 'Reset to Default Overviewer Background',
+        'reset_overviewer_bg_btn': 'Reset to Default Deck overview Background',
         'overview_style_section': 'Overview Style',
         'overview_style_desc': 'Choose between a detailed or a compact overview screen.',
         'pro_overview_label': 'Pro Overview',
@@ -866,8 +866,8 @@ TRANSLATIONS = {
         'empty': 'Empty',
         'custom_study': 'Custom Study',
         'description': 'Description',
-        'click_to_reveal': 'Click to reveal',
-        'click_to_hide': 'Click to hide',
+        'click_to_reveal': 'Show add-on widgets',
+        'click_to_hide': 'Hide add-on widgets',
         'background_color': 'Background Color',
         'background_light_mode': 'Background (Light Mode)',
         'background_dark_mode': 'Background (Dark Mode)',
@@ -973,7 +973,7 @@ TRANSLATIONS = {
         'overlay_color_light': 'Overlay Color (Light Mode):',
         'overlay_opacity': 'Overlay Opacity:',
         'overview_style': 'Overview Style',
-        'overviewer_background': 'Overviewer Background',
+        'overviewer_background': 'Deck overview Background',
         'pictures': 'Pictures',
         'portuguese': 'Portuguese',
         'pro': 'Pro',
@@ -21008,7 +21008,7 @@ button_radius|Button radius|Raio dos botões|Radio de los botones|按钮圆角|�
 button_border|Button border|Borda dos botões|Borde de los botones|按钮边框|ボタンの枠線|Bordure des boutons|버튼 테두리|Schaltflächenrahmen
 button_background|Button background|Fundo dos botões|Fondo de los botones|按钮背景|ボタンの背景|Fond des boutons|버튼 배경|Schaltflächenhintergrund
 sync_categories|Sync categories|Categorias de sincronização|Categorías de sincronización|同步类别|同期するカテゴリ|Catégories de synchronisation|동기화 범주|Synchronisierungskategorien
-sync_categories_desc|These choices are local to this computer and are not copied to other devices.|Estas escolhas valem apenas neste computador e não são copiadas para outros dispositivos.|Estas opciones son locales y no se copian a otros dispositivos.|这些选项仅适用于此电脑，不会复制到其他设备。|これらの選択はこのコンピュータ専用で、他の端末にはコピーされません。|Ces choix sont propres à cet ordinateur et ne sont pas copiés sur les autres appareils.|이 설정은 이 컴퓨터에만 적용되며 다른 기기에 복사되지 않습니다.|Diese Auswahl gilt nur für diesen Computer und wird nicht auf andere Geräte kopiert.
+sync_categories_desc|These choices are local to this device and are not copied to other devices.|Estas escolhas valem apenas neste computador e não são copiadas para outros dispositivos.|Estas opciones son locales y no se copian a otros dispositivos.|这些选项仅适用于此电脑，不会复制到其他设备。|これらの選択はこのコンピュータ専用で、他の端末にはコピーされません。|Ces choix sont propres à cet ordinateur et ne sont pas copiés sur les autres appareils.|이 설정은 이 컴퓨터에만 적용되며 다른 기기에 복사되지 않습니다.|Diese Auswahl gilt nur für diesen Computer und wird nicht auf andere Geräte kopiert.
 theme_style|Theme style|Estilo do tema|Estilo del tema|主题样式|テーマのスタイル|Style du thème|테마 스타일|Theme-Stil
 things_show_due|Due today|Pendentes hoje|Pendientes hoy|今天到期|今日の予定|À réviser aujourd’hui|오늘 복습 예정|Heute fällig
 things_show_tasks|Tasks|Tarefas|Tareas|任务|タスク|Tâches|작업|Aufgaben
@@ -21282,10 +21282,13 @@ settings_theme_missing|Theme not found: {name}|Tema não encontrado: {name}|Tema
 settings_theme_name_required|Name your theme first.|Dê um nome ao tema primeiro.|Pon nombre al tema primero.|请先为主题命名。|先にテーマに名前を付けてください。|Nommez d’abord votre thème.|먼저 테마 이름을 지정하세요.|Benenne zuerst dein Theme.
 settings_action_unsupported|Unsupported action: {action}|Ação não suportada: {action}|Acción no compatible: {action}|不支持的操作：{action}|未対応の操作: {action}|Action non prise en charge : {action}|지원하지 않는 작업: {action}|Nicht unterstützte Aktion: {action}
 settings_command_unknown|Unknown command|Comando desconhecido|Comando desconocido|未知命令|不明なコマンド|Commande inconnue|알 수 없는 명령|Unbekannter Befehl
+storage_restored_missing|{label} was missing, so it was restored from the {source}.|{label} was missing, so it was restored from the {source}.|{label} was missing, so it was restored from the {source}.|{label} was missing, so it was restored from the {source}.|{label} was missing, so it was restored from the {source}.|{label} was missing, so it was restored from the {source}.|{label} was missing, so it was restored from the {source}.|{label} was missing, so it was restored from the {source}.
+sync_title_clear|Sync Onigiri settings and progress|Sync Onigiri settings and progress|Sync Onigiri settings and progress|Sync Onigiri settings and progress|Sync Onigiri settings and progress|Sync Onigiri settings and progress|Sync Onigiri settings and progress|Sync Onigiri settings and progress
+sync_hero_desc|Your cards and review history sync separately through Anki.|Your cards and review history sync separately through Anki.|Your cards and review history sync separately through Anki.|Your cards and review history sync separately through Anki.|Your cards and review history sync separately through Anki.|Your cards and review history sync separately through Anki.|Your cards and review history sync separately through Anki.|Your cards and review history sync separately through Anki.
 storage_restored|{label} was unreadable, so it was restored from the {source}.|Não foi possível ler {label}; os dados foram restaurados de {source}.|No se pudo leer {label}; se restauró desde {source}.|无法读取{label}，已从{source}恢复。|{label} を読み込めなかったため、{source} から復元しました。|{label} était illisible et a été restauré depuis {source}.|{label}을(를) 읽을 수 없어 {source}에서 복원했습니다.|{label} war nicht lesbar und wurde aus {source} wiederhergestellt.
 storage_damaged|{label} was damaged and no backup could be read. Onigiri fell back to defaults; the damaged file was kept as .corrupt.|{label} estava danificado e nenhum backup pôde ser lido. Onigiri usou os padrões e preservou o arquivo como .corrupt.|{label} estaba dañado y no se pudo leer ninguna copia. Onigiri usó los valores predeterminados y conservó el archivo como .corrupt.|{label}已损坏，且无法读取备份。Onigiri 使用默认值，并将损坏文件保留为 .corrupt。|{label} が破損し、バックアップも読み込めませんでした。既定値を使い、破損ファイルは .corrupt として保存しました。|{label} était endommagé et aucune sauvegarde lisible. Onigiri a utilisé les valeurs par défaut et conservé le fichier en .corrupt.|{label}이(가) 손상되었고 백업을 읽을 수 없습니다. 기본값을 사용하고 손상된 파일은 .corrupt로 보존했습니다.|{label} war beschädigt und kein Backup lesbar. Onigiri nutzt Standardwerte; die beschädigte Datei bleibt als .corrupt erhalten.
 storage_profile_renamed|Your Anki profile appears to have been renamed. Onigiri carried your settings over from: {profiles}|Seu perfil do Anki parece ter sido renomeado. Onigiri recuperou suas configurações de: {profiles}|Parece que se renombró tu perfil de Anki. Onigiri recuperó los ajustes de: {profiles}|你的 Anki 用户似乎已重命名。Onigiri 已迁移以下用户的设置：{profiles}|Anki のプロファイル名が変更されたようです。次の設定を引き継ぎました: {profiles}|Votre profil Anki semble avoir été renommé. Onigiri a récupéré les réglages de : {profiles}|Anki 프로필 이름이 변경된 것 같습니다. 설정을 가져온 프로필: {profiles}|Dein Anki-Profil wurde offenbar umbenannt. Onigiri hat die Einstellungen übernommen von: {profiles}
-storage_folder_restored|Onigiri's data folder was empty, so {amount} file(s) were restored from the backup kept outside the add-on folder. This usually means the add-on was reinstalled by hand instead of through Anki's updater.|A pasta de dados estava vazia. Onigiri restaurou {amount} arquivos do backup externo. Isso costuma acontecer quando o add-on é reinstalado manualmente.|La carpeta de datos estaba vacía. Onigiri restauró {amount} archivos de la copia externa. Suele ocurrir al reinstalar el complemento manualmente.|Onigiri 数据文件夹为空，已从外部备份恢复 {amount} 个文件。这通常发生在手动重装插件时。|データフォルダーが空だったため、外部バックアップから {amount} 個のファイルを復元しました。通常は手動で再インストールした場合に起こります。|Le dossier était vide. Onigiri a restauré {amount} fichiers depuis la sauvegarde externe. Cela arrive souvent après une réinstallation manuelle.|데이터 폴더가 비어 외부 백업에서 파일 {amount}개를 복원했습니다. 수동 재설치 시 주로 발생합니다.|Der Datenordner war leer. Onigiri hat {amount} Dateien aus dem externen Backup wiederhergestellt. Dies passiert meist bei manueller Neuinstallation.
+storage_folder_restored|Your Onigiri settings and game progress were restored from the backup kept outside the add-on folder, because its data folder was empty ({amount} file(s)). Your cards and review history were not affected. This usually means the add-on was reinstalled by hand instead of through Anki's updater.|A pasta de dados estava vazia. Onigiri restaurou {amount} arquivos do backup externo. Isso costuma acontecer quando o add-on é reinstalado manualmente.|La carpeta de datos estaba vacía. Onigiri restauró {amount} archivos de la copia externa. Suele ocurrir al reinstalar el complemento manualmente.|Onigiri 数据文件夹为空，已从外部备份恢复 {amount} 个文件。这通常发生在手动重装插件时。|データフォルダーが空だったため、外部バックアップから {amount} 個のファイルを復元しました。通常は手動で再インストールした場合に起こります。|Le dossier était vide. Onigiri a restauré {amount} fichiers depuis la sauvegarde externe. Cela arrive souvent après une réinstallation manuelle.|데이터 폴더가 비어 외부 백업에서 파일 {amount}개를 복원했습니다. 수동 재설치 시 주로 발생합니다.|Der Datenordner war leer. Onigiri hat {amount} Dateien aus dem externen Backup wiederhergestellt. Dies passiert meist bei manueller Neuinstallation.
 storage_stale_update|Anki left an unfinished add-on update behind at '{path}'. Installing another add-on may restore those files into the wrong place - it is worth deleting that folder.|O Anki deixou uma atualização incompleta em '{path}'. Instalar outro add-on pode restaurar esses arquivos no lugar errado. Recomenda-se excluir essa pasta.|Anki dejó una actualización incompleta en '{path}'. Instalar otro complemento puede restaurar los archivos en un lugar incorrecto. Se recomienda eliminar esa carpeta.|Anki 在“{path}”留下了未完成的插件更新。安装其他插件可能将文件恢复到错误位置，建议删除该文件夹。|Anki の未完了の更新が '{path}' に残っています。別のアドオンの導入で誤った場所へ復元される可能性があるため、このフォルダーの削除をお勧めします。|Anki a laissé une mise à jour inachevée dans '{path}'. Une autre installation pourrait restaurer ces fichiers au mauvais endroit. Il est conseillé de supprimer ce dossier.|Anki가 '{path}'에 완료되지 않은 업데이트를 남겼습니다. 다른 확장 설치 시 잘못된 위치에 복원될 수 있으므로 폴더 삭제를 권장합니다.|Anki hat eine unvollständige Aktualisierung in '{path}' hinterlassen. Weitere Installationen könnten Dateien falsch wiederherstellen. Lösche diesen Ordner am besten.
 storage_backup_file|backup file|arquivo de backup|archivo de copia de seguridad|备份文件|バックアップファイル|fichier de sauvegarde|백업 파일|der Sicherungsdatei
 storage_dated_snapshot|dated snapshot|backup datado|copia con fecha|带日期的备份|日付付きバックアップ|sauvegarde datée|날짜별 백업|dem datierten Backup

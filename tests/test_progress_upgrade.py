@@ -837,5 +837,31 @@ class ProgressUpgradeTests(unittest.TestCase):
         self.assertTrue(all((row, c) not in occupied for c in range(col, col + title['col'])))
 
 
+    def test_missing_progress_restored_from_backup_says_missing_not_unreadable(self):
+        # After a reinstall the file is absent, which is not damage: the
+        # notice must not read like data loss.
+        path = self.files / 'gamification_Upgrade.json'
+        Path(str(path) + '.bak').write_text(json.dumps({'restaurant_level': {'taiyaki_coins': 3}}))
+        data = self.storage.read_json(str(path), default={}, label='Your Onigiri progress')
+        self.assertEqual(data['restaurant_level']['taiyaki_coins'], 3)
+        notices = self.storage.take_notices()
+        self.assertEqual(len(notices), 1)
+        self.assertIn('was missing', notices[0])
+        self.assertNotIn('unreadable', notices[0])
+
+    def test_damaged_progress_still_says_unreadable(self):
+        path = self.files / 'gamification_Upgrade.json'
+        path.write_text('{not json')
+        Path(str(path) + '.bak').write_text(json.dumps({'restaurant_level': {'taiyaki_coins': 3}}))
+        self.storage.read_json(str(path), default={}, label='Your Onigiri progress')
+        self.assertIn('unreadable', self.storage.take_notices()[0])
+
+    def test_folder_restored_message_hides_per_file_missing_notices(self):
+        folder_msg = ('Your Onigiri settings and game progress were restored from the backup '
+                      'kept outside the add-on folder, because its data folder was empty (4 file(s)).')
+        self.assertTrue(self.storage.looks_restored_folder([folder_msg]))
+        self.assertFalse(self.storage.looks_restored_folder(['something else']))
+
+
 if __name__ == '__main__':
     unittest.main()
