@@ -8739,6 +8739,27 @@ def generate_reviewer_buttons_css(conf):
     show_answer_hover_text_light = conf.get("onigiri_reviewer_show_answer_btn_hover_text_light", "#f0f0f0")
     show_answer_hover_bg_dark = conf.get("onigiri_reviewer_show_answer_btn_hover_bg_dark", "#e0e0e0")
     show_answer_hover_text_dark = conf.get("onigiri_reviewer_show_answer_btn_hover_text_dark", "#3a3a3a")
+    # iPhone/iPad: the default Show Answer (white on a white page, ~1.05:1)
+    # did not read as the primary action. Phones fill it with the theme
+    # accent unless the user picked their own colours (audit ACC-02).
+    try:
+        from ..core import mobile_theme
+
+        if mobile_theme.active():
+            if (show_answer_bg_light.lower(), show_answer_text_light.lower()) == ("#ffffff", "#2c2c2c"):
+                light_tokens = mobile_theme.tokens(False)
+                show_answer_bg_light = light_tokens["accent"]
+                show_answer_text_light = light_tokens["on_accent"]
+                show_answer_hover_bg_light = light_tokens["accent"]
+                show_answer_hover_text_light = light_tokens["on_accent"]
+            if (show_answer_bg_dark.lower(), show_answer_text_dark.lower()) == ("#3a3a3a", "#e0e0e0"):
+                dark_tokens = mobile_theme.tokens(True)
+                show_answer_bg_dark = dark_tokens["accent"]
+                show_answer_text_dark = dark_tokens["on_accent"]
+                show_answer_hover_bg_dark = dark_tokens["accent"]
+                show_answer_hover_text_dark = dark_tokens["on_accent"]
+    except Exception:
+        pass
 
     # Stats bar background: the Show Answer button's own background while the
     # timer + New/Learn/Review pills panel is visible. Defaults to mirroring the

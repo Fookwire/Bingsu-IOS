@@ -171,7 +171,9 @@ def set_edge_color(css_color: str) -> bool:
         if active():
             _log(f"no usable edge colour in {css_color!r}")
         return False
-    if _state["edge"] == (top, bottom):
+    if _state["edge"] == (top, bottom) and _RULE_START in (mw.styleSheet() or ""):
+        # Already painted, and the window still carries the rule (a restyle
+        # of the main window drops it; then paint again).
         return True
     _state["edge"] = (top, bottom)
     try:
@@ -434,10 +436,31 @@ def flush_on_background(state) -> None:
         _log(f"background flush failed: {exc}")
 
 
+def ensure_edges(*_args) -> None:
+    """Repaint the safe-area strips if the main window lost them (a dialog
+    closing or a restyle can leave black bands until the next screen change)."""
+    mw = _mw()
+    edge = _state.get("edge")
+    if mw is None or not edge or not active():
+        return
+    try:
+        if _RULE_START in (mw.styleSheet() or ""):
+            return
+        top, bottom = edge
+        _state["edge"] = None
+        set_edge_color("rgb(%d, %d, %d)|rgb(%d, %d, %d)" % (top + bottom))
+    except Exception as exc:
+        _log(f"could not restore the screen edges: {exc}")
+
+
 def _watch_app_state() -> None:
     mw = _mw()
     if mw is None or _state.get("app_state_watch"):
         return
+    try:
+        mw.app.focusWindowChanged.connect(ensure_edges)
+    except Exception:
+        pass
     try:
         mw.app.applicationStateChanged.connect(flush_on_background)
         _state["app_state_watch"] = True

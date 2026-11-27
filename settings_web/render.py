@@ -52,11 +52,19 @@ def accent_color(conf=None):
 
 
 def palette(dark):
-    """Settings keeps neutral chrome; only its accent follows the theme."""
+    """Settings keeps neutral chrome on desktop; only its accent follows the
+    theme. On iPhone/iPad it takes the theme's own colours so moving between
+    the study screens and Settings does not look like switching apps."""
     mode = "dark" if dark else "light"
-    return chrome_palette(
-        config.get_config_readonly().get("colors", {}).get(mode, {}), dark
-    )
+    theme = config.get_config_readonly().get("colors", {}).get(mode, {})
+    try:
+        from ..core import mobile_theme
+
+        if mobile_theme.active():
+            return mobile_theme.settings_palette(theme, dark)
+    except Exception:
+        pass
+    return chrome_palette(theme, dark)
 
 
 # ── assets ─────────────────────────────────────────────────────────────────────

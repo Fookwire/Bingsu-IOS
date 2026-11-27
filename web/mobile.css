@@ -2473,3 +2473,34 @@ html.onigiri-phone .osw-shell .osw-designer-deck .osw-slider-track {
     grid-column: 1 / -1;
     min-height: 32px;
 }
+
+/* ------------------------------------------------------------------------- */
+/* Deck list header controls on phones: legible and tappable (audit ACC-01)   */
+/* ------------------------------------------------------------------------- */
+/* They were grey on the page colour (~3.25:1) with 15px glyphs, so "Edit"
+   looked disabled. Accent colour, 21px glyphs, 44pt targets. */
+html.onigiri-phone #deck-list-header .deck-header-btn,
+html.onigiri-phone #deck-list-header .onigiri-select-toggle {
+    color: var(--accent-color, var(--fg)) !important;
+    min-width: 44px;
+    min-height: 44px;
+}
+
+html.onigiri-phone #deck-list-header .deck-header-btn svg,
+html.onigiri-phone #deck-list-header .deck-header-btn i,
+html.onigiri-phone #deck-list-header .deck-header-btn img,
+html.onigiri-phone #deck-list-header .deck-header-btn .icon,
+html.onigiri-phone #deck-list-header .deck-header-btn [style*="mask-image"] {
+    width: 21px !important;
+    height: 21px !important;
+}
+
+html.onigiri-phone #deck-list-header .deck-header-btn [style*="mask-image"],
+html.onigiri-phone #deck-list-header .deck-header-btn .icon {
+    background-color: currentColor !important;
+}
+
+html.onigiri-phone #deck-list-header .onigiri-select-toggle {
+    font-size: 17px !important;
+    font-weight: 500;
+}

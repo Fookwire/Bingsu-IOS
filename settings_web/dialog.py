@@ -1023,6 +1023,14 @@ class SettingsWebDialog(QDialog):
             side_effects.refresh_anki()
         if _dialog is self:
             _dialog = None
+        # A theme may have been applied: repaint the phone's Qt colours and
+        # screen edges (no-op on desktop).
+        try:
+            from ..core import mobile_theme
+
+            mobile_theme.refresh()
+        except Exception:
+            pass
         super().closeEvent(event)
 
 
