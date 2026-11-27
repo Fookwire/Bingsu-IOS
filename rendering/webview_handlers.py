@@ -361,8 +361,9 @@ def _run_deck_icon_color_picker(context, current: str):
     from ..core.platform import IS_MOBILE
 
     if IS_MOBILE:
-        # Full-screen dialog on iOS; no floating host window needed.
-        return OnigiriColorDialog.getColor(current, mw)
+        # The icon chooser picks colours in-page on touch screens
+        # (icon_modal.js, <input type="color"> = the iOS colour picker).
+        return current, False
 
     host = QWidget(None)
     host.setWindowFlags(
@@ -423,7 +424,9 @@ def _add_icon_files(context, deck_id: str, file_type: str) -> None:
         title = "Select SVG icons"
         pattern = "SVG Icons (*.svg)"
 
-    files, _ = QFileDialog.getOpenFileNames(mw, title, "", pattern)
+    from ..core.platform import pick_files
+
+    files = pick_files(mw, title, pattern, multi=True)
     if not files:
         return
 
@@ -555,27 +558,73 @@ def _menu_tree(menu) -> list:
     return items
 
 
-def show_app_menu(context=None) -> None:
-    """Anki's menus (File, Edit, View, Tools, Help, Onigiri) as a full-screen
-    page in the web view that asked (web/mobile.js showAppMenu): on
-    iPhone/iPad the desktop menu row is hidden, and a Qt popup opened as a
-    desktop-sized list in the corner of the screen."""
-    menubar = getattr(getattr(mw, "form", None), "menubar", None) or mw.menuBar()
-    if menubar is None:
-        return
+def show_menu_page(menu, title: str = "", context=None, keep=None) -> bool:
+    """Any QMenu as a full-screen iOS list page in the web view that asked
+    (web/mobile.js showAppMenu), instead of a desktop popup at a cursor
+    position that taps don't set. Returns False if the page couldn't show
+    it. ``keep`` holds objects the menu's actions need alive."""
     _APP_MENU_ACTIONS.clear()
-    tree = _menu_tree(menubar)
+    _APP_MENU_ACTIONS["__keep"] = (menu, keep)
+    tree = _menu_tree(menu)
+    if not tree:
+        return False
     web = getattr(context, "web", None) or mw.web
     try:
-        payload = json.dumps({"items": tree})
+        payload = json.dumps({"title": title, "items": tree})
         web.eval(
             "(function(){if(window.OnigiriMobile&&OnigiriMobile.showAppMenu){OnigiriMobile.showAppMenu(%s);}"
             "else{pycmd('onigiri_app_menu_popup');}})();" % payload
         )
-        return
+        return True
     except Exception as exc:
-        print(f"Onigiri: menu page failed, using a popup: {exc}")
-    _show_app_menu_popup()
+        print(f"Onigiri: menu page failed: {exc}")
+        return False
+
+
+def show_app_menu(context=None) -> None:
+    """Anki's menus (File, Edit, View, Tools, Help, Onigiri) as a full-screen
+    page: on iPhone/iPad the desktop menu row is hidden."""
+    menubar = getattr(getattr(mw, "form", None), "menubar", None) or mw.menuBar()
+    if menubar is None:
+        return
+    if not show_menu_page(menubar, "", context):
+        _show_app_menu_popup()
+
+
+def show_deck_options_page(context, deck_id: int) -> None:
+    """Anki's deck menu (Rename, Options, Export, Delete + every add-on's
+    entries via deck_browser_will_show_options_menu) as a menu page on
+    touch screens. Anki builds it in DeckBrowser._showOptions and pops it at
+    QCursor.pos(); the menu is captured instead of popped."""
+    import aqt.deckbrowser as deckbrowser_module
+
+    db = context if isinstance(context, DeckBrowser) else mw.deckBrowser
+    real_menu = deckbrowser_module.QMenu
+    captured = []
+
+    class _CapturedMenu(real_menu):
+        def popup(self, *args, **kwargs):  # noqa: D401
+            captured.append(self)
+
+        def exec(self, *args, **kwargs):
+            captured.append(self)
+            return None
+
+    deckbrowser_module.QMenu = _CapturedMenu
+    try:
+        db._showOptions(str(deck_id))
+    finally:
+        deckbrowser_module.QMenu = real_menu
+    if captured:
+        name = ""
+        try:
+            name = mw.col.decks.name(deck_id).split("::")[-1]
+        except Exception:
+            pass
+        if not show_menu_page(captured[0], name, context):
+            from aqt.qt import QCursor
+
+            captured[0].popup(QCursor.pos())
 
 
 def _show_app_menu_popup() -> None:
@@ -1226,7 +1275,15 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
             db = context if isinstance(context, DeckBrowser) else mw.deckBrowser
             # The native menu calls every deck-menu hook, including FSRS
             # Helper's Delay Overdue action, with this exact deck ID.
-            db._showOptions(str(deck_id))
+            try:
+                from ..core.platform import IS_MOBILE
+            except ImportError:
+                IS_MOBILE = False
+
+            if IS_MOBILE:
+                show_deck_options_page(context, deck_id)
+            else:
+                db._showOptions(str(deck_id))
         except Exception as e:
             print(f"Onigiri: Error opening add-on deck actions: {e}")
         return (True, None)

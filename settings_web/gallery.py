@@ -156,7 +156,9 @@ def import_images(folder, parent=None, title="Import image", extensions=IMAGE_EX
         return [], f"unknown gallery folder {folder!r}"
 
     pattern = " ".join("*" + ext for ext in extensions)
-    paths, _ = QFileDialog.getOpenFileNames(parent, title, "", f"{filter_label} ({pattern})")
+    from ..core.platform import pick_files
+
+    paths = pick_files(parent, title, f"{filter_label} ({pattern})", multi=True)
     if not paths:
         return [], None
 

@@ -895,8 +895,10 @@
 
     function setupNavBar() {
         if (!root.classList.contains('onigiri-phone') || document.getElementById('onigiri-phone-nav')) return;
-        var isReviewer = !!document.getElementById('qa');
-        var isOverview = isOverviewPage();
+        // Only Onigiri's own study screens: a card previewer or the card
+        // layout window also shows a #qa card.
+        var isReviewer = root.classList.contains('onigiri-screen-review');
+        var isOverview = root.classList.contains('onigiri-screen-overview') && isOverviewPage();
         if (!isReviewer && !isOverview) return;
         var nav = document.createElement('nav');
         nav.id = 'onigiri-phone-nav';
@@ -938,9 +940,10 @@
     function setupEdgeSwipe() {
         if (!root.classList.contains('onigiri-touch')) return;
         if (document.documentElement.dataset.onigiriEdgeSwipe) return;
-        var isReviewer = !!document.getElementById('qa');
+        var isReviewer = root.classList.contains('onigiri-screen-review');
         var isSettings = !!document.querySelector('.osw-shell');
-        if (!isReviewer && !isSettings && !isOverviewPage()) return;
+        var isOverview = root.classList.contains('onigiri-screen-overview');
+        if (!isReviewer && !isSettings && !isOverview) return;
         document.documentElement.dataset.onigiriEdgeSwipe = '1';
         var start = null;
         var cue = null;
@@ -1079,7 +1082,7 @@
         page.innerHTML = '<div class="oam-bar"><button type="button" class="oam-back"></button>' +
             '<div class="oam-title"></div><button type="button" class="oam-done"></button></div>' +
             '<div class="oam-body"></div>';
-        var stack = [{ title: t('menu', 'Menu'), items: (data && data.items) || [] }];
+        var stack = [{ title: (data && data.title) || t('menu', 'Menu'), items: (data && data.items) || [] }];
         var backBtn = page.querySelector('.oam-back');
         var doneBtn = page.querySelector('.oam-done');
         var title = page.querySelector('.oam-title');

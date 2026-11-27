@@ -110,3 +110,48 @@ def make_managed_window(widget) -> bool:
     except Exception as exc:
         print(f"Onigiri: could not adapt window for mobile: {exc}")
         return False
+
+
+def pick_files(parent, title: str, name_filter: str, multi: bool = False) -> list:
+    """Paths the user picked (empty if cancelled).
+
+    On iPhone/iPad this goes through Anki's getFile, which Kioku replaces
+    with the iOS document picker: it copies the file into the app, where
+    Python can read it. QFileDialog there returned paths the app may not
+    read. Desktop keeps Qt's dialog."""
+    if IS_MOBILE:
+        try:
+            from aqt.utils import getFile
+
+            result = getFile(parent, title, None, filter=name_filter, multi=multi)
+        except Exception as exc:
+            print(f"Onigiri: file picker failed: {exc}")
+            return []
+        if not result:
+            return []
+        return list(result) if isinstance(result, (list, tuple)) else [result]
+    from aqt.qt import QFileDialog
+
+    if multi:
+        paths, _ = QFileDialog.getOpenFileNames(parent, title, "", name_filter)
+        return [p for p in paths if p]
+    path, _ = QFileDialog.getOpenFileName(parent, title, "", name_filter)
+    return [path] if path else []
+
+
+def save_file(parent, title: str, suggested_path: str, name_filter: str, ext: str) -> str:
+    """Where to save (empty if cancelled). On iPhone/iPad, Kioku's
+    getSaveFile puts the file in Documents/Exports (the Files app)."""
+    if IS_MOBILE:
+        try:
+            from aqt.utils import getSaveFile
+
+            name = os.path.basename(suggested_path) or ("export" + ext)
+            return getSaveFile(parent, title, "onigiri", "", ext, name) or ""
+        except Exception as exc:
+            print(f"Onigiri: save picker failed: {exc}")
+            return ""
+    from aqt.qt import QFileDialog
+
+    path, _ = QFileDialog.getSaveFileName(parent, title, suggested_path, name_filter)
+    return path or ""

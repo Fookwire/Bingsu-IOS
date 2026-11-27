@@ -872,6 +872,11 @@ window.OnigiriIconChooser = (function () {
             slot.appendChild(meta);
             slot.addEventListener("click", () => {
                 const current = role === "dark" ? state.selectedColorDark : state.selectedColorLight;
+                if (window.OnigiriMobile && OnigiriMobile.isTouch()) {
+                    // iOS: the system colour picker, from the page itself.
+                    pickColorInPage(current || "#00A982", (hex) => window.OnigiriIconChooser.applyColor(role, hex));
+                    return;
+                }
                 py(`onigiri_icon_chooser_color:${state.deckId}:${role}:${current || "#00A982"}`);
             });
             slots.appendChild(slot);
@@ -891,6 +896,25 @@ window.OnigiriIconChooser = (function () {
             applyThemeColorMode();
         };
         return section;
+    }
+
+    // Touch screens: a colour input opens the system colour picker (iOS
+    // UIColorPickerViewController) over the page. It has to be in the
+    // document and is reused.
+    function pickColorInPage(current, done) {
+        let input = document.getElementById("onigiri-icon-color-input");
+        if (!input) {
+            input = document.createElement("input");
+            input.type = "color";
+            input.id = "onigiri-icon-color-input";
+            input.setAttribute("aria-hidden", "true");
+            input.style.cssText = "position:fixed;left:50%;bottom:0;width:1px;height:1px;opacity:0;border:0;padding:0;";
+            document.body.appendChild(input);
+        }
+        const hex = /^#[0-9a-f]{6}$/i.test(current) ? current : "#00a982";
+        input.value = hex;
+        input.oninput = input.onchange = () => done(input.value);
+        input.click();
     }
 
     function open(data) {

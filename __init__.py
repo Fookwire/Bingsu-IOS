@@ -1458,7 +1458,7 @@ def _on_native_cmd(handled, cmd, context):
     if isinstance(cmd, str) and cmd.startswith("onigiri_native:"):
         from .core import ios_native
 
-        ios_native.handle_command(cmd)
+        ios_native.handle_command(cmd, context)
         return (True, None)
     return handled
 

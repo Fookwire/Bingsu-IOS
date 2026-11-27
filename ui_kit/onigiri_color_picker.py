@@ -646,6 +646,16 @@ class OnigiriColorDialog:
         app = QApplication.instance()
         if app is None:
             return _normalized_hex(initial_color), False
+        try:
+            from ..core.platform import IS_MOBILE
+        except Exception:
+            IS_MOBILE = False
+        if IS_MOBILE:
+            # On iPhone/iPad the popup is a child of the main window, which
+            # the web view's native surface paints over: it was invisible and
+            # this nested loop waited for a Qt mouse press that never came
+            # (the app looked frozen). Pages pick colours in-page instead.
+            return _normalized_hex(initial_color), False
 
         root = parent.window() if parent else app.activeWindow()
         if root is None:

@@ -886,9 +886,10 @@ class PrepStationDialog(QDialog):
         self.web.stdHtml(_render_web())
 
     def _copy_thumbnail(self) -> None:
-        source, _ = QFileDialog.getOpenFileName(
-            self, tr("prep_choose_photo", "Choose Photo…"), "", "Images (*.png *.jpg *.jpeg *.webp *.gif *.bmp)"
-        )
+        from ..core.platform import pick_files
+
+        picked = pick_files(self, tr("prep_choose_photo", "Choose Photo…"), "Images (*.png *.jpg *.jpeg *.webp *.gif *.bmp)")
+        source = picked[0] if picked else ""
         if not source:
             return
         extension = os.path.splitext(source)[1].lower() or ".png"

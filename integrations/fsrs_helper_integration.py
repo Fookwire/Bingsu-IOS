@@ -57,6 +57,13 @@ def _open_fsrs_helper_menu(handled, message, context):
 
         menu = _get_fsrs_helper_menu()
         if menu is not None:
+            from ..core.platform import IS_MOBILE
+
+            if IS_MOBILE:
+                from ..rendering.webview_handlers import show_menu_page
+
+                if show_menu_page(menu, "FSRS4Anki Helper", context):
+                    return (True, None)
             menu.popup(QCursor.pos())
     except Exception as exc:
         print(f"Onigiri: Failed to open FSRS4Anki Helper menu: {exc}")

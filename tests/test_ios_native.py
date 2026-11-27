@@ -112,5 +112,71 @@ class MobileJsContractTests(unittest.TestCase):
         self.assertIn("ios_native.install()", init)
 
 
+class AuditStepOneTests(unittest.TestCase):
+    def setUp(self):
+        self.platform, self.native = load()
+
+    def test_pick_files_uses_ankis_getfile_on_mobile(self):
+        calls = []
+        utils = types.ModuleType("aqt.utils")
+        utils.getFile = lambda parent, title, cb, filter="*", multi=False: (calls.append((filter, multi)) or (["/a.png", "/b.png"] if multi else "/a.png"))
+        aqt = types.ModuleType("aqt")
+        aqt.utils = utils
+        with patch.dict(sys.modules, {"aqt": aqt, "aqt.utils": utils}), \
+                patch.object(self.platform, "IS_MOBILE", True):
+            self.assertEqual(self.platform.pick_files(None, "t", "Images (*.png)", multi=True), ["/a.png", "/b.png"])
+            self.assertEqual(self.platform.pick_files(None, "t", "Images (*.png)"), ["/a.png"])
+        self.assertEqual(calls, [("Images (*.png)", True), ("Images (*.png)", False)])
+
+    def test_pick_files_cancel_and_errors_give_empty(self):
+        utils = types.ModuleType("aqt.utils")
+        utils.getFile = lambda *a, **k: None
+        aqt = types.ModuleType("aqt")
+        aqt.utils = utils
+        with patch.dict(sys.modules, {"aqt": aqt, "aqt.utils": utils}), \
+                patch.object(self.platform, "IS_MOBILE", True):
+            self.assertEqual(self.platform.pick_files(None, "t", "*"), [])
+            utils.getFile = lambda *a, **k: (_ for _ in ()).throw(RuntimeError())
+            self.assertEqual(self.platform.pick_files(None, "t", "*"), [])
+
+    def test_back_only_from_main_screens(self):
+        went = []
+        mw = types.SimpleNamespace(reviewer=object(), overview=object(), deckBrowser=object())
+        with patch.object(self.native, "_mw", lambda: mw), \
+                patch.object(self.native, "go_back", lambda: went.append(1)):
+            self.native.handle_command("onigiri_native:back", object())  # a previewer
+            self.native.handle_command("onigiri_native:back", None)
+            self.assertEqual(went, [])
+            self.native.handle_command("onigiri_native:back", mw.reviewer)
+            self.assertEqual(went, [1])
+
+    def test_back_from_review_goes_through_onoverview(self):
+        # onOverview is what Focus Dango guards
+        calls = []
+        mw = types.SimpleNamespace(col=object(), state="review",
+                                   onOverview=lambda: calls.append("onOverview"),
+                                   moveToState=lambda s: calls.append(s))
+        with patch.object(self.native, "_mw", lambda: mw):
+            self.native.go_back()
+            mw.state = "overview"
+            self.native.go_back()
+        self.assertEqual(calls, ["onOverview", "deckBrowser"])
+
+    def test_background_flushes_pending_writes(self):
+        flushed = []
+        storage = types.ModuleType("ios_native_test.core.safe_storage")
+        storage.flush_pending = lambda: flushed.append(1)
+        qt = types.ModuleType("aqt.qt")
+        qt.Qt = types.SimpleNamespace(ApplicationState=types.SimpleNamespace(ApplicationActive="active"))
+        aqt = types.ModuleType("aqt")
+        aqt.qt = qt
+        with patch.dict(sys.modules, {"aqt": aqt, "aqt.qt": qt, "ios_native_test.core.safe_storage": storage}):
+            sys.modules["ios_native_test.core"].safe_storage = storage
+            self.native.flush_on_background("active")
+            self.assertEqual(flushed, [])
+            self.native.flush_on_background("suspended")
+            self.assertEqual(flushed, [1])
+
+
 if __name__ == "__main__":
     unittest.main()

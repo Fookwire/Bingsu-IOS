@@ -333,7 +333,16 @@ def haptic(kind: str = "light") -> bool:
 # --- wiring --------------------------------------------------------------------
 
 
-def handle_command(cmd: str) -> bool:
+def _is_main_screen(context) -> bool:
+    """The deck list, overview or reviewer in the main window: not a card
+    previewer or another window that also shows a card (#qa)."""
+    mw = _mw()
+    if mw is None or context is None:
+        return False
+    return any(context is getattr(mw, name, None) for name in ("reviewer", "overview", "deckBrowser"))
+
+
+def handle_command(cmd: str, context=None) -> bool:
     """``onigiri_native:<what>[:<arg>]`` from web/mobile.js."""
     if not cmd.startswith("onigiri_native:"):
         return False
@@ -346,19 +355,23 @@ def handle_command(cmd: str) -> bool:
     elif what == "haptic":
         haptic(arg or "light")
     elif what == "back":
-        go_back()
+        if _is_main_screen(context):
+            go_back()
     return True
 
 
 def go_back() -> None:
-    """The nav bar's ‹ and the edge swipe: reviewer -> overview -> decks."""
+    """The nav bar's ‹ and the edge swipe: reviewer -> overview -> decks.
+    Through Anki's onOverview/onDeckBrowser, which Focus Dango guards (a
+    direct moveToState walked out of a locked study session)."""
     mw = _mw()
     if mw is None or mw.col is None:
         return
     try:
         if mw.state == "review":
-            mw.moveToState("overview")
+            mw.onOverview()
         elif mw.state in ("overview", "resetRequired"):
+            # Focus Dango only guards leaving a review
             mw.moveToState("deckBrowser")
     except Exception as exc:
         print(f"Onigiri: back failed: {exc}")
@@ -373,6 +386,34 @@ def _after_main_window() -> None:
         QTimer.singleShot(0, stop_bounce_everywhere)
     except Exception:
         pass
+    _watch_app_state()
+
+
+def flush_on_background(state) -> None:
+    """iOS suspends a backgrounded app and may then kill it without any
+    close event: game progress still waiting in Onigiri's write queue (Nook
+    XP, Onigimon; written ~1.5 s after an answer) was lost. Write it now."""
+    try:
+        from aqt.qt import Qt
+
+        if state == Qt.ApplicationState.ApplicationActive:
+            return
+        from . import safe_storage
+
+        safe_storage.flush_pending()
+    except Exception as exc:
+        _log(f"background flush failed: {exc}")
+
+
+def _watch_app_state() -> None:
+    mw = _mw()
+    if mw is None or _state.get("app_state_watch"):
+        return
+    try:
+        mw.app.applicationStateChanged.connect(flush_on_background)
+        _state["app_state_watch"] = True
+    except Exception as exc:
+        _log(f"could not watch the app state: {exc}")
 
 
 def _after_state_change(*_args) -> None:

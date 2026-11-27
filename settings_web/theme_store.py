@@ -669,8 +669,10 @@ def export_theme(store, name, parent=None):
 
     theme_data, assets_to_zip = build_export_payload(store)
     suggested = name.lower().replace(" ", "_") + ".onigiri"
-    save_path, _ = QFileDialog.getSaveFileName(
-        parent, "Save Theme As", os.path.join(user_themes_dir(), suggested), "Onigiri Theme Files (*.onigiri)"
+    from ..core.platform import save_file
+
+    save_path = save_file(
+        parent, "Save Theme As", os.path.join(user_themes_dir(), suggested), "Onigiri Theme Files (*.onigiri)", ".onigiri"
     )
     if not save_path:
         return None, None
@@ -692,9 +694,10 @@ def import_theme(parent=None):
     user_themes/. Returns (summary_dict, error)."""
     from aqt.qt import QFileDialog
 
-    filepath, _ = QFileDialog.getOpenFileName(
-        parent, "Import Theme", "", "Onigiri Theme Files (*.onigiri)"
-    )
+    from ..core.platform import pick_files
+
+    picked = pick_files(parent, "Import Theme", "Onigiri Theme Files (*.onigiri)")
+    filepath = picked[0] if picked else ""
     if not filepath:
         return None, None
 

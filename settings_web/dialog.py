@@ -486,12 +486,14 @@ class SettingsWebDialog(QDialog):
     def _cmd_pomodoro_choose_sound(self, _arg):
         from ..study_tools import pomodoro
 
-        path, _ = QFileDialog.getOpenFileName(
+        from ..core.platform import pick_files
+
+        picked = pick_files(
             self,
             tr("pomodoro_choose_sound", "Choose Sound File…"),
-            "",
             "Audio Files (*.mp3 *.wav *.ogg *.m4a *.flac)",
         )
+        path = picked[0] if picked else ""
         if not path:
             return "ok"
         try:
