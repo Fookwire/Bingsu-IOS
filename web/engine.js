@@ -445,12 +445,19 @@ window.OnigiriEngine = {
         bar.classList.remove('is-closing');
         bar.classList.add('is-visible');
         input.value = '';
-        requestAnimationFrame(() => {
+        const focusInput = () => {
             try {
                 input.focus({ preventScroll: true });
             } catch (error) {
                 input.focus();
             }
+        };
+        // iOS only raises the keyboard for a focus() made inside the tap
+        // itself; one made in a later animation frame focused the field with
+        // no keyboard (audit INT-01). Focus now, and again once laid out.
+        focusInput();
+        requestAnimationFrame(() => {
+            if (document.activeElement !== input) focusInput();
         });
     },
 

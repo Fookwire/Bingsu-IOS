@@ -6119,6 +6119,20 @@ def _adapt_for_phone(pages):
     for page in pages:
         if page.get("id") == "sidebar":
             page["title"] = tr("deck_list", "Deck list")
+        if page.get("id") == "overviewer":
+            page.setdefault("sections", []).append({
+                "id": "overviewer_phone",
+                "title": tr("on_this_phone", "On this phone"),
+                "fields": [{
+                    "id": "overview_profile_bar_on_phone",
+                    "type": "toggle",
+                    "label": tr("show_profile_bar_on_phone", "Show profile bar on the deck overview"),
+                    "desc": tr("show_profile_bar_on_phone_desc",
+                               "Off by default on phones, where it sits between the deck name and its counts."),
+                    "bind": {"kind": "config", "key": "showOverviewProfileBarOnPhone"},
+                    "default": False,
+                }],
+            })
         for section in page.get("sections") or []:
             fields = section.get("fields")
             if isinstance(fields, list):

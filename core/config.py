@@ -184,6 +184,7 @@ DEFAULTS = {
     "sidebarContentMode": "decks",
     "showCongratsProfileBar": True,
     "showOverviewProfileBar": True,
+    "showOverviewProfileBarOnPhone": False,
     # Match Anki's congratulations notice: the next learning card's ready time
     # plus the number of learning cards still due before the next day cutoff.
     "showOverviewDueLaterNotice": True,

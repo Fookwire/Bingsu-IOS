@@ -919,6 +919,7 @@
     }
 
     function hideHeaderButtonsInShadow() {
+        if (!root.classList.contains('onigiri-phone') || !root.classList.contains('onigiri-screen-review')) return;
         var host = document.getElementById('onigiri-reviewer-ui-host');
         var shadow = host && host.shadowRoot;
         if (!shadow || shadow.getElementById('onigiri-phone-nav-style')) return;
@@ -1607,6 +1608,7 @@
         haptic: haptic,
         paintEdges: paintEdges,
         findOverflow: findOverflow,
+        hideHeaderButtonsInShadow: hideHeaderButtonsInShadow,
         fitSegments: fitSegments,
     };
 })();

@@ -613,6 +613,12 @@ def inject_menu_files(web_content, context):
                             ${{topBarHtml}}
                         `;
                         headerEl = shadow.getElementById('onigiri-reviewer-header');
+                        // Phones: hide the desktop toolbar row in the same
+                        // tick it is created, so it never flashes before the
+                        // nav bar takes over (audit INT-04).
+                        if (window.OnigiriMobile && typeof window.OnigiriMobile.hideHeaderButtonsInShadow === 'function') {{
+                            try {{ window.OnigiriMobile.hideHeaderButtonsInShadow(); }} catch (e) {{}}
+                        }}
                         if (window.OnigiriReviewerDock && typeof window.OnigiriReviewerDock.mount === 'function') {{
                             window.OnigiriReviewerDock.mount(shadow);
                         }}

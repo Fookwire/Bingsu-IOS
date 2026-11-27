@@ -2472,7 +2472,16 @@ def patch_overview():
 
 	profile_bar_html = ""
 	profile_type = mw.col.conf.get("modern_menu_profile_type", "bar")
-	if conf.get("showOverviewProfileBar", True) and profile_type == "bar":
+	# Phones: the profile pill sat on the stats card between the deck name and
+	# its counts and said nothing about the deck (audit LAY-11). It is off on
+	# phones unless "Show profile bar on this phone" is turned on.
+	try:
+		from ..core.platform import is_phone_device as _is_phone
+
+		_phone_hides_bar = _is_phone() and not conf.get("showOverviewProfileBarOnPhone", False)
+	except Exception:
+		_phone_hides_bar = False
+	if conf.get("showOverviewProfileBar", True) and profile_type == "bar" and not _phone_hides_bar:
 		user_name = conf.get("userName", "USER")
 		profile_pic_html = _get_profile_pic_html(user_name, mw.addonManager.addonFromModule(__name__), "profile-pic")
 		restaurant_chip_html = _get_nook_level_chip_html()

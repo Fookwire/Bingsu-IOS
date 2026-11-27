@@ -1950,36 +1950,42 @@ html body .onigiri-slide-from-left.onigiri-slide-from-left {
    waits off screen, then slides in (an animation, so it always plays from
    the edge) once it is ready to be shown. Pure slide, like iOS navigation. */
 html.onigiri-enter-forward body {
-    transform: translateX(100%);
+    /* Anki replaces the whole page, so the old screen cannot stay on screen
+       during the slide. The new one starts close to its place and fades in
+       while it slides, so the empty frame between pages is short and is not
+       a full-width blank (audit SYS-06). */
+    transform: translateX(28%);
+    opacity: 0;
     /* never left off screen if the script didn't run */
     animation: onigiri-enter-failsafe 0s linear 1.6s forwards;
 }
 
 html.onigiri-enter-back body {
-    transform: translateX(-100%);
+    transform: translateX(-28%);
+    opacity: 0;
     animation: onigiri-enter-failsafe 0s linear 1.6s forwards;
 }
 
 html.onigiri-enter-forward.onigiri-entering body {
-    animation: onigiri-push-from-right 0.42s cubic-bezier(0.32, 0.72, 0, 1) both !important;
+    animation: onigiri-push-from-right 0.34s cubic-bezier(0.32, 0.72, 0, 1) both !important;
 }
 
 html.onigiri-enter-back.onigiri-entering body {
-    animation: onigiri-push-from-left 0.42s cubic-bezier(0.32, 0.72, 0, 1) both !important;
+    animation: onigiri-push-from-left 0.34s cubic-bezier(0.32, 0.72, 0, 1) both !important;
 }
 
 @keyframes onigiri-push-from-right {
-    from { transform: translateX(100%); }
-    to { transform: none; }
+    from { transform: translateX(28%); opacity: 0; }
+    to { transform: none; opacity: 1; }
 }
 
 @keyframes onigiri-push-from-left {
-    from { transform: translateX(-100%); }
-    to { transform: none; }
+    from { transform: translateX(-28%); opacity: 0; }
+    to { transform: none; opacity: 1; }
 }
 
 @keyframes onigiri-enter-failsafe {
-    to { transform: none; }
+    to { transform: none; opacity: 1; }
 }
 
 /* Taps: tiles and big buttons sink a little under the finger. */
@@ -2606,4 +2612,34 @@ html.onigiri-phone #onigiri-quick-actions .action-sync.is-syncing svg {
    bar holds Actions and the selection count. */
 html.onigiri-touch #onigiri-edit-toolbar button[data-act="done"] {
     display: none !important;
+}
+
+/* Profile sheet (audit LAY-10): full height on the device too. A blur,
+   filter or transform on an ancestor (some themes blur the sidebar) makes a
+   fixed child size to that ancestor instead of the screen, which left an
+   empty band under the sheet. While it is open those are switched off. */
+html.onigiri-phone.onigiri-profile-open body,
+html.onigiri-phone.onigiri-profile-open .container.modern-main-menu,
+html.onigiri-phone.onigiri-profile-open .sidebar-left,
+html.onigiri-phone.onigiri-profile-open .sidebar-expanded-content {
+    transform: none !important;
+    filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    contain: none !important;
+    will-change: auto !important;
+    perspective: none !important;
+}
+
+html.onigiri-phone .sidebar-left.profile-sidebar-open .onigiri-sidebar-profile {
+    height: 100vh !important;
+    height: 100dvh !important;
+    padding-top: var(--onigiri-safe-top, 0px) !important;
+}
+
+/* A close button you can see on any banner image. */
+html.onigiri-phone .onigiri-sidebar-profile .onigiri-sidebar-profile-back {
+    background-color: rgba(0, 0, 0, 0.45) !important;
+    color: #fff !important;
+    top: calc(3px + var(--onigiri-safe-top, 0px)) !important;
 }

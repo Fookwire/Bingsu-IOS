@@ -345,10 +345,32 @@
   // reach: on touch screens (iPhone/iPad) it gets its own touch rules. No
   // keyboard-shortcut hints, full-size rows, clear of the home indicator.
   // --onigiri-safe-bottom is inherited from <html> through the shadow boundary.
+  const IS_TOUCH = (function () {
+    try {
+      return document.documentElement.classList.contains("onigiri-touch") ||
+        (window.matchMedia && window.matchMedia("(hover: none) and (pointer: coarse)").matches);
+    } catch (e) { return false; }
+  })();
+
   function touchCssText() {
     if (!document.documentElement.classList.contains("onigiri-touch")) return "";
     return `
       .rm-kbd { display: none !important; }
+      /* A bottom sheet like the app's other sheets (audit INT-05). */
+      .rm-panel {
+        left: 0 !important; right: 0 !important; bottom: 0 !important; width: auto !important;
+        max-width: none !important; border-radius: 20px 20px 0 0 !important;
+        padding-bottom: calc(12px + var(--onigiri-safe-bottom, 0px)) !important;
+        transform-origin: 50% 100% !important;
+      }
+      .rm-mini-pill { min-height: 44px; min-width: 56px; }
+      .rm-item-btn.is-danger {
+        color: #ff453a !important;
+        margin-top: 10px;
+        border-top: 1px solid var(--rm-border);
+        border-radius: 0 0 14px 14px;
+      }
+      .rm-item-btn.is-danger .rm-row-icon { color: #ff453a !important; }
       /* The panel would otherwise inherit the card's typeface. */
       .rm-panel, .rm-panel button, .rm-panel input {
         font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -808,7 +830,9 @@
       }),
       makeMediaBtn({
         icon: ICONS.replay,
-        label: labels.replayShort || "Replay",
+        // Two buttons both said "Replay" (card audio, your recording): on
+        // touch screens, where there are no hover titles, use the full names.
+        label: IS_TOUCH ? (labels.replayAudio || "Replay Audio") : (labels.replayShort || "Replay"),
         title: labels.replayAudio || "Replay Audio",
         shortcut: shortcuts.replayAudio,
         action: "replay_audio",
@@ -847,7 +871,7 @@
       }),
       makeMediaBtn({
         icon: ICONS.volume,
-        label: labels.playVoiceShort || "Replay",
+        label: IS_TOUCH ? "Replay Recording" : (labels.playVoiceShort || "Replay"),
         title: labels.replayVoice || "Replay Own Voice",
         shortcut: shortcuts.replayVoice,
         action: "replay_voice",
