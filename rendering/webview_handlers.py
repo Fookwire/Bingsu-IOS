@@ -637,7 +637,16 @@ def _onigiri_menu_parts(menu) -> dict:
             if children:
                 parts["rest"].append({"t": _menu_text(action), "sub": children})
         elif not action.isEnabled():
-            parts["info"].append(_action_entry(action))  # the version line
+            entry = _action_entry(action)  # the version line
+            try:
+                from ..core import ios_native
+                from ..core.platform import IS_MOBILE
+
+                if IS_MOBILE:
+                    entry["t"] = entry["t"] + " · " + ios_native.kioku_summary()
+            except Exception:
+                pass
+            parts["info"].append(entry)
         else:
             parts["rest"].append(_action_entry(action))
     return parts
@@ -1348,7 +1357,10 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
                 "favorites_first": tr("sort_favorites_first"),
                 "custom": tr("sort_custom_order"),
             }
-            tooltip(tr("deck_sort_toast").format(labels.get(sort_mode, sort_mode)))
+            from ..core.platform import IS_MOBILE
+
+            if not IS_MOBILE:  # on a phone the sort sheet already shows the checkmark (R3-24)
+                tooltip(tr("deck_sort_toast").format(labels.get(sort_mode, sort_mode)))
             return (True, None)
         except Exception as e:
             print(f"Onigiri: Error handling sort command: {e}")

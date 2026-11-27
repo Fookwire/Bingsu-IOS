@@ -38,9 +38,13 @@ def _swatch(palette):
     return {key: palette.get(key, "") for key in SWATCH_KEYS}
 
 
+# Spelling fixes for display only: the stored theme key must not change (audit 3, R3-21).
+THEME_LABELS = {"Machiatto": "Macchiato"}
+
+
 def list_official_themes():
     return [
-        {"name": name, "light": _swatch(data.get("light")), "dark": _swatch(data.get("dark"))}
+        {"name": name, "label": THEME_LABELS.get(name, name), "light": _swatch(data.get("light")), "dark": _swatch(data.get("dark"))}
         for name, data in sorted(THEMES.items(), key=lambda item: item[0].lower())
     ]
 

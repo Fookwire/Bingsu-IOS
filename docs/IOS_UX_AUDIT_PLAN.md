@@ -293,3 +293,22 @@ Needs the phone: the Year scroller (touch scrolling inside the Home scroller) an
 - Card answered in the harness after the last change: review log +1, reps +1, undo available, no tracebacks.
 - Anki windows opened in the harness (Browse, Add, Choose Deck, Custom Study, Preferences, Deck Options, Statistics): adapted, no tracebacks.
 - Everything above ran in headless Anki 26.09.4 with Chromium and no Kioku: **nothing is confirmed on the phone yet.** Update Kioku to v0.2.12 or newer first (the single Settings header needs it).
+
+---
+
+## Progress (audit 3)
+
+Source: `docs/audit3_2026-11/Kioku_Bingsu_UX_Audit_3.md` (screen recording of build 1.1.0-beta.6; evidence frames in `docs/audit3_2026-11/evidence/`, none from the private 2:28–2:47 range). Plan: five phases, builds 1.1.0-beta.7 … beta.11. Same rules as before: no change to scheduling, FSRS, review logging, sync, schema, deck names, theme keys or stored values; phone-only; nothing here is confirmed on the phone until it is run there.
+
+### Phase 1 (build 1.1.0-beta.7), done in emulation
+- **R3-03 Browse sidebar:** its own filter field no longer takes focus without a tap (same focus filter as the main search field; the tree gets it). The sidebar is a full-screen layer: while it is shown the card list is hidden and the dock takes the screen width (Qt would otherwise keep a 216pt strip because of the table's minimum width). Choosing a filter (a row with a search) closes the sidebar so the filtered list is what you see; a group row only expands or collapses.
+- **R3-07 reviewer's scrolled header:** its background is the theme background (`--onigiri-nav-bg`, set from the theme tokens on Onigiri's own phone pages), not the page's default.
+- **R3-16 Gallery hints:** "Dock icon: Decks", "Dock bubble"; `rdock_`, `swidget_`, `dstats_` and `bbar_` ids never show; a hint that still looks like an id falls back to the field's label. Test: `tests/test_gallery_hint.py`.
+- **R3-21:** the theme is shown as "Macchiato"; the stored key stays "Machiatto" so nothing saved breaks.
+- **R3-22:** "Sidebar Fonts" → "Deck list Fonts" on phones.
+- **R3-18:** the pressed row in Settings uses the accent tint, not Anki's blue.
+- **R3-24:** no "Deck sort: …" toast on top of the sort sheet on phones.
+- **R3-31:** the Settings window is titled "Appearance" on phones, as in the Menu.
+- **R3-04 diagnostics:** Menu → Help's version line ends with "Kioku <version> · single header: yes/no" (the version is read through rubicon; "version unknown" if it cannot be); the same line is printed at start-up. This answers whether the phone runs a Kioku older than v0.2.12.
+Checked in the harness (Anki 26.09.4, offscreen Qt, `ONIGIRI_PHONE_WIDTH=390`): sidebar probe (programmatic focus on its filter stays on the tree, a mouse-reason focus is kept, dock 400pt wide when shown, a click on a search row hides it), Settings sweep at 375/393/430 (52 pages, 0 off-screen, all at the top), no Gallery tile name with an underscore or an internal id, tests at the known 87 failures.
+Needs the phone: the sidebar layer and keyboard; the Kioku line in Help; Back/header colours.

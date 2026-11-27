@@ -134,6 +134,11 @@ html.onigiri-touch.onigiri-app :is(tr.deck, .quick-menu-item, .osw-nav-item).oni
     background-color: var(--highlight-bg, rgba(127, 127, 127, 0.16)) !important;
 }
 
+/* Settings rows use the accent, not Anki's blue (audit 3, R3-18). */
+html.onigiri-touch .osw-shell .osw-nav-item.onigiri-pressed {
+    background-color: var(--osw-accent-a14, rgba(127, 127, 127, 0.16)) !important;
+}
+
 html.onigiri-touch tr.deck.onigiri-pressing {
     background-color: var(--highlight-bg) !important;
     transition: background-color 0.4s ease;
@@ -2265,7 +2270,7 @@ html.onigiri-phone.onigiri-nav-scrolled #onigiri-phone-nav {
     height: 54px;
     padding: 10px calc(10px + var(--onigiri-safe-right)) 0 calc(10px + var(--onigiri-safe-left));
     box-sizing: border-box;
-    background: var(--canvas, var(--bg, #fff));
+    background: var(--onigiri-nav-bg, var(--bg, var(--canvas, #fff)));
     box-shadow: 0 1px 0 rgba(127, 127, 127, 0.25);
 }
 

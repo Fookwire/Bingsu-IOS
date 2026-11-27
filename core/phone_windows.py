@@ -348,6 +348,62 @@ def adapt_browser(browser: Any) -> None:
     # focuses it on open and again after a sidebar choice.
     search = form.searchEdit
     _keep_keyboard_closed([search, search.lineEdit()], view, browser)
+    _adapt_browse_sidebar(browser)
+
+
+def _adapt_browse_sidebar(browser: Any) -> None:
+    """The sidebar is a layer over the list (audit 3, R3-03): its own search
+    field never opens the keyboard by itself, it opens full width instead of
+    leaving a sliver of table, and choosing a filter closes it so the filtered
+    list is what you see."""
+    from aqt.qt import Qt, QTimer
+
+    sidebar = getattr(browser, "sidebar", None)
+    if sidebar is None:
+        return
+    bar = getattr(sidebar, "searchBar", None)
+    if bar is not None:
+        _keep_keyboard_closed([bar], sidebar, browser)
+    dock = getattr(browser, "sidebarDockWidget", None)
+
+    central = browser.centralWidget()
+
+    def fill_width(visible: bool = True) -> None:
+        """Shown: the sidebar is the whole screen (the table's own minimum width
+        would otherwise leave it a 216pt strip and the table a sliver). Hidden:
+        the table comes back."""
+        if dock is None:
+            return
+        try:
+            if visible:
+                central.hide()
+                browser.resizeDocks([dock], [_avail_width()], Qt.Orientation.Horizontal)
+            else:
+                central.show()
+        except Exception as exc:  # noqa: BLE001
+            _log(f"sidebar width: {exc}")
+
+    if dock is not None:
+        try:
+            dock.visibilityChanged.connect(fill_width)
+            if dock.isVisible():
+                fill_width(True)
+        except Exception:
+            pass
+
+    def chosen(index: Any) -> None:
+        try:
+            item = sidebar.model().item_for_index(index)
+            if getattr(item, "search_node", None) is None:
+                return  # a group row: expand/collapse, stay open
+        except Exception:
+            return
+        QTimer.singleShot(0, lambda: browser.showSidebar(False))
+
+    try:
+        sidebar.clicked.connect(chosen)
+    except Exception:
+        pass
 
 
 def adapt_add_cards(window: Any) -> None:

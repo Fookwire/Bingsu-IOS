@@ -238,6 +238,17 @@ def anki_page_style_tag(context):
         return ""
 
 
+def nav_background_style_tag():
+    """The theme background as a CSS variable for Onigiri's own phone screens, so
+    the scrolled header bar never falls back to white (audit 3, R3-07)."""
+    if not active():
+        return ""
+    try:
+        return '<style id="onigiri-nav-bg">:root{--onigiri-nav-bg:%s}</style>' % tokens()["background"]
+    except Exception:
+        return ""
+
+
 def inject_anki_page_theme(webview):
     """webview_did_inject_style_into_page: theme Anki's own pages on phones."""
     if not active():

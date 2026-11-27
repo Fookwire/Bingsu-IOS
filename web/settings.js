@@ -14260,7 +14260,7 @@
       tile.appendChild(wrap);
 
       const foot = el("span", "osw-theme-foot");
-      foot.appendChild(el("span", "osw-theme-name", theme.name));
+      foot.appendChild(el("span", "osw-theme-name", theme.label || theme.name));
       const sub = el("span", "osw-theme-sub");
       const dotA = el("span", "osw-theme-sub-dot");
       dotA.style.background = colors.lightAccent;
@@ -14341,7 +14341,7 @@
           document.querySelectorAll(".osw-theme-tile.is-current").forEach(function (t) { t.classList.remove("is-current"); });
           tile.classList.add("is-current");
           CTX.currentThemeColors = { lightBg: colors.lightBg, darkBg: colors.darkBg, lightAccent: colors.lightAccent, darkAccent: colors.darkAccent };
-          toast(str("theme_applied_toast", "Theme applied:") + " " + theme.name);
+          toast(str("theme_applied_toast", "Theme applied:") + " " + (theme.label || theme.name));
         });
       }
 

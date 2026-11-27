@@ -5900,19 +5900,49 @@ def _color_bindings(field, fields_by_id):
     return tuple(sorted(set(bindings)))
 
 
-def _gallery_hint(field_id, section_title):
+_GALLERY_HINT_MAP = (
+    # (id prefix, readable lead-in); the rest of the id follows as the button name
+    ("rdock_icon_color_", "Dock icon: "),
+    ("rdock_goo_color", "Dock bubble"),
+)
+_GALLERY_HINT_DROP = ("gallery_", "modern_menu_", "onigiri_", "rdock_", "swidget_", "dstats_", "bbar_")
+
+
+def _gallery_hint(field_id, section_title, label=""):
     """A short readable hint from a setting id: "modern_menu_title_background_color"
-    becomes "Title background". Words the section title already says are left out."""
-    words = field_id
-    for prefix in ("gallery_", "modern_menu_", "onigiri_"):
-        words = words.replace(prefix, "", 1) if words.startswith(prefix) else words
-    if words.endswith("_color"):
-        words = words[: -len("_color")]
-    parts = [w for w in words.split("_") if w]
-    title_words = {w.lower() for w in str(section_title or "").split()}
-    kept = [w for w in parts if w.lower() not in title_words] or parts
-    text = " ".join(kept).strip()
-    return text[:1].upper() + text[1:] if text else ""
+    becomes "Title background"; "rdock_icon_color_decks" becomes "Dock icon: Decks".
+    Words the section title already says are left out. Never returns an id: if
+    what is left still looks like one, the field's label is used (audit 3, R3-16)."""
+    raw = str(field_id or "")
+    text = ""
+    for prefix, lead in _GALLERY_HINT_MAP:
+        if raw.startswith(prefix):
+            rest = raw[len(prefix):]
+            for tail in ("_light", "_dark", "_theme_mode"):
+                if rest.endswith(tail):
+                    rest = rest[: -len(tail)]
+            name = " ".join(w for w in rest.split("_") if w).title()
+            text = (lead + name).strip()
+            break
+    if not text:
+        words = raw
+        changed = True
+        while changed:
+            changed = False
+            for prefix in _GALLERY_HINT_DROP:
+                if words.startswith(prefix):
+                    words = words[len(prefix):]
+                    changed = True
+        if words.endswith("_color"):
+            words = words[: -len("_color")]
+        parts = [w for w in words.split("_") if w]
+        title_words = {w.lower() for w in str(section_title or "").split()}
+        kept = [w for w in parts if w.lower() not in title_words] or parts
+        text = " ".join(kept).strip()
+        text = text[:1].upper() + text[1:] if text else ""
+    if "_" in text or text.lower().startswith(("rdock", "swidget", "dstats", "bbar")):
+        text = str(label or "").strip()
+    return text
 
 
 def _tell_gallery_tiles_apart(page_fields):
@@ -5927,9 +5957,9 @@ def _tell_gallery_tiles_apart(page_fields):
             continue
         for field in fields:
             raw_id = str(field.get("id", "")).split("_", 2)[-1]  # gallery_<page>_<id>
-            hint = _gallery_hint(raw_id, desc)
+            hint = _gallery_hint(raw_id, desc, field.get("label") or "")
             if hint:
-                field["desc"] = (desc + " — " + hint) if desc else hint
+                field["desc"] = hint if (not desc or hint.lower().startswith(desc.lower())) else desc + " — " + hint
 
 
 def _gallery_color_sections(source_pages):
@@ -6210,7 +6240,7 @@ def _adapt_for_phone(pages):
                     continue
             kept_sections.append(section)
             # "sidebar" is a desktop word (audit 2, R2-19)
-            for key in ("title", "desc"):
+            for key in ("title", "desc", "font_menu_label"):
                 if isinstance(section.get(key), str):
                     section[key] = phone_text(section[key])
             for f in section.get("fields") or []:

@@ -1442,6 +1442,18 @@ def _anki_page_style(context):
         return ""
 
 
+def _nav_background_style(context):
+    """Theme background variable for the scrolled phone header bar (R3-07)."""
+    try:
+        if not _is_onigiri_page(context):
+            return ""
+        from .core import mobile_theme
+
+        return mobile_theme.nav_background_style_tag()
+    except Exception:
+        return ""
+
+
 def inject_mobile_assets(web_content, context):
     """Touch/phone support on every page (iPhone/iPad via Kioku).
 
@@ -1482,6 +1494,7 @@ def inject_mobile_assets(web_content, context):
         + web_content.head
         + stylesheet_link("mobile.css")
         + _anki_page_style(context)
+        + _nav_background_style(context)
     )
 
 
