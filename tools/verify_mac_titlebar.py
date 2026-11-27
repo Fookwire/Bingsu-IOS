@@ -33,7 +33,7 @@ try:
 finally:
     bridge._send(pool, 'drain', restype=None)
 
-with tempfile.TemporaryDirectory(prefix='bingsu-objc-abi-') as tmp:
+with tempfile.TemporaryDirectory(prefix='onigiri-objc-abi-') as tmp:
     source = Path(tmp) / 'probe.m'
     source.write_text('#import <Foundation/Foundation.h>\nNSRect probe(NSValue *value) { return [value rectValue]; }\n')
     for architecture in ('x86_64', 'arm64'):

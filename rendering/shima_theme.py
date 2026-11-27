@@ -8,7 +8,7 @@ from aqt.deckbrowser import DeckBrowser
 
 from ..core import config
 from ..integrations import fsrs_helper_integration
-from . import bingsu_renderer
+from . import onigiri_renderer
 from ..decks import tree_updater as deck_tree_updater
 from ..core.translations import tr
 
@@ -17,33 +17,33 @@ def render_deck_browser(deck_browser: DeckBrowser, reuse: bool = False) -> None:
     """Render only the centered deck island on the main menu.
 
     Shima deliberately does not execute the dashboard-widget hooks. The deck
-    tree still goes through Bingsu's normal renderer, so custom icons, counts,
+    tree still goes through Onigiri's normal renderer, so custom icons, counts,
     context menus, searching, sorting, and drag ordering keep working.
     """
     del reuse
 
     tree_data = deck_browser.mw.col.sched.deck_due_tree()
-    deck_browser._render_data = bingsu_renderer.RenderData(tree=tree_data)
+    deck_browser._render_data = onigiri_renderer.RenderData(tree=tree_data)
     tree_html = deck_tree_updater._render_deck_tree_html_only(deck_browser)
 
     addon_package = mw.addonManager.addonFromModule(__name__)
     conf = config.get_config_readonly()
-    home_button_html = bingsu_renderer._build_archived_home_button(
+    home_button_html = onigiri_renderer._build_archived_home_button(
         conf, addon_package
     )
-    ready_marker_html = bingsu_renderer._build_hidden_ready_marker(addon_package)
-    search_icon_html = bingsu_renderer._sidebar_header_icon_markup(
+    ready_marker_html = onigiri_renderer._build_hidden_ready_marker(addon_package)
+    search_icon_html = onigiri_renderer._sidebar_header_icon_markup(
         "modern_menu_icon_header_search", "search.svg", "search-btn-icon",
         addon_package,
     )
-    sort_icon_html = bingsu_renderer._sidebar_header_icon_markup(
+    sort_icon_html = onigiri_renderer._sidebar_header_icon_markup(
         "modern_menu_icon_header_sort", "sort_default.svg", "sort-btn-icon",
         addon_package,
     )
     js_config = {
         "addonPackage": addon_package,
         "deckSortMode": config.get_collection_config(
-            "bingsu_sort_mode", "default"
+            "onigiri_sort_mode", "default"
         ),
         "decklineAvailable": False,
         "fsrsHelperAvailable": fsrs_helper_integration.is_available(),
@@ -54,11 +54,11 @@ def render_deck_browser(deck_browser: DeckBrowser, reuse: bool = False) -> None:
         "markerNames": conf.get("markerNames", {}),
         "filters": {
             "favorites": bool(
-                config.get_collection_config("bingsu_show_favourites", False)
-                or config.get_collection_config("bingsu_show_favorites", False)
+                config.get_collection_config("onigiri_show_favourites", False)
+                or config.get_collection_config("onigiri_show_favorites", False)
             ),
             "marked": bool(
-                config.get_collection_config("bingsu_show_marked", False)
+                config.get_collection_config("onigiri_show_marked", False)
             ),
         },
     }
@@ -78,32 +78,32 @@ def render_deck_browser(deck_browser: DeckBrowser, reuse: bool = False) -> None:
         </svg>
     """
     body = f"""
-    <div class="container modern-main-menu bingsu-shima">
+    <div class="container modern-main-menu onigiri-shima">
         <main class="sidebar-left shima-island" aria-label="{deck_label}">
             <div class="sidebar-expanded-content">
-                <section class="bingsu-sidebar-section
-                                bingsu-sidebar-decks-section is-decks-mode">
+                <section class="onigiri-sidebar-section
+                                onigiri-sidebar-decks-section is-decks-mode">
                     <div id="deck-list-header">
                         <h2>{deck_heading}</h2>
-                        <div id="bingsu-deck-search-bar">
-                            <span class="bingsu-search-icon" aria-hidden="true"></span>
-                            <input type="text" id="bingsu-deck-search-input"
+                        <div id="onigiri-deck-search-bar">
+                            <span class="onigiri-search-icon" aria-hidden="true"></span>
+                            <input type="text" id="onigiri-deck-search-input"
                                    placeholder="{search_placeholder}"
                                    autocomplete="off" spellcheck="false">
-                            <button id="bingsu-deck-search-close"
+                            <button id="onigiri-deck-search-close"
                                     aria-label="Close" type="button">
                                 {close_icon}
                             </button>
                         </div>
                         <div class="deck-header-actions">
-                            <button id="bingsu-search-toolbar-btn" class="deck-header-btn"
-                                    onclick="BingsuEngine.toggleDeckSearch()"
+                            <button id="onigiri-search-toolbar-btn" class="deck-header-btn"
+                                    onclick="OnigiriEngine.toggleDeckSearch()"
                                     title="{search_title}" type="button">
                                 {search_icon_html}
                             </button>
-                            <button id="bingsu-sort-toolbar-btn" class="deck-header-btn"
+                            <button id="onigiri-sort-toolbar-btn" class="deck-header-btn"
                                     type="button" title="Sort decks"
-                                    onclick="BingsuEngine.showSortMenu(this, event)">
+                                    onclick="OnigiriEngine.showSortMenu(this, event)">
                                 {sort_icon_html}
                             </button>
                             {ready_marker_html}
@@ -120,7 +120,7 @@ def render_deck_browser(deck_browser: DeckBrowser, reuse: bool = False) -> None:
         </main>
     </div>
     <script>
-        window.BINGSU_CONFIG = {json.dumps(js_config)};
+        window.ONIGIRI_CONFIG = {json.dumps(js_config)};
         document.addEventListener('DOMContentLoaded', function () {{
             if (typeof anki !== 'undefined' && anki.setupDeckBrowser) {{
                 anki.setupDeckBrowser();

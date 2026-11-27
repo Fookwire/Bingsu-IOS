@@ -28,7 +28,7 @@ body {
 }
 
 /* Ensure external overview add-ons can expand normally */
-.overview-center-container .bingsu-external-overview-addon {
+.overview-center-container .onigiri-external-overview-addon {
     align-self: stretch;
     width: 100%;
     max-width: 100%;
@@ -36,10 +36,10 @@ body {
 }
 
 /* Ankimon's legacy overview grid uses fixed 120px base64 sprites and its own
-   dark card theme. The Bingsu replacement is intentionally quiet and shares
+   dark card theme. The Onigiri replacement is intentionally quiet and shares
    the overview palette, so it reads as part of the study card. */
-.overview-container .bingsu-ankimon-team-widget,
-.overview-center-container > .bingsu-ankimon-team-widget {
+.overview-container .onigiri-ankimon-team-widget,
+.overview-center-container > .onigiri-ankimon-team-widget {
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -54,13 +54,13 @@ body {
     box-shadow: none !important;
 }
 
-.overview-center-container > .bingsu-ankimon-team-widget {
+.overview-center-container > .onigiri-ankimon-team-widget {
     width: min(560px, calc(100vw - 40px));
     align-self: center;
     margin: 0 auto;
 }
 
-.bingsu-ankimon-team-head {
+.onigiri-ankimon-team-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -69,7 +69,7 @@ body {
     font-weight: 650;
 }
 
-.bingsu-ankimon-team-head em {
+.onigiri-ankimon-team-head em {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -83,13 +83,13 @@ body {
     font-style: normal;
 }
 
-.bingsu-ankimon-team-list {
+.onigiri-ankimon-team-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(92px, 100%), 1fr));
     gap: 6px;
 }
 
-.bingsu-ankimon-team-member {
+.onigiri-ankimon-team-member {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -104,12 +104,12 @@ body {
     box-shadow: none !important;
 }
 
-.bingsu-ankimon-team-member:hover {
+.onigiri-ankimon-team-member:hover {
     border-color: var(--accent-color, #00a982);
     background: color-mix(in srgb, var(--accent-color, #00a982) 10%, transparent);
 }
 
-.bingsu-ankimon-team-sprite {
+.onigiri-ankimon-team-sprite {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -117,7 +117,7 @@ body {
     height: 54px;
 }
 
-.bingsu-ankimon-team-sprite img {
+.onigiri-ankimon-team-sprite img {
     display: block;
     width: 54px;
     height: 54px;
@@ -126,7 +126,7 @@ body {
     image-rendering: crisp-edges;
 }
 
-.bingsu-ankimon-team-name {
+.onigiri-ankimon-team-name {
     width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -136,14 +136,14 @@ body {
     line-height: 1.2;
 }
 
-.bingsu-ankimon-team-level {
+.onigiri-ankimon-team-level {
     margin-top: 1px;
     font-size: 9px;
     line-height: 1;
     opacity: .6;
 }
 
-.bingsu-ankimon-team-types {
+.onigiri-ankimon-team-types {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
@@ -155,7 +155,7 @@ body {
     white-space: normal !important;
 }
 
-.bingsu-ankimon-team-type {
+.onigiri-ankimon-team-type {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -323,7 +323,7 @@ body {
     z-index: 1000;
 }
 
-#bingsu-overview-header {
+#onigiri-overview-header {
     position: fixed !important;
     top: 5px !important;
     left: 50% !important;
@@ -360,15 +360,15 @@ body {
 
 /* The three secondary Overview actions each pick up their own light/dark
    palette from Overview Style. Their shared layout remains unchanged. */
-.bingsu-overview-action-options {
+.onigiri-overview-action-options {
     --overview-action-button-bg: var(--overview-options-button-bg);
     --overview-action-button-fg: var(--overview-options-button-fg);
 }
-.bingsu-overview-action-custom-study {
+.onigiri-overview-action-custom-study {
     --overview-action-button-bg: var(--overview-custom-study-button-bg);
     --overview-action-button-fg: var(--overview-custom-study-button-fg);
 }
-.bingsu-overview-action-description {
+.onigiri-overview-action-description {
     --overview-action-button-bg: var(--overview-description-button-bg);
     --overview-action-button-fg: var(--overview-description-button-fg);
 }
@@ -424,7 +424,7 @@ body {
 }
 
 /* Native-style reminder shown when learning cards return later today. */
-.bingsu-learning-due-notice {
+.onigiri-learning-due-notice {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -439,13 +439,13 @@ body {
     text-align: center;
 }
 
-.bingsu-learning-due-notice p {
+.onigiri-learning-due-notice p {
     width: 100%;
     margin: 0;
     text-align: center;
 }
 
-.bingsu-learning-browse-button {
+.onigiri-learning-browse-button {
     display: block;
     width: 100%;
     max-width: none;
@@ -473,8 +473,8 @@ body {
     filter: none !important;
 }
 
-.bingsu-learning-browse-button:hover,
-.bingsu-learning-browse-button:active {
+.onigiri-learning-browse-button:hover,
+.onigiri-learning-browse-button:active {
     border-color: var(--border, rgba(0, 0, 0, 0.14)) !important;
     background: var(--canvas-inset, rgba(127, 127, 127, 0.08)) !important;
     color: var(--fg, inherit) !important;
@@ -485,12 +485,12 @@ body {
     filter: none !important;
 }
 
-.bingsu-learning-ready-text {
+.onigiri-learning-ready-text {
     display: inline;
     color: inherit;
 }
 
-.bingsu-learning-browse-button:hover .bingsu-learning-ready-text {
+.onigiri-learning-browse-button:hover .onigiri-learning-ready-text {
     color: var(--overview-learn-bubble-bg, var(--learn-count-bubble-bg, #ff5757));
 }
 
@@ -599,24 +599,24 @@ body {
 }
 
 /* =========================================================
-   Profile type: Ring / Minimal (shared markup, .bingsu-profile)
+   Profile type: Ring / Minimal (shared markup, .onigiri-profile)
    ========================================================= */
-.bingsu-profile {
+.onigiri-profile {
     box-sizing: border-box;
     color: var(--fg);
     position: relative;
     min-width: 0;
 }
-.bingsu-profile .opro-avatar {
+.onigiri-profile .opro-avatar {
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
     border-radius: 50%;
 }
-.bingsu-profile .opro-avatar .profile-pic,
-.bingsu-profile .opro-avatar .profile-pic-generated,
-.bingsu-profile .opro-avatar img {
+.onigiri-profile .opro-avatar .profile-pic,
+.onigiri-profile .opro-avatar .profile-pic-generated,
+.onigiri-profile .opro-avatar img {
     width: 100%;
     height: 100%;
     border-radius: 50%;
@@ -637,7 +637,7 @@ body {
     -webkit-mask-size: contain;
     mask-size: contain;
 }
-.bingsu-profile .opro-name {
+.onigiri-profile .opro-name {
     font-size: calc(var(--font-size-main, 14px) * 1.14);
     font-weight: 600;
     white-space: nowrap;
@@ -647,103 +647,103 @@ body {
 }
 
 /* --- Ring --- */
-.bingsu-profile.ring-profile {
+.onigiri-profile.ring-profile {
     display: flex;
     align-items: center;
     gap: 12px;
 }
-.bingsu-profile.ring-profile .opro-avatar-wrap {
+.onigiri-profile.ring-profile .opro-avatar-wrap {
     position: relative;
     width: 52px;
     height: 52px;
     flex: 0 0 auto;
 }
-.bingsu-profile.ring-profile .opro-avatar {
+.onigiri-profile.ring-profile .opro-avatar {
     position: absolute;
     inset: 8px;
 }
-.bingsu-profile.ring-profile .opro-ring {
+.onigiri-profile.ring-profile .opro-ring {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     transform: rotate(-90deg);
 }
-.bingsu-profile.ring-profile .opro-ring-track {
+.onigiri-profile.ring-profile .opro-ring-track {
     fill: none;
     stroke: var(--highlight-bg, rgba(128, 128, 128, 0.25));
     stroke-width: 3;
 }
-.bingsu-profile.ring-profile .opro-ring-fill {
+.onigiri-profile.ring-profile .opro-ring-fill {
     fill: none;
     stroke-width: 3;
     stroke-linecap: round;
     transition: stroke-dashoffset 0.4s ease;
 }
-.bingsu-profile.ring-profile .opro-text {
+.onigiri-profile.ring-profile .opro-text {
     display: flex;
     flex-direction: column;
     min-width: 0;
     gap: 2px;
 }
-.bingsu-profile.ring-profile .opro-level {
+.onigiri-profile.ring-profile .opro-level {
     font-size: calc(var(--font-size-main, 14px) * 0.86);
     opacity: 0.7;
 }
 
 /* --- Minimal --- */
-.bingsu-profile.minimal-profile {
+.onigiri-profile.minimal-profile {
     display: flex;
     flex-direction: column;
     gap: 8px;
 }
-.bingsu-profile.minimal-profile .opro-top {
+.onigiri-profile.minimal-profile .opro-top {
     display: flex;
     align-items: center;
     gap: 10px;
     min-width: 0;
 }
-.bingsu-profile.minimal-profile .opro-avatar {
+.onigiri-profile.minimal-profile .opro-avatar {
     width: 34px;
     height: 34px;
     flex: 0 0 auto;
 }
-.bingsu-profile.minimal-profile .opro-bar-row {
+.onigiri-profile.minimal-profile .opro-bar-row {
     display: flex;
     align-items: center;
     gap: 8px;
 }
-.bingsu-profile.minimal-profile .opro-lv {
+.onigiri-profile.minimal-profile .opro-lv {
     font-size: calc(var(--font-size-main, 14px) * 0.79);
     font-weight: 600;
     opacity: 0.7;
     white-space: nowrap;
     flex: 0 0 auto;
 }
-.bingsu-profile.minimal-profile .opro-track {
+.onigiri-profile.minimal-profile .opro-track {
     flex: 1 1 auto;
     height: 6px;
     border-radius: 999px;
     background: var(--highlight-bg, rgba(128, 128, 128, 0.25));
     overflow: hidden;
 }
-.bingsu-profile.minimal-profile .opro-bar-fill {
+.onigiri-profile.minimal-profile .opro-bar-fill {
     height: 100%;
     border-radius: inherit;
     transition: width 0.3s ease;
 }
 
 /* --- Centered placement on Overviewer / Congrats --- */
-.bingsu-profile.opro-surface-overview,
-.bingsu-profile.opro-surface-congrats {
+.onigiri-profile.opro-surface-overview,
+.onigiri-profile.opro-surface-congrats {
     margin: 0 auto 14px auto;
 }
-.bingsu-profile.ring-profile.opro-surface-overview,
-.bingsu-profile.ring-profile.opro-surface-congrats {
+.onigiri-profile.ring-profile.opro-surface-overview,
+.onigiri-profile.ring-profile.opro-surface-congrats {
     justify-content: center;
 }
-.bingsu-profile.minimal-profile.opro-surface-overview,
-.bingsu-profile.minimal-profile.opro-surface-congrats {
+.onigiri-profile.minimal-profile.opro-surface-overview,
+.onigiri-profile.minimal-profile.opro-surface-congrats {
     width: 240px;
     max-width: 90%;
 }

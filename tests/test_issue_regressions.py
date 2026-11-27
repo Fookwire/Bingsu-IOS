@@ -10,7 +10,7 @@ SETTINGS = (ROOT / "web" / "settings.js").read_text(encoding="utf-8")
 MENU_CSS = (ROOT / "web" / "menu.css").read_text(encoding="utf-8")
 INJECTOR = (ROOT / "web" / "injector.js").read_text(encoding="utf-8")
 TREE_UPDATER = (ROOT / "decks" / "tree_updater.py").read_text(encoding="utf-8")
-RENDERER = (ROOT / "rendering/bingsu_renderer.py").read_text(encoding="utf-8")
+RENDERER = (ROOT / "rendering/onigiri_renderer.py").read_text(encoding="utf-8")
 INIT = (ROOT / "__init__.py").read_text(encoding="utf-8")
 DIALOG = (ROOT / "settings_web" / "dialog.py").read_text(encoding="utf-8")
 
@@ -100,7 +100,7 @@ class OpenIssueRegressionTests(unittest.TestCase):
 
     def test_one_dashboard_widget_cannot_abort_the_main_menu_render(self):
         self.assertIn("def render_widget_safely(widget_id, renderer):", RENDERER)
-        self.assertIn("Bingsu: {widget_id} widget failed", RENDERER)
+        self.assertIn("Onigiri: {widget_id} widget failed", RENDERER)
         self.assertIn("ignored invalid {widget_id} widget layout", RENDERER)
         self.assertIn("def safe_fragment(label, generator):", INIT)
         self.assertIn('"deck-browser backgrounds"', INIT)
@@ -129,7 +129,7 @@ class OpenIssueRegressionTests(unittest.TestCase):
 
     def test_deck_and_tag_names_select_their_own_writing_direction(self):
         self.assertIn('class="deck-name" dir="auto"', PATCHER)
-        self.assertIn('class="bingsu-tag-name" dir="auto"', TREE_UPDATER)
+        self.assertIn('class="onigiri-tag-name" dir="auto"', TREE_UPDATER)
         self.assertIn("a.deck .deck-name:dir(rtl)", MENU_CSS)
 
 

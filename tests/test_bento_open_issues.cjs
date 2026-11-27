@@ -10,7 +10,7 @@ function fn(name){const start=src.indexOf('  function '+name+'(');assert(start>=
  try{
  const page=await browser.newPage({viewport:{width:1280,height:800}});
  const errors=[];page.on('pageerror',e=>errors.push(String(e)));
- await page.route('http://bingsu.test/**',route=>{
+ await page.route('http://onigiri.test/**',route=>{
   const pathname=new URL(route.request().url()).pathname;
   const relative=pathname.replace('/_addons/1011095603/','');
   if(relative===pathname || !relative.startsWith('system_files/fonts/')) return route.fulfill({status:404,body:''});
@@ -24,7 +24,7 @@ function fn(name){const start=src.indexOf('  function '+name+'(');assert(start>=
    await page.goto('about:blank');
    await page.setContent('<html><body><div class="ba-dashboard"></div></body></html>');
    await page.evaluate(({locale,selection})=>{
-    window.BINGSU_LOCALIZATION={literals:locale.literals};
+    window.ONIGIRI_LOCALIZATION={literals:locale.literals};
     window.__baOpts={sidebar:{heroStat:selection}};
     window.__baStandingData={due:37,new:12,learn:8,streak:4,today:23,todayMin:5,total:69,dueTotal:50};
     window.pycmd=()=>{};
@@ -68,18 +68,18 @@ function fn(name){const start=src.indexOf('  function '+name+'(');assert(start>=
  // faces in the document and typography isolated inside the shadow root.
  for(const width of [360,1440]) for(const dark of [false,true]){
   await page.setViewportSize({width,height:800});
-  await page.setContent('<html><head><base href="http://bingsu.test"></head><body style="font-family:serif"><div id="qa">Card template stays in its own font</div><div id="bingsu-reviewer-ui-host"></div></body></html>');
+  await page.setContent('<html><head><base href="http://onigiri.test"></head><body style="font-family:serif"><div id="qa">Card template stays in its own font</div><div id="onigiri-reviewer-ui-host"></div></body></html>');
   await page.addStyleTag({content:fixture.fontFaces});
   await page.evaluate(({fixture,dark})=>{
    window.commands=[];window.pycmd=c=>window.commands.push(c);
-   const host=document.getElementById('bingsu-reviewer-ui-host');host.classList.toggle('night-mode',dark);
+   const host=document.getElementById('onigiri-reviewer-ui-host');host.classList.toggle('night-mode',dark);
    host.attachShadow({mode:'open'}).innerHTML=fixture.shadowCss+fixture.header;
    document.body.style.background=dark?'#202020':'white';document.body.style.color=dark?'white':'black';
-   document.getElementById('qa').style.marginTop=(host.shadowRoot.getElementById('bingsu-reviewer-header').offsetHeight+15)+'px';
+   document.getElementById('qa').style.marginTop=(host.shadowRoot.getElementById('onigiri-reviewer-header').offsetHeight+15)+'px';
   },{fixture,dark});
   await page.evaluate(async family=>{await document.fonts.load('18px "'+family+'"');await document.fonts.ready;},fixture.fontFamily);
   const state=await page.evaluate(family=>{
-   const header=document.getElementById('bingsu-reviewer-ui-host').shadowRoot.getElementById('bingsu-reviewer-header');
+   const header=document.getElementById('onigiri-reviewer-ui-host').shadowRoot.getElementById('onigiri-reviewer-header');
    return {family:getComputedStyle(header).fontFamily,gauge:getComputedStyle(header.querySelector('.orp-text')).fontFamily,
     loaded:[...document.fonts].some(f=>f.family.replace(/['"]/g,'')===family && f.status==='loaded'),
     qa:getComputedStyle(document.getElementById('qa')).fontFamily,
@@ -89,15 +89,15 @@ function fn(name){const start=src.indexOf('  function '+name+'(');assert(start>=
   assert(state.family.includes(fixture.fontFamily));assert(state.gauge.includes(fixture.fontFamily));assert.equal(state.qa,'serif');
   assert(state.left>=0 && state.right<=width,'header fits viewport');
   const iconLoaded=await page.evaluate(async()=>{
-   const root=document.getElementById('bingsu-reviewer-ui-host').shadowRoot;
-   const mask=getComputedStyle(root.querySelector('.bingsu-external-toolbar-button span')).maskImage;
+   const root=document.getElementById('onigiri-reviewer-ui-host').shadowRoot;
+   const mask=getComputedStyle(root.querySelector('.onigiri-external-toolbar-button span')).maskImage;
    const url=mask.slice(5,-2);
    return new Promise(resolve=>{const image=new Image();image.onload=()=>resolve(true);image.onerror=()=>resolve(false);image.src=url;});
   });
   assert(iconLoaded,'captured add-on icon decodes as a standalone SVG mask');
-  await page.locator('.bingsu-external-toolbar-button').click();
+  await page.locator('.onigiri-external-toolbar-button').click();
   assert.deepEqual(await page.evaluate(()=>window.commands),['ankiterminator']);
-  if(process.env.BINGSU_SCREENSHOT_DIR){fs.mkdirSync(process.env.BINGSU_SCREENSHOT_DIR,{recursive:true});await page.screenshot({path:path.join(process.env.BINGSU_SCREENSHOT_DIR,'reviewer-'+width+'-'+(dark?'dark':'light')+'.png')});}
+  if(process.env.ONIGIRI_SCREENSHOT_DIR){fs.mkdirSync(process.env.ONIGIRI_SCREENSHOT_DIR,{recursive:true});await page.screenshot({path:path.join(process.env.ONIGIRI_SCREENSHOT_DIR,'reviewer-'+width+'-'+(dark?'dark':'light')+'.png')});}
  }
  assert.deepEqual(errors,[]);
  console.log(`Passed ${locales} locale/selection cases, 8 sidebar image cases, dashboard click and 4 reviewer font/button layouts.`);

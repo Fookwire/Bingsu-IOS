@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 128 128">
-  <!-- Optically center the asymmetric bingsu within circular avatars. -->
+  <!-- Optically center the asymmetric onigiri within circular avatars. -->
   <g transform="translate(1.91 -3.56) translate(64 64) scale(0.9) translate(-64 -64)">
   <path fill="none" stroke="#2f2f2f" stroke-width="10.6667" stroke-linecap="round" stroke-linejoin="round" d="M111.18 31.69 C108.25 28.74 104.97 26.11 101.44 23.83 C90.09 16.53 77.26 9.95 64.27 6.25 C58.06 4.48 50.61 2.93 43.75 2.93 C42.18 2.93 40.64 3.01 39.14 3.19 C31.79 4.07 24.96 7.08 19.4 13.34 C15.55 17.67 12.1 23.65 10.29 29.16 C7.98 36.19 6.48 43.98 5.91 51.35 C5.19 60.67 3.99 70.01 3.86 79.37 C3.78 84.65 4.23 90 5.4 95.17 C7.66 99.02 11.83 101.83 16.23 103.02 C11.83 101.82 7.66 99.01 5.4 95.16 C6.2 98.71 7.33 102.18 8.88 105.48 C11.7 111.51 16.47 116.37 22.19 119.71 C28.73 123.54 35.99 125.07 43.34 125.07 C49.66 125.07 56.04 123.94 62.07 122.19 C75.58 118.26 87.54 110.34 97.86 101.04 C107.46 92.4 118.22 82.3 122.53 69.71 C124.11 65.07 124.65 59.05 123.64 54.2 C121.82 45.42 117.29 37.84 111.18 31.68 Z" />
   <path fill="none" stroke="#2f2f2f" stroke-width="10.6667" stroke-linecap="round" stroke-linejoin="round" d="M16.23 103.02 C22.14 104.62 28.4 103.83 34.43 102.79 C42.3 101.43 50.2 99.61 57.68 96.85" />

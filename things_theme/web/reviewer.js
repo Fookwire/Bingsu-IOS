@@ -136,7 +136,7 @@
       while (t && t !== qa) {
         var tag = (t.tagName || "").toLowerCase();
         if (tag === "a" || tag === "button" || tag === "input"
-            || tag === "textarea" || tag === window.bingsuText("select") || tag === "audio"
+            || tag === "textarea" || tag === window.onigiriText("select") || tag === "audio"
             || tag === "video" || t.isContentEditable) {
           return;  // let the user actually interact with that thing
         }
@@ -238,23 +238,23 @@
     bar = document.createElement("div");
     bar.id = "ba-edit-bar";
     bar.setAttribute("role", "toolbar");
-    bar.setAttribute("aria-label", window.bingsuText("Edit card"));
+    bar.setAttribute("aria-label", window.onigiriText("Edit card"));
     // The toolbar lives outside the card so its buttons are reachable
     // even when the card content scrolls. Format buttons on the left,
     // primary actions on the right.
     bar.innerHTML =
-        window.bingsuTemplate('<div class="ba-edit-fmt" role="group" aria-label="Formatting">')
-      +   window.bingsuTemplate('<button type="button" data-cmd="bold"      title="Bold (⌘B)"      aria-label="Bold"><b>B</b></button>')
-      +   window.bingsuTemplate('<button type="button" data-cmd="italic"    title="Italic (⌘I)"    aria-label="Italic"><i>I</i></button>')
-      +   window.bingsuTemplate('<button type="button" data-cmd="underline" title="Underline (⌘U)" aria-label="Underline"><u>U</u></button>')
+        window.onigiriTemplate('<div class="ba-edit-fmt" role="group" aria-label="Formatting">')
+      +   window.onigiriTemplate('<button type="button" data-cmd="bold"      title="Bold (⌘B)"      aria-label="Bold"><b>B</b></button>')
+      +   window.onigiriTemplate('<button type="button" data-cmd="italic"    title="Italic (⌘I)"    aria-label="Italic"><i>I</i></button>')
+      +   window.onigiriTemplate('<button type="button" data-cmd="underline" title="Underline (⌘U)" aria-label="Underline"><u>U</u></button>')
       + '</div>'
       + '<div class="ba-edit-actions">'
       +   '<button type="button" class="ba-edit-link" data-action="full" '
-      +           window.bingsuTemplate('title="Open Anki\'s full editor">Open full editor</button>')
+      +           window.onigiriTemplate('title="Open Anki\'s full editor">Open full editor</button>')
       +   '<button type="button" class="ba-edit-secondary" data-action="cancel" '
-      +           window.bingsuTemplate('title="Cancel (Esc)">Cancel</button>')
+      +           window.onigiriTemplate('title="Cancel (Esc)">Cancel</button>')
       +   '<button type="button" class="ba-edit-primary" data-action="save" '
-      +           window.bingsuTemplate('title="Save (⌘↩)">Save</button>')
+      +           window.onigiriTemplate('title="Save (⌘↩)">Save</button>')
       + '</div>';
     document.body.appendChild(bar);
 
@@ -314,7 +314,7 @@
       return;
     }
     if (meta && (e.key === "Enter" || e.key === "Return"
-                 || e.key === window.bingsuText("s") || e.key === window.bingsuText("S"))) {
+                 || e.key === window.onigiriText("s") || e.key === window.onigiriText("S"))) {
       e.preventDefault();
       exitEdit(true);
       return;

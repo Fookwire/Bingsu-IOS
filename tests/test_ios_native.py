@@ -56,7 +56,7 @@ class IosNativeTests(unittest.TestCase):
         self.assertIsNone(p(""))
 
     def test_off_ios_everything_is_a_noop(self):
-        with patch.object(self.native.bingsu_platform, "IS_IOS", False):
+        with patch.object(self.native.onigiri_platform, "IS_IOS", False):
             self.assertFalse(self.native.active())
             self.assertFalse(self.native.haptic("light"))
             self.assertFalse(self.native.set_edge_color("rgb(1,2,3)"))
@@ -66,15 +66,15 @@ class IosNativeTests(unittest.TestCase):
             self.assertFalse(self.native._state["installed"])
 
     def test_handle_command_only_takes_its_prefix(self):
-        self.assertFalse(self.native.handle_command("bingsu_app_menu"))
-        with patch.object(self.native.bingsu_platform, "IS_IOS", False):
-            self.assertTrue(self.native.handle_command("bingsu_native:haptic:light"))
-            self.assertTrue(self.native.handle_command("bingsu_native:edge:rgb(1,2,3)"))
-            self.assertTrue(self.native.handle_command("bingsu_native:ready"))
-            self.assertTrue(self.native.handle_command("bingsu_native:unknown"))
+        self.assertFalse(self.native.handle_command("onigiri_app_menu"))
+        with patch.object(self.native.onigiri_platform, "IS_IOS", False):
+            self.assertTrue(self.native.handle_command("onigiri_native:haptic:light"))
+            self.assertTrue(self.native.handle_command("onigiri_native:edge:rgb(1,2,3)"))
+            self.assertTrue(self.native.handle_command("onigiri_native:ready"))
+            self.assertTrue(self.native.handle_command("onigiri_native:unknown"))
 
     def test_haptic_without_rubicon_does_not_raise(self):
-        with patch.object(self.native.bingsu_platform, "IS_IOS", True), \
+        with patch.object(self.native.onigiri_platform, "IS_IOS", True), \
                 patch.dict(sys.modules, {"rubicon": None, "rubicon.objc": None}):
             self.assertFalse(self.native.haptic("medium"))
 
@@ -102,7 +102,7 @@ class MobileJsContractTests(unittest.TestCase):
 
     def test_commands_match(self):
         js = (ROOT / "web" / "mobile.js").read_text(encoding="utf-8")
-        self.assertIn("'bingsu_native:' + what", js)
+        self.assertIn("'onigiri_native:' + what", js)
         for cmd in ("'ready'", "'edge:'", "'haptic:'"):
             self.assertIn(cmd, js)
 
@@ -144,10 +144,10 @@ class AuditStepOneTests(unittest.TestCase):
         mw = types.SimpleNamespace(reviewer=object(), overview=object(), deckBrowser=object())
         with patch.object(self.native, "_mw", lambda: mw), \
                 patch.object(self.native, "go_back", lambda: went.append(1)):
-            self.native.handle_command("bingsu_native:back", object())  # a previewer
-            self.native.handle_command("bingsu_native:back", None)
+            self.native.handle_command("onigiri_native:back", object())  # a previewer
+            self.native.handle_command("onigiri_native:back", None)
             self.assertEqual(went, [])
-            self.native.handle_command("bingsu_native:back", mw.reviewer)
+            self.native.handle_command("onigiri_native:back", mw.reviewer)
             self.assertEqual(went, [1])
 
     def test_back_from_review_goes_through_onoverview(self):
@@ -178,9 +178,9 @@ class AuditStepOneTests(unittest.TestCase):
             self.assertEqual(flushed, [1])
 
     def test_play_sound_is_a_noop_off_ios_and_safe_without_rubicon(self):
-        with patch.object(self.native.bingsu_platform, "IS_IOS", False):
+        with patch.object(self.native.onigiri_platform, "IS_IOS", False):
             self.assertFalse(self.native.play_sound("/x.wav"))
-        with patch.object(self.native.bingsu_platform, "IS_IOS", True), \
+        with patch.object(self.native.onigiri_platform, "IS_IOS", True), \
                 patch.dict(sys.modules, {"rubicon": None, "rubicon.objc": None}):
             self.assertFalse(self.native.play_sound("/x.wav"))
 

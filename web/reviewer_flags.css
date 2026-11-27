@@ -1,7 +1,7 @@
 /* Style every flag from first paint, including unset/reset icon choices. */
 #_flag {
   position: fixed !important;
-  top: calc(var(--bingsu-reviewer-header-offset, 0px) + 12px) !important;
+  top: calc(var(--onigiri-reviewer-header-offset, 0px) + 12px) !important;
   right: 12px !important;
   left: auto !important;
   box-sizing: border-box !important;
@@ -31,6 +31,6 @@
   height: 24px !important;
   background: currentColor !important;
   /* Bundled fallback also covers first paint and a failed/delayed script. */
-  -webkit-mask: var(--bingsu-flag-icon, url("../system_files/system_icons/available_for_users/flag.svg")) center / contain no-repeat !important;
-  mask: var(--bingsu-flag-icon, url("../system_files/system_icons/available_for_users/flag.svg")) center / contain no-repeat !important;
+  -webkit-mask: var(--onigiri-flag-icon, url("../system_files/system_icons/available_for_users/flag.svg")) center / contain no-repeat !important;
+  mask: var(--onigiri-flag-icon, url("../system_files/system_icons/available_for_users/flag.svg")) center / contain no-repeat !important;
 }

@@ -1,5 +1,5 @@
 /* Compact deck-wide progress shared by Overview and Congrats. */
-.bingsu-deck-progress {
+.onigiri-deck-progress {
     width: 100%;
     box-sizing: border-box;
     color: var(--fg);
@@ -7,36 +7,36 @@
     text-align: left;
 }
 
-.stats-container > .bingsu-deck-progress {
+.stats-container > .onigiri-deck-progress {
     margin-top: 5px;
     padding-top: 14px;
 }
 
-.congrats-card .bingsu-deck-progress {
+.congrats-card .onigiri-deck-progress {
     margin-top: 22px;
 }
 
-.bingsu-deck-progress-heading,
-.bingsu-deck-progress-meta {
+.onigiri-deck-progress-heading,
+.onigiri-deck-progress-meta {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
 }
 
-.bingsu-deck-progress-heading {
+.onigiri-deck-progress-heading {
     font-size: calc(var(--font-size-main, 16px) * 0.92);
     font-weight: 600;
 }
 
 /* The existing overview palette remains the single color source: a theme
    change should update the progress indicator without another setting. */
-.bingsu-deck-progress-heading strong {
+.onigiri-deck-progress-heading strong {
     color: var(--accent-color, var(--overview-review-bubble-bg, #19c96b));
     font-variant-numeric: tabular-nums;
 }
 
-.bingsu-deck-progress-track {
+.onigiri-deck-progress-track {
     width: 100%;
     height: 6px;
     margin: 9px 0 7px;
@@ -45,33 +45,33 @@
     background: var(--highlight-bg, rgba(127, 127, 127, 0.18));
 }
 
-.bingsu-deck-progress-track > span {
+.onigiri-deck-progress-track > span {
     display: block;
     height: 100%;
     border-radius: inherit;
     background: var(--accent-color, var(--overview-review-bubble-bg, #19c96b));
 }
 
-.bingsu-deck-progress-meta {
+.onigiri-deck-progress-meta {
     color: var(--fg-subtle, var(--fg));
     font-size: calc(var(--font-size-main, 16px) * 0.76);
     line-height: 1.35;
 }
 
-.bingsu-deck-progress-forecast {
+.onigiri-deck-progress-forecast {
     flex: 0 0 auto;
     text-align: right;
 }
 
-/* Secondary states stay collapsed until requested. This preserves Bingsu's
+/* Secondary states stay collapsed until requested. This preserves Onigiri's
    three-row overview at a glance while keeping the full upstream data close. */
-.bingsu-deck-progress-details {
+.onigiri-deck-progress-details {
     margin-top: 9px;
     color: var(--fg-subtle, var(--fg));
     font-size: calc(var(--font-size-main, 16px) * 0.76);
 }
 
-.bingsu-deck-progress-details summary {
+.onigiri-deck-progress-details summary {
     width: max-content;
     margin-left: auto;
     cursor: pointer;
@@ -79,7 +79,7 @@
     list-style-position: outside;
 }
 
-.bingsu-deck-progress-grid {
+.onigiri-deck-progress-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 7px 18px;
@@ -88,7 +88,7 @@
     border-top: 1px solid var(--overview-box-border, var(--border));
 }
 
-.bingsu-deck-progress-detail {
+.onigiri-deck-progress-detail {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -96,39 +96,39 @@
     min-width: 0;
 }
 
-.bingsu-deck-progress-detail span {
+.onigiri-deck-progress-detail span {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.bingsu-deck-progress-detail strong {
+.onigiri-deck-progress-detail strong {
     color: var(--fg);
     font-weight: 600;
     font-variant-numeric: tabular-nums;
 }
 
-.mini-overview .bingsu-deck-progress-heading {
+.mini-overview .onigiri-deck-progress-heading {
     font-size: 13px;
 }
 
-.mini-overview .bingsu-deck-progress-meta,
-.mini-overview .bingsu-deck-progress-details {
+.mini-overview .onigiri-deck-progress-meta,
+.mini-overview .onigiri-deck-progress-details {
     font-size: 11px;
 }
 
-.mini-overview .bingsu-deck-progress-grid {
+.mini-overview .onigiri-deck-progress-grid {
     gap: 6px 12px;
 }
 
 @media (max-width: 360px) {
-    .bingsu-deck-progress-meta {
+    .onigiri-deck-progress-meta {
         align-items: flex-start;
         flex-direction: column;
         gap: 2px;
     }
 
-    .bingsu-deck-progress-forecast {
+    .onigiri-deck-progress-forecast {
         text-align: left;
     }
 }

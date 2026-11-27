@@ -15,21 +15,21 @@ class MenuTitleBackgroundTests(unittest.TestCase):
     def setUp(self):
         self.values = {}
         self.addon_conf = {}
-        tree = ast.parse((ROOT / 'rendering/bingsu_renderer.py').read_text())
+        tree = ast.parse((ROOT / 'rendering/onigiri_renderer.py').read_text())
         function = next(node for node in tree.body if isinstance(node, ast.FunctionDef)
-                        and node.name == '_get_bingsu_stats_title_html')
+                        and node.name == '_get_onigiri_stats_title_html')
         env = dict(html=html, os=os, re=re, quote_url_component=quote,
-                   config=SimpleNamespace(DEFAULTS={'statsTitle': 'Welcome to Bingsu'},
+                   config=SimpleNamespace(DEFAULTS={'statsTitle': 'Welcome to Onigiri'},
                                           get_config_readonly=lambda: self.addon_conf),
                    mw=SimpleNamespace(addonManager=SimpleNamespace(addonFromModule=lambda _: '1011095603')),
                    _col_conf_get=lambda key, default: self.values.get(key, default),
-                   __name__='1011095603.bingsu_renderer')
-        exec(compile(ast.Module(body=[function], type_ignores=[]), 'rendering/bingsu_renderer.py', 'exec'), env)
+                   __name__='1011095603.onigiri_renderer')
+        exec(compile(ast.Module(body=[function], type_ignores=[]), 'rendering/onigiri_renderer.py', 'exec'), env)
         self.render = env[function.name]
 
     def test_fresh_install_keeps_phrase_without_background(self):
         markup = self.render()
-        self.assertIn('Welcome to Bingsu', markup)
+        self.assertIn('Welcome to Onigiri', markup)
         self.assertNotIn('has-background', markup)
         self.assertIn('--menu-title-alignment:left', markup)
 
@@ -45,7 +45,7 @@ class MenuTitleBackgroundTests(unittest.TestCase):
         self.assertIn('has-background', markup)
         self.assertIn('background-color:color-mix(in srgb, #123456 100.0%, transparent)', markup)
         self.assertNotIn('<h1', markup)
-        self.assertNotIn('Welcome to Bingsu', markup)
+        self.assertNotIn('Welcome to Onigiri', markup)
 
     def test_image_url_encodes_filename_and_retains_background_when_blank(self):
         self.values.update(modern_menu_statsTitle='', modern_menu_title_background_enabled=True,
@@ -66,12 +66,12 @@ class MenuTitleBackgroundTests(unittest.TestCase):
             markup = self.render()
             self.assertIn('--menu-title-alignment:' + alignment, markup)
             self.assertIn('backdrop-filter:blur(6.0px)', markup)
-            self.assertIn('<h1 class="bingsu-widget-title">Welcome to Bingsu</h1>', markup)
+            self.assertIn('<h1 class="onigiri-widget-title">Welcome to Onigiri</h1>', markup)
 
     def test_toggle_off_preserves_selected_asset_and_phrase(self):
         self.values.update(modern_menu_title_background_enabled=False,
                            modern_menu_title_background_type='image', modern_menu_title_background_image='saved.png')
-        self.assertNotIn('bingsu-menu-title-background', self.render())
+        self.assertNotIn('onigiri-menu-title-background', self.render())
         self.assertEqual(self.values['modern_menu_title_background_image'], 'saved.png')
 
     def test_color_opacity_leaves_the_blurred_backdrop_visible(self):
@@ -95,7 +95,7 @@ class MenuTitleBackgroundTests(unittest.TestCase):
         saved = self.values.copy()
         markup = self.render()
         self.assertIn('background-color:var(--canvas-inset)', markup)
-        self.assertIn('backdrop-filter:blur(var(--bingsu-widget-blur, 0px))', markup)
+        self.assertIn('backdrop-filter:blur(var(--onigiri-widget-blur, 0px))', markup)
         self.assertNotIn('saved.png', markup)
         self.assertEqual(self.values, saved)
         self.values['modern_menu_title_sync_widgets'] = False

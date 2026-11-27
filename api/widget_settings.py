@@ -3,7 +3,7 @@
 The Bento add-ons intentionally keep their own configuration and rendering
 code.  This module owns only the settings chrome and value plumbing: the same
 rail/panel/card hierarchy, automatic saving, and production-rendered preview
-contract used by Bingsu's main settings window.
+contract used by Onigiri's main settings window.
 
 Integrations subclass :class:`BentoSettingsDialog`, pass a small page schema,
 and provide a preview callback.  The callback receives the in-progress config,
@@ -39,7 +39,7 @@ def _read_asset(name: str) -> str:
         with open(os.path.join(WEB_ROOT, name), "r", encoding="utf-8") as handle:
             return handle.read()
     except OSError as exc:
-        print(f"[Bingsu] Bento settings asset missing ({name}): {exc}")
+        print(f"[Onigiri] Bento settings asset missing ({name}): {exc}")
         return ""
 
 
@@ -109,7 +109,7 @@ def deep_merge(base: dict, overlay: dict) -> dict:
 
 
 def palette(dark: bool) -> dict:
-    """Keep the shared Bento surface on Bingsu's settings color tokens."""
+    """Keep the shared Bento surface on Onigiri's settings color tokens."""
     if dark:
         return {
             "outer": "#232323", "panel": "#1a1a1a", "surface": "#242424",
@@ -182,7 +182,7 @@ def preview_document(
 
     No replica widget is drawn here.  ``content`` and ``css`` are the output of
     the integration's real renderer.  The wrapper only supplies the same kind
-    of wallpaper stage used by Bingsu and scales the result to the iframe.
+    of wallpaper stage used by Onigiri and scales the result to the iframe.
     """
     fallback = "#171717" if dark else "#ffffff"
     base_color = (wallpaper.get("color") if isinstance(wallpaper, dict) else None) or fallback
@@ -326,11 +326,11 @@ class BentoSettingsDialog(QDialog):
         self.preview_variant = str(self.preview_variants[0].get("value", "default"))
         self.preview_theme = "dark" if theme_manager.night_mode else "light"
         self.initial_page = initial_page or (self.pages[0]["id"] if self.pages else "")
-        bingsu_api = getattr(mw, "bingsu_api", None) or getattr(mw, "onigiri_api", None)
-        self.bingsu_connected = bool(
-            isinstance(bingsu_api, dict) and bingsu_api.get("id") == "1011095603"
+        onigiri_api = getattr(mw, "onigiri_api", None)
+        self.onigiri_connected = bool(
+            isinstance(onigiri_api, dict) and onigiri_api.get("id") == "1011095603"
         )
-        self.bingsu_version = str(bingsu_api.get("version") or "") if self.bingsu_connected else ""
+        self.onigiri_version = str(onigiri_api.get("version") or "") if self.onigiri_connected else ""
         nested_config = self.config.get("ui_settings")
         nested_defaults = self.defaults.get("ui_settings")
         nested_footprint = any(
@@ -488,8 +488,8 @@ class BentoSettingsDialog(QDialog):
             "previewVariants": self.preview_variants,
             "hasDonate": bool(self.donate_url),
             "hasBugs": bool(self.bugs_url),
-            "bingsuConnected": self.bingsu_connected,
-            "bingsuVersion": self.bingsu_version,
+            "onigiriConnected": self.onigiri_connected,
+            "onigiriVersion": self.onigiri_version,
             "footprint": self._footprint_context(),
         }
         return (
@@ -524,7 +524,7 @@ class BentoSettingsDialog(QDialog):
             for group in item.get("sections", [])
             for spec in group.get("fields", [])
         }
-        if not self.bingsu_connected:
+        if not self.onigiri_connected:
             specs.update({spec["path"]: spec for spec in self.footprint_fields})
         for path, value in patch.items():
             spec = specs.get(path)

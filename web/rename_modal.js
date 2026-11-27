@@ -1,4 +1,4 @@
-window.BingsuRenameDeckModal = (function () {
+window.OnigiriRenameDeckModal = (function () {
     const state = {
         deckId: "",
         parentPrefix: "",
@@ -9,24 +9,24 @@ window.BingsuRenameDeckModal = (function () {
     }
 
     function close() {
-        const backdrop = document.getElementById("bingsu-rename-backdrop");
+        const backdrop = document.getElementById("onigiri-rename-backdrop");
         if (backdrop) backdrop.remove();
     }
 
-    // Shared light/dark tokens for Bingsu dialogs. They read the Bingsu palette
+    // Shared light/dark tokens for Onigiri dialogs. They read the Onigiri palette
     // (which flips on .night-mode) instead of Anki's --canvas*, so a dialog can
     // never end up with light-theme surfaces under dark-theme text.
     function T(key, fallback) {
-        if (window.BingsuI18n && typeof BingsuI18n.t === 'function') {
-            return BingsuI18n.t(key, fallback);
+        if (window.OnigiriI18n && typeof OnigiriI18n.t === 'function') {
+            return OnigiriI18n.t(key, fallback);
         }
         return fallback;
     }
 
     function ensureDialogThemeTokens() {
-        if (document.getElementById('bingsu-dialog-theme-tokens')) return;
+        if (document.getElementById('onigiri-dialog-theme-tokens')) return;
         var tokenStyle = document.createElement('style');
-        tokenStyle.id = 'bingsu-dialog-theme-tokens';
+        tokenStyle.id = 'onigiri-dialog-theme-tokens';
         tokenStyle.textContent = [
             ':root{--odlg-surface:#ffffff;--odlg-inset:#ffffff;',
             '  --odlg-fg:#202124;--odlg-fg-subtle:#6f7177;',
@@ -42,11 +42,11 @@ window.BingsuRenameDeckModal = (function () {
 
     function ensureStyles() {
         ensureDialogThemeTokens();
-        if (document.getElementById("bingsu-rename-modal-styles")) return;
+        if (document.getElementById("onigiri-rename-modal-styles")) return;
         const style = document.createElement("style");
-        style.id = "bingsu-rename-modal-styles";
+        style.id = "onigiri-rename-modal-styles";
         style.textContent = `
-            #bingsu-rename-backdrop {
+            #onigiri-rename-backdrop {
                 position: fixed;
                 inset: 0;
                 z-index: 200001;
@@ -55,8 +55,8 @@ window.BingsuRenameDeckModal = (function () {
                 justify-content: center;
                 background: var(--odlg-scrim, rgba(0, 0, 0, 0.46));
             }
-            #bingsu-rename-backdrop button,
-            #bingsu-rename-backdrop input {
+            #onigiri-rename-backdrop button,
+            #onigiri-rename-backdrop input {
                 -webkit-appearance: none !important;
                 appearance: none !important;
                 box-sizing: border-box !important;
@@ -64,7 +64,7 @@ window.BingsuRenameDeckModal = (function () {
                 letter-spacing: 0 !important;
                 outline: none !important;
             }
-            .bingsu-rename-modal {
+            .onigiri-rename-modal {
                 position: relative;
                 width: min(390px, calc(100vw - 36px));
                 border: 1px solid var(--odlg-border, rgba(0,0,0,0.14));
@@ -74,17 +74,17 @@ window.BingsuRenameDeckModal = (function () {
                 box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
                 overflow: hidden;
             }
-            .bingsu-rename-header {
+            .onigiri-rename-header {
                 display: flex;
                 align-items: center;
                 padding: 16px 18px 8px;
             }
-            .bingsu-rename-title {
+            .onigiri-rename-title {
                 font-size: 15px;
                 font-weight: 650;
                 line-height: 1.2;
             }
-            .bingsu-rename-close {
+            .onigiri-rename-close {
                 position: absolute;
                 top: 12px;
                 right: 12px;
@@ -100,19 +100,19 @@ window.BingsuRenameDeckModal = (function () {
                 align-items: center;
                 justify-content: center;
             }
-            .bingsu-rename-close:hover {
+            .onigiri-rename-close:hover {
                 color: var(--odlg-fg-subtle, #757575) !important;
                 background: transparent !important;
             }
-            .bingsu-rename-close svg {
+            .onigiri-rename-close svg {
                 width: 15px;
                 height: 15px;
                 pointer-events: none;
             }
-            .bingsu-rename-body {
+            .onigiri-rename-body {
                 padding: 8px 18px 16px;
             }
-            .bingsu-rename-label {
+            .onigiri-rename-label {
                 display: block;
                 margin-bottom: 7px;
                 color: var(--odlg-fg-subtle, #757575);
@@ -120,7 +120,7 @@ window.BingsuRenameDeckModal = (function () {
                 font-weight: 650;
                 text-transform: uppercase;
             }
-            .bingsu-rename-path {
+            .onigiri-rename-path {
                 display: none;
                 margin-bottom: 10px;
                 color: var(--odlg-fg-subtle, #757575);
@@ -129,10 +129,10 @@ window.BingsuRenameDeckModal = (function () {
                 text-overflow: ellipsis;
                 white-space: nowrap;
             }
-            .bingsu-rename-path.visible {
+            .onigiri-rename-path.visible {
                 display: block;
             }
-            .bingsu-rename-input {
+            .onigiri-rename-input {
                 width: 100%;
                 height: 40px;
                 padding: 0 12px;
@@ -142,24 +142,24 @@ window.BingsuRenameDeckModal = (function () {
                 color: var(--odlg-fg, #212121);
                 font-size: 14px;
             }
-            .bingsu-rename-input:focus {
+            .onigiri-rename-input:focus {
                 border-color: var(--odlg-accent, #0077C8);
                 box-shadow: inset 0 0 0 1px var(--odlg-accent, #0077C8);
             }
-            .bingsu-rename-error {
+            .onigiri-rename-error {
                 min-height: 18px;
                 margin-top: 7px;
                 color: #ff5f57;
                 font-size: 12px;
             }
-            .bingsu-rename-footer {
+            .onigiri-rename-footer {
                 display: flex;
                 align-items: center;
                 justify-content: flex-end;
                 gap: 8px;
                 padding: 14px 18px 18px;
             }
-            .bingsu-rename-btn {
+            .onigiri-rename-btn {
                 height: 34px;
                 min-width: 82px;
                 padding: 0 14px !important;
@@ -170,15 +170,15 @@ window.BingsuRenameDeckModal = (function () {
                 font-weight: 650 !important;
                 transform: none !important;
             }
-            .bingsu-rename-btn.secondary {
+            .onigiri-rename-btn.secondary {
                 background: var(--odlg-highlight, rgba(0,0,0,0.06)) !important;
                 color: var(--odlg-fg, #212121) !important;
             }
-            .bingsu-rename-btn.primary {
+            .onigiri-rename-btn.primary {
                 background: var(--odlg-accent, #0077C8) !important;
                 color: white !important;
             }
-            .bingsu-rename-btn:hover {
+            .onigiri-rename-btn:hover {
                 filter: none !important;
                 box-shadow: none !important;
                 transform: none !important;
@@ -188,8 +188,8 @@ window.BingsuRenameDeckModal = (function () {
     }
 
     function submit() {
-        const input = document.getElementById("bingsu-rename-input");
-        const error = document.getElementById("bingsu-rename-error");
+        const input = document.getElementById("onigiri-rename-input");
+        const error = document.getElementById("onigiri-rename-error");
         if (!input) return;
         const name = input.value.trim();
         if (!name) {
@@ -197,7 +197,7 @@ window.BingsuRenameDeckModal = (function () {
             input.focus();
             return;
         }
-        py(`bingsu_rename_deck:${state.deckId}:${encodeURIComponent(JSON.stringify({ name }))}`);
+        py(`onigiri_rename_deck:${state.deckId}:${encodeURIComponent(JSON.stringify({ name }))}`);
         close();
     }
 
@@ -208,20 +208,20 @@ window.BingsuRenameDeckModal = (function () {
         state.parentPrefix = payload.parentPrefix || "";
 
         const backdrop = document.createElement("div");
-        backdrop.id = "bingsu-rename-backdrop";
+        backdrop.id = "onigiri-rename-backdrop";
         backdrop.addEventListener("click", close);
 
         const modal = document.createElement("div");
-        modal.className = "bingsu-rename-modal";
+        modal.className = "onigiri-rename-modal";
         modal.addEventListener("click", event => event.stopPropagation());
 
         const header = document.createElement("div");
-        header.className = "bingsu-rename-header";
+        header.className = "onigiri-rename-header";
         const title = document.createElement("div");
-        title.className = "bingsu-rename-title";
+        title.className = "onigiri-rename-title";
         title.textContent = T("rename_deck_title", "Rename Deck");
         const closeBtn = document.createElement("span");
-        closeBtn.className = "bingsu-rename-close";
+        closeBtn.className = "onigiri-rename-close";
         closeBtn.setAttribute('role', 'button');
         closeBtn.tabIndex = 0;
         closeBtn.setAttribute("aria-label", "Close");
@@ -231,24 +231,24 @@ window.BingsuRenameDeckModal = (function () {
         header.appendChild(closeBtn);
 
         const body = document.createElement("div");
-        body.className = "bingsu-rename-body";
+        body.className = "onigiri-rename-body";
         const label = document.createElement("label");
-        label.className = "bingsu-rename-label";
-        label.setAttribute("for", "bingsu-rename-input");
+        label.className = "onigiri-rename-label";
+        label.setAttribute("for", "onigiri-rename-input");
         label.textContent = T("deck_name_label", "Deck name");
         const path = document.createElement("div");
-        path.className = "bingsu-rename-path" + (state.parentPrefix ? " visible" : "");
+        path.className = "onigiri-rename-path" + (state.parentPrefix ? " visible" : "");
         path.textContent = state.parentPrefix ? `${state.parentPrefix} ::` : "";
         const input = document.createElement("input");
-        input.id = "bingsu-rename-input";
-        input.className = "bingsu-rename-input";
+        input.id = "onigiri-rename-input";
+        input.className = "onigiri-rename-input";
         input.type = "text";
         input.value = payload.leafName || "";
         input.autocomplete = "off";
         input.spellcheck = false;
         const error = document.createElement("div");
-        error.id = "bingsu-rename-error";
-        error.className = "bingsu-rename-error";
+        error.id = "onigiri-rename-error";
+        error.className = "onigiri-rename-error";
         input.addEventListener("input", () => {
             error.textContent = "";
         });
@@ -262,15 +262,15 @@ window.BingsuRenameDeckModal = (function () {
         body.appendChild(error);
 
         const footer = document.createElement("div");
-        footer.className = "bingsu-rename-footer";
+        footer.className = "onigiri-rename-footer";
         const cancel = document.createElement("span");
-        cancel.className = "bingsu-rename-btn secondary";
+        cancel.className = "onigiri-rename-btn secondary";
         cancel.setAttribute('role', 'button');
         cancel.tabIndex = 0;
         cancel.textContent = T("cancel", "Cancel");
         cancel.addEventListener("click", close);
         const save = document.createElement("span");
-        save.className = "bingsu-rename-btn primary";
+        save.className = "onigiri-rename-btn primary";
         save.setAttribute('role', 'button');
         save.tabIndex = 0;
         save.textContent = T("save", "Save");
@@ -290,7 +290,7 @@ window.BingsuRenameDeckModal = (function () {
     }
 
     document.addEventListener("keydown", event => {
-        if (event.key === "Escape" && document.getElementById("bingsu-rename-backdrop")) {
+        if (event.key === "Escape" && document.getElementById("onigiri-rename-backdrop")) {
             close();
         }
     });

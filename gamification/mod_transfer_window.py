@@ -331,7 +331,7 @@ def show_transfer_window(source_dids_json: str) -> None:
                 }}
 
                 try {{
-                    const command = 'bingsu_move_decks:' + JSON.stringify(payload);
+                    const command = 'onigiri_move_decks:' + JSON.stringify(payload);
                     pycmd(command);
                 }} catch (error) {{
                     alert('Error sending command: ' + error.message);
@@ -356,15 +356,15 @@ def show_transfer_window(source_dids_json: str) -> None:
     web.eval("document.body.className = anki.theme;") # Apply dark/light theme
     web.show()
     # Store a reference on mw to prevent garbage collection
-    mw.bingsu_transfer_window = web
+    mw.onigiri_transfer_window = web
 
-def handle_bingsu_commands(handled, message, context):
+def handle_onigiri_commands(handled, message, context):
     """
-    Route custom Bingsu commands to their respective handlers.
+    Route custom Onigiri commands to their respective handlers.
     """
-    if message.startswith("bingsu_show_transfer_window:"):
+    if message.startswith("onigiri_show_transfer_window:"):
         try:
-            source_dids_json = message.replace("bingsu_show_transfer_window:", "")
+            source_dids_json = message.replace("onigiri_show_transfer_window:", "")
             show_transfer_window(source_dids_json)
             return True
         except Exception as e:

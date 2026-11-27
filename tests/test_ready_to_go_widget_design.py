@@ -36,7 +36,7 @@ class ReadyToGoWidgetDesignTests(unittest.TestCase):
         render = self.env["render_widget_html"]
         for markup in (render(), render("squares"), render("unknown")):
             self.assertNotIn("is-circles", markup)
-            self.assertEqual(markup.count('class="bingsu-ready-action '), 4)
+            self.assertEqual(markup.count('class="onigiri-ready-action '), 4)
             self.assertIn('<span>Inbox</span>', markup)
             self.assertIn('title="Inbox"', markup)
 
@@ -47,7 +47,7 @@ class ReadyToGoWidgetDesignTests(unittest.TestCase):
         self.assertEqual(markup.count('class="mag-label"'), 4)
         self.assertNotIn('title="Inbox"', markup)
         for key, action in self.env["READY_ACTIONS"].items():
-            self.assertIn("pycmd('bingsu_ready:" + key + "')", markup)
+            self.assertIn("pycmd('onigiri_ready:" + key + "')", markup)
             self.assertIn('aria-label="' + action["label"] + '"', markup)
             self.assertIn('/icons/' + key + '.svg', markup)
 

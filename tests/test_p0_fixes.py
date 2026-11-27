@@ -143,7 +143,7 @@ class P0FixesTests(unittest.TestCase):
             self.assertEqual(page._bg.alpha(), 255)
 
     def test_408_deck_browser_and_congrats_redraw_bottom_bar(self):
-        renderer_src = (ADDON_ROOT / "rendering/bingsu_renderer.py").read_text(encoding="utf-8")
+        renderer_src = (ADDON_ROOT / "rendering/onigiri_renderer.py").read_text(encoding="utf-8")
         self.assertIn('if hasattr(self, "_drawButtons"):', renderer_src)
         self.assertIn("self._drawButtons()", renderer_src)
 

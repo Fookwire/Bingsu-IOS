@@ -84,7 +84,7 @@ def _config() -> Dict[str, Any]:
     try:
         from . import colors as _colors
 
-        return _colors.bingsu_layout_config()
+        return _colors.onigiri_layout_config()
     except Exception:
         return mw.addonManager.getConfig(ADDON) or {}
 
@@ -93,7 +93,7 @@ def _resolve_palette() -> Tuple[Dict[str, str], bool]:
     try:
         from . import colors as _colors
 
-        palette, is_dark = _colors.bingsu_palette()
+        palette, is_dark = _colors.onigiri_palette()
         return _colors.apply_background(palette, _config(), is_dark), is_dark
     except Exception:
         pass
@@ -697,7 +697,7 @@ def _redress(addcards: AddCards) -> None:
             m.exec(add_btn.mapToGlobal(QPoint(0, add_btn.height())))
         except Exception as e:
             try:
-                from ..ui_kit.bingsu_notifications import notify_warning as showWarning
+                from ..ui_kit.onigiri_notifications import notify_warning as showWarning
                 showWarning(f"Recent menu failed: {e}")
             except Exception:
                 pass

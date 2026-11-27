@@ -351,7 +351,7 @@ class _IconButton(QWidget):
             self.clicked.emit()
 
 
-class _BingsuPalettePopup(QFrame):
+class _OnigiriPalettePopup(QFrame):
     finished = pyqtSignal(str, bool)
 
     def __init__(self, initial_color, parent=None, anchor=None, allow_transparent=False):
@@ -372,7 +372,7 @@ class _BingsuPalettePopup(QFrame):
         self._sat = max(0.0, self._color.saturationF())
         self._val = max(0.0, self._color.valueF())
 
-        self.setObjectName("BingsuPalettePopup")
+        self.setObjectName("OnigiriPalettePopup")
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setFixedWidth(POPUP_WIDTH)
@@ -381,7 +381,7 @@ class _BingsuPalettePopup(QFrame):
         border = "#3F3F44" if self._dark else "#E3E4E7"
         self.setStyleSheet(
             f"""
-            QFrame#BingsuPalettePopup {{
+            QFrame#OnigiriPalettePopup {{
                 background-color: {bg};
                 border: 1px solid {border};
                 border-radius: 20px;
@@ -440,12 +440,12 @@ class _BingsuPalettePopup(QFrame):
         content_layout.addWidget(self.hue_slider)
 
         hex_frame = QFrame(content)
-        hex_frame.setObjectName("BingsuHexFrame")
+        hex_frame.setObjectName("OnigiriHexFrame")
         hex_frame.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         hex_frame.setFixedHeight(38)
         pill_bg = "#3A3A3D" if self._dark else "#F0F0EF"
         hex_frame.setStyleSheet(
-            f"QFrame#BingsuHexFrame {{ background-color: {pill_bg}; border: 0px; border-radius: 19px; }}"
+            f"QFrame#OnigiriHexFrame {{ background-color: {pill_bg}; border: 0px; border-radius: 19px; }}"
         )
         hex_layout = QHBoxLayout(hex_frame)
         hex_layout.setContentsMargins(5, 5, 12, 5)
@@ -640,7 +640,7 @@ class _BingsuPalettePopup(QFrame):
             self.hex_input.setText(self._color.name().lstrip("#").upper())
             self.hex_input.blockSignals(False)
 
-class BingsuColorDialog:
+class OnigiriColorDialog:
     @staticmethod
     def getColor(initial_color, parent=None, anchor=None, allow_transparent=False):
         app = QApplication.instance()
@@ -665,7 +665,7 @@ class BingsuColorDialog:
 
         result = {"color": _normalized_hex(initial_color), "ok": False}
         loop = QEventLoop()
-        popup = _BingsuPalettePopup(initial_color, root, anchor=anchor, allow_transparent=allow_transparent)
+        popup = _OnigiriPalettePopup(initial_color, root, anchor=anchor, allow_transparent=allow_transparent)
 
         def finish(color_hex, accepted):
             result["color"] = color_hex

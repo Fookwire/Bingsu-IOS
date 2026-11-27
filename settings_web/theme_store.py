@@ -110,31 +110,31 @@ def theme_customization_key_groups():
     explicit_addon_keys = [
         "markerColors", "overview_style", "showOverviewProfileBar", "showCongratsProfileBar",
         "congratsMessage", "studyNowText", "hideRetentionStars",
-        "bingsu_overview_bg_mode", "bingsu_overview_bg_main_blur", "bingsu_overview_bg_main_opacity",
-        "bingsu_overview_bg_light_color", "bingsu_overview_bg_dark_color", "bingsu_overview_bg_image",
-        "bingsu_overview_bg_image_light", "bingsu_overview_bg_image_dark", "bingsu_overview_bg_image_mode",
-        "bingsu_overview_bg_color_theme_mode", "bingsu_overview_bg_image_theme_mode",
-        "bingsu_overview_bg_blur", "bingsu_overview_bg_opacity",
-        "bingsu_reviewer_bg_mode", "bingsu_reviewer_bg_main_blur", "bingsu_reviewer_bg_main_opacity",
-        "bingsu_reviewer_bg_light_color", "bingsu_reviewer_bg_dark_color", "bingsu_reviewer_bg_image",
-        "bingsu_reviewer_bg_image_light", "bingsu_reviewer_bg_image_dark", "bingsu_reviewer_bg_image_mode",
-        "bingsu_reviewer_bg_color_theme_mode", "bingsu_reviewer_bg_image_theme_mode",
-        "bingsu_reviewer_bg_blur", "bingsu_reviewer_bg_opacity",
-        "bingsu_reviewer_slideshow_images", "bingsu_reviewer_slideshow_interval",
-        "bingsu_reviewer_bottom_bar_bg_mode", "bingsu_reviewer_bottom_bar_bg_light_color",
-        "bingsu_reviewer_bottom_bar_bg_dark_color", "bingsu_reviewer_bottom_bar_bg_image",
-        "bingsu_reviewer_bottom_bar_bg_blur", "bingsu_reviewer_bottom_bar_bg_opacity",
-        "bingsu_reviewer_bottom_bar_match_main_blur", "bingsu_reviewer_bottom_bar_match_main_opacity",
-        "bingsu_reviewer_bottom_bar_match_reviewer_bg_blur", "bingsu_reviewer_bottom_bar_match_reviewer_bg_opacity",
-        "bingsu_reviewer_bottom_bar_match_overview_bg_blur", "bingsu_reviewer_bottom_bar_match_overview_bg_opacity",
-        "bingsu_reviewer_btn_border_size", "bingsu_reviewer_btn_radius", "bingsu_reviewer_btn_padding",
-        "bingsu_reviewer_btn_height", "bingsu_reviewer_bar_height", "bingsu_reviewer_stattxt_mode",
-        "bingsu_toolbar_bg_mode", "bingsu_toolbar_bg_color_light", "bingsu_toolbar_bg_color_dark",
-        "bingsu_toolbar_bg_image", "bingsu_toolbar_bg_blur",
-        "bingsu_sidebar_main_bg_effect_mode", "bingsu_sidebar_main_bg_effect_intensity",
-        "bingsu_sidebar_opaque_tint_intensity", "bingsu_sidebar_opaque_tint_color_light",
-        "bingsu_sidebar_opaque_tint_color_dark",
-        "bingsu_profile_level_bar_mode", "bingsu_profile_level_bar_custom_color",
+        "onigiri_overview_bg_mode", "onigiri_overview_bg_main_blur", "onigiri_overview_bg_main_opacity",
+        "onigiri_overview_bg_light_color", "onigiri_overview_bg_dark_color", "onigiri_overview_bg_image",
+        "onigiri_overview_bg_image_light", "onigiri_overview_bg_image_dark", "onigiri_overview_bg_image_mode",
+        "onigiri_overview_bg_color_theme_mode", "onigiri_overview_bg_image_theme_mode",
+        "onigiri_overview_bg_blur", "onigiri_overview_bg_opacity",
+        "onigiri_reviewer_bg_mode", "onigiri_reviewer_bg_main_blur", "onigiri_reviewer_bg_main_opacity",
+        "onigiri_reviewer_bg_light_color", "onigiri_reviewer_bg_dark_color", "onigiri_reviewer_bg_image",
+        "onigiri_reviewer_bg_image_light", "onigiri_reviewer_bg_image_dark", "onigiri_reviewer_bg_image_mode",
+        "onigiri_reviewer_bg_color_theme_mode", "onigiri_reviewer_bg_image_theme_mode",
+        "onigiri_reviewer_bg_blur", "onigiri_reviewer_bg_opacity",
+        "onigiri_reviewer_slideshow_images", "onigiri_reviewer_slideshow_interval",
+        "onigiri_reviewer_bottom_bar_bg_mode", "onigiri_reviewer_bottom_bar_bg_light_color",
+        "onigiri_reviewer_bottom_bar_bg_dark_color", "onigiri_reviewer_bottom_bar_bg_image",
+        "onigiri_reviewer_bottom_bar_bg_blur", "onigiri_reviewer_bottom_bar_bg_opacity",
+        "onigiri_reviewer_bottom_bar_match_main_blur", "onigiri_reviewer_bottom_bar_match_main_opacity",
+        "onigiri_reviewer_bottom_bar_match_reviewer_bg_blur", "onigiri_reviewer_bottom_bar_match_reviewer_bg_opacity",
+        "onigiri_reviewer_bottom_bar_match_overview_bg_blur", "onigiri_reviewer_bottom_bar_match_overview_bg_opacity",
+        "onigiri_reviewer_btn_border_size", "onigiri_reviewer_btn_radius", "onigiri_reviewer_btn_padding",
+        "onigiri_reviewer_btn_height", "onigiri_reviewer_bar_height", "onigiri_reviewer_stattxt_mode",
+        "onigiri_toolbar_bg_mode", "onigiri_toolbar_bg_color_light", "onigiri_toolbar_bg_color_dark",
+        "onigiri_toolbar_bg_image", "onigiri_toolbar_bg_blur",
+        "onigiri_sidebar_main_bg_effect_mode", "onigiri_sidebar_main_bg_effect_intensity",
+        "onigiri_sidebar_opaque_tint_intensity", "onigiri_sidebar_opaque_tint_color_light",
+        "onigiri_sidebar_opaque_tint_color_dark",
+        "onigiri_profile_level_bar_mode", "onigiri_profile_level_bar_custom_color",
     ]
     addon_tokens = (
         "bg", "background", "font", "btn", "bar", "color", "blur", "opacity",
@@ -143,7 +143,7 @@ def theme_customization_key_groups():
     addon_keys = [
         key for key in config.DEFAULTS.keys()
         if key != "colors"
-        and (key.startswith("bingsu_") or key.startswith("modern_menu_"))
+        and (key.startswith("onigiri_") or key.startswith("modern_menu_"))
         and any(token in key for token in addon_tokens)
     ]
     addon_keys.extend(explicit_addon_keys)
@@ -153,9 +153,9 @@ def theme_customization_key_groups():
     addon_keys = sorted(set(addon_keys))
 
     collection_keys = [
-        "modern_menu_studyNowText", "bingsu_overview_style", "bingsu_overview_sync_box_effect",
-        "bingsu_overview_box_color_theme_mode", "bingsu_overview_effect_blur", "bingsu_overview_effect_opacity",
-        "bingsu_overview_border_radius", "bingsu_overview_border_width",
+        "modern_menu_studyNowText", "onigiri_overview_style", "onigiri_overview_sync_box_effect",
+        "onigiri_overview_box_color_theme_mode", "onigiri_overview_effect_blur", "onigiri_overview_effect_opacity",
+        "onigiri_overview_border_radius", "onigiri_overview_border_width",
         "modern_menu_hide_folder_icon", "modern_menu_hide_subdeck_icon", "modern_menu_hide_deck_icon",
         "modern_menu_hide_filtered_deck_icon", "modern_menu_hide_default_icons",
         "modern_menu_title_background_enabled", "modern_menu_title_background_type",
@@ -192,24 +192,24 @@ def theme_customization_key_groups():
         "modern_menu_profile_name_color_theme_mode",
         "modern_menu_profile_level_color_light", "modern_menu_profile_level_color_dark",
         "modern_menu_profile_level_color_theme_mode",
-        "bingsu_profile_page_bg_mode", "bingsu_profile_page_bg_dynamic_mode",
-        "bingsu_profile_page_bg_light_color1", "bingsu_profile_page_bg_light_color2",
-        "bingsu_profile_page_bg_dark_color1", "bingsu_profile_page_bg_dark_color2",
-        "bingsu_profile_sidebar_cover_image", "bingsu_profile_sidebar_cover_image_light",
-        "bingsu_profile_sidebar_cover_image_dark",
-        "bingsu_canvas_inset_color_theme_mode", "bingsu_canvas_inset_effect_mode",
-        "bingsu_canvas_inset_effect_intensity", "bingsu_canvas_inset_effect_blur",
-        "bingsu_canvas_inset_effect_opacity", "bingsu_canvas_inset_border_radius",
-        "bingsu_canvas_inset_border_width", "bingsu_canvas_inset_color_light", "bingsu_canvas_inset_color_dark",
-        "bingsu_font_main", "bingsu_font_subtle", "bingsu_font_small_title",
-        "bingsu_font_size_main", "bingsu_font_size_subtle", "bingsu_font_size_small_title",
-        "bingsu_font_profile_level", "bingsu_font_size_profile_level",
-        "bingsu_toolbar_bg_mode", "bingsu_toolbar_bg_color_light", "bingsu_toolbar_bg_color_dark",
-        "bingsu_toolbar_bg_image", "bingsu_toolbar_bg_blur",
-        "bingsu_sidebar_main_bg_effect_mode", "bingsu_sidebar_main_bg_effect_intensity",
-        "bingsu_sidebar_opaque_tint_intensity", "bingsu_sidebar_opaque_tint_color_light",
-        "bingsu_sidebar_opaque_tint_color_dark",
-        "bingsu_profile_level_bar_mode", "bingsu_profile_level_bar_custom_color",
+        "onigiri_profile_page_bg_mode", "onigiri_profile_page_bg_dynamic_mode",
+        "onigiri_profile_page_bg_light_color1", "onigiri_profile_page_bg_light_color2",
+        "onigiri_profile_page_bg_dark_color1", "onigiri_profile_page_bg_dark_color2",
+        "onigiri_profile_sidebar_cover_image", "onigiri_profile_sidebar_cover_image_light",
+        "onigiri_profile_sidebar_cover_image_dark",
+        "onigiri_canvas_inset_color_theme_mode", "onigiri_canvas_inset_effect_mode",
+        "onigiri_canvas_inset_effect_intensity", "onigiri_canvas_inset_effect_blur",
+        "onigiri_canvas_inset_effect_opacity", "onigiri_canvas_inset_border_radius",
+        "onigiri_canvas_inset_border_width", "onigiri_canvas_inset_color_light", "onigiri_canvas_inset_color_dark",
+        "onigiri_font_main", "onigiri_font_subtle", "onigiri_font_small_title",
+        "onigiri_font_size_main", "onigiri_font_size_subtle", "onigiri_font_size_small_title",
+        "onigiri_font_profile_level", "onigiri_font_size_profile_level",
+        "onigiri_toolbar_bg_mode", "onigiri_toolbar_bg_color_light", "onigiri_toolbar_bg_color_dark",
+        "onigiri_toolbar_bg_image", "onigiri_toolbar_bg_blur",
+        "onigiri_sidebar_main_bg_effect_mode", "onigiri_sidebar_main_bg_effect_intensity",
+        "onigiri_sidebar_opaque_tint_intensity", "onigiri_sidebar_opaque_tint_color_light",
+        "onigiri_sidebar_opaque_tint_color_dark",
+        "onigiri_profile_level_bar_mode", "onigiri_profile_level_bar_custom_color",
     ]
     for icon_key in ICON_DEFAULTS.keys():
         collection_keys.append(f"modern_menu_icon_{icon_key}")
@@ -292,11 +292,11 @@ def _apply_palette_surfaces(cfg, collection, palettes):
         "modern_menu_profile_picture_dynamic_mode": True,
         "modern_menu_profile_name_dynamic_mode": True,
         "modern_menu_profile_fill_dynamic_mode": True,
-        "bingsu_profile_page_bg_mode": "color",
-        "bingsu_toolbar_bg_mode": "main",
+        "onigiri_profile_page_bg_mode": "color",
+        "onigiri_toolbar_bg_mode": "main",
     })
-    for key in ("bingsu_overview_bg_mode", "bingsu_reviewer_bg_mode",
-                "bingsu_reviewer_bottom_bar_bg_mode", "bingsu_toolbar_bg_mode"):
+    for key in ("onigiri_overview_bg_mode", "onigiri_reviewer_bg_mode",
+                "onigiri_reviewer_bottom_bar_bg_mode", "onigiri_toolbar_bg_mode"):
         cfg[key] = "main"
     kome = cfg.setdefault("things_theme", {})
     for key in ("background_light", "background_dark", "sidebar_background_light",
@@ -320,7 +320,7 @@ def _apply_palette_surfaces(cfg, collection, palettes):
         # Reviewer chrome follows the palette; card templates remain owned
         # by their note types. Explicit reviewer_settings are applied later.
         for key in config.DEFAULTS:
-            if not key.startswith("bingsu_reviewer_") or not key.endswith("_" + mode):
+            if not key.startswith("onigiri_reviewer_") or not key.endswith("_" + mode):
                 continue
             if "_hover_text_" in key:
                 cfg[key] = readable_text(accent)
@@ -337,8 +337,8 @@ def _apply_palette_surfaces(cfg, collection, palettes):
             fill = palette[f"--{token}-count-bubble-bg"]
             if role == "hard":
                 fill = mix(fill, inset, .65)
-            cfg[f"bingsu_reviewer_btn_{role}_bg_{mode}"] = fill
-            cfg[f"bingsu_reviewer_btn_{role}_text_{mode}"] = readable_text(fill)
+            cfg[f"onigiri_reviewer_btn_{role}_bg_{mode}"] = fill
+            cfg[f"onigiri_reviewer_btn_{role}_text_{mode}"] = readable_text(fill)
         collection_colors = {
             "modern_menu_bg_color": bg, "modern_menu_sidebar_bg_color": inset,
             "modern_menu_profile_bg_color": inset,
@@ -347,14 +347,14 @@ def _apply_palette_surfaces(cfg, collection, palettes):
             "modern_menu_profile_name_color": fg,
             "modern_menu_profile_level_color": accent,
             "modern_menu_profile_fill_color": accent,
-            "bingsu_canvas_inset_color": inset,
-            "bingsu_toolbar_bg_color": bg,
+            "onigiri_canvas_inset_color": inset,
+            "onigiri_toolbar_bg_color": bg,
         }
         level_chip[f"chip_progress_color_{mode}"] = accent
         for key, value in collection_colors.items():
             collection[f"{key}_{mode}"] = value
         for number, value in ((1, bg), (2, inset)):
-            collection[f"bingsu_profile_page_bg_{mode}_color{number}"] = value
+            collection[f"onigiri_profile_page_bg_{mode}_color{number}"] = value
         base = {"box_bg": inset, "box_border": border}
         overview = dict(base, study_button=palette["--button-primary-bg"],
                         study_button_stroke=border, options_button=inset,
@@ -443,7 +443,7 @@ def apply_theme(store, theme_data, *, write=True, normalize_heatmap_zero=True):
             config_value = _asset_config_value(path_value)
             if config_value is None:
                 continue
-            if config_key in addon_key_set or config_key in cfg or config_key.startswith("bingsu_"):
+            if config_key in addon_key_set or config_key in cfg or config_key.startswith("onigiri_"):
                 cfg[config_key] = copy.deepcopy(config_value)
                 touched.add(config_key)
             if config_key in collection_key_set or config_key.startswith("modern_menu_"):
@@ -468,7 +468,7 @@ def apply_theme(store, theme_data, *, write=True, normalize_heatmap_zero=True):
     if isinstance(assets.get("font_config"), dict):
         for type_key, font_key in assets["font_config"].items():
             if type_key in ("main", "subtle", "small_title") or (isinstance(type_key, str) and type_key.startswith("size_")):
-                conf_key = f"bingsu_font_{type_key}"
+                conf_key = f"onigiri_font_{type_key}"
                 _col_set(mw.col, conf_key, font_key)
                 touched.add(conf_key)
 
@@ -515,8 +515,8 @@ def reset_theme_to_default(store):
         collection_colors = {
             f"modern_menu_sidebar_bg_color_{mode}": palette["--profile-page-bg"],
             f"modern_menu_profile_bg_color_{mode}": palette["--profile-page-bg"],
-            f"bingsu_profile_page_bg_{mode}_color1": palette["--profile-page-bg"],
-            f"bingsu_profile_page_bg_{mode}_color2": palette["--profile-export-btn-bg"],
+            f"onigiri_profile_page_bg_{mode}_color1": palette["--profile-page-bg"],
+            f"onigiri_profile_page_bg_{mode}_color2": palette["--profile-export-btn-bg"],
         }
         for key, value in collection_colors.items():
             _col_set(mw.col, key, value)
@@ -536,21 +536,21 @@ def _gather_active_images(cfg):
         "modern_menu_title_background_image": "main_bg",
         "modern_menu_background_image": "main_bg", "modern_menu_background_image_light": "main_bg",
         "modern_menu_background_image_dark": "main_bg", "modern_menu_slideshow_images": "main_bg",
-        "bingsu_overview_bg_image": "main_bg", "bingsu_overview_bg_image_light": "main_bg",
-        "bingsu_overview_bg_image_dark": "main_bg",
+        "onigiri_overview_bg_image": "main_bg", "onigiri_overview_bg_image_light": "main_bg",
+        "onigiri_overview_bg_image_dark": "main_bg",
         "modern_menu_profile_bg_image": "profile_bg", "modern_menu_profile_bg_image_light": "profile_bg",
         "modern_menu_profile_bg_image_dark": "profile_bg",
-        "bingsu_profile_sidebar_cover_image": "profile_bg",
-        "bingsu_profile_sidebar_cover_image_light": "profile_bg",
-        "bingsu_profile_sidebar_cover_image_dark": "profile_bg",
+        "onigiri_profile_sidebar_cover_image": "profile_bg",
+        "onigiri_profile_sidebar_cover_image_light": "profile_bg",
+        "onigiri_profile_sidebar_cover_image_dark": "profile_bg",
         "modern_menu_profile_picture": "profile", "modern_menu_profile_picture_light": "profile",
         "modern_menu_profile_picture_dark": "profile",
         "modern_menu_sidebar_bg_image": "sidebar_bg", "modern_menu_sidebar_bg_image_light": "sidebar_bg",
         "modern_menu_sidebar_bg_image_dark": "sidebar_bg", "modern_menu_sidebar_slideshow_images": "sidebar_bg",
-        "bingsu_reviewer_bg_image": "reviewer_bg", "bingsu_reviewer_bg_image_light": "reviewer_bg",
-        "bingsu_reviewer_bg_image_dark": "reviewer_bg", "bingsu_reviewer_slideshow_images": "reviewer_bg",
-        "bingsu_reviewer_bottom_bar_bg_image": "reviewer_bar_bg",
-        "bingsu_toolbar_bg_image": "toolbar_bg",
+        "onigiri_reviewer_bg_image": "reviewer_bg", "onigiri_reviewer_bg_image_light": "reviewer_bg",
+        "onigiri_reviewer_bg_image_dark": "reviewer_bg", "onigiri_reviewer_slideshow_images": "reviewer_bg",
+        "onigiri_reviewer_bottom_bar_bg_image": "reviewer_bar_bg",
+        "onigiri_toolbar_bg_image": "toolbar_bg",
     }
     active_images = {}
     assets_to_zip = []
@@ -603,7 +603,7 @@ def _gather_fonts():
     font_config = {}
     assets_to_zip = []
     for font_type in ("main", "subtle", "small_title"):
-        font_key = _col_get(mw.col, f"bingsu_font_{font_type}", None) if mw and mw.col else None
+        font_key = _col_get(mw.col, f"onigiri_font_{font_type}", None) if mw and mw.col else None
         if font_key:
             font_config[font_type] = font_key
             font_path = os.path.join(ADDON_ROOT, "user_files", "fonts", font_key)
@@ -611,7 +611,7 @@ def _gather_fonts():
                 archive_path = f"fonts/{font_key}"
                 if not any(a[1] == archive_path for a in assets_to_zip):
                     assets_to_zip.append((font_path, archive_path))
-        size_value = _col_get(mw.col, f"bingsu_font_size_{font_type}", None) if mw and mw.col else None
+        size_value = _col_get(mw.col, f"onigiri_font_size_{font_type}", None) if mw and mw.col else None
         if size_value is not None:
             font_config[f"size_{font_type}"] = size_value
     return font_config, assets_to_zip
@@ -664,15 +664,15 @@ def build_export_payload(store):
 
 
 def export_theme(store, name, parent=None):
-    """Native Save dialog + zips the current setup into a `.bingsu` file."""
+    """Native Save dialog + zips the current setup into a `.onigiri` file."""
     from aqt.qt import QFileDialog
 
     theme_data, assets_to_zip = build_export_payload(store)
-    suggested = name.lower().replace(" ", "_") + ".bingsu"
+    suggested = name.lower().replace(" ", "_") + ".onigiri"
     from ..core.platform import save_file
 
     save_path = save_file(
-        parent, "Save Theme As", os.path.join(user_themes_dir(), suggested), "Bingsu Theme Files (*.bingsu)", ".bingsu"
+        parent, "Save Theme As", os.path.join(user_themes_dir(), suggested), "Onigiri Theme Files (*.onigiri)", ".onigiri"
     )
     if not save_path:
         return None, None
@@ -690,20 +690,20 @@ def export_theme(store, name, parent=None):
 # ── import ─────────────────────────────────────────────────────────────────────
 
 def import_theme(parent=None):
-    """Native Open dialog + extracts a `.bingsu` file into user_files/ and
+    """Native Open dialog + extracts a `.onigiri` file into user_files/ and
     user_themes/. Returns (summary_dict, error)."""
     from aqt.qt import QFileDialog
 
     from ..core.platform import pick_files
 
-    picked = pick_files(parent, "Import Theme", "Bingsu Theme Files (*.bingsu)")
+    picked = pick_files(parent, "Import Theme", "Onigiri Theme Files (*.onigiri)")
     filepath = picked[0] if picked else ""
     if not filepath:
         return None, None
 
     filename = os.path.basename(filepath)
-    if not filename.lower().endswith((".bingsu", ".onigiri")):
-        return None, "The selected file is not a .bingsu (or .onigiri) theme."
+    if not filename.lower().endswith(".onigiri"):
+        return None, "The selected file is not a .onigiri theme."
     if not zipfile.is_zipfile(filepath):
         return None, "The selected file is not a valid zip archive."
 
@@ -713,7 +713,7 @@ def import_theme(parent=None):
                 with zf.open("theme.json") as handle:
                     theme_data = json.load(handle)
             except KeyError:
-                return None, "The .bingsu file is missing theme.json."
+                return None, "The .onigiri file is missing theme.json."
 
             assets = theme_data.get("assets", {})
             theme_name = os.path.splitext(filename)[0]

@@ -29,7 +29,7 @@ def _load_ready_functions(setting_values):
         "html": __import__("html"),
         "_appearance_style": lambda: "",
         "_buttons_html": lambda cls, circles=False: f"<div class='{cls}'></div>",
-        "READY_ACTIONS": {"inbox": {"query": "is:new", "deck_name": "Bingsu Ready — Inbox"}},
+        "READY_ACTIONS": {"inbox": {"query": "is:new", "deck_name": "Onigiri Ready — Inbox"}},
         "_build_and_study": build_mock,
         "_report_error": Mock(),
     }
@@ -49,8 +49,8 @@ class ReadyToGoToggleTests(unittest.TestCase):
     def test_enabled_by_default_renders_sidebar_and_widget(self):
         ns, build_mock = _load_ready_functions({})
         self.assertTrue(ns["is_enabled"]())
-        self.assertIn("bingsu-ready-sidebar", ns["render_sidebar_html"]())
-        self.assertIn("bingsu-ready-widget", ns["render_widget_html"]())
+        self.assertIn("onigiri-ready-sidebar", ns["render_sidebar_html"]())
+        self.assertIn("onigiri-ready-widget", ns["render_widget_html"]())
         self.assertTrue(ns["handle_command"]("inbox"))
         build_mock.assert_called_once()
 
@@ -60,14 +60,14 @@ class ReadyToGoToggleTests(unittest.TestCase):
         )
         self.assertTrue(ns["is_enabled"]())
         self.assertEqual(ns["render_sidebar_html"](), "")
-        self.assertIn("bingsu-ready-widget", ns["render_widget_html"]())
+        self.assertIn("onigiri-ready-widget", ns["render_widget_html"]())
 
     def test_settings_schema_and_renderers_wire_ready_toggle(self):
         schema_src = (ADDON_ROOT / "settings_web" / "schema.py").read_text(encoding="utf-8")
         self.assertIn('"id": "modern_menu_ready_enabled"', schema_src)
         self.assertIn('"id": "things_show_ready_to_go"', schema_src)
 
-        renderer_src = (ADDON_ROOT / "rendering" / "bingsu_renderer.py").read_text(encoding="utf-8")
+        renderer_src = (ADDON_ROOT / "rendering" / "onigiri_renderer.py").read_text(encoding="utf-8")
         self.assertIn("if not _ready_to_go().is_enabled():", renderer_src)
 
         kome_js = (ADDON_ROOT / "things_theme" / "web" / "sidebar.js").read_text(encoding="utf-8")

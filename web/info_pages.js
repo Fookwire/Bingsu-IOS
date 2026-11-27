@@ -23,7 +23,7 @@
     const phrases = document.querySelectorAll('#donation-phrases span');
     if (!opening || !phrases.length) return;
 
-    const storageKey = 'bingsuDonationPhraseIndex';
+    const storageKey = 'onigiriDonationPhraseIndex';
     let last = -1;
     try {
         const stored = window.localStorage.getItem(storageKey);

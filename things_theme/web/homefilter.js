@@ -1,5 +1,5 @@
 /* Kome keeps the home screen intentionally focused: navigation, decks,
-   and review activity only. Other add-ons and Bingsu game modules can append
+   and review activity only. Other add-ons and Onigiri game modules can append
    widgets to DeckBrowserContent.stats after Kome's Python hook has run, so
    enforce the final composition against the rendered DOM as well. */
 (function () {

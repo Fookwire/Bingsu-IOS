@@ -14,11 +14,11 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def _load_module():
-    pkg = types.ModuleType("bingsu_test_pkg")
+    pkg = types.ModuleType("onigiri_test_pkg")
     pkg.__path__ = [str(ROOT)]
-    core_pkg = types.ModuleType("bingsu_test_pkg.core")
+    core_pkg = types.ModuleType("onigiri_test_pkg.core")
     core_pkg.__path__ = [str(ROOT / "core")]
-    rendering_pkg = types.ModuleType("bingsu_test_pkg.rendering")
+    rendering_pkg = types.ModuleType("onigiri_test_pkg.rendering")
     rendering_pkg.__path__ = [str(ROOT / "rendering")]
     fake_config = types.SimpleNamespace(
         effective_night_mode=lambda *_: True,
@@ -28,13 +28,13 @@ def _load_module():
     with patch.dict(
         sys.modules,
         {
-            "bingsu_test_pkg": pkg,
-            "bingsu_test_pkg.core": core_pkg,
-            "bingsu_test_pkg.core.config": fake_config,
-            "bingsu_test_pkg.rendering": rendering_pkg,
+            "onigiri_test_pkg": pkg,
+            "onigiri_test_pkg.core": core_pkg,
+            "onigiri_test_pkg.core.config": fake_config,
+            "onigiri_test_pkg.rendering": rendering_pkg,
         },
     ):
-        return importlib.import_module("bingsu_test_pkg.rendering.reviewer_more_menu")
+        return importlib.import_module("onigiri_test_pkg.rendering.reviewer_more_menu")
 
 
 class _FakeAction:
@@ -121,7 +121,7 @@ class ReviewerMoreMenuTests(unittest.TestCase):
         with patch.object(
             self.mod.config,
             "get_config_readonly",
-            lambda: {"bingsu_reviewer_flag_icons": {"1": "system:heart.svg"}},
+            lambda: {"onigiri_reviewer_flag_icons": {"1": "system:heart.svg"}},
             create=True,
         ):
             payload = self.mod.build_menu_payload(reviewer, mw_ref=mw_ref)
@@ -145,7 +145,7 @@ class ReviewerMoreMenuTests(unittest.TestCase):
         assets = self.mod.bottom_bar_assets()
         self.assertIn("lucide-chevron-down", assets)
         self.assertIn("m6 9 6 6 6-6", assets)
-        self.assertIn("bingsu-more-chevron", assets)
+        self.assertIn("onigiri-more-chevron", assets)
 
     def test_extract_custom_items_ignores_builtins_and_preserves_submenus(self):
         builtin_1 = _FakeAction("Bury Card")
@@ -177,7 +177,7 @@ class ReviewerMoreMenuTests(unittest.TestCase):
         self.assertEqual(len(action_map), 2)
 
         self.mod._custom_action_map = action_map
-        self.assertTrue(self.mod.handle_command(f"bingsu_more_menu:custom:{items[1]['items'][0]['id']}"))
+        self.assertTrue(self.mod.handle_command(f"onigiri_more_menu:custom:{items[1]['items'][0]['id']}"))
         self.assertEqual(sub_child.triggered_count, 1)
 
     def test_action_dispatch_routes_every_reviewer_method(self):
@@ -207,12 +207,12 @@ class ReviewerMoreMenuTests(unittest.TestCase):
                 ("record_voice", "onRecordVoice"),
                 ("replay_voice", "onReplayRecorded"),
             ]:
-                self.assertTrue(self.mod.handle_command(f"bingsu_more_menu:act:{cmd_id}"))
+                self.assertTrue(self.mod.handle_command(f"onigiri_more_menu:act:{cmd_id}"))
                 getattr(reviewer, attr).assert_called_once()
 
-            self.assertTrue(self.mod.handle_command("bingsu_more_menu:act:flag:5"))
+            self.assertTrue(self.mod.handle_command("onigiri_more_menu:act:flag:5"))
             reviewer.set_flag_on_current_card.assert_called_with(5)
-            self.assertTrue(self.mod.handle_command("bingsu_more_menu:act:flag:0"))
+            self.assertTrue(self.mod.handle_command("onigiri_more_menu:act:flag:0"))
             reviewer.set_flag_on_current_card.assert_called_with(0)
 
     def test_open_toggles_closed_when_already_open(self):
@@ -238,14 +238,14 @@ class ReviewerMoreMenuTests(unittest.TestCase):
             self.mod.close_menu(from_js=True, immediate=True)
             self.mod.open_menu(reviewer)
             self.assertTrue(self.mod._is_open)
-            self.assertIn("BingsuReviewerMoreMenu.open(", r_web.eval.call_args[0][0])
-            b_web.eval.assert_called_with("window.bingsuSetMoreMenuOpen && window.bingsuSetMoreMenuOpen(true);")
+            self.assertIn("OnigiriReviewerMoreMenu.open(", r_web.eval.call_args[0][0])
+            b_web.eval.assert_called_with("window.onigiriSetMoreMenuOpen && window.onigiriSetMoreMenuOpen(true);")
 
             # Calling open_menu while open toggles closed
             self.mod.open_menu(reviewer)
             self.assertFalse(self.mod._is_open)
-            self.assertIn("BingsuReviewerMoreMenu.close()", r_web.eval.call_args[0][0])
-            b_web.eval.assert_called_with("window.bingsuSetMoreMenuOpen && window.bingsuSetMoreMenuOpen(false);")
+            self.assertIn("OnigiriReviewerMoreMenu.close()", r_web.eval.call_args[0][0])
+            b_web.eval.assert_called_with("window.onigiriSetMoreMenuOpen && window.onigiriSetMoreMenuOpen(false);")
 
     def test_css_contains_motion_spring_and_reduced_motion(self):
         css = (ROOT / "web/reviewer_more_menu.css").read_text(encoding="utf-8")
@@ -352,7 +352,7 @@ docEl.classList.add('night-mode');
 const cmds = [];
 const context = {
   window: {
-    bingsuMoreMenuCssText: '/* css */',
+    onigiriMoreMenuCssText: '/* css */',
     pycmd(cmd) { cmds.push(cmd); }
   },
   document: {
@@ -372,7 +372,7 @@ const context = {
 context.window.window = context.window;
 
 vm.runInNewContext(fs.readFileSync(process.argv[1], 'utf8'), context);
-const api = context.window.BingsuReviewerMoreMenu;
+const api = context.window.OnigiriReviewerMoreMenu;
 assert.ok(api, 'API attached');
 
 const payload = {
@@ -392,7 +392,7 @@ const payload = {
 
 api.open(payload, true);
 assert.equal(api.isOpen(), true);
-const host = context.document.getElementById('bingsu-reviewer-more-menu-host');
+const host = context.document.getElementById('onigiri-reviewer-more-menu-host');
 assert.ok(host.classList.contains('night-mode'));
 
 const panel = host.shadowRoot.children[1].children[1];
@@ -411,13 +411,13 @@ assert.ok(setDueBtn && !setDueBtn.textContent.includes('...'));
 const replayBtn = buttons.find(b => b.textContent.includes('Replay'));
 replayBtn.click();
 assert.equal(api.isOpen(), true);
-assert.equal(cmds[cmds.length - 1], 'bingsu_more_menu:act:replay_audio');
+assert.equal(cmds[cmds.length - 1], 'onigiri_more_menu:act:replay_audio');
 
 // Clicking Delete Note closes menu immediately and sends act:delete_note
 const deleteBtn = buttons.find(b => b.textContent.includes('Delete Note'));
 deleteBtn.click();
 assert.equal(api.isOpen(), false);
-assert.equal(cmds[cmds.length - 1], 'bingsu_more_menu:act:delete_note');
+assert.equal(cmds[cmds.length - 1], 'onigiri_more_menu:act:delete_note');
 
 // Reopen, open custom submenu, click nested item
 api.open(payload, false);
@@ -427,7 +427,7 @@ subToggle.click();
 assert.equal(subToggle.getAttribute('aria-expanded'), 'true');
 const nestedBtn = panel.querySelectorAll('button').find(b => b.textContent.includes('Nested'));
 nestedBtn.click();
-assert.equal(cmds[cmds.length - 1], 'bingsu_more_menu:custom:1');
+assert.equal(cmds[cmds.length - 1], 'onigiri_more_menu:custom:1');
 assert.equal(api.isOpen(), false);
 '''
         env = dict(os.environ)

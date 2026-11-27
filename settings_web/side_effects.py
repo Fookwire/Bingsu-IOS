@@ -23,8 +23,8 @@ def _modes(store):
 def _language(store):
     lang_name = store.read("language") or "English (Default)"
     code = LANGUAGES.get(lang_name, "en")
-    if mw.pm.profile.get("bingsu_language") != code:
-        mw.pm.profile["bingsu_language"] = code
+    if mw.pm.profile.get("onigiri_language") != code:
+        mw.pm.profile["onigiri_language"] = code
 
 
 def _profile(store):
@@ -61,18 +61,18 @@ def _sidebar(store):
     if _col_get(mw.col, "modern_menu_sidebar_bg_transparency", 0):
         _col_set(mw.col, "modern_menu_sidebar_bg_transparency", 0)
     if position == "center":
-        _col_set(mw.col, "bingsu_deck_cycle_state", 4)
-        _col_set(mw.col, "bingsu_deck_focus_mode", False)
-    elif _col_get(mw.col, "bingsu_deck_cycle_state") == 4:
-        _col_set(mw.col, "bingsu_deck_cycle_state", 0)
-        _col_set(mw.col, "bingsu_deck_focus_mode", False)
+        _col_set(mw.col, "onigiri_deck_cycle_state", 4)
+        _col_set(mw.col, "onigiri_deck_focus_mode", False)
+    elif _col_get(mw.col, "onigiri_deck_cycle_state") == 4:
+        _col_set(mw.col, "onigiri_deck_cycle_state", 0)
+        _col_set(mw.col, "onigiri_deck_focus_mode", False)
 
 
 def _stats_widgets(store):
     """Keep the legacy `hideRetentionStars` switch in step with the Stats
     Widgets toggle that replaced it.
 
-    bingsu_renderer.py:1071-1075 and patcher.py:1689 still consult
+    onigiri_renderer.py:1071-1075 and patcher.py:1689 still consult
     `hideRetentionStars` and it *wins* over `stats_widgets_style.
     show_retention_stars`. Without this mirror a collection that ever had the
     old Hide Modes switch on would hide its stars forever, with no control left
@@ -246,7 +246,7 @@ def run(names, store):
         except Exception as exc:  # noqa: BLE001 - logged, never fatal
             import traceback
 
-            print(f"[Bingsu] settings_web post-save hook {name!r} failed:\n{traceback.format_exc()}")
+            print(f"[Onigiri] settings_web post-save hook {name!r} failed:\n{traceback.format_exc()}")
             failures.append((name, repr(exc)))
     return failures
 

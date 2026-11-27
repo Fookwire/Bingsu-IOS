@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  let icons = window.bingsuReviewerFlagIcons || {};
+  let icons = window.onigiriReviewerFlagIcons || {};
   let flag = null;
   const observer = new MutationObserver(paint);
 
@@ -11,15 +11,15 @@
     // Keep both intact so its shortcuts, colours and unflagged state work.
     const match = /var\(\s*--flag-([0-7])\s*\)/.exec(flag.style.color);
     const url = match && !flag.hidden && icons[match[1]];
-    // CSS always draws the Bingsu fallback. Clearing an override must never
+    // CSS always draws the Onigiri fallback. Clearing an override must never
     // expose the original text glyph, even before this script has attached.
     if (url) {
       const mask = 'url("' + url.replace(/"/g, "%22") + '")';
-      if (flag.style.getPropertyValue("--bingsu-flag-icon") !== mask) {
-        flag.style.setProperty("--bingsu-flag-icon", mask);
+      if (flag.style.getPropertyValue("--onigiri-flag-icon") !== mask) {
+        flag.style.setProperty("--onigiri-flag-icon", mask);
       }
-    } else if (flag.style.getPropertyValue("--bingsu-flag-icon")) {
-      flag.style.removeProperty("--bingsu-flag-icon");
+    } else if (flag.style.getPropertyValue("--onigiri-flag-icon")) {
+      flag.style.removeProperty("--onigiri-flag-icon");
     }
   }
 
@@ -31,7 +31,7 @@
     paint();
   }
 
-  window.BingsuReviewerFlags = {
+  window.OnigiriReviewerFlags = {
     setIcons: function (next) {
       icons = next || {};
       attach();

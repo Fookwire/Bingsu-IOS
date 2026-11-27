@@ -88,25 +88,25 @@ def _rgba(hex_color: str, alpha: float) -> str:
     return f"rgba({r},{g},{b},{alpha:g})"
 
 
-def bingsu_layout_config() -> Dict[str, Any]:
-    """Return Kome's settings with Bingsu's shared appearance attached.
+def onigiri_layout_config() -> Dict[str, Any]:
+    """Return Kome's settings with Onigiri's shared appearance attached.
 
-    Kome is a layout choice within Bingsu, so its dialogs must not consult a
+    Kome is a layout choice within Onigiri, so its dialogs must not consult a
     second add-on configuration or keep an independent accent colour.
     """
     try:
-        from ..core import config as bingsu_config
+        from ..core import config as onigiri_config
 
-        root = bingsu_config.get_config_readonly()
+        root = onigiri_config.get_config_readonly()
         root = root if isinstance(root, dict) else {}
         nested = root.get("things_theme", {})
         cfg = dict(nested) if isinstance(nested, dict) else {}
-        dark = bingsu_config.effective_night_mode(root)
+        dark = onigiri_config.effective_night_mode(root)
         colors = root.get("colors", {})
         colors = colors if isinstance(colors, dict) else {}
         active = colors.get("dark" if dark else "light", {})
         active = active if isinstance(active, dict) else {}
-        cfg["theme"] = root.get("bingsuThemeMode", "system")
+        cfg["theme"] = root.get("onigiriThemeMode", "system")
         cfg["accent"] = active.get("--accent-color", "#0077c8")
         if str(cfg.get("background_light", "")).lower() == "#f6f3ec":
             cfg["background_light"] = ""
@@ -117,8 +117,8 @@ def bingsu_layout_config() -> Dict[str, Any]:
         return {}
 
 
-def bingsu_palette() -> Tuple[Dict[str, str], bool]:
-    """Build Kome's Qt palette from the active Bingsu colour tokens."""
+def onigiri_palette() -> Tuple[Dict[str, str], bool]:
+    """Build Kome's Qt palette from the active Onigiri colour tokens."""
     defaults = {
         "light": {
             "--bg": "#eeeeee", "--canvas-inset": "#ffffff",
@@ -130,11 +130,11 @@ def bingsu_palette() -> Tuple[Dict[str, str], bool]:
         },
     }
     try:
-        from ..core import config as bingsu_config
+        from ..core import config as onigiri_config
 
-        root = bingsu_config.get_config_readonly()
+        root = onigiri_config.get_config_readonly()
         root = root if isinstance(root, dict) else {}
-        dark = bingsu_config.effective_night_mode(root)
+        dark = onigiri_config.effective_night_mode(root)
         colors = root.get("colors", {})
         source = (
             colors.get("dark" if dark else "light", {})
@@ -151,7 +151,7 @@ def bingsu_palette() -> Tuple[Dict[str, str], bool]:
         token: hex_ok(source.get(token)) or fallback
         for token, fallback in defaults[mode].items()
     }
-    # Kome's base canvas is deliberately fixed to Bingsu's exact light and
+    # Kome's base canvas is deliberately fixed to Onigiri's exact light and
     # dark paper values; other shared tokens remain user-configurable.
     paper = "#171717" if dark else "#eeeeee"
     ink = values["--fg"]

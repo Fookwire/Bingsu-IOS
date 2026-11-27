@@ -110,7 +110,7 @@ def read(key, default=None):
     try:
         value = entry[0]()
     except Exception as exc:  # noqa: BLE001 - a broken game must not blank the page
-        print(f"[Bingsu] settings_web games: could not read {key!r}: {exc}")
+        print(f"[Onigiri] settings_web games: could not read {key!r}: {exc}")
         return default
     # A manager that has nothing yet (no companion picked, no island named)
     # answers with "", which is the field's empty state, not an error.
@@ -137,7 +137,7 @@ def nook_context():
             "name": str(getattr(progress, "name", "") or ""),
         }
     except Exception as exc:  # noqa: BLE001
-        print(f"[Bingsu] settings_web games: Nook progress unavailable: {exc}")
+        print(f"[Onigiri] settings_web games: Nook progress unavailable: {exc}")
         return {"level": 0, "name": ""}
 
 
@@ -355,7 +355,7 @@ def hexagon_context():
             "name": str(hexagon_land.manager.island_display_name(state) or ""),
         }
     except Exception as exc:  # noqa: BLE001
-        print(f"[Bingsu] settings_web games: Hexagon Land state unavailable: {exc}")
+        print(f"[Onigiri] settings_web games: Hexagon Land state unavailable: {exc}")
         return {"owns_keys": False, "coins": 0, "cost": 0, "affordable": False, "name": ""}
 
 
@@ -377,7 +377,7 @@ def bento_games(asset_url):
     try:
         detected = bento_api.get_game_widgets()
     except Exception as exc:  # noqa: BLE001
-        print(f"[Bingsu] settings_web games: Bento probe failed: {exc}")
+        print(f"[Onigiri] settings_web games: Bento probe failed: {exc}")
         detected = {}
 
     out = []
@@ -401,7 +401,7 @@ def bento_games(asset_url):
 
 def _confirm(parent, title, question):
     from aqt.qt import QMessageBox
-    from ..ui_kit.bingsu_notifications import brand_message_box
+    from ..ui_kit.onigiri_notifications import brand_message_box
 
     box = QMessageBox(parent)
     brand_message_box(box, title)
@@ -412,7 +412,7 @@ def _confirm(parent, title, question):
 
 
 def _info(message):
-    from ..ui_kit.bingsu_notifications import notify_info
+    from ..ui_kit.onigiri_notifications import notify_info
 
     notify_info(message)
 
@@ -522,7 +522,7 @@ def initialize_enabled_hooks(conf):
 
             focus_dango.setup_focus_dango()
     except Exception as exc:  # noqa: BLE001
-        print(f"[Bingsu] settings_web games: could not refresh gamification hooks: {exc}")
+        print(f"[Onigiri] settings_web games: could not refresh gamification hooks: {exc}")
 
 
 def mochi_icon_exists(relative_path):

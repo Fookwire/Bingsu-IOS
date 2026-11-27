@@ -1,5 +1,5 @@
 /* Shima: a single, calm deck island centered on the main-menu background. */
-.container.modern-main-menu.bingsu-shima {
+.container.modern-main-menu.onigiri-shima {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -10,11 +10,11 @@
     overflow: hidden;
 }
 
-.bingsu-quick-menu {
-    --bingsu-quick-menu-bg: var(--canvas-inset, #ffffff);
+.onigiri-quick-menu {
+    --onigiri-quick-menu-bg: var(--canvas-inset, #ffffff);
 }
 
-.container.modern-main-menu.bingsu-shima > .sidebar-left.shima-island {
+.container.modern-main-menu.onigiri-shima > .sidebar-left.shima-island {
     width: clamp(360px, 42vw, 560px) !important;
     min-width: 0 !important;
     max-width: calc(100vw - 48px) !important;
@@ -30,12 +30,12 @@
     overflow: hidden;
 }
 
-.night-mode .container.modern-main-menu.bingsu-shima > .sidebar-left.shima-island,
-.nightMode .container.modern-main-menu.bingsu-shima > .sidebar-left.shima-island {
+.night-mode .container.modern-main-menu.onigiri-shima > .sidebar-left.shima-island,
+.nightMode .container.modern-main-menu.onigiri-shima > .sidebar-left.shima-island {
     box-shadow: none !important;
 }
 
-.bingsu-shima .sidebar-expanded-content {
+.onigiri-shima .sidebar-expanded-content {
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
@@ -43,7 +43,7 @@
     overflow: hidden;
 }
 
-.bingsu-shima .bingsu-sidebar-decks-section {
+.onigiri-shima .onigiri-sidebar-decks-section {
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
@@ -51,7 +51,7 @@
     overflow: hidden;
 }
 
-.bingsu-shima #deck-list-header {
+.onigiri-shima #deck-list-header {
     position: relative;
     display: flex;
     align-items: center;
@@ -61,7 +61,7 @@
     margin: 0 2px 14px;
 }
 
-.bingsu-shima #deck-list-header h2 {
+.onigiri-shima #deck-list-header h2 {
     margin: 0;
     color: var(--icon-color, var(--fg-subtle));
     font-size: 13px;
@@ -69,14 +69,14 @@
     text-transform: uppercase;
 }
 
-.bingsu-shima .deck-header-actions {
+.onigiri-shima .deck-header-actions {
     display: flex;
     align-items: center;
     gap: 4px;
     flex-shrink: 0;
 }
 
-.bingsu-shima .deck-header-btn {
+.onigiri-shima .deck-header-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -93,18 +93,18 @@
     opacity: 0.72;
 }
 
-.bingsu-shima .deck-header-btn:hover {
+.onigiri-shima .deck-header-btn:hover {
     color: var(--accent-color);
     opacity: 1;
 }
 
-.bingsu-shima .deck-header-btn svg {
+.onigiri-shima .deck-header-btn svg {
     width: 16px;
     height: 16px;
     pointer-events: none;
 }
 
-.bingsu-shima #deck-list-container {
+.onigiri-shima #deck-list-container {
     flex: 1 1 auto;
     min-height: 0;
     padding-bottom: 0;
@@ -113,14 +113,14 @@
     contain: layout style paint;
 }
 
-.bingsu-shima .deck-table .decktd {
+.onigiri-shima .deck-table .decktd {
     display: flex;
     align-items: center;
     padding: 0 5px !important;
     pointer-events: auto !important;
 }
 
-.bingsu-shima .deck-table a.deck {
+.onigiri-shima .deck-table a.deck {
     display: flex;
     flex: 1 1 0;
     align-items: center;
@@ -131,11 +131,11 @@
 
 /* The island keeps room for long collections without becoming a dashboard. */
 @media (max-width: 520px), (max-height: 520px) {
-    .container.modern-main-menu.bingsu-shima {
+    .container.modern-main-menu.onigiri-shima {
         padding: 16px;
     }
 
-    .container.modern-main-menu.bingsu-shima > .sidebar-left.shima-island {
+    .container.modern-main-menu.onigiri-shima > .sidebar-left.shima-island {
         width: 100% !important;
         max-width: none !important;
         height: min(76vh, 520px) !important;

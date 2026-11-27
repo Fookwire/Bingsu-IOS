@@ -22,7 +22,7 @@ from .haptics import trigger as trigger_haptic
 
 
 BUY_HEX_COINS_URL = "https://buymeacoffee.com/peacemonk/extras"
-HEXLAND_GUIDE_URL = "https://bingsu-addon-guide.notion.site/Hexagon-Land-3a43d4f0321380c19e8adfe630ca9a40"
+HEXLAND_GUIDE_URL = "https://onigiri-addon-guide.notion.site/Hexagon-Land-3a43d4f0321380c19e8adfe630ca9a40"
 KEYS_OF_THE_ISLAND_COST = 5000
 SANDBOX_MODE = False
 
@@ -382,7 +382,7 @@ INHABITANT_ITEMS = {
         "cost": {"coins": 15},
         "unlock_lands": 15,
         "offset": {"x": 20, "y": -12, "w": 26},
-        "group": "Bingsu Fam",
+        "group": "Onigiri Fam",
     },
     "mochi_inhabitant": {
         "label": "Mochi",
@@ -390,7 +390,7 @@ INHABITANT_ITEMS = {
         "cost": {"coins": 15},
         "unlock_lands": 15,
         "offset": {"x": 20, "y": -12, "w": 26},
-        "group": "Bingsu Fam",
+        "group": "Onigiri Fam",
     },
     "nigiri_inhabitant": {
         "label": "Nigiri",
@@ -398,15 +398,15 @@ INHABITANT_ITEMS = {
         "cost": {"coins": 15},
         "unlock_lands": 15,
         "offset": {"x": 20, "y": -12, "w": 26},
-        "group": "Bingsu Fam",
+        "group": "Onigiri Fam",
     },
     "onigi_alien": {
-        "label": "Bingsu San",
-        "sprite": "bingsu_san.svg",
+        "label": "Onigiri San",
+        "sprite": "onigiri_san.svg",
         "cost": {"coins": 15},
         "unlock_lands": 15,
         "offset": {"x": 20, "y": -12, "w": 26},
-        "group": "Bingsu Fam",
+        "group": "Onigiri Fam",
     },
     "pikachu_inhabitant": {
         "label": "Pikachu",
@@ -414,7 +414,7 @@ INHABITANT_ITEMS = {
         "cost": {"coins": 15},
         "unlock_lands": 15,
         "offset": {"x": 20, "y": -12, "w": 26},
-        "group": "Bingsu Fam",
+        "group": "Onigiri Fam",
     },
 }
 
@@ -759,7 +759,7 @@ def _detected_sheet_views(sheet: str) -> List[Tuple[str, float, float, float, fl
     try:
         root = ET.parse(_sheet_file_path(sheet)).getroot()
     except Exception as exc:
-        print(f"Bingsu: Error reading Hexagon Land SVG sheet {sheet}: {exc}")
+        print(f"Onigiri: Error reading Hexagon Land SVG sheet {sheet}: {exc}")
         _DETECTED_SHEET_VIEWS[sheet] = []
         return []
 
@@ -879,7 +879,7 @@ def _sheet_svg_parts(sheet: str) -> Tuple[Dict[str, str], List[Tuple[Tuple[float
         ET.register_namespace("xlink", "http://www.w3.org/1999/xlink")
         root = ET.parse(_sheet_file_path(sheet)).getroot()
     except Exception as exc:
-        print(f"Bingsu: Error reading Hexagon Land SVG sheet {sheet}: {exc}")
+        print(f"Onigiri: Error reading Hexagon Land SVG sheet {sheet}: {exc}")
         _SHEET_SVG_PARTS[sheet] = ({}, [])
         return _SHEET_SVG_PARTS[sheet]
 
@@ -1489,7 +1489,7 @@ class HexagonLandManager:
                 today_start_ms,
             ) or 0)
         except Exception as exc:
-            print(f"Bingsu: Error reading today's Hexagon Land reviews: {exc}")
+            print(f"Onigiri: Error reading today's Hexagon Land reviews: {exc}")
             return None
 
     def _latest_today_review_eases(self, count: int) -> List[int]:
@@ -1518,7 +1518,7 @@ class HexagonLandManager:
             )
             return [int(ease or 0) for ease in eases]
         except Exception as exc:
-            print(f"Bingsu: Error reading Hexagon Land review eases: {exc}")
+            print(f"Onigiri: Error reading Hexagon Land review eases: {exc}")
             return [0] * count
 
     def _prepare_study_day(self, state: HexagonLandState, anki_today: date) -> bool:
@@ -1659,7 +1659,7 @@ class HexagonLandManager:
                     # We save without using the cache so it persists immediately
                     self.save(state, immediate=True)
         except Exception as exc:
-            print(f"Bingsu: Error loading Hexagon Land data: {exc}")
+            print(f"Onigiri: Error loading Hexagon Land data: {exc}")
             state = HexagonLandState()
         self._state_cache = state
         self._data_path_cache = path
@@ -1801,8 +1801,8 @@ class HexagonLandManager:
                 "duration": 6500,
             }
             script = (
-                "if (window.BingsuNotifications) "
-                f"window.BingsuNotifications.show({json.dumps(payload, ensure_ascii=False)});"
+                "if (window.OnigiriNotifications) "
+                f"window.OnigiriNotifications.show({json.dumps(payload, ensure_ascii=False)});"
             )
             delivered = False
             if getattr(mw, "state", None) != "review":
@@ -2487,7 +2487,7 @@ def render_widget_html(grid_style: str = "") -> str:
         # empty string. Returning "" makes the deck-browser grid drop the widget
         # entirely, so a widget placed in the grid would silently vanish.
         return f"""
-    <div class="hex-land-preview disabled" style="{grid_style}" ondblclick="pycmd('openHexagonLand')" onclick="if (window.BingsuMobile &amp;&amp; BingsuMobile.isTouch()) pycmd('openHexagonLand')">
+    <div class="hex-land-preview disabled" style="{grid_style}" ondblclick="pycmd('openHexagonLand')" onclick="if (window.OnigiriMobile &amp;&amp; OnigiriMobile.isTouch()) pycmd('openHexagonLand')">
         <div class="hex-land-copy">
             <h3>{escape(tr('hexland_title'))}</h3>
             <p>{escape(tr('hexland_enable_settings', 'Enable Hexagon Land in Gamification Settings.'))}</p>
@@ -2526,7 +2526,7 @@ def render_widget_html(grid_style: str = "") -> str:
         animation: riskBlink 4s ease-in-out infinite !important;
     }}
     </style>
-    <div class="hex-land-preview" style="{grid_style} --hl-scale: {scale:.3f}; --hl-top: {top_color}; --hl-bottom: {bottom_color};" ondblclick="pycmd('openHexagonLand')" onclick="if (window.BingsuMobile &amp;&amp; BingsuMobile.isTouch()) pycmd('openHexagonLand')"
+    <div class="hex-land-preview" style="{grid_style} --hl-scale: {scale:.3f}; --hl-top: {top_color}; --hl-bottom: {bottom_color};" ondblclick="pycmd('openHexagonLand')" onclick="if (window.OnigiriMobile &amp;&amp; OnigiriMobile.isTouch()) pycmd('openHexagonLand')"
              id="hl-preview-{state.created_at.replace(':', '-')}"
              data-pan-x="{state.widget_offset_x}" data-pan-y="{state.widget_offset_y}" data-scale="{scale:.3f}">
             <div class="hex-land-preview-stage" style="width:{width}px;height:{height}px; transform: translate(calc(-50% + {state.widget_offset_x}px), calc(-50% + {state.widget_offset_y}px)) scale(var(--hl-scale, .72));">
@@ -5092,7 +5092,7 @@ function redeemModalHtml() {
             <div class="redeem-purchase">
                 <div>
                     <strong>{tr('hexland_need_coins', 'Need more Hex Coins?')}</strong>
-                    <p>{tr('support_bingsu_coins', 'Support Bingsu to get special coin codes and unlock exclusive themes!')}</p>
+                    <p>{tr('support_onigiri_coins', 'Support Onigiri to get special coin codes and unlock exclusive themes!')}</p>
                 </div>
                 <button class="redeem-purchase-btn" type="button" onclick="haptic(); pycmd('hex_land_purchase')">{tr('buy_coin_codes', 'Buy Coin Codes')}</button>
             </div>

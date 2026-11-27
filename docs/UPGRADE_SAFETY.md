@@ -1,7 +1,7 @@
 # Original / Middle → Current upgrade audit
 
-Audited on 2026-10-11 against the attached `Bingsu(Original)` and
-`Bingsu(Middle)` directories. Changes are implemented in Current.
+Audited on 2026-10-11 against the attached `Onigiri(Original)` and
+`Onigiri(Middle)` directories. Changes are implemented in Current.
 
 ## Verified data contracts
 
@@ -26,9 +26,9 @@ protects data; it does not reinstate retired interfaces or animations.
 
 ## Backup and recovery
 
-Before migrations or file repairs, Bingsu creates:
+Before migrations or file repairs, Onigiri creates:
 
-- `<Anki base>/bingsu_backups/before_progress_upgrade_v2.zip`, containing the
+- `<Anki base>/onigiri_backups/before_progress_upgrade_v2.zip`, containing the
   original `user_files` tree, shared add-on configuration, and any surviving
   legacy root sync/layout files. It is never refreshed by subsequent saves.
 - `before_progress_upgrade_v2_<profile hash>.json` in the same directory, holding
@@ -49,7 +49,7 @@ files and unrelated orphaned game files are not guessed into another profile.
 Build with:
 
 ```sh
-python3 tools/build_addon.py /absolute/path/Bingsu.ankiaddon
+python3 tools/build_addon.py /absolute/path/Onigiri.ankiaddon
 ```
 
 The builder keeps package identity `1011095603`, ships empty default add-on
@@ -105,7 +105,7 @@ older hosts. The snapshot is detached from live settings; export failures never
 become empty sync payloads or replace an existing sync archive.
 
 Storage notices and generic font, icon, Kome, shortcut, and recent-menu warnings
-now use the central native Bingsu dialog. It shows the supplied Bingsu logo,
+now use the central native Onigiri dialog. It shows the supplied Onigiri logo,
 visible app name, and theme palette. Native fallback/confirmation boxes and the
 sync conflict dialog are branded too. Warning dialogs remain persistent even
 when game notifications are muted. Long messages scroll; keyboard/OK dismissal
@@ -123,7 +123,7 @@ Post-fix verification:
 - `tools/verify_anki_upgrade.py`, run with the installed Anki Python environment,
   reproduces the exact exception on a temporary real Anki collection. The fixed
   backup then matches every collection configuration key and value, with live
-  settings unchanged; a real sync archive retains the Bingsu notes/title keys.
+  settings unchanged; a real sync archive retains the Onigiri notes/title keys.
 - The same tool renders Qt dialogs offscreen in light/dark mode and checks logo,
   visible source name, OK dismissal, scrolling, silent-mode independence, and
   the branded fallback. No live Anki window or user collection is used.

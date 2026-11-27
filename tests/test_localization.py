@@ -19,13 +19,13 @@ ROOT = Path(__file__).resolve().parents[1]
 class LocalizationTests(unittest.TestCase):
     def setUp(self):
         self.settings = {}
-        self.profile = {"bingsu_language": "en"}
+        self.profile = {"onigiri_language": "en"}
         self.scripts = []
         self.mw = types.SimpleNamespace(
             pm=types.SimpleNamespace(profile=self.profile), state="review",
             reviewer=types.SimpleNamespace(web=types.SimpleNamespace(eval=self.scripts.append)),
         )
-        package = types.ModuleType("_bingsu_locale_tests")
+        package = types.ModuleType("_onigiri_locale_tests")
         package.__path__ = [str(ROOT / "core")]
         config = types.ModuleType(package.__name__ + ".config")
         config.get_config_readonly = lambda: self.settings
@@ -55,7 +55,7 @@ class LocalizationTests(unittest.TestCase):
         catalogue = self.translations.TRANSLATIONS["en"]
         missing = []
         for path in ROOT.rglob("*.py"):
-            if path.relative_to(ROOT).parts[0].startswith("Bingsu("):
+            if path.relative_to(ROOT).parts[0].startswith("Onigiri("):
                 continue
             if any(part in path.parts for part in ("tests", "user_files", "__pycache__")):
                 continue
@@ -105,16 +105,16 @@ class LocalizationTests(unittest.TestCase):
                       if isinstance(node, ast.Assign) and any(isinstance(target, ast.Name)
                       and target.id == "EMOJI_SPRITES" for target in node.targets))
         literals = self.translations.literal_strings()
-        self.assertFalse({item["label"] for item in emojis} - set(literals) - {"Onigiri", "Bingsu", "Dango"})
+        self.assertFalse({item["label"] for item in emojis} - set(literals) - {"Onigiri", "Dango"})
 
     def test_saved_language_wins_over_stale_profile_mirror(self):
         for name, code in self.translations.LANGUAGES.items():
             self.settings["language"] = name
-            self.profile["bingsu_language"] = "en" if code != "en" else "ja-JP"
+            self.profile["onigiri_language"] = "en" if code != "en" else "ja-JP"
             self.assertEqual(self.translations.current_language(), code)
             self.assertEqual(self.translations.tr("settings_title"), self.translations.TRANSLATIONS[code]["settings_title"])
         self.settings["language"] = "unknown"
-        self.profile["bingsu_language"] = "ja-JP"
+        self.profile["onigiri_language"] = "ja-JP"
         self.assertEqual(self.translations.current_language(), "ja-JP")
 
     def test_recovery_notices_translate_only_when_displayed(self):
@@ -123,8 +123,8 @@ class LocalizationTests(unittest.TestCase):
         storage = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(storage)
         self.settings["language"] = "English (Default)"
-        original = "Your Bingsu progress was restored from backup file."
-        storage._note(original, key="storage_restored", label="Your Bingsu progress", source="backup file")
+        original = "Your Onigiri progress was restored from backup file."
+        storage._note(original, key="storage_restored", label="Your Onigiri progress", source="backup file")
         self.settings["language"] = "Português (Brasil)"
         expected = self.translations.TRANSLATIONS["pt-BR"]
         self.assertEqual(storage.take_notices(), [expected["storage_restored"].format(
@@ -251,18 +251,18 @@ const maps = JSON.parse(fs.readFileSync(0, 'utf8'));
 const context = {window: {}};
 vm.runInNewContext(fs.readFileSync(process.argv[1], 'utf8'), context);
 for (const [locale, literals] of Object.entries(maps)) {
-  context.window.BINGSU_LOCALIZATION = {locale, literals};
-  assert.equal(context.window.bingsuText('  Settings '), '  ' + literals.Settings + ' ');
-  const template = context.window.bingsuTemplate('<button title="Open Anki\'s full editor">Settings</button>');
+  context.window.ONIGIRI_LOCALIZATION = {locale, literals};
+  assert.equal(context.window.onigiriText('  Settings '), '  ' + literals.Settings + ' ');
+  const template = context.window.onigiriTemplate('<button title="Open Anki\'s full editor">Settings</button>');
   const escape = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'})[c]);
   assert(template.includes('>' + escape(literals.Settings) + '</button>'));
   assert(template.includes('title="' + escape(literals["Open Anki\'s full editor"]) + '"'));
   // User content is interpolated after source translation, never scanned.
   const userContent = 'Settings';
-  assert.equal(context.window.bingsuTemplate('<div>') + userContent + '</div>', '<div>Settings</div>');
+  assert.equal(context.window.onigiriTemplate('<div>') + userContent + '</div>', '<div>Settings</div>');
 }
-context.window.BINGSU_LOCALIZATION = {literals: {'Settings': 'A < B & C "D"'}};
-assert.equal(context.window.bingsuTemplate('<b>Settings</b>'), '<b>A &lt; B &amp; C &quot;D&quot;</b>');
+context.window.ONIGIRI_LOCALIZATION = {literals: {'Settings': 'A < B & C "D"'}};
+assert.equal(context.window.onigiriTemplate('<b>Settings</b>'), '<b>A &lt; B &amp; C &quot;D&quot;</b>');
 """
         result = subprocess.run([shutil.which("node"), "-e", script, str(ROOT / "web/localization.js")],
                                 input=json.dumps(data), text=True, capture_output=True)
@@ -289,7 +289,7 @@ env.applyLocalization(context);
 assert.equal(oldStrings.title, 'translated');
 assert.equal(oldPages[0].id, 'games');
 assert.equal(env.document.documentElement.lang, 'ja-JP');
-assert.equal(env.window.BINGSU_LOCALIZATION.locale, 'ja-JP');
+assert.equal(env.window.ONIGIRI_LOCALIZATION.locale, 'ja-JP');
 assert.equal(env.values.mochi[0], 'translated default');
 assert.equal(env.values.custom, 'unsaved');
 assert(!env.fieldById.old && !env.pageById.old);

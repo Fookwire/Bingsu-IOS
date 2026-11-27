@@ -2,14 +2,14 @@
 Hashi Notes — a lightweight "napkin" for fast, temporary study notes.
 
 Storage model (two physical stores satisfy the three-way spec):
-  1. mw.col.conf["bingsu_hashi_notes"] — source of truth. Lives inside
+  1. mw.col.conf["onigiri_hashi_notes"] — source of truth. Lives inside
      collection.anki2, so it is both the "SQL DB copy" and the "AnkiWeb" copy
      (it syncs with the collection). Mirrors the Prep Station pattern.
   2. user_files/hashi_notes/<id>.json — one file per note. Rides the existing
-     Bingsu media-zip sync (sync.py).
+     Onigiri media-zip sync (sync.py).
 
 Preferences (retention default, custom CSS, default sort, trash grace) live in
-the local Bingsu config (config.py DEFAULTS["hashi_notes"]).
+the local Onigiri config (config.py DEFAULTS["hashi_notes"]).
 
 Retention is creation-based with a soft trash: a note expires at
 created_at + retention days, at which point it is moved to trash (trashed_at
@@ -45,8 +45,8 @@ from ..ui_kit.system_icons import pickable_system_icons
 
 # ─── Constants ────────────────────────────────────────────────────────────────
 
-CONF_KEY = "bingsu_hashi_notes"
-CONF_GROUPS_KEY = "bingsu_hashi_note_groups"
+CONF_KEY = "onigiri_hashi_notes"
+CONF_GROUPS_KEY = "onigiri_hashi_note_groups"
 USER_FILES_SUBDIR = "hashi_notes"
 RETENTION_CHOICES = (7, 30, 0)  # 0 == Never
 
@@ -651,7 +651,7 @@ def _addon_uri(rel_from_root):
 
 
 def _emoji_sprite_map():
-    """Maps each Bingsu gallery emoji to its sprite SVG under system_files/emojis."""
+    """Maps each Onigiri gallery emoji to its sprite SVG under system_files/emojis."""
     try:
         from ..ui_kit.emoji_sprites import EMOJI_SPRITES
 
@@ -1403,7 +1403,7 @@ def render_widget_html(row_span: int = 1, col_span: int = 1) -> str:
     if not notes:
         return f"""
 <div class="hashi-notes-widget is-{mode}"{_style_attr(widget_font_css)} onclick="pycmd('openHashiGallery')">
-  <div class="bingsu-widget-head"><h3>{title_html}</h3></div>
+  <div class="onigiri-widget-head"><h3>{title_html}</h3></div>
   <div class="hashi-widget-empty">{html.escape(tr("hashi_no_notes_yet", "No notes yet"), quote=False)}</div>
 </div>"""
 
@@ -1493,7 +1493,7 @@ def render_widget_html(row_span: int = 1, col_span: int = 1) -> str:
             click_attr = f" onclick=\"pycmd('hashiWidget:open:{note_id}')\""
         return f"""
 <div class="hashi-notes-widget is-single{' is-editing' if direct_edit else ''}{' uses-widget-surface' if use_widget_surface else ''}"{_style_attr(widget_font_css, accent_css)}{click_attr}>
-  <div class="bingsu-widget-head">
+  <div class="onigiri-widget-head">
     <h3>{title_html}</h3>
     {date_html}
   </div>
@@ -1533,7 +1533,7 @@ def render_widget_html(row_span: int = 1, col_span: int = 1) -> str:
 
     return f"""
 <div class="hashi-notes-widget is-gallery"{_style_attr(widget_font_css)} onclick="pycmd('openHashiGallery')">
-  <div class="bingsu-widget-head"><h3>{title_html}</h3></div>
+  <div class="onigiri-widget-head"><h3>{title_html}</h3></div>
   <div class="hashi-widget-cards">{cards_html}</div>
 </div>"""
 

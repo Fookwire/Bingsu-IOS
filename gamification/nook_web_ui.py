@@ -55,7 +55,7 @@ def _current_item(store: Dict[str, Any]) -> Dict[str, Any]:
     if item_id == "default":
         return {
             "id": "default",
-            "name": tr("onigiri_stand_name", "Bingsu Stand"),
+            "name": tr("onigiri_stand_name", "Onigiri Stand"),
             "description": tr("onigiri_stand_desc", "Your cozy starting nook."),
             "theme": "#D49083",
             "image": "sushi/onigiri_stand.webp",
@@ -63,7 +63,7 @@ def _current_item(store: Dict[str, Any]) -> Dict[str, Any]:
     for items in _item_groups().values():
         if item_id in items:
             return {"id": item_id, **items[item_id]}
-    return {"id": "default", "name": tr("onigiri_stand_name", "Bingsu Stand"), "image": "sushi/onigiri_stand.webp", "theme": "#D49083"}
+    return {"id": "default", "name": tr("onigiri_stand_name", "Onigiri Stand"), "image": "sushi/onigiri_stand.webp", "theme": "#D49083"}
 
 
 def _rush_history() -> List[Dict[str, Any]]:
@@ -185,7 +185,7 @@ def nook_payload() -> Dict[str, Any]:
         "recipeCounts": counts,
         "imageBase": _asset_url("nook_folder/"),
         "logoImage": _asset_url("nook.webp"),
-        "rewardImage": _asset_url("bingsu_trophy.webp"),
+        "rewardImage": _asset_url("onigiri_trophy.webp"),
         "coinImage": _asset_url("Tayaki_coin.webp"),
         "strings": _strings(_NOOK_STRING_KEYS),
     }
@@ -251,19 +251,19 @@ class _NookWebDialog(QDialog):
             with open(html_path, encoding="utf-8") as handle:
                 body = handle.read()
         except OSError:
-            body = "<main><h1>Bingsu page assets are missing.</h1></main>"
+            body = "<main><h1>Onigiri page assets are missing.</h1></main>"
         payload = json.dumps(self._payload(), ensure_ascii=False).replace("</", "<\\/")
-        head = f"<script>window.BINGSU_NOOK_DATA={payload};</script>"
+        head = f"<script>window.ONIGIRI_NOOK_DATA={payload};</script>"
         if self.page == "nook":
             # Apply the palette before first paint.
             head += (
                 "<script>document.documentElement.dataset.nookTheme="
-                "window.BINGSU_NOOK_DATA.colorMode;</script>"
+                "window.ONIGIRI_NOOK_DATA.colorMode;</script>"
             )
         else:
             head += (
                 "<script>document.documentElement.dataset.storeTheme="
-                "window.BINGSU_NOOK_DATA.colorMode;</script>"
+                "window.ONIGIRI_NOOK_DATA.colorMode;</script>"
             )
 
         # Avoid cached UI assets when this installed add-on is updated in

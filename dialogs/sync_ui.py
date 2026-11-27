@@ -3,9 +3,9 @@ from aqt.qt import (
     Qt, QFrame, QSizePolicy, QGraphicsDropShadowEffect, QColor, QIcon
 )
 from datetime import datetime
-from ..core.sync import bingsu_sync
+from ..core.sync import onigiri_sync
 from ..core.translations import tr
-from ..ui_kit.bingsu_notifications import _branded_title, _info_dialog_icon_pixmap, _info_dialog_palette
+from ..ui_kit.onigiri_notifications import _branded_title, _info_dialog_icon_pixmap, _info_dialog_palette
 
 from aqt.theme import theme_manager
 from aqt import mw
@@ -47,7 +47,7 @@ class SyncConflictDialog(QDialog):
         header_row = QHBoxLayout()
         logo = QLabel()
         logo.setPixmap(_info_dialog_icon_pixmap(size=42))
-        logo.setAccessibleName("Bingsu")
+        logo.setAccessibleName("Onigiri")
         header_row.addWidget(logo)
         header = QLabel(_branded_title(tr("sync_conflict_heading")))
         header.setWordWrap(True)
@@ -64,8 +64,8 @@ class SyncConflictDialog(QDialog):
         comp_layout = QHBoxLayout()
         comp_layout.setSpacing(15)
 
-        local_time = bingsu_sync.get_local_mtime()
-        cloud_time = bingsu_sync.get_cloud_mtime()
+        local_time = onigiri_sync.get_local_mtime()
+        cloud_time = onigiri_sync.get_cloud_mtime()
 
         self.local_card = self._create_info_card(
             tr("sync_local_device"), 

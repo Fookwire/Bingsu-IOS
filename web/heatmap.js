@@ -1,11 +1,11 @@
 /*
-    Bingsu Heatmap Renderer
+    Onigiri Heatmap Renderer
     This script is responsible for drawing the heatmap graph based on review data,
     with Year, Month, Week, and Terrain views.
 */
 
-// Ensure the BingsuHeatmap object exists
-window.BingsuHeatmap = window.BingsuHeatmap || {};
+// Ensure the OnigiriHeatmap object exists
+window.OnigiriHeatmap = window.OnigiriHeatmap || {};
 
 (function (exports) {
     "use strict";
@@ -297,7 +297,7 @@ window.BingsuHeatmap = window.BingsuHeatmap || {};
 
     function openDateInBrowser(dateKey) {
         if (!dateKey || typeof pycmd !== 'function') return;
-        pycmd(`bingsu_heatmap_browse:${dateKey}`);
+        pycmd(`onigiri_heatmap_browse:${dateKey}`);
     }
 
     function bindCellInteractions(gridContainer) {
@@ -305,7 +305,7 @@ window.BingsuHeatmap = window.BingsuHeatmap || {};
             const cell = event.target.closest('.heatmap-day-cell');
             // Touch screens have no hover: the first tap on a day shows its
             // count, a second tap on the same day opens it in the browser.
-            if (cell && window.BingsuMobile && BingsuMobile.isTouch() && !cell.classList.contains('is-tip-open')) {
+            if (cell && window.OnigiriMobile && OnigiriMobile.isTouch() && !cell.classList.contains('is-tip-open')) {
                 document.querySelectorAll('.heatmap-day-cell.is-tip-open').forEach(c => c.classList.remove('is-tip-open'));
                 cell.classList.add('is-tip-open');
                 return;
@@ -748,7 +748,7 @@ window.BingsuHeatmap = window.BingsuHeatmap || {};
         gridContainer.style.removeProperty('max-width');
 
         const containerStyle = window.getComputedStyle(container);
-        const header = container.querySelector('.bingsu-heatmap-header');
+        const header = container.querySelector('.onigiri-heatmap-header');
         let room = container.clientHeight
             - parseFloat(containerStyle.paddingTop || 0)
             - parseFloat(containerStyle.paddingBottom || 0);
@@ -881,7 +881,7 @@ window.BingsuHeatmap = window.BingsuHeatmap || {};
         let flatView = views.includes(config.heatmapDefaultView) ? config.heatmapDefaultView : 'year';
         // A year of days is a field of dots at phone width; a month has
         // tappable days. The Year tab is still there.
-        if (flatView === 'year' && window.BingsuMobile && BingsuMobile.isPhone()) flatView = 'month';
+        if (flatView === 'year' && window.OnigiriMobile && OnigiriMobile.isPhone()) flatView = 'month';
         const defaultView = config.heatmapTerrainEnabled === true ? 'terrain' : flatView;
         let state = containerStates.get(container);
         if (!state || state.defaultView !== defaultView) {
@@ -914,7 +914,7 @@ window.BingsuHeatmap = window.BingsuHeatmap || {};
                 : 'No streak yet';
             const streakLabel = i18n.day_streak || 'day streak';
             const streakHTML = config.heatmapShowStreak
-                ? `<div class="streak-counter bingsu-streak-tip" data-tooltip="${escapeAttr(streakTip)}">${fireSvg}<span class="streak-count">${data.streak}</span><span class="streak-label">${streakLabel}</span></div>`
+                ? `<div class="streak-counter onigiri-streak-tip" data-tooltip="${escapeAttr(streakTip)}">${fireSvg}<span class="streak-count">${data.streak}</span><span class="streak-label">${streakLabel}</span></div>`
                 : '';
 
             let navHTML = '';
@@ -958,7 +958,7 @@ window.BingsuHeatmap = window.BingsuHeatmap || {};
             // A Terrain user still needs the year picker. The flat view
             // switcher is only available with Terrain turned off in Settings.
             container.innerHTML = `
-                <div class="bingsu-heatmap-header">
+                <div class="onigiri-heatmap-header">
                     <div class="header-left">
                         <h3 class="heatmap-title">${(i18n.activity || 'Activity').toUpperCase()}</h3>
                     </div>
@@ -986,8 +986,8 @@ window.BingsuHeatmap = window.BingsuHeatmap || {};
             }
             if (!gridContainer.refreshTerrain) {
                 bindCellInteractions(gridContainer);
-                if (config.heatmapParticlesAnimation && window.BingsuParticles) {
-                    container.__particles = new window.BingsuParticles.Particles(gridContainer);
+                if (config.heatmapParticlesAnimation && window.OnigiriParticles) {
+                    container.__particles = new window.OnigiriParticles.Particles(gridContainer);
                 }
             }
             // Set the final width before painting. Scale from the previous
@@ -1108,10 +1108,10 @@ window.BingsuHeatmap = window.BingsuHeatmap || {};
 
     // --- AUTO-RENDERER ---
     exports.autoRender = function() {
-        if (window.bingsuHeatmapData && window.bingsuHeatmapConfig) {
-            exports.render('bingsu-heatmap-container', window.bingsuHeatmapData, window.bingsuHeatmapConfig);
-            if (typeof window.bingsuDismissOverlay === 'function') {
-                window.bingsuDismissOverlay('heatmap');
+        if (window.onigiriHeatmapData && window.onigiriHeatmapConfig) {
+            exports.render('onigiri-heatmap-container', window.onigiriHeatmapData, window.onigiriHeatmapConfig);
+            if (typeof window.onigiriDismissOverlay === 'function') {
+                window.onigiriDismissOverlay('heatmap');
             }
             return true;
         }
@@ -1123,7 +1123,7 @@ window.BingsuHeatmap = window.BingsuHeatmap || {};
         // Settings embeds this production renderer but drives it with its own
         // illustrative preview data. Do not start the menu's polling boot loop
         // in that host; PREVIEW_PAINTERS.heatmap calls render() directly.
-        if (window.bingsuHeatmapDisableAutoRender) return;
+        if (window.onigiriHeatmapDisableAutoRender) return;
         const tryAutoRender = () => {
             if (exports.autoRender()) {
                 return;
@@ -1145,4 +1145,4 @@ window.BingsuHeatmap = window.BingsuHeatmap || {};
         }
     })();
 
-})(window.BingsuHeatmap);
+})(window.OnigiriHeatmap);

@@ -1,12 +1,12 @@
-"""Native iOS touches for Bingsu running inside Kioku.
+"""Native iOS touches for Onigiri running inside Kioku.
 
 Kioku is desktop Anki on iOS: every page is a WKWebView and the main window
 is a Qt window. Without its own app, an add-on can still reach far enough to
-make Bingsu feel like an iOS app rather than a web page in a desktop shell:
+make Onigiri feel like an iOS app rather than a web page in a desktop shell:
 
 * **Menu row.** Anki's File/Edit/View/Tools/Help row (``mw.form.menubar``)
   stays hidden on iPhones, and on iPads where iPadOS 26 puts the same menus
-  in the system menu bar. The menus open from Bingsu's Menu button
+  in the system menu bar. The menus open from Onigiri's Menu button
   (``webview_handlers.show_app_menu``). Add-on config
   ``ios_show_menu_row: true`` brings the row back.
 * **Edges.** The strips under the status bar and the home indicator are the
@@ -28,13 +28,13 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from . import platform as bingsu_platform
+from . import platform as onigiri_platform
 
 _state: dict[str, Any] = {"edge": None, "installed": False}
 
 
 def active() -> bool:
-    return bingsu_platform.IS_IOS
+    return onigiri_platform.IS_IOS
 
 
 # --- helpers -------------------------------------------------------------------
@@ -100,7 +100,7 @@ def _system_menu_bar() -> bool:
 def should_hide_menu_row() -> bool:
     if not active() or _config().get("ios_show_menu_row"):
         return False
-    return bingsu_platform.is_phone_device() or _system_menu_bar()
+    return onigiri_platform.is_phone_device() or _system_menu_bar()
 
 
 def hide_menu_row() -> None:
@@ -113,8 +113,8 @@ def hide_menu_row() -> None:
         import aqt.main
 
         cls = aqt.main.AnkiQt
-        if not getattr(cls, "_bingsu_menu_row", False):
-            cls._bingsu_menu_row = True
+        if not getattr(cls, "_onigiri_menu_row", False):
+            cls._onigiri_menu_row = True
             original_show = cls.show_menubar
 
             def show_menubar(self) -> None:  # type: ignore[no-untyped-def]
@@ -154,7 +154,7 @@ def parse_css_color(text: str):
 
 def _log(message: str) -> None:
     # Kioku writes stdout to Documents/kioku.log
-    print(f"Bingsu iOS: {message}")
+    print(f"Onigiri iOS: {message}")
 
 
 def set_edge_color(css_color: str) -> bool:
@@ -209,8 +209,8 @@ def set_edge_color(css_color: str) -> bool:
         return False
 
 
-_RULE_START = "/* bingsu-edges */"
-_RULE_END = "/* /bingsu-edges */"
+_RULE_START = "/* onigiri-edges */"
+_RULE_END = "/* /onigiri-edges */"
 
 
 def _set_window_rule(mw, declarations: str) -> None:
@@ -289,9 +289,9 @@ def stop_bounce_everywhere() -> None:
         from aqt.webview import AnkiWebView
 
         for widget in QApplication.allWidgets():
-            if isinstance(widget, AnkiWebView) and not getattr(widget, "_bingsu_no_bounce", False):
+            if isinstance(widget, AnkiWebView) and not getattr(widget, "_onigiri_no_bounce", False):
                 if stop_bounce(widget):
-                    widget._bingsu_no_bounce = True
+                    widget._onigiri_no_bounce = True
     except Exception:
         pass
 
@@ -372,8 +372,8 @@ def _is_main_screen(context) -> bool:
 
 
 def handle_command(cmd: str, context=None) -> bool:
-    """``bingsu_native:<what>[:<arg>]`` from web/mobile.js."""
-    if not cmd.startswith("bingsu_native:"):
+    """``onigiri_native:<what>[:<arg>]`` from web/mobile.js."""
+    if not cmd.startswith("onigiri_native:"):
         return False
     _, _, rest = cmd.partition(":")
     what, _, arg = rest.partition(":")
@@ -403,7 +403,7 @@ def go_back() -> None:
             # Focus Dango only guards leaving a review
             mw.moveToState("deckBrowser")
     except Exception as exc:
-        print(f"Bingsu: back failed: {exc}")
+        print(f"Onigiri: back failed: {exc}")
 
 
 def _after_main_window() -> None:
@@ -420,7 +420,7 @@ def _after_main_window() -> None:
 
 def flush_on_background(state) -> None:
     """iOS suspends a backgrounded app and may then kill it without any
-    close event: game progress still waiting in Bingsu's write queue (Nook
+    close event: game progress still waiting in Onigiri's write queue (Nook
     XP, Onigimon; written ~1.5 s after an answer) was lost. Write it now."""
     try:
         from aqt.qt import Qt

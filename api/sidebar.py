@@ -1,9 +1,9 @@
 """
-Sidebar API (Bingsu)
+Sidebar API (Onigiri)
 
 Usage:
-    import Bingsu
-    Bingsu.register_sidebar_action(
+    import Onigiri
+    Onigiri.register_sidebar_action(
         entry_id="MyAddon.open_panel",
         label="My Panel",
         command="myaddon_open_panel",
@@ -62,7 +62,7 @@ def register_sidebar_action(
     icon_svg: str = "",
 ) -> SidebarEntry:
     """
-    Register a sidebar entry for the Bingsu deck browser sidebar.
+    Register a sidebar entry for the Onigiri deck browser sidebar.
 
     - entry_id must be globally unique (suggestion: "module.function" style).
     - label is shown in the sidebar layout editor.
@@ -142,7 +142,7 @@ def render_reviewer_toolbar_entries() -> str:
                     f'-webkit-mask:url(\'{safe_source}\') center/contain no-repeat"></span>'
                 )
         buttons.append(
-            f'<a href="#" class="bingsu-reviewer-button bingsu-external-toolbar-button" '
+            f'<a href="#" class="onigiri-reviewer-button onigiri-external-toolbar-button" '
             f'title="{label}" aria-label="{label}" onclick="pycmd({command}); return false;">'
             f'{icon or label}</a>'
         )
@@ -157,11 +157,11 @@ def _refresh_reviewer_toolbar_entries() -> None:
     if web is not None:
         web.eval("""
         (() => {
-            const host = document.getElementById('bingsu-reviewer-ui-host');
+            const host = document.getElementById('onigiri-reviewer-ui-host');
             const root = host && host.shadowRoot;
-            const slot = root && root.getElementById('bingsu-reviewer-external-actions');
+            const slot = root && root.getElementById('onigiri-reviewer-external-actions');
             if (slot) slot.innerHTML = %s;
-            if (window.bingsuRefreshReviewerHeaderOffset) window.bingsuRefreshReviewerHeaderOffset();
+            if (window.onigiriRefreshReviewerHeaderOffset) window.onigiriRefreshReviewerHeaderOffset();
         })();
         """ % json.dumps(render_reviewer_toolbar_entries()))
 
@@ -222,7 +222,7 @@ def render_sidebar_entry(entry_id: str) -> str:
                     f"mask: url('{data_uri}') no-repeat center / contain; "
                     f"-webkit-mask: url('{data_uri}') no-repeat center / contain;\""
                 )
-                data_attr = " data-bingsu-icon=\"1\""
+                data_attr = " data-onigiri-icon=\"1\""
             else:
                 # SVG mask: inline SVG is turned into a data URI and used as a CSS mask.
                 data_uri = "data:image/svg+xml," + urllib.parse.quote(icon_svg)
@@ -234,7 +234,7 @@ def render_sidebar_entry(entry_id: str) -> str:
                     f"mask: url('{data_uri}') no-repeat center / contain; "
                     f"-webkit-mask: url('{data_uri}') no-repeat center / contain;\""
                 )
-                data_attr = " data-bingsu-icon=\"1\""
+                data_attr = " data-onigiri-icon=\"1\""
 
     return (
         f"<div class=\"menu-item {safe_class}\"{data_attr} onclick='pycmd({js_cmd})'>"
@@ -255,7 +255,7 @@ def _ensure_layout_entry(entry: SidebarEntry) -> None:
         archived.append(entry.entry_id)
         config.write_config(conf)
     except Exception as exc:
-        print(f"Bingsu: Failed to persist sidebar entry {entry.entry_id}: {exc}")
+        print(f"Onigiri: Failed to persist sidebar entry {entry.entry_id}: {exc}")
 
 
 _ICON_OVERRIDE_CACHE: Dict[str, str] = {}
@@ -603,7 +603,7 @@ def _capture_toolbar_links(links, _toolbar) -> None:
             _toolbar_cmds.add(cmd)
         _refresh_reviewer_toolbar_entries()
     except Exception as exc:
-        print(f"Bingsu: Failed to capture toolbar links: {exc}")
+        print(f"Onigiri: Failed to capture toolbar links: {exc}")
 
 
 def _dispatch_toolbar_cmd(handled, message, context):
@@ -618,7 +618,7 @@ def _dispatch_toolbar_cmd(handled, message, context):
             handler()
             return (True, None)
     except Exception as exc:
-        print(f"Bingsu: Toolbar cmd failed ({message}): {exc}")
+        print(f"Onigiri: Toolbar cmd failed ({message}): {exc}")
         return (True, None)
     return handled
 
@@ -632,7 +632,7 @@ def _install_toolbar_bridge() -> None:
         gui_hooks.top_toolbar_did_init_links.append(_capture_toolbar_links)
         gui_hooks.webview_did_receive_js_message.append(_dispatch_toolbar_cmd)
     except Exception as exc:
-        print(f"Bingsu: Failed to install toolbar bridge: {exc}")
+        print(f"Onigiri: Failed to install toolbar bridge: {exc}")
 
 
 def ensure_capture_hook_is_last() -> None:
@@ -650,7 +650,7 @@ def ensure_capture_hook_is_last() -> None:
             pass
         hook.append(_capture_toolbar_links)
     except Exception as exc:
-        print(f"Bingsu: Failed to reorder toolbar hook: {exc}")
+        print(f"Onigiri: Failed to reorder toolbar hook: {exc}")
 
 
 _install_toolbar_bridge()

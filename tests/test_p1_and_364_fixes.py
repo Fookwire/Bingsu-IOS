@@ -110,17 +110,17 @@ class P1And364FixesTests(unittest.TestCase):
 
         intercept = ns["intercept_exit_attempt"]
         # Attempts 1 and 2 are blocked; attempt 3 unlocks
-        self.assertTrue(intercept("bingsu_go_home"))
-        self.assertTrue(intercept("bingsu_go_home"))
-        self.assertFalse(intercept("bingsu_go_home"))
+        self.assertTrue(intercept("onigiri_go_home"))
+        self.assertTrue(intercept("onigiri_go_home"))
+        self.assertFalse(intercept("onigiri_go_home"))
         # Immediately following wrapped call during the same tick is NOT re-blocked
         self.assertTrue(ns["_navigation_is_suspended"])
-        self.assertFalse(intercept("bingsu_go_home"))
+        self.assertFalse(intercept("onigiri_go_home"))
         # Once the QTimer(0) callback fires, protection resumes cleanly
         self.assertEqual(len(scheduled), 1)
         scheduled[0]()
         self.assertFalse(ns["_navigation_is_suspended"])
-        self.assertTrue(intercept("bingsu_go_home"))
+        self.assertTrue(intercept("onigiri_go_home"))
 
     def test_357_patcher_has_single_reviewer_focus_dango_intercept(self):
         patcher_src = (ADDON_ROOT / "rendering/patcher.py").read_text(encoding="utf-8")
@@ -149,7 +149,7 @@ class P1And364FixesTests(unittest.TestCase):
 
     # ── #406: Ready-to-Go Inbox respects daily scheduled new-card limits ───────
     def test_406_inbox_respects_daily_new_limit_and_skips_internal_decks(self):
-        is_internal = lambda name: str(name).startswith("Bingsu::Ready")
+        is_internal = lambda name: str(name).startswith("Onigiri::Ready")
         spec_fn = _load_function(
             "study_tools/ready_to_go.py",
             "_scheduled_new_inbox_spec",
@@ -170,7 +170,7 @@ class P1And364FixesTests(unittest.TestCase):
                     ],
                 ),
                 SimpleNamespace(name="Medicine", new_count=0, children=[]),
-                SimpleNamespace(name="Bingsu::Ready::Inbox", new_count=99, children=[]),
+                SimpleNamespace(name="Onigiri::Ready::Inbox", new_count=99, children=[]),
             ]
         )
         col = SimpleNamespace(sched=SimpleNamespace(deck_due_tree=lambda: tree))
@@ -180,7 +180,7 @@ class P1And364FixesTests(unittest.TestCase):
         self.assertIn('deck:"Japanese::Vocab"', query)
         self.assertNotIn("Paused", query)
         self.assertNotIn("Medicine", query)
-        self.assertNotIn("Bingsu::Ready", query)
+        self.assertNotIn("Onigiri::Ready", query)
 
         # Case 2: Parent with direct new cards + a zero-new subdeck
         tree_direct = SimpleNamespace(

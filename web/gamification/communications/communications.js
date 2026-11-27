@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  let data = window.BINGSU_COMMUNICATIONS_DATA || {};
+  let data = window.ONIGIRI_COMMUNICATIONS_DATA || {};
   const $ = selector => document.querySelector(selector);
   const all = selector => [...document.querySelectorAll(selector)];
   const t = (key, fallback) => {
@@ -114,7 +114,7 @@
           );
       const copy = document.createElement('p');
       copy.textContent = hasSynced
-        ? t('communications_empty_body', 'Sync to check for updates from the Bingsu team.')
+        ? t('communications_empty_body', 'Sync to check for updates from the Onigiri team.')
         : t(
             data.isSyncing ? 'communications_first_sync_body' : 'communications_first_sync_failed_body',
             data.isSyncing

@@ -224,5 +224,5 @@
             this.grid.classList.remove('ptc');
         }
     }
-    window.BingsuParticles = { Particles };
+    window.OnigiriParticles = { Particles };
 })();

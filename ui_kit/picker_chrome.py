@@ -1,4 +1,4 @@
-# Shared visual language for every Bingsu icon/emoji picker.
+# Shared visual language for every Onigiri icon/emoji picker.
 #
 # There used to be three pickers with three different looks (two Qt dialogs in
 # this file's sibling `_icon_picker.py`, one HTML modal in `web/icon_modal.js`).
@@ -66,7 +66,7 @@ def section_title_qss(pal):
 
 def close_qss(pal):
     return (
-        "/* bingsu-rounded-button-fix */\n"
+        "/* onigiri-rounded-button-fix */\n"
         f"QPushButton {{ background: transparent; border: 1px solid transparent;"
         f" border-radius: {CONTROL_RADIUS}px; color: {pal['muted']}; font-size: 18px; }}"
         f" QPushButton:hover {{ background: {pal['inset']}; color: {pal['fg']};"
@@ -137,13 +137,13 @@ def pill_qss(pal, primary=False, name="iconPickerFooterPill"):
     if primary:
         hover = QColor(pal["accent"]).lighter(112).name()
         return (
-            "/* bingsu-rounded-button-fix */\n"
+            "/* onigiri-rounded-button-fix */\n"
             f"QPushButton#{name} {{ background: {pal['accent']}; color: #ffffff; border: none;"
             f" border-radius: {CONTROL_RADIUS}px; padding: 0 18px; font-weight: 600; }}"
             f" QPushButton#{name}:hover {{ background: {hover}; }}"
         )
     return (
-        "/* bingsu-rounded-button-fix */\n"
+        "/* onigiri-rounded-button-fix */\n"
         f"QPushButton#{name} {{ background: {pal['inset']}; color: {pal['fg']};"
         f" border: 1px solid transparent; border-radius: {CONTROL_RADIUS}px; padding: 0 16px; }}"
         f" QPushButton#{name}:hover {{ background: {pal['inset_hover']}; }}"
@@ -194,7 +194,7 @@ def segment_bar_qss(pal, name="IconPickerSegments"):
     """iOS-style segmented switch: one inset track, the active segment lifted
     onto the modal's own surface colour."""
     return (
-        "/* bingsu-rounded-button-fix */\n"
+        "/* onigiri-rounded-button-fix */\n"
         f"QFrame#{name} {{ background: {pal['inset']}; border: none;"
         f" border-radius: {SEGMENT_RADIUS}px; }}"
         f" QFrame#{name} QPushButton {{ background: transparent; border: none;"
@@ -233,7 +233,7 @@ def icon_cell_qss(pal, selected, accent=None):
 def color_row_qss(pal, name="IconPickerColorRow"):
     """One colour choice as a full-width pill: swatch, then its label."""
     return (
-        "/* bingsu-rounded-button-fix */\n"
+        "/* onigiri-rounded-button-fix */\n"
         f"QPushButton#{name} {{ background: {pal['inset']}; color: {pal['fg']};"
         f" border: 1px solid transparent; border-radius: {CONTROL_RADIUS}px;"
         " text-align: left; padding: 0 12px; font-size: 13px; font-weight: 500; }"

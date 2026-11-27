@@ -34,7 +34,7 @@ vm.runInContext(['pairAvailable', 'pairLinked', 'imageTargets', 'imageValue', 'i
   '\n' + fn('currentTint', '    ') + '\nthis.api = {imageTargets, renderIconPopupColorSlots, currentTint, sidebarIconTint};', sandbox);
 
 // Equal values and a linked sidebar palette must never hide either tint slot.
-field.themeModeField = 'bingsu_sidebar_deck_colors_theme_mode';
+field.themeModeField = 'onigiri_sidebar_deck_colors_theme_mode';
 sandbox.values[field.themeModeField] = 'single';
 assert.deepEqual(Array.from(sandbox.api.imageTargets(field), t => t.role), ['light', 'dark']);
 for (const dark of [false, true]) {

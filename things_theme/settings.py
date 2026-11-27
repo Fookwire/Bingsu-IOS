@@ -100,9 +100,9 @@ def _resolve_palette() -> Tuple[Dict[str, str], bool]:
     falls back to the OS appearance when set to "system")."""
     if _colors is not None:
         try:
-            palette, is_dark = _colors.bingsu_palette()
+            palette, is_dark = _colors.onigiri_palette()
             return _colors.apply_background(
-                palette, _colors.bingsu_layout_config(), is_dark
+                palette, _colors.onigiri_layout_config(), is_dark
             ), is_dark
         except Exception:
             pass

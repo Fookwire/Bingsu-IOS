@@ -18,7 +18,7 @@ class StartupRecoveryTests(unittest.TestCase):
     def startup_hook(self):
         self.callbacks = []
         self.warnings = []
-        notifications = types.ModuleType('upgrade_test_addon.ui_kit.bingsu_notifications')
+        notifications = types.ModuleType('upgrade_test_addon.ui_kit.onigiri_notifications')
         notifications.notify_warning = lambda message, **kw: self.warnings.append((message, kw))
         ui = types.ModuleType('upgrade_test_addon.ui_kit')
         ui.__path__ = []
@@ -31,7 +31,7 @@ class StartupRecoveryTests(unittest.TestCase):
         hook = next(node for node in tree.body if isinstance(node, ast.FunctionDef)
                     and node.name == '_storage_integrity_check')
         namespace = dict(__package__='upgrade_test_addon', mw=self.mw,
-                         addon_package='bingsu', safe_storage=self.storage,
+                         addon_package='onigiri', safe_storage=self.storage,
                          config=self.config, tr=lambda key: key,
                          QTimer=types.SimpleNamespace(singleShot=lambda delay, fn: self.callbacks.append(fn)))
         exec(compile(ast.Module(body=[hook], type_ignores=[]), '__init__.py', 'exec'), namespace)
@@ -49,7 +49,7 @@ class StartupRecoveryTests(unittest.TestCase):
 
     def test_recovery_warning_returns_before_remaining_profile_hooks(self):
         path, saved = self.damaged_settings()
-        self.assertEqual(self.storage.read_json(path, default={}, label='Your Bingsu settings'), saved)
+        self.assertEqual(self.storage.read_json(path, default={}, label='Your Onigiri settings'), saved)
         hook = self.startup_hook()
         hook()
         self.assertEqual(self.warnings, [])

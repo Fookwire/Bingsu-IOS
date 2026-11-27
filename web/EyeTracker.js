@@ -7,8 +7,8 @@
    One turn (yaw and pitch) is the state, sprung toward the pointer; both
    eyes are read off it, so they can never disagree.
 
-   This adapter keeps the bingsu artwork instead of drawing Bencho's body.
-   Its pale rice carries round dark eyes and a smile inspired by Bingsu-san.
+   This adapter keeps the onigiri artwork instead of drawing Bencho's body.
+   Its pale rice carries round dark eyes and a smile inspired by Onigiri-san.
    Written straight to the DOM every frame: a pointer move is not a render. */
 (function () {
     'use strict';

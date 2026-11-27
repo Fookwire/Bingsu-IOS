@@ -5,13 +5,13 @@ from urllib.parse import quote
 from aqt import mw
 from aqt.deckbrowser import DeckBrowser, RenderDeckNodeContext
 from anki.decks import DeckId
-from ..rendering import bingsu_renderer
+from ..rendering import onigiri_renderer
 from ..core import config
 from ..ui_kit.emoji_sprites import asset_for_emoji
 from ..core.translations import tr
 
-ARCHIVED_DECKS_CONF_KEY = "bingsu_archived_decks"
-SHOW_ARCHIVED_CONF_KEY = "bingsu_show_archived"
+ARCHIVED_DECKS_CONF_KEY = "onigiri_archived_decks"
+SHOW_ARCHIVED_CONF_KEY = "onigiri_show_archived"
 
 def _replace_children(nodes_collection, nodes):
     """Replace Anki's mutable deck-tree children collection when supported."""
@@ -25,10 +25,10 @@ def _replace_children(nodes_collection, nodes):
 def _sort_lookups(saved_order=None):
     """Favorites and custom order, read once per tree instead of per subtree."""
     saved_order = [str(value) for value in (saved_order or [])]
-    favorites = {str(did) for did in config.get_collection_config("bingsu_favorite_decks", [])}
+    favorites = {str(did) for did in config.get_collection_config("onigiri_favorite_decks", [])}
     custom_order = {
         str(did): index
-        for index, did in enumerate(saved_order or config.get_collection_config("bingsu_custom_deck_order", []))
+        for index, did in enumerate(saved_order or config.get_collection_config("onigiri_custom_deck_order", []))
     }
     return favorites, custom_order
 
@@ -125,20 +125,20 @@ def apply_archive_filter(tree_data, archived_ids=None, show_archived_only=None):
 
 
 def _apply_active_filters(tree_data) -> None:
-    """Apply Bingsu deck list filters while preserving matching descendants."""
+    """Apply Onigiri deck list filters while preserving matching descendants."""
     show_favorites_only = bool(
-        mw.col.conf.get("bingsu_show_favourites", False)
-        or mw.col.conf.get("bingsu_show_favorites", False)
+        mw.col.conf.get("onigiri_show_favourites", False)
+        or mw.col.conf.get("onigiri_show_favorites", False)
     )
-    show_marked_only = bool(mw.col.conf.get("bingsu_show_marked", False))
+    show_marked_only = bool(mw.col.conf.get("onigiri_show_marked", False))
 
     if not show_favorites_only and not show_marked_only:
         return
 
-    favorite_ids = {str(did) for did in config.get_collection_config("bingsu_favorite_decks", [])}
+    favorite_ids = {str(did) for did in config.get_collection_config("onigiri_favorite_decks", [])}
     mark_ids = {
         str(did)
-        for did, value in mw.col.conf.get("bingsu_deck_marks", {}).items()
+        for did, value in mw.col.conf.get("onigiri_deck_marks", {}).items()
         if value
     }
 
@@ -166,14 +166,14 @@ def _apply_active_filters(tree_data) -> None:
         del tree_data.children[:]
         tree_data.children.extend(kept)
     except Exception as e:
-        print(f"Bingsu: Could not apply deck list filter: {e}")
+        print(f"Onigiri: Could not apply deck list filter: {e}")
 
 
 def _apply_tree_preferences(tree_data) -> None:
     _prune_internal_ready_decks(tree_data.children)
-    sort_mode = mw.col.conf.get("bingsu_sort_mode", "default")
+    sort_mode = mw.col.conf.get("onigiri_sort_mode", "default")
     if sort_mode != "default":
-        saved_order = [str(value) for value in config.get_collection_config("bingsu_custom_deck_order", [])]
+        saved_order = [str(value) for value in config.get_collection_config("onigiri_custom_deck_order", [])]
         _apply_sort_recursive(tree_data.children, sort_mode, saved_order, is_top_level=True)
     apply_archive_filter(tree_data)
     _apply_active_filters(tree_data)
@@ -188,12 +188,12 @@ def _render_deck_tree_html_only(deck_browser: DeckBrowser) -> str:
         tree_data = deck_browser._render_data.tree
     else:
         tree_data = deck_browser.mw.col.sched.deck_due_tree()
-        deck_browser._render_data = bingsu_renderer.RenderData(tree=tree_data)
+        deck_browser._render_data = onigiri_renderer.RenderData(tree=tree_data)
 
     _apply_tree_preferences(tree_data)
     
     ctx = RenderDeckNodeContext(current_deck_id=deck_browser.mw.col.decks.get_current_id())
-    # Note: _render_deck_node is patched by Bingsu in patcher.py
+    # Note: _render_deck_node is patched by Onigiri in patcher.py
     return "".join(deck_browser._render_deck_node(child, ctx) for child in tree_data.children)
 
 
@@ -231,7 +231,7 @@ def _render_tag_tree_html(deck_browser: DeckBrowser, query: str = "") -> str:
     """
     normalized = query.strip().lower()
     custom_icons = config.get_collection_config(
-        "bingsu_custom_tag_icons", {}, col=deck_browser.mw.col
+        "onigiri_custom_tag_icons", {}, col=deck_browser.mw.col
     ) or {}
     try:
         addon_package = deck_browser.mw.addonManager.addonFromModule(__name__)
@@ -240,7 +240,7 @@ def _render_tag_tree_html(deck_browser: DeckBrowser, query: str = "") -> str:
     try:
         tree = deck_browser.mw.col.tags.tree()
     except Exception as exc:
-        print(f"Bingsu: Could not load tag tree: {exc}")
+        print(f"Onigiri: Could not load tag tree: {exc}")
         return _tag_empty_row(tr("no_tags", "No tags yet"))
 
     def render_nodes(nodes, head: str = "", depth: int = 0) -> list[str]:
@@ -311,33 +311,33 @@ def _render_tag_row(
             quote=True,
         )
         toggle = f"""
-            <button class="bingsu-tag-toggle" type="button"
+            <button class="onigiri-tag-toggle" type="button"
                     aria-label="{toggle_label}"
                     aria-expanded="{'true' if expanded else 'false'}"
                     onclick="event.stopPropagation();
-                             pycmd('bingsu_tag_collapse:{encoded_tag}:{desired_state}')">
+                             pycmd('onigiri_tag_collapse:{encoded_tag}:{desired_state}')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                      aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
             </button>
         """
     else:
-        toggle = '<span class="bingsu-tag-toggle-placeholder" aria-hidden="true"></span>'
+        toggle = '<span class="onigiri-tag-toggle-placeholder" aria-hidden="true"></span>'
 
     tag_icon = _render_tag_icon(icon_config, addon_package)
 
     return f"""
-        <tr class="bingsu-tag-row" data-tag="{safe_full_name}">
+        <tr class="onigiri-tag-row" data-tag="{safe_full_name}">
             <td class="decktd" colspan="7">
-                <div class="bingsu-tag-entry" style="--tag-depth: {max(0, depth)}">
+                <div class="onigiri-tag-entry" style="--tag-depth: {max(0, depth)}">
                     {toggle}
-                    <button class="bingsu-tag-link" type="button"
+                    <button class="onigiri-tag-link" type="button"
                             title="{safe_full_name}"
-                            onclick="pycmd('bingsu_study_tag:{encoded_tag}')"
-                            oncontextmenu="return BingsuEngine.showTagContextMenu(
+                            onclick="pycmd('onigiri_study_tag:{encoded_tag}')"
+                            oncontextmenu="return OnigiriEngine.showTagContextMenu(
                                 event, '{encoded_tag}')">
                         {tag_icon}
-                        <span class="bingsu-tag-name" dir="auto">{safe_leaf_name}</span>
+                        <span class="onigiri-tag-name" dir="auto">{safe_leaf_name}</span>
                     </button>
                 </div>
             </td>
@@ -364,11 +364,11 @@ def _render_tag_icon(icon_config: dict, addon_package: str) -> str:
                 f"{asset}"
             )
             return (
-                '<img class="bingsu-tag-icon bingsu-tag-icon-image" '
+                '<img class="onigiri-tag-icon onigiri-tag-icon-image" '
                 f'src="{html.escape(url, quote=True)}" alt="">'
             )
         return (
-            '<span class="bingsu-tag-icon bingsu-tag-icon-emoji" '
+            '<span class="onigiri-tag-icon onigiri-tag-icon-emoji" '
             f'aria-hidden="true">{html.escape(emoji, quote=False)}</span>'
         )
 
@@ -396,24 +396,24 @@ def _render_tag_icon(icon_config: dict, addon_package: str) -> str:
     safe_url = html.escape(url, quote=True)
     if filename.lower().endswith(".png"):
         return (
-            '<img class="bingsu-tag-icon bingsu-tag-icon-image" '
+            '<img class="onigiri-tag-icon onigiri-tag-icon-image" '
             f'src="{safe_url}" alt="">'
         )
 
     style = (
-        f"--bingsu-tag-icon:url('{safe_url}');"
-        f"--bingsu-tag-icon-light:{html.escape(light_color, quote=True)};"
-        f"--bingsu-tag-icon-dark:{html.escape(dark_color, quote=True)};"
+        f"--onigiri-tag-icon:url('{safe_url}');"
+        f"--onigiri-tag-icon-light:{html.escape(light_color, quote=True)};"
+        f"--onigiri-tag-icon-dark:{html.escape(dark_color, quote=True)};"
     )
     return (
-        '<i class="bingsu-tag-icon bingsu-tag-icon-mask" '
+        '<i class="onigiri-tag-icon onigiri-tag-icon-mask" '
         f'style="{style}" aria-hidden="true"></i>'
     )
 
 
 def _tag_empty_row(message: str) -> str:
     return (
-        '<tr class="bingsu-tag-row"><td class="bingsu-tag-empty" colspan="7">'
+        '<tr class="onigiri-tag-row"><td class="onigiri-tag-empty" colspan="7">'
         f"{html.escape(message, quote=False)}</td></tr>"
     )
 
@@ -440,7 +440,7 @@ def on_deck_collapse(deck_browser: DeckBrowser, deck_id: str) -> None:
 
         # Refresh the tree data *after* collapse state has changed
         tree_data = deck_browser.mw.col.sched.deck_due_tree()
-        deck_browser._render_data = bingsu_renderer.RenderData(tree=tree_data)
+        deck_browser._render_data = onigiri_renderer.RenderData(tree=tree_data)
         
         # Re-render only the deck tree
         new_tree_html = _render_active_sidebar_list(deck_browser)
@@ -453,7 +453,7 @@ def on_deck_collapse(deck_browser: DeckBrowser, deck_id: str) -> None:
         (function() {{
             const container = document.getElementById('deck-list-container');
             const scrollTop = container?.scrollTop || 0;
-            BingsuEngine.updateDeckTree({new_tree_html});
+            OnigiriEngine.updateDeckTree({new_tree_html});
             if (container) {{
                 container.scrollTop = scrollTop;
             }}
@@ -463,7 +463,7 @@ def on_deck_collapse(deck_browser: DeckBrowser, deck_id: str) -> None:
         deck_browser.web.eval(js)
 
     except Exception as e:
-        print(f"Bingsu: Error in on_deck_collapse for deck_id '{deck_id}': {e}")
+        print(f"Onigiri: Error in on_deck_collapse for deck_id '{deck_id}': {e}")
         import traceback
         traceback.print_exc()
 
@@ -474,45 +474,45 @@ def on_decks_move(data_str: str) -> None:
     It closes the transfer window and refreshes the main Deck Browser.
     """
     # Close the transfer window first, if it exists
-    if hasattr(mw, "bingsu_transfer_window") and mw.bingsu_transfer_window:
+    if hasattr(mw, "onigiri_transfer_window") and mw.onigiri_transfer_window:
         try:
-            mw.bingsu_transfer_window.close()
+            mw.onigiri_transfer_window.close()
         except Exception as e:
-            print(f"Bingsu: Could not close transfer window: {e}")
-        mw.bingsu_transfer_window = None
+            print(f"Onigiri: Could not close transfer window: {e}")
+        mw.onigiri_transfer_window = None
 
     try:
-        print(f"Bingsu: on_decks_move called with data_str: {data_str}")
+        print(f"Onigiri: on_decks_move called with data_str: {data_str}")
         data = json.loads(data_str)
-        print(f"Bingsu: parsed data: {data}")
+        print(f"Onigiri: parsed data: {data}")
         source_dids_str = data.get("source_dids", [])
         target_did_str = data.get("target_did")
-        print(f"Bingsu: source_dids_str: {source_dids_str}, target_did_str: {target_did_str}")
+        print(f"Onigiri: source_dids_str: {source_dids_str}, target_did_str: {target_did_str}")
 
         if not source_dids_str or target_did_str is None:
-            print(f"Bingsu: Missing data - source_dids_str: {source_dids_str}, target_did_str: {target_did_str}")
+            print(f"Onigiri: Missing data - source_dids_str: {source_dids_str}, target_did_str: {target_did_str}")
             return
 
         source_dids = [DeckId(int(did)) for did in source_dids_str]
         target_did = DeckId(int(target_did_str))
         # Corrected print statement
-        print(f"Bingsu: converted to DeckIds - source_dids: {source_dids}, target_did: {target_did}")
+        print(f"Onigiri: converted to DeckIds - source_dids: {source_dids}, target_did: {target_did}")
 
         # Anki's reparent function handles invalid moves (e.g., moving a parent into its child)
         mw.col.decks.reparent(source_dids, target_did)
-        print(f"Bingsu: Successfully called reparent")
+        print(f"Onigiri: Successfully called reparent")
 
         # Force a complete deck browser refresh to update all internal state
         # This prevents stale deck IDs from persisting in the context menu
         if mw.deckBrowser:
             # Call show() which triggers a full re-render via _renderPage
             mw.deckBrowser.show()
-            print(f"Bingsu: Successfully refreshed deck browser with full render")
+            print(f"Onigiri: Successfully refreshed deck browser with full render")
         else:
-            print(f"Bingsu: deckBrowser is None, cannot refresh")
+            print(f"Onigiri: deckBrowser is None, cannot refresh")
 
     except (ValueError, TypeError, json.JSONDecodeError) as e:
-        print(f"Bingsu: Could not process deck move request: {e}")
+        print(f"Onigiri: Could not process deck move request: {e}")
 
 def refresh_deck_tree_state(deck_browser: DeckBrowser) -> None:
     """
@@ -521,7 +521,7 @@ def refresh_deck_tree_state(deck_browser: DeckBrowser) -> None:
     try:
         # Refresh the tree data
         tree_data = deck_browser.mw.col.sched.deck_due_tree()
-        deck_browser._render_data = bingsu_renderer.RenderData(tree=tree_data)
+        deck_browser._render_data = onigiri_renderer.RenderData(tree=tree_data)
         
         # Re-render whichever sidebar list the user selected. Without this,
         # unrelated collection updates could replace a visible tag tree with
@@ -535,7 +535,7 @@ def refresh_deck_tree_state(deck_browser: DeckBrowser) -> None:
         (function() {{
             const container = document.getElementById('deck-list-container');
             const scrollTop = container?.scrollTop || 0;
-            BingsuEngine.updateDeckTree({new_tree_html});
+            OnigiriEngine.updateDeckTree({new_tree_html});
             if (container) {{
                 container.scrollTop = scrollTop;
             }}
@@ -545,6 +545,6 @@ def refresh_deck_tree_state(deck_browser: DeckBrowser) -> None:
         deck_browser.web.eval(js)
 
     except Exception as e:
-        print(f"Bingsu: Error in refresh_deck_tree_state: {e}")
+        print(f"Onigiri: Error in refresh_deck_tree_state: {e}")
         import traceback
         traceback.print_exc()

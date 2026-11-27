@@ -51,8 +51,8 @@ from ..rendering.themes import THEMES
 from aqt.qt import QRectF
 from PyQt6.QtGui import QImage, QBitmap, QPainter as _QPainter
 from PyQt6.QtWidgets import QApplication, QGraphicsBlurEffect, QGraphicsPixmapItem, QGraphicsScene, QListView, QGraphicsColorizeEffect, QGraphicsOpacityEffect
-from .bingsu_notifications import notify_info as showInfo
-from .bingsu_color_picker import BingsuColorDialog, _contrast_icon_color
+from .onigiri_notifications import notify_info as showInfo
+from .onigiri_color_picker import OnigiriColorDialog, _contrast_icon_color
 from PyQt6.QtGui import QFontDatabase, QFont
 from PyQt6.QtCore import QRect, QSize, QPoint
 from .fonts import FONTS, get_all_fonts

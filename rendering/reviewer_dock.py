@@ -105,7 +105,7 @@ def dock_mode(conf: dict[str, Any] | None = None) -> str:
     """Return normalized reviewer dock mode: 'static', 'minimal', or 'island'."""
     if conf is None:
         conf = config.get_config_readonly()
-    raw = str((conf or {}).get("bingsu_reviewer_dock_mode", "static") or "static").strip().lower()
+    raw = str((conf or {}).get("onigiri_reviewer_dock_mode", "static") or "static").strip().lower()
     mode = raw if raw in VALID_DOCK_MODES else "static"
     if mode == "static":
         # Static's labelled buttons wrap to two rows on an iPhone and cover
@@ -150,7 +150,7 @@ def _dock_action_items(conf: dict[str, Any]) -> list[dict[str, str]]:
                 "id": "hashi_notes",
                 "cmd": "openHashiNotes:reviewer",
                 "label": tr_at("hashi_notes_title"),
-                "extra_cls": "bingsu-hashi-notes-button",
+                "extra_cls": "onigiri-hashi-notes-button",
             }
         )
     if reviewer_button_visible("pomodoro", conf):
@@ -159,7 +159,7 @@ def _dock_action_items(conf: dict[str, Any]) -> list[dict[str, str]]:
                 "id": "pomodoro",
                 "cmd": "togglePomodoro",
                 "label": tr_at("pomodoro_title"),
-                "extra_cls": "bingsu-pomodoro-button",
+                "extra_cls": "onigiri-pomodoro-button",
             }
         )
     return items
@@ -227,12 +227,12 @@ def _icon_data_uri(path: Path | None) -> str:
 
 
 def _dock_icon_html(item_id: str, conf: dict[str, Any]) -> str:
-    icons = conf.get("bingsu_reviewer_dock_icons")
+    icons = conf.get("onigiri_reviewer_dock_icons")
     raw = icons.get(item_id, "") if isinstance(icons, dict) else ""
     raw = str(raw or "").strip() or DEFAULT_DOCK_ICONS.get(item_id, "")
     if raw.startswith("emoji:") and raw[len("emoji:") :].strip():
         emoji = html.escape(raw[len("emoji:") :].strip())
-        return f'<span class="bingsu-dock-glyph is-emoji" aria-hidden="true">{emoji}</span>'
+        return f'<span class="onigiri-dock-glyph is-emoji" aria-hidden="true">{emoji}</span>'
     path = _resolve_icon_file(raw)
     if path is None:
         default_raw = DEFAULT_DOCK_ICONS.get(item_id, "")
@@ -241,7 +241,7 @@ def _dock_icon_html(item_id: str, conf: dict[str, Any]) -> str:
     uri = _icon_data_uri(path)
     if uri:
         return (
-            '<span class="bingsu-dock-glyph" '
+            '<span class="onigiri-dock-glyph" '
             f'style="-webkit-mask-image: url(\'{uri}\'); mask-image: url(\'{uri}\');" '
             'aria-hidden="true"></span>'
         )
@@ -249,8 +249,8 @@ def _dock_icon_html(item_id: str, conf: dict[str, Any]) -> str:
 
 
 def resolve_icon_colors(item_id: str, conf: dict[str, Any]) -> tuple[str, str]:
-    light_map = conf.get("bingsu_reviewer_dock_icon_colors_light")
-    dark_map = conf.get("bingsu_reviewer_dock_icon_colors_dark")
+    light_map = conf.get("onigiri_reviewer_dock_icon_colors_light")
+    dark_map = conf.get("onigiri_reviewer_dock_icon_colors_dark")
     raw_light = light_map.get(item_id) if isinstance(light_map, dict) else None
     raw_dark = dark_map.get(item_id) if isinstance(dark_map, dict) else None
     return (
@@ -260,12 +260,12 @@ def resolve_icon_colors(item_id: str, conf: dict[str, Any]) -> tuple[str, str]:
 
 
 def resolve_goo_palette(conf: dict[str, Any]) -> dict[str, str]:
-    theme_mode = str(conf.get("bingsu_web_rdock_goo_theme_mode", "separate") or "separate").strip().lower()
-    goo_light = _normalize_hex_color(conf.get("bingsu_reviewer_dock_goo_color_light"), DEFAULT_GOO_COLOR_LIGHT)
+    theme_mode = str(conf.get("onigiri_web_rdock_goo_theme_mode", "separate") or "separate").strip().lower()
+    goo_light = _normalize_hex_color(conf.get("onigiri_reviewer_dock_goo_color_light"), DEFAULT_GOO_COLOR_LIGHT)
     if theme_mode == "single":
         goo_dark = goo_light
     else:
-        goo_dark = _normalize_hex_color(conf.get("bingsu_reviewer_dock_goo_color_dark"), DEFAULT_GOO_COLOR_DARK)
+        goo_dark = _normalize_hex_color(conf.get("onigiri_reviewer_dock_goo_color_dark"), DEFAULT_GOO_COLOR_DARK)
     return {
         "goo_light": goo_light,
         "goo_dark": goo_dark,
@@ -346,18 +346,18 @@ def generate_top_bar_html_and_css(
     info = _header_info_parts(conf, include_overview_class=include_overview_class)
     items = _dock_action_items(conf)
     dock_css = _read_dock_css_text()
-    full_css = base_css + f'\n<style id="bingsu-reviewer-dock-style">\n{dock_css}\n</style>'
+    full_css = base_css + f'\n<style id="onigiri-reviewer-dock-style">\n{dock_css}\n</style>'
 
     if mode == "minimal":
-        buttons_html = _render_icon_buttons(items, "bingsu-reviewer-button is-icon-only", conf)
+        buttons_html = _render_icon_buttons(items, "onigiri-reviewer-button is-icon-only", conf)
         prog_left = info["progress_html"] if info["progress_position"] == "left" else ""
         prog_right = info["progress_html"] if info["progress_position"] == "right" else ""
         header_html = f"""
-        <div id="bingsu-reviewer-header" class="header is-minimal">
-            <div class="bingsu-reviewer-header-buttons">
+        <div id="onigiri-reviewer-header" class="header is-minimal">
+            <div class="onigiri-reviewer-header-buttons">
                 {prog_left}
                 {buttons_html}
-                <span id="bingsu-reviewer-external-actions" style="display: contents">{info["external_html"]}</span>
+                <span id="onigiri-reviewer-external-actions" style="display: contents">{info["external_html"]}</span>
                 {info["restaurant_chip_html"]}
                 {prog_right}
             </div>
@@ -366,7 +366,7 @@ def generate_top_bar_html_and_css(
         return header_html, full_css
 
     # mode == "island"
-    dock_items_html = _render_icon_buttons(items, "bingsu-dock-item", conf)
+    dock_items_html = _render_icon_buttons(items, "onigiri-dock-item", conf)
     goo = resolve_goo_palette(conf)
     header_style = (
         f"--rd-goo-light: {goo['goo_light']}; "
@@ -378,29 +378,29 @@ def generate_top_bar_html_and_css(
     prog_right = info["progress_html"] if info["progress_position"] == "right" else ""
     info_blocks = "".join(part for part in (prog_left, info["restaurant_chip_html"], prog_right) if part.strip())
     info_section = (
-        f'<span class="bingsu-dock-divider" aria-hidden="true"></span>'
-        f'<div class="bingsu-island-info">{info_blocks}</div>'
+        f'<span class="onigiri-dock-divider" aria-hidden="true"></span>'
+        f'<div class="onigiri-island-info">{info_blocks}</div>'
         if info_blocks
         else ""
     )
     header_html = f"""
-    <div id="bingsu-reviewer-header" class="header is-island" style="{header_style}">
-        <div class="bingsu-island-shell">
-            <span class="bingsu-island-surface" aria-hidden="true"></span>
-            <div class="bingsu-island-bar">
-                <div class="bingsu-reviewer-header-buttons">
-                    <nav class="bingsu-rubber-dock" aria-label="Study dock">
-                        <i class="bingsu-dock-indicator" aria-hidden="true"></i>
+    <div id="onigiri-reviewer-header" class="header is-island" style="{header_style}">
+        <div class="onigiri-island-shell">
+            <span class="onigiri-island-surface" aria-hidden="true"></span>
+            <div class="onigiri-island-bar">
+                <div class="onigiri-reviewer-header-buttons">
+                    <nav class="onigiri-rubber-dock" aria-label="Study dock">
+                        <i class="onigiri-dock-indicator" aria-hidden="true"></i>
                         {dock_items_html}
-                        <span id="bingsu-reviewer-external-actions" style="display: contents">{info["external_html"]}</span>
-                        <div class="bingsu-dock-ink" aria-hidden="true"></div>
-                        <span class="bingsu-dock-tip" aria-hidden="true"></span>
+                        <span id="onigiri-reviewer-external-actions" style="display: contents">{info["external_html"]}</span>
+                        <div class="onigiri-dock-ink" aria-hidden="true"></div>
+                        <span class="onigiri-dock-tip" aria-hidden="true"></span>
                     </nav>
                     {info_section}
                 </div>
             </div>
-            <div class="bingsu-island-notice" aria-live="polite">
-                <div class="bingsu-island-notice-inner"></div>
+            <div class="onigiri-island-notice" aria-live="polite">
+                <div class="onigiri-island-notice-inner"></div>
             </div>
         </div>
     </div>
@@ -425,21 +425,21 @@ def build_shadow_header_payload(
         return mode, "", ""
 
     shadow_css = (
-        patcher.generate_scoped_main_font_css(addon_package, "#bingsu-reviewer-header")
+        patcher.generate_scoped_main_font_css(addon_package, "#onigiri-reviewer-header")
         + patcher.generate_box_effect_button_vars_css(
             conf,
-            selector="#bingsu-reviewer-header",
-            night_selector=":host(.night-mode) #bingsu-reviewer-header",
+            selector="#onigiri-reviewer-header",
+            night_selector=":host(.night-mode) #onigiri-reviewer-header",
         )
         + top_bar_css
     )
     shadow_css = shadow_css.replace(
-        ".night_mode #bingsu-reviewer-header",
-        ":host(.night-mode) #bingsu-reviewer-header",
+        ".night_mode #onigiri-reviewer-header",
+        ":host(.night-mode) #onigiri-reviewer-header",
     )
     shadow_css = shadow_css.replace(
-        ".night_mode .bingsu-island-shell",
-        ":host(.night-mode) .bingsu-island-shell",
+        ".night_mode .onigiri-island-shell",
+        ":host(.night-mode) .onigiri-island-shell",
     )
     shadow_css = re.sub(r"@font-face\s*\{[^{}]*\}", "", shadow_css)
     return mode, top_bar_html, shadow_css
@@ -466,7 +466,7 @@ def refresh_live_dock(conf: dict[str, Any] | None = None) -> None:
             return
         mode, header_html, shadow_css = build_shadow_header_payload(addon_package, conf)
         reviewer_web.eval(
-            "window.BingsuReviewerDock && window.BingsuReviewerDock.replaceHeader("
+            "window.OnigiriReviewerDock && window.OnigiriReviewerDock.replaceHeader("
             f"{json.dumps(header_html)}, {json.dumps(shadow_css)}, {json.dumps(mode)});"
         )
         return
@@ -480,6 +480,6 @@ def refresh_live_dock(conf: dict[str, Any] | None = None) -> None:
         conf, include_overview_class=True
     )
     overview_web.eval(
-        "window.BingsuReviewerDock && window.BingsuReviewerDock.replaceHeader("
+        "window.OnigiriReviewerDock && window.OnigiriReviewerDock.replaceHeader("
         f"{json.dumps(header_html)}, {json.dumps(top_bar_css)}, {json.dumps(mode)});"
     )

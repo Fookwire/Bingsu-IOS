@@ -155,9 +155,9 @@
         iconSVG("submit", "ba-side-newdeck-icon--submit") +
       '</span>' +
       '<span class="ba-side-newdeck-swap">' +
-        window.bingsuTemplate('<span class="ba-side-newdeck-label">New deck</span>') +
+        window.onigiriTemplate('<span class="ba-side-newdeck-label">New deck</span>') +
         '<input type="text" class="ba-side-newdeck-input" autocomplete="off" ' +
-          window.bingsuTemplate('spellcheck="false" placeholder="Name a deck…" tabindex="-1" />') +
+          window.onigiriTemplate('spellcheck="false" placeholder="Name a deck…" tabindex="-1" />') +
       '</span>';
 
     var input = row.querySelector(".ba-side-newdeck-input");
@@ -235,11 +235,11 @@
 
   // ---- active-cards donut ----------------------------------------------- //
   var DONUT_STATES = [
-    { key: "new",        label: window.bingsuText("New"),        cls: "new" },
-    { key: "learning",   label: window.bingsuText("Learning"),   cls: "learning" },
-    { key: "relearning", label: window.bingsuText("Relearning"), cls: "relearning" },
-    { key: "young",      label: window.bingsuText("Young"),      cls: "young" },
-    { key: "mature",     label: window.bingsuText("Mature"),     cls: "mature" },
+    { key: "new",        label: window.onigiriText("New"),        cls: "new" },
+    { key: "learning",   label: window.onigiriText("Learning"),   cls: "learning" },
+    { key: "relearning", label: window.onigiriText("Relearning"), cls: "relearning" },
+    { key: "young",      label: window.onigiriText("Young"),      cls: "young" },
+    { key: "mature",     label: window.onigiriText("Mature"),     cls: "mature" },
   ];
   function openDonutState(key) {
     send("donut-open:" + key);
@@ -256,7 +256,7 @@
     }
     wrap.innerHTML =
       '<div class="ba-side-section-title">' +
-        window.bingsuTemplate('<span>Active cards</span>') +
+        window.onigiriTemplate('<span>Active cards</span>') +
       '</div>' +
       '<div class="ba-side-donut-row">' +
         '<div class="ba-side-donut-ring" data-donut-ring>' +
@@ -363,11 +363,11 @@
     }
     wrap.innerHTML =
       '<div class="ba-side-section-title">' +
-        window.bingsuTemplate('<span>Progress</span>') +
-        window.bingsuTemplate('<span class="ba-side-progress-meta"><b data-x="streak">—</b>d streak</span>') +
+        window.onigiriTemplate('<span>Progress</span>') +
+        window.onigiriTemplate('<span class="ba-side-progress-meta"><b data-x="streak">—</b>d streak</span>') +
       '</div>' +
       '<div class="ba-side-progress-chart">' + bars + '</div>' +
-      window.bingsuTemplate('<div class="ba-side-progress-days"><span>14 days ago</span><span>Today</span></div>');
+      window.onigiriTemplate('<div class="ba-side-progress-days"><span>14 days ago</span><span>Today</span></div>');
     return wrap;
   }
 
@@ -394,8 +394,8 @@
     wrap.className = "ba-side-tasks-block";
     wrap.innerHTML =
       '<div class="ba-side-section-title">' +
-        window.bingsuTemplate('<span>Tasks</span>') +
-        window.bingsuTemplate('<button type="button" class="ba-side-tasks-add-btn" aria-label="Add task">') +
+        window.onigiriTemplate('<span>Tasks</span>') +
+        window.onigiriTemplate('<button type="button" class="ba-side-tasks-add-btn" aria-label="Add task">') +
           '<svg class="ba-side-tasks-add-icon" viewBox="0 0 24 24" fill="none" ' +
             'stroke="currentColor" stroke-width="2" stroke-linecap="round" ' +
             'stroke-linejoin="round" aria-hidden="true">' +
@@ -404,7 +404,7 @@
         '</button>' +
       '</div>' +
       '<form class="ba-side-tasks-form" style="display:none;">' +
-        window.bingsuTemplate('<input type="text" class="ba-side-tasks-input" placeholder="New task…" maxlength="200" />') +
+        window.onigiriTemplate('<input type="text" class="ba-side-tasks-input" placeholder="New task…" maxlength="200" />') +
       '</form>' +
       '<ul class="ba-side-tasks-list"></ul>';
 
@@ -433,14 +433,14 @@
   function buildReadyToGo() {
     var wrap = document.createElement("div");
     wrap.className = "ba-side-ready-block";
-    wrap.innerHTML = window.bingsuTemplate('<div class="ba-side-section-title"><span>Ready to go</span></div>');
+    wrap.innerHTML = window.onigiriTemplate('<div class="ba-side-section-title"><span>Ready to go</span></div>');
     var actions = document.createElement("div");
     actions.className = "ba-side-ready-actions";
     [
-      { cmd: "ready:inbox", label: window.bingsuText("Inbox"), icon: "ready_inbox" },
-      { cmd: "ready:warm_up", label: window.bingsuText("Warm up"), icon: "ready_warm_up" },
-      { cmd: "ready:today", label: window.bingsuText("Today"), icon: "ready_today" },
-      { cmd: "ready:cool_down", label: window.bingsuText("Cool-Down"), icon: "ready_cool_down" }
+      { cmd: "ready:inbox", label: window.onigiriText("Inbox"), icon: "ready_inbox" },
+      { cmd: "ready:warm_up", label: window.onigiriText("Warm up"), icon: "ready_warm_up" },
+      { cmd: "ready:today", label: window.onigiriText("Today"), icon: "ready_today" },
+      { cmd: "ready:cool_down", label: window.onigiriText("Cool-Down"), icon: "ready_cool_down" }
     ].forEach(function (it) { actions.appendChild(makeRow(it)); });
     wrap.appendChild(actions);
     return wrap;
@@ -453,7 +453,7 @@
     if (!tasks || !tasks.length) {
       var empty = document.createElement("li");
       empty.className = "ba-side-tasks-empty";
-      empty.textContent = window.bingsuText("No tasks yet.");
+      empty.textContent = window.onigiriText("No tasks yet.");
       list.appendChild(empty);
       return;
     }
@@ -465,7 +465,7 @@
         var box = document.createElement("button");
         box.type = "button";
         box.className = "ba-side-task-box";
-        box.setAttribute("aria-label", t.done ? window.bingsuText("Mark not done") : window.bingsuText("Mark done"));
+        box.setAttribute("aria-label", t.done ? window.onigiriText("Mark not done") : window.onigiriText("Mark done"));
         box.setAttribute("aria-pressed", t.done ? "true" : "false");
         box.addEventListener("click", function () { send("task-toggle:" + t.id); });
 
@@ -476,7 +476,7 @@
         var del = document.createElement("button");
         del.type = "button";
         del.className = "ba-side-task-del";
-        del.setAttribute("aria-label", window.bingsuText("Remove task"));
+        del.setAttribute("aria-label", window.onigiriText("Remove task"));
         del.innerHTML =
           '<svg class="ba-side-task-del-icon" viewBox="0 0 24 24" fill="none" ' +
             'stroke="currentColor" stroke-width="2" stroke-linecap="round" ' +
@@ -499,7 +499,7 @@
     var sidebarOpts = (window.__baOpts && window.__baOpts.sidebar) || {};
     var heroStat = sidebarOpts.heroStat;
     if (heroStat !== "new" && heroStat !== "learn") heroStat = "due";
-    var HERO_LABELS = { due: window.bingsuText("Due Today"), new: window.bingsuText("New Cards"), learn: window.bingsuText("In Learning") };
+    var HERO_LABELS = { due: window.onigiriText("Due Today"), new: window.onigiriText("New Cards"), learn: window.onigiriText("In Learning") };
 
     aside.innerHTML = ''
       // Hero — a single configurable stat (Settings → sidebar_hero_stat).
@@ -507,7 +507,7 @@
       +   '<div class="ba-side-hero-label">' + HERO_LABELS[heroStat] + '</div>'
       +   '<div class="ba-side-hero-num">'
       +     '<span class="ba-side-hero-n" data-x="' + heroStat + '">—</span>'
-      +     window.bingsuTemplate('<span class="ba-side-hero-unit">cards</span>')
+      +     window.onigiriTemplate('<span class="ba-side-hero-unit">cards</span>')
       +   '</div>'
       + '</div>';
 
@@ -526,7 +526,7 @@
     var cmdk = document.createElement("button");
     cmdk.type = "button";
     cmdk.className = "ba-side-cmdk";
-    cmdk.setAttribute("aria-label", window.bingsuText("Open command palette"));
+    cmdk.setAttribute("aria-label", window.onigiriText("Open command palette"));
     // Mac users see ⌘K; everyone else sees Ctrl+K (both bindings fire).
     var modGlyph = /Mac|iPod|iPhone|iPad/i.test(navigator.platform || "")
       ? '<span class="ba-side-cmdk-key">⌘</span>'
@@ -537,7 +537,7 @@
         'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
         '<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.3-4.3"/>' +
       '</svg>' +
-      window.bingsuTemplate('<span class="ba-side-cmdk-l">Search anything…</span>') +
+      window.onigiriTemplate('<span class="ba-side-cmdk-l">Search anything…</span>') +
       '<span class="ba-side-cmdk-kbd">' +
         modGlyph +
         '<span class="ba-side-cmdk-key">K</span>' +
@@ -559,13 +559,13 @@
     var actions = document.createElement("nav");
     actions.className = "ba-side-actions-grid";
     [
-      { cmd: "decks",  label: window.bingsuText("Decks"),  key: "D", active: true },
-      { cmd: "add",    label: window.bingsuText("Add"),    key: "A" },
-      { cmd: "browse", label: window.bingsuText("Browse"), key: "B" },
-      { cmd: "stats",  label: window.bingsuText("Stats"),  key: "T" },
+      { cmd: "decks",  label: window.onigiriText("Decks"),  key: "D", active: true },
+      { cmd: "add",    label: window.onigiriText("Add"),    key: "A" },
+      { cmd: "browse", label: window.onigiriText("Browse"), key: "B" },
+      { cmd: "stats",  label: window.onigiriText("Stats"),  key: "T" },
     ].forEach(function (it) { actions.appendChild(makeRow(it)); });
     actions.appendChild(makeNewDeckRow());
-    actions.appendChild(makeRow({ cmd: "import", label: window.bingsuText("Import file"), cls: "ba-side-act" }));
+    actions.appendChild(makeRow({ cmd: "import", label: window.onigiriText("Import file"), cls: "ba-side-act" }));
     aside.appendChild(actions);
 
     // Personal planning and study charts follow the navigation, mirroring
@@ -579,8 +579,8 @@
     var foot = document.createElement("div");
     foot.className = "ba-side-foot";
     [
-      { cmd: "sync",     label: window.bingsuText("Sync"),     key: window.bingsuText("Y"), dot: true },
-      { cmd: "settings", label: window.bingsuText("Settings"), key: ",", cls: "ba-side-settings" },
+      { cmd: "sync",     label: window.onigiriText("Sync"),     key: window.onigiriText("Y"), dot: true },
+      { cmd: "settings", label: window.onigiriText("Settings"), key: ",", cls: "ba-side-settings" },
     ].forEach(function (it) { foot.appendChild(makeRow(it)); });
     aside.appendChild(foot);
 
@@ -649,9 +649,9 @@
     else if (state === "full") el.classList.add("ba-sync-full");
     else if (state === "active") {
       el.classList.add("ba-sync-active");
-      if (text && !revealing) text.textContent = window.bingsuText("Syncing…");
+      if (text && !revealing) text.textContent = window.onigiriText("Syncing…");
     } else if (!revealing && text) {
-      text.textContent = window.bingsuText("Sync");
+      text.textContent = window.onigiriText("Sync");
     }
   }
 
@@ -676,8 +676,8 @@
     el.setAttribute("data-sync-result", kind);
     // Different reveals for "real changes happened" vs "heartbeat / no
     // changes" vs "error" — see styles below for the actual motion.
-    if (kind === "ok" && text) text.textContent = window.bingsuText("Synced");
-    else if (kind === "error" && text) text.textContent = window.bingsuText("Sync failed");
+    if (kind === "ok" && text) text.textContent = window.onigiriText("Synced");
+    else if (kind === "error" && text) text.textContent = window.onigiriText("Sync failed");
     // "noop" — keep the label as it was (usually "Syncing…"); we let it
     // fade back to "Sync" with the icon's settle bounce.
 
@@ -690,7 +690,7 @@
       el.removeAttribute("data-sync-added");
       el.removeAttribute("data-sync-removed");
       var t = el.querySelector(".ba-side-l-text");
-      if (t) t.textContent = window.bingsuText("Sync");
+      if (t) t.textContent = window.onigiriText("Sync");
     }, hold);
   }
 

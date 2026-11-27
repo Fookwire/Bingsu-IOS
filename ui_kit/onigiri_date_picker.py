@@ -1,4 +1,4 @@
-"""A modern, frameless date-picker popup matching BingsuColorDialog's look
+"""A modern, frameless date-picker popup matching OnigiriColorDialog's look
 and interaction model (rounded card, soft shadow, click-outside/Escape to
 dismiss) so pickers across the add-on feel consistent."""
 
@@ -26,7 +26,7 @@ from aqt.qt import (
 )
 from PyQt6.QtCore import QEvent, QEventLoop, QLocale, pyqtSignal
 
-from .bingsu_color_picker import _is_dark_mode, _IconButton, REMOVE_ICON_PATH
+from .onigiri_color_picker import _is_dark_mode, _IconButton, REMOVE_ICON_PATH
 from ..core.translations import current_locale
 
 POPUP_WIDTH = 280
@@ -101,7 +101,7 @@ class _DayCell(QToolButton):
         super().leaveEvent(event)
 
 
-class _BingsuDatePopup(QFrame):
+class _OnigiriDatePopup(QFrame):
     finished = pyqtSignal(object, bool)
 
     def __init__(self, initial_date, parent=None, anchor=None, accent="#00A982", min_date=None):
@@ -116,7 +116,7 @@ class _BingsuDatePopup(QFrame):
         self._year = self._selected.year
         self._month = self._selected.month
 
-        self.setObjectName("BingsuDatePopup")
+        self.setObjectName("OnigiriDatePopup")
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.setFixedWidth(POPUP_WIDTH)
@@ -124,7 +124,7 @@ class _BingsuDatePopup(QFrame):
         bg = "#28282A" if self._dark else "#FFFFFF"
         border = "#3F3F44" if self._dark else "#F1F1F1"
         self.setStyleSheet(
-            f"QFrame#BingsuDatePopup {{ background-color: {bg}; border: 1px solid {border}; border-radius: 22px; }}"
+            f"QFrame#OnigiriDatePopup {{ background-color: {bg}; border: 1px solid {border}; border-radius: 22px; }}"
         )
 
         shadow = QGraphicsDropShadowEffect(self)
@@ -341,7 +341,7 @@ def _tr_today() -> str:
         return "Today"
 
 
-class BingsuDateDialog:
+class OnigiriDateDialog:
     @staticmethod
     def getDate(initial_date, parent=None, anchor=None, accent="#00A982", min_date=None):
         app = QApplication.instance()
@@ -356,7 +356,7 @@ class BingsuDateDialog:
 
         result = {"date": initial_date, "ok": False}
         loop = QEventLoop()
-        popup = _BingsuDatePopup(initial_date, root, anchor=anchor, accent=accent, min_date=min_date)
+        popup = _OnigiriDatePopup(initial_date, root, anchor=anchor, accent=accent, min_date=min_date)
 
         def finish(value, accepted):
             result["date"] = value

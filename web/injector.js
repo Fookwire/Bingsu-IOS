@@ -14,8 +14,8 @@
     }
 
     function T(key, fallback) {
-        if (window.BingsuI18n && typeof BingsuI18n.t === 'function') {
-            return BingsuI18n.t(key, fallback);
+        if (window.OnigiriI18n && typeof OnigiriI18n.t === 'function') {
+            return OnigiriI18n.t(key, fallback);
         }
         return fallback;
     }
@@ -49,7 +49,7 @@
     }
 
     function getSidebarButtonLayout() {
-        const configLayout = window.BINGSU_CONFIG && window.BINGSU_CONFIG.sidebarButtonLayout;
+        const configLayout = window.ONIGIRI_CONFIG && window.ONIGIRI_CONFIG.sidebarButtonLayout;
         const visible = Array.isArray(configLayout && configLayout.visible) ? configLayout.visible : [];
         const more = Array.isArray(configLayout && configLayout.more)
             ? configLayout.more : ['get_shared', 'create_deck', 'import_file'];
@@ -63,7 +63,7 @@
         if (!toolbar || !expandedContent) return;
 
         toolbar.classList.add('sidebar-actions-inline');
-        const actionsSection = expandedContent.querySelector('.bingsu-sidebar-actions-section');
+        const actionsSection = expandedContent.querySelector('.onigiri-sidebar-actions-section');
         if (actionsSection) {
             actionsSection.appendChild(toolbar);
         } else if (toolbar.parentElement !== expandedContent) {
@@ -75,10 +75,10 @@
 
     function setupActionButtons() {
         // Check config
-        if (typeof window.BINGSU_CONFIG === 'undefined') return;
+        if (typeof window.ONIGIRI_CONFIG === 'undefined') return;
 
         // Only show toolbar icons if mode is 'collapsed'
-        if (window.BINGSU_CONFIG.sidebarActionsMode !== 'collapsed') {
+        if (window.ONIGIRI_CONFIG.sidebarActionsMode !== 'collapsed') {
             return;
         }
 
@@ -86,11 +86,11 @@
         if (!toolbar) return;
         moveToolbarToActionsSection(toolbar);
 
-        const pkg = window.BINGSU_CONFIG.addonPackage || '1011095603';
+        const pkg = window.ONIGIRI_CONFIG.addonPackage || '1011095603';
         const iconBase = `/_addons/${pkg}/system_files/system_icons/unavailable_for_users/`;
         const pickableIconBase = `/_addons/${pkg}/system_files/system_icons/available_for_users/`;
         const userIconBase = `/_addons/${pkg}/user_files/icons/`;
-        const collapsedIcons = window.BINGSU_CONFIG.collapsedIcons || {};
+        const collapsedIcons = window.ONIGIRI_CONFIG.collapsedIcons || {};
 
         // Map action id -> default system icon filename
         const defaultIcons = {
@@ -123,11 +123,11 @@
             { id: 'browse', cmd: 'browse', title: T('browse', 'Browser') },
             { id: 'stats', cmd: 'stats', title: T('stats', 'Stats') },
             { id: 'sync', cmd: 'sync', title: T('sync', 'Sync') },
-            { id: 'settings', cmd: 'openBingsuSettings', title: T('settings', 'Settings') },
-            { id: 'gamification', cmd: 'openGamificationSettings', title: T('bingsu_games', 'Bingsu Games') },
+            { id: 'settings', cmd: 'openOnigiriSettings', title: T('settings', 'Settings') },
+            { id: 'gamification', cmd: 'openGamificationSettings', title: T('onigiri_games', 'Onigiri Games') },
             { id: 'more', cmd: null, title: T('more', 'More') },
             { id: 'get_shared', cmd: 'shared', title: T('get_shared', 'Get Shared') },
-            { id: 'create_deck', cmd: 'bingsu_create_deck', title: T('create_deck', 'Create Deck') },
+            { id: 'create_deck', cmd: 'onigiri_create_deck', title: T('create_deck', 'Create Deck') },
             { id: 'import_file', cmd: 'import', title: T('import_file', 'Import File') }
         ];
 
@@ -172,7 +172,7 @@
 
             toolbar.appendChild(btn);
 
-            if (action.id === 'sync' && window.BINGSU_SYNC_STATUS === 'sync') {
+            if (action.id === 'sync' && window.ONIGIRI_SYNC_STATUS === 'sync') {
                 btn.classList.add('sync-needed');
             }
         });
@@ -196,7 +196,7 @@
 
         const allItems = [
             { label: T('get_shared', 'Get Shared'), id: 'get_shared', cmd: 'shared' },
-            { label: T('create_deck', 'Create Deck'), id: 'create_deck', cmd: 'bingsu_create_deck' },
+            { label: T('create_deck', 'Create Deck'), id: 'create_deck', cmd: 'onigiri_create_deck' },
             { label: T('import_file', 'Import File'), id: 'import_file', cmd: 'import' }
         ];
         const itemById = Object.fromEntries(allItems.map(item => [item.id, item]));
@@ -249,14 +249,14 @@
     }
 
     function setupArchivedHomeButton() {
-        if (typeof window.BINGSU_CONFIG === 'undefined') return;
+        if (typeof window.ONIGIRI_CONFIG === 'undefined') return;
 
         const actions = document.querySelector('#deck-list-header .deck-header-actions');
-        const sortButton = document.getElementById('bingsu-sort-toolbar-btn');
+        const sortButton = document.getElementById('onigiri-sort-toolbar-btn');
         const container = document.querySelector('.container.modern-main-menu');
         const sidebar = document.querySelector('.sidebar-left');
-        const shouldShow = window.BINGSU_CONFIG.sidebarActionsMode === 'archived';
-        const addonPackage = window.BINGSU_CONFIG.addonPackage || '';
+        const shouldShow = window.ONIGIRI_CONFIG.sidebarActionsMode === 'archived';
+        const addonPackage = window.ONIGIRI_CONFIG.addonPackage || '';
         const homeIconUrl = addonPackage
             ? `/_addons/${addonPackage}/system_files/system_icons/unavailable_for_users/home.svg`
             : '';
@@ -266,7 +266,7 @@
 
         if (!actions || !sortButton) return;
 
-        let homeButton = document.getElementById('bingsu-home-toolbar-btn');
+        let homeButton = document.getElementById('onigiri-home-toolbar-btn');
 
         if (!shouldShow) {
             if (homeButton) homeButton.remove();
@@ -275,7 +275,7 @@
 
         if (!homeButton) {
             homeButton = document.createElement('span');
-            homeButton.id = 'bingsu-home-toolbar-btn';
+            homeButton.id = 'onigiri-home-toolbar-btn';
             homeButton.className = 'deck-header-btn';
             homeButton.setAttribute('role', 'button');
         homeButton.tabIndex = 0;
@@ -284,8 +284,8 @@
             homeButton.title = T('home', 'Home');
             homeButton.innerHTML = '<i class="home-btn-icon"></i>';
             homeButton.addEventListener('click', (event) => {
-                if (window.BingsuEngine && typeof window.BingsuEngine.showHomeMenu === 'function') {
-                    window.BingsuEngine.showHomeMenu(homeButton, event);
+                if (window.OnigiriEngine && typeof window.OnigiriEngine.showHomeMenu === 'function') {
+                    window.OnigiriEngine.showHomeMenu(homeButton, event);
                 }
             });
         }
@@ -316,8 +316,8 @@
         const container = document.querySelector('.container.modern-main-menu');
         if (!header || !label || !container) return;
 
-        if (!sidebar.dataset.bingsuBaseSidebarOnly) {
-            sidebar.dataset.bingsuBaseSidebarOnly = sidebar.classList.contains('sidebar-only-mode') ? '1' : '0';
+        if (!sidebar.dataset.onigiriBaseSidebarOnly) {
+            sidebar.dataset.onigiriBaseSidebarOnly = sidebar.classList.contains('sidebar-only-mode') ? '1' : '0';
         }
 
         document.querySelectorAll('.deck-focus-btn, .deck-header-focus-btn').forEach(btn => btn.remove());
@@ -340,7 +340,7 @@
             modeGroup.insertBefore(label, modeGroup.firstChild);
         }
 
-        const pkg = (window.BINGSU_CONFIG && window.BINGSU_CONFIG.addonPackage) || '1011095603';
+        const pkg = (window.ONIGIRI_CONFIG && window.ONIGIRI_CONFIG.addonPackage) || '1011095603';
         const iconBase = `/_addons/${pkg}/system_files/system_icons/unavailable_for_users/`;
         const modeIcons = [
             { state: 0, icon: 'sidebar.svg', label: 'Default sidebar' },
@@ -379,7 +379,7 @@
         });
 
         const restoreBaseSidebarOnly = () => {
-            sidebar.classList.toggle('sidebar-only-mode', sidebar.dataset.bingsuBaseSidebarOnly === '1');
+            sidebar.classList.toggle('sidebar-only-mode', sidebar.dataset.onigiriBaseSidebarOnly === '1');
         };
 
         const applyState = (state, options) => {
@@ -390,8 +390,8 @@
             const isStackedLayout = nextState === 4;
 
             sidebar.classList.toggle('deck-focus-mode', isFocusMode);
-            container.classList.toggle('bingsu-cycle-sidebar-only', isTemporarySidebarOnly);
-            container.classList.toggle('bingsu-cycle-stacked', isStackedLayout);
+            container.classList.toggle('onigiri-cycle-sidebar-only', isTemporarySidebarOnly);
+            container.classList.toggle('onigiri-cycle-stacked', isStackedLayout);
             if (isTemporarySidebarOnly || isStackedLayout) {
                 sidebar.classList.add('sidebar-only-mode');
             } else {
@@ -402,18 +402,18 @@
             }
 
             header.classList.toggle('deck-focus-active', isFocusMode);
-            header.dataset.bingsuDeckCycleState = String(nextState);
+            header.dataset.onigiriDeckCycleState = String(nextState);
             modePalette.querySelectorAll('.deck-focus-mode-icon-btn').forEach((button) => {
                 const isActive = button.dataset.deckCycleState === String(nextState);
                 button.classList.toggle('active', isActive);
                 button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
             });
             updateDeckFocusLayout();
-            if (typeof window.bingsuUpdateSidebarEdgeToggle === 'function') {
-                window.bingsuUpdateSidebarEdgeToggle();
+            if (typeof window.onigiriUpdateSidebarEdgeToggle === 'function') {
+                window.onigiriUpdateSidebarEdgeToggle();
             }
-            if (window.BingsuEngine && typeof window.BingsuEngine.updateMultiSelectionVisuals === 'function') {
-                window.BingsuEngine.updateMultiSelectionVisuals();
+            if (window.OnigiriEngine && typeof window.OnigiriEngine.updateMultiSelectionVisuals === 'function') {
+                window.OnigiriEngine.updateMultiSelectionVisuals();
             }
             if (opts.persistFocus !== false && typeof pycmd === 'function') {
                 pycmd(`saveDeckCycleState:${nextState}`);
@@ -422,10 +422,10 @@
         };
 
         const currentState = () => {
-            if (container.classList.contains('bingsu-cycle-stacked')) {
+            if (container.classList.contains('onigiri-cycle-stacked')) {
                 return 4;
             }
-            if (container.classList.contains('bingsu-cycle-sidebar-only')) {
+            if (container.classList.contains('onigiri-cycle-sidebar-only')) {
                 return sidebar.classList.contains('deck-focus-mode') ? 2 : 3;
             }
             return sidebar.classList.contains('deck-focus-mode') ? 1 : 0;
@@ -439,8 +439,8 @@
             applyState((currentState() + 1) % 5);
         };
 
-        if (!label.dataset.bingsuDeckViewCycleBound) {
-            label.dataset.bingsuDeckViewCycleBound = 'true';
+        if (!label.dataset.onigiriDeckViewCycleBound) {
+            label.dataset.onigiriDeckViewCycleBound = 'true';
             label.addEventListener('click', cycle);
             label.addEventListener('keydown', (event) => {
                 if (event.key !== 'Enter' && event.key !== ' ') return;
@@ -449,8 +449,8 @@
         }
 
         modePalette.querySelectorAll('.deck-focus-mode-icon-btn').forEach((button) => {
-            if (button.dataset.bingsuDeckModeBound) return;
-            button.dataset.bingsuDeckModeBound = 'true';
+            if (button.dataset.onigiriDeckModeBound) return;
+            button.dataset.onigiriDeckModeBound = 'true';
             button.addEventListener('click', (event) => {
                 event.preventDefault();
                 event.stopPropagation();
@@ -467,7 +467,7 @@
         // Sidebar position change from Settings until Anki was restarted.
         let restoredState = sidebar.classList.contains('deck-focus-mode') ? 1 : 0;
         const configuredState = Number.parseInt(
-            window.BINGSU_CONFIG && window.BINGSU_CONFIG.deckCycleState,
+            window.ONIGIRI_CONFIG && window.ONIGIRI_CONFIG.deckCycleState,
             10
         );
         if (configuredState >= 0 && configuredState <= 4) {
@@ -480,9 +480,9 @@
         const handle = document.querySelector('.resize-handle');
         const sidebarEl = document.querySelector('.sidebar-left');
         const containerEl = document.querySelector('.container.modern-main-menu');
-        if (!handle || !sidebarEl || handle.dataset.bingsuSetup) return;
-        if (window.BINGSU_CONFIG && window.BINGSU_CONFIG.sidebarWidthPinned) return;
-        handle.dataset.bingsuSetup = 'true';
+        if (!handle || !sidebarEl || handle.dataset.onigiriSetup) return;
+        if (window.ONIGIRI_CONFIG && window.ONIGIRI_CONFIG.sidebarWidthPinned) return;
+        handle.dataset.onigiriSetup = 'true';
 
         let hitbox = handle.querySelector('.resize-handle-hitbox');
         if (!hitbox) {
@@ -519,8 +519,8 @@
         const defaultHeight = 520;
 
         const isStackedLayout = () => {
-            if (containerEl && containerEl.classList.contains('bingsu-cycle-stacked')) return true;
-            return !!(window.BINGSU_CONFIG && window.BINGSU_CONFIG.sidebarPosition === 'center');
+            if (containerEl && containerEl.classList.contains('onigiri-cycle-stacked')) return true;
+            return !!(window.ONIGIRI_CONFIG && window.ONIGIRI_CONFIG.sidebarPosition === 'center');
         };
 
         const isSidebarOnRight = () => {
@@ -551,9 +551,9 @@
 
         const setResizeCursor = (edges) => {
             const cursor = cursorForEdges(edges);
-            handle.style.setProperty('--bingsu-sidebar-resize-cursor', cursor);
-            const edgePill = document.getElementById('bingsu-sidebar-edge-pill');
-            if (edgePill) edgePill.style.setProperty('--bingsu-sidebar-resize-cursor', cursor);
+            handle.style.setProperty('--onigiri-sidebar-resize-cursor', cursor);
+            const edgePill = document.getElementById('onigiri-sidebar-edge-pill');
+            if (edgePill) edgePill.style.setProperty('--onigiri-sidebar-resize-cursor', cursor);
             return cursor;
         };
 
@@ -561,8 +561,8 @@
             if (!isStackedLayout()) {
                 return [isSidebarOnRight() ? 'left' : 'right'];
             }
-            const edgePill = document.getElementById('bingsu-sidebar-edge-pill');
-            const stored = (handle.dataset.bingsuResizeEdges || (edgePill && edgePill.dataset.resizeEdges) || '')
+            const edgePill = document.getElementById('onigiri-sidebar-edge-pill');
+            const stored = (handle.dataset.onigiriResizeEdges || (edgePill && edgePill.dataset.resizeEdges) || '')
                 .split(/\s+/)
                 .filter(Boolean);
             if (stored.length) return stored;
@@ -585,23 +585,23 @@
 
         const fixedWidth = (width) => {
             const nextWidth = Math.max(minWidth, Math.round(width));
-            sidebarEl.style.setProperty('--bingsu-sidebar-width', `${nextWidth}px`);
+            sidebarEl.style.setProperty('--onigiri-sidebar-width', `${nextWidth}px`);
             sidebarEl.style.setProperty('width', `${nextWidth}px`, 'important');
             sidebarEl.style.setProperty('max-width', 'none', 'important');
-            sidebarEl.dataset.bingsuLastWidth = String(nextWidth);
-            if (typeof window.bingsuUpdateSidebarEdgeToggle === 'function') {
-                window.bingsuUpdateSidebarEdgeToggle();
+            sidebarEl.dataset.onigiriLastWidth = String(nextWidth);
+            if (typeof window.onigiriUpdateSidebarEdgeToggle === 'function') {
+                window.onigiriUpdateSidebarEdgeToggle();
             }
             return nextWidth;
         };
 
         const fixedHeight = (height) => {
             const nextHeight = Math.max(minHeight, Math.round(height));
-            sidebarEl.style.setProperty('--bingsu-sidebar-height', `${nextHeight}px`);
+            sidebarEl.style.setProperty('--onigiri-sidebar-height', `${nextHeight}px`);
             sidebarEl.style.setProperty('height', `${nextHeight}px`, 'important');
-            sidebarEl.dataset.bingsuLastHeight = String(nextHeight);
-            if (typeof window.bingsuUpdateSidebarEdgeToggle === 'function') {
-                window.bingsuUpdateSidebarEdgeToggle();
+            sidebarEl.dataset.onigiriLastHeight = String(nextHeight);
+            if (typeof window.onigiriUpdateSidebarEdgeToggle === 'function') {
+                window.onigiriUpdateSidebarEdgeToggle();
             }
             return nextHeight;
         };
@@ -644,9 +644,9 @@
             resizeArmed = false;
             sidebarEl.classList.remove('is-resize-armed');
             handle.classList.remove('is-resize-armed');
-            const edgePill = document.getElementById('bingsu-sidebar-edge-pill');
+            const edgePill = document.getElementById('onigiri-sidebar-edge-pill');
             if (edgePill) edgePill.classList.remove('is-resize-armed');
-            handle.removeAttribute('data-bingsu-resize-edges');
+            handle.removeAttribute('data-onigiri-resize-edges');
         };
 
         const pointerdownHandler = (e) => {
@@ -655,10 +655,10 @@
             e.preventDefault();
             e.stopPropagation();
 
-            const edgePill = document.getElementById('bingsu-sidebar-edge-pill');
+            const edgePill = document.getElementById('onigiri-sidebar-edge-pill');
             activeResizeEdges = resolveResizeEdges(e);
             const resizeCursor = setResizeCursor(activeResizeEdges);
-            handle.dataset.bingsuResizeEdges = activeResizeEdges.join(' ');
+            handle.dataset.onigiriResizeEdges = activeResizeEdges.join(' ');
             if (edgePill) edgePill.dataset.resizeEdges = activeResizeEdges.join(' ');
             if (!resizeArmed) {
                 resizeArmed = true;
@@ -666,8 +666,8 @@
                 handle.classList.add('is-resize-armed');
                 if (edgePill) edgePill.classList.add('is-resize-armed');
                 handle.setAttribute('aria-pressed', 'true');
-                if (typeof window.bingsuUpdateSidebarEdgeToggle === 'function') {
-                    window.bingsuUpdateSidebarEdgeToggle();
+                if (typeof window.onigiriUpdateSidebarEdgeToggle === 'function') {
+                    window.onigiriUpdateSidebarEdgeToggle();
                 }
                 return;
             }
@@ -680,10 +680,10 @@
             lastClientY = startY;
             const rect = sidebarEl.getBoundingClientRect();
             const rememberedWidth = parseFloat(sidebarEl.style.width)
-                || parseFloat(sidebarEl.dataset.bingsuLastWidth)
+                || parseFloat(sidebarEl.dataset.onigiriLastWidth)
                 || defaultWidth;
             const rememberedHeight = parseFloat(sidebarEl.style.height)
-                || parseFloat(sidebarEl.dataset.bingsuLastHeight)
+                || parseFloat(sidebarEl.dataset.onigiriLastHeight)
                 || defaultHeight;
             startWidth = rect.width || rememberedWidth;
             startHeight = rect.height || rememberedHeight;
@@ -697,8 +697,8 @@
             sidebarEl.classList.add('is-resizing');
             handle.classList.add('is-resizing');
             if (edgePill) edgePill.classList.add('is-resizing');
-            if (typeof window.bingsuUpdateSidebarEdgeToggle === 'function') {
-                window.bingsuUpdateSidebarEdgeToggle();
+            if (typeof window.onigiriUpdateSidebarEdgeToggle === 'function') {
+                window.onigiriUpdateSidebarEdgeToggle();
             }
             document.body.style.userSelect = 'none';
             document.body.style.cursor = resizeCursor;
@@ -741,7 +741,7 @@
             sidebarEl.classList.remove('is-resizing');
             handle.classList.remove('is-resizing');
             handle.setAttribute('aria-pressed', 'false');
-            const edgePill = document.getElementById('bingsu-sidebar-edge-pill');
+            const edgePill = document.getElementById('onigiri-sidebar-edge-pill');
             if (edgePill) {
                 edgePill.classList.remove('is-resizing');
             }
@@ -751,8 +751,8 @@
                 clearResizeArmed();
             }
 
-            if (typeof window.bingsuUpdateSidebarEdgeToggle === 'function') {
-                window.bingsuUpdateSidebarEdgeToggle();
+            if (typeof window.onigiriUpdateSidebarEdgeToggle === 'function') {
+                window.onigiriUpdateSidebarEdgeToggle();
             }
             document.body.style.removeProperty('user-select');
             document.body.style.removeProperty('cursor');
@@ -796,7 +796,7 @@
         document.removeEventListener('pointercancel', handlers.pointerup);
         document.removeEventListener('pointerdown', handlers.documentPointerdown);
 
-        delete handle.dataset.bingsuSetup;
+        delete handle.dataset.onigiriSetup;
         setupResizeHandle();
     }
 
@@ -811,16 +811,16 @@
                 event.preventDefault();
                 event.stopPropagation();
             }
-            if (open && sidebar.classList.contains('sidebar-collapsed') && typeof window.bingsuExpandSidebar === 'function') {
-                window.bingsuExpandSidebar();
+            if (open && sidebar.classList.contains('sidebar-collapsed') && typeof window.onigiriExpandSidebar === 'function') {
+                window.onigiriExpandSidebar();
             }
             sidebar.classList.toggle('profile-sidebar-open', !!open);
-            if (typeof window.bingsuUpdateSidebarEdgeToggle === 'function') {
-                requestAnimationFrame(window.bingsuUpdateSidebarEdgeToggle);
+            if (typeof window.onigiriUpdateSidebarEdgeToggle === 'function') {
+                requestAnimationFrame(window.onigiriUpdateSidebarEdgeToggle);
             }
         }
 
-        window.BingsuProfileSidebar = {
+        window.OnigiriProfileSidebar = {
             open: (event) => setOpen(true, event),
             close: (event) => setOpen(false, event),
             toggle: (event) => setOpen(!sidebar.classList.contains('profile-sidebar-open'), event)
@@ -838,11 +838,11 @@
 
         const sidebarEl = document.querySelector('.sidebar-left');
         const legacyToggleBtn = document.querySelector('.sidebar-toggle-btn');
-        const edgeToggleBtn = document.getElementById('bingsu-sidebar-edge-toggle');
+        const edgeToggleBtn = document.getElementById('onigiri-sidebar-edge-toggle');
         const edgeToggleZone = document.querySelector('.sidebar-edge-toggle-zone');
-        const edgePill = document.getElementById('bingsu-sidebar-edge-pill');
+        const edgePill = document.getElementById('onigiri-sidebar-edge-pill');
         const sidebarWidthPinned = !!(
-            window.BINGSU_CONFIG && window.BINGSU_CONFIG.sidebarWidthPinned
+            window.ONIGIRI_CONFIG && window.ONIGIRI_CONFIG.sidebarWidthPinned
         );
         if (legacyToggleBtn) legacyToggleBtn.remove();
         if (sidebarEl) sidebarEl.classList.toggle('sidebar-width-pinned', sidebarWidthPinned);
@@ -878,8 +878,8 @@
 
         function isStackedLayout() {
             const container = document.querySelector('.container.modern-main-menu');
-            if (container && container.classList.contains('bingsu-cycle-stacked')) return true;
-            return !!(window.BINGSU_CONFIG && window.BINGSU_CONFIG.sidebarPosition === 'center');
+            if (container && container.classList.contains('onigiri-cycle-stacked')) return true;
+            return !!(window.ONIGIRI_CONFIG && window.ONIGIRI_CONFIG.sidebarPosition === 'center');
         }
 
         function setEdgeControlPosition(centerX, centerY) {
@@ -908,10 +908,10 @@
             const isHorizontal = edgeSet.has('top') || edgeSet.has('bottom');
             edgePill.dataset.resizeEdges = normalized;
             edgePill.classList.toggle('is-edge-horizontal', isHorizontal);
-            edgePill.style.setProperty('--bingsu-sidebar-resize-cursor', cursorForResizeEdges(edges));
+            edgePill.style.setProperty('--onigiri-sidebar-resize-cursor', cursorForResizeEdges(edges));
             if (resizeHandle) {
-                resizeHandle.dataset.bingsuResizeEdges = normalized;
-                resizeHandle.style.setProperty('--bingsu-sidebar-resize-cursor', cursorForResizeEdges(edges));
+                resizeHandle.dataset.onigiriResizeEdges = normalized;
+                resizeHandle.style.setProperty('--onigiri-sidebar-resize-cursor', cursorForResizeEdges(edges));
             }
         }
 
@@ -981,7 +981,7 @@
         }
 
         function iconUrl(filename) {
-            const pkg = (window.BINGSU_CONFIG && window.BINGSU_CONFIG.addonPackage) || '1011095603';
+            const pkg = (window.ONIGIRI_CONFIG && window.ONIGIRI_CONFIG.addonPackage) || '1011095603';
             return `/_addons/${pkg}/system_files/system_icons/unavailable_for_users/${filename}`;
         }
 
@@ -1021,14 +1021,14 @@
             const iconColor = resolveSidebarIconColor();
             if (edgePill) {
                 if (iconColor) {
-                    edgePill.style.setProperty('--bingsu-edge-icon-color', iconColor);
+                    edgePill.style.setProperty('--onigiri-edge-icon-color', iconColor);
                 }
                 if (sidebarEl) {
                     const sidebarBg = window.getComputedStyle(sidebarEl).backgroundColor;
                     if (sidebarBg && sidebarBg !== 'rgba(0, 0, 0, 0)' && sidebarBg !== 'transparent') {
-                        edgePill.style.setProperty('--bingsu-sidebar-bg', sidebarBg);
+                        edgePill.style.setProperty('--onigiri-sidebar-bg', sidebarBg);
                     } else {
-                        edgePill.style.removeProperty('--bingsu-sidebar-bg');
+                        edgePill.style.removeProperty('--onigiri-sidebar-bg');
                     }
                 }
             }
@@ -1037,12 +1037,12 @@
                     ? (collapsed ? 'down.svg' : 'up.svg')
                     : (sidebarOnRight ? 'sidebar_right_hidden.svg' : 'sidebar_left_hidden.svg');
                 collapseIcon.style.setProperty(
-                    '--bingsu-collapse-icon-url',
+                    '--onigiri-collapse-icon-url',
                     `url("${iconUrl(collapseIconName)}")`
                 );
             }
             if (resizeIcon) {
-                resizeIcon.style.setProperty('--bingsu-resize-icon-url', `url("${iconUrl('resize.svg')}")`);
+                resizeIcon.style.setProperty('--onigiri-resize-icon-url', `url("${iconUrl('resize.svg')}")`);
             }
         }
 
@@ -1170,7 +1170,7 @@
                 savedSidebarWidth = `${Math.round(currentWidth)}px`;
             }
             if (savedSidebarWidth) {
-                sidebarEl.dataset.bingsuLastWidth = String(parseFloat(savedSidebarWidth) || 345);
+                sidebarEl.dataset.onigiriLastWidth = String(parseFloat(savedSidebarWidth) || 345);
             }
             sidebarEl.style.removeProperty('width');
             sidebarEl.style.removeProperty('max-width');
@@ -1187,7 +1187,7 @@
                 const restoredWidth = parseFloat(savedSidebarWidth);
                 if (Number.isFinite(restoredWidth) && restoredWidth > 0) {
                     sidebarEl.style.setProperty('width', `${restoredWidth}px`, 'important');
-                    sidebarEl.dataset.bingsuLastWidth = String(restoredWidth);
+                    sidebarEl.dataset.onigiriLastWidth = String(restoredWidth);
                 }
             }
             updateSidebarEdgeToggle();
@@ -1203,10 +1203,10 @@
             }
         }
 
-        window.bingsuCollapseSidebar = collapseSidebar;
-        window.bingsuExpandSidebar = expandSidebar;
-        window.bingsuToggleSidebar = toggleSidebar;
-        window.bingsuUpdateSidebarEdgeToggle = updateSidebarEdgeToggle;
+        window.onigiriCollapseSidebar = collapseSidebar;
+        window.onigiriExpandSidebar = expandSidebar;
+        window.onigiriToggleSidebar = toggleSidebar;
+        window.onigiriUpdateSidebarEdgeToggle = updateSidebarEdgeToggle;
 
         if (edgeToggleBtn && sidebarEl && edgePill) {
             updateSidebarEdgeToggle();
@@ -1287,7 +1287,7 @@
             try {
                 step();
             } catch (err) {
-                console.error('Bingsu: ' + (step.name || 'init step') + ' failed', err);
+                console.error('Onigiri: ' + (step.name || 'init step') + ' failed', err);
             }
         });
 

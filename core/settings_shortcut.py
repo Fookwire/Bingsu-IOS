@@ -1,4 +1,4 @@
-"""Application-wide hold shortcut for Bingsu settings."""
+"""Application-wide hold shortcut for Onigiri settings."""
 
 from aqt import mw
 from aqt.qt import QEvent, QObject, Qt, QTimer
@@ -47,7 +47,7 @@ class SettingsHoldShortcut(QObject):
 
 def install_settings_shortcut():
     """Keep one filter alive for the lifetime of the Anki main window."""
-    if getattr(mw, "_bingsu_settings_hold_shortcut", None) is None:
+    if getattr(mw, "_onigiri_settings_hold_shortcut", None) is None:
         shortcut = SettingsHoldShortcut(mw)
         mw.app.installEventFilter(shortcut)
-        mw._bingsu_settings_hold_shortcut = shortcut
+        mw._onigiri_settings_hold_shortcut = shortcut

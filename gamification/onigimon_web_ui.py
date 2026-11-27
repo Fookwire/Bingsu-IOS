@@ -285,9 +285,9 @@ class OnigimonWebDialog(QDialog):
             ],
             js=[f"{asset_root}/onigimon.js?v={asset_version}"],
             head=(
-                f"<script>window.BINGSU_ONIGIMON_DATA={payload};"
+                f"<script>window.ONIGIRI_ONIGIMON_DATA={payload};"
                 "document.documentElement.dataset.onigimonTheme="
-                "window.BINGSU_ONIGIMON_DATA.colorMode;</script>"
+                "window.ONIGIRI_ONIGIMON_DATA.colorMode;</script>"
             ),
             context=self,
         )

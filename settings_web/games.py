@@ -293,7 +293,7 @@ def _gamification_page():
                 "layout": "games_gallery",
                 "description": tr(
                     "select_games_desc",
-                    "Every game Bingsu ships with. Open one to set it up.",
+                    "Every game Onigiri ships with. Open one to set it up.",
                 ),
                 "cards": _game_cards(),
                 "fields": [],
@@ -317,7 +317,7 @@ def _gamification_page():
                         "id": "g_notification_mode",
                         "type": "choice",
                         "label": tr("notification_style", "Notification style"),
-                        "bind": {"kind": "config", "key": "bingsu_reviewer_notification_mode"},
+                        "bind": {"kind": "config", "key": "onigiri_reviewer_notification_mode"},
                         "default": "classic",
                         # The card's subject: the stage draws whichever of the
                         # two this picks, so it belongs in the header.
@@ -330,7 +330,7 @@ def _gamification_page():
                     _toggle(
                         "g_silent_mode",
                         tr("silent_mode", "Silent mode"),
-                        ("bingsu_reviewer_silent_notifications",),
+                        ("onigiri_reviewer_silent_notifications",),
                         head=True,
                         head_label=tr("silent_mode", "Silent mode"),
                     ),
@@ -338,7 +338,7 @@ def _gamification_page():
                         "id": "g_notification_position",
                         "type": "notif_position",
                         "label": tr("reviewer_notification_pos_title", "Notification Position"),
-                        "bind": {"kind": "config", "key": "bingsu_reviewer_notification_position"},
+                        "bind": {"kind": "config", "key": "onigiri_reviewer_notification_position"},
                         "default": "top-center",
                         # Mini notifications are anchored to the reviewer header
                         # and silenced ones are drawn nowhere at all, so in both
@@ -352,7 +352,7 @@ def _gamification_page():
                         "id": "g_notification_duration",
                         "type": "number",
                         "label": tr("notification_display_time", "Show notifications for"),
-                        "bind": {"kind": "config", "key": "bingsu_notification_duration_ms"},
+                        "bind": {"kind": "config", "key": "onigiri_notification_duration_ms"},
                         "default": 5200,
                         "min": 1,
                         "max": 30,
@@ -643,7 +643,7 @@ def _onigimon_page():
                         "default": "",
                     },
                     {
-                        # The team widget is a normal Bingsu menu widget, but
+                        # The team widget is a normal Onigiri menu widget, but
                         # its choices come from Ankimon's live collection.
                         "id": "g_onigimon_menu_pokemon",
                         "type": "hidden",
@@ -793,7 +793,7 @@ def _onigimon_page():
                 "description": tr(
                     "onigimon_reviewer_hud_desc",
                     "Replace Ankimon's reviewer HUD and battle popups with a minimal "
-                    "Onigimon bar and Bingsu-aligned notifications. Turn off to restore "
+                    "Onigimon bar and Onigiri-aligned notifications. Turn off to restore "
                     "Ankimon's default HUD.",
                 ),
                 "fields": [
@@ -808,7 +808,7 @@ def _onigimon_page():
                         desc=tr(
                             "onigimon_reviewer_hud_desc",
                             "Replace Ankimon's reviewer HUD and battle popups with a minimal "
-                            "Onigimon bar and Bingsu-aligned notifications. Turn off to restore "
+                            "Onigimon bar and Onigiri-aligned notifications. Turn off to restore "
                             "Ankimon's default HUD.",
                         ),
                     ),
@@ -1287,7 +1287,7 @@ def _mochi_page():
                         "bind": _conf_path("mochi_messages", "text_color"),
                         "default": "",
                         # web/notifications.css's own
-                        # --bingsu-notification-text-{light,dark}.
+                        # --onigiri-notification-text-{light,dark}.
                         "static_fallback": {"light": "#2c2c2c", "dark": "#ffffff"},
                     },
                     {

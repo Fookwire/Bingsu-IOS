@@ -1,4 +1,4 @@
-window.BingsuIconChooser = (function () {
+window.OnigiriIconChooser = (function () {
     const EMOJIS = [
         { value: "🤍", label: "White Heart", asset: "heart_white.svg" },
         { value: "🧼", label: "Soap", asset: "soap.svg" },
@@ -73,8 +73,8 @@ window.BingsuIconChooser = (function () {
     };
 
     function T(key, fallback) {
-        if (window.BingsuI18n && typeof BingsuI18n.t === 'function') {
-            return BingsuI18n.t(key, fallback);
+        if (window.OnigiriI18n && typeof OnigiriI18n.t === 'function') {
+            return OnigiriI18n.t(key, fallback);
         }
         return fallback;
     }
@@ -102,17 +102,17 @@ window.BingsuIconChooser = (function () {
     }
 
     function close() {
-        const backdrop = document.getElementById("bingsu-icon-backdrop");
+        const backdrop = document.getElementById("onigiri-icon-backdrop");
         if (backdrop) backdrop.remove();
     }
 
-    // Shared light/dark tokens for Bingsu dialogs. They read the Bingsu palette
+    // Shared light/dark tokens for Onigiri dialogs. They read the Onigiri palette
     // (which flips on .night-mode) instead of Anki's --canvas*, so a dialog can
     // never end up with light-theme surfaces under dark-theme text.
     function ensureDialogThemeTokens() {
-        if (document.getElementById('bingsu-dialog-theme-tokens')) return;
+        if (document.getElementById('onigiri-dialog-theme-tokens')) return;
         var tokenStyle = document.createElement('style');
-        tokenStyle.id = 'bingsu-dialog-theme-tokens';
+        tokenStyle.id = 'onigiri-dialog-theme-tokens';
         tokenStyle.textContent = [
             ':root{--odlg-surface:#ffffff;--odlg-inset:#ffffff;',
             '  --odlg-fg:#202124;--odlg-fg-subtle:#6f7177;',
@@ -132,13 +132,13 @@ window.BingsuIconChooser = (function () {
 
     function ensureStyles() {
         ensureDialogThemeTokens();
-        if (document.getElementById("bingsu-icon-modal-styles")) return;
+        if (document.getElementById("onigiri-icon-modal-styles")) return;
         const style = document.createElement("style");
-        style.id = "bingsu-icon-modal-styles";
+        style.id = "onigiri-icon-modal-styles";
         style.textContent = `
             /* Picker tokens. These mirror ui_kit/picker_chrome.py one for one
                so the Qt pickers and this modal read as the same dialog. */
-            #bingsu-icon-backdrop {
+            #onigiri-icon-backdrop {
                 --pk-surface: #ffffff;
                 --pk-fg: #202124;
                 --pk-muted: #8f9299;
@@ -159,8 +159,8 @@ window.BingsuIconChooser = (function () {
                 backdrop-filter: blur(14px) saturate(120%);
                 -webkit-backdrop-filter: blur(14px) saturate(120%);
             }
-            .night-mode #bingsu-icon-backdrop,
-            .nightMode #bingsu-icon-backdrop {
+            .night-mode #onigiri-icon-backdrop,
+            .nightMode #onigiri-icon-backdrop {
                 --pk-surface: #242424;
                 --pk-fg: #f4f4f5;
                 --pk-muted: #8a8a8a;
@@ -170,8 +170,8 @@ window.BingsuIconChooser = (function () {
                 --pk-surface-alt: #2a2a2a;
                 background: rgba(0, 0, 0, 0.38);
             }
-            #bingsu-icon-backdrop button,
-            #bingsu-icon-backdrop input {
+            #onigiri-icon-backdrop button,
+            #onigiri-icon-backdrop input {
                 -webkit-appearance: none !important;
                 appearance: none !important;
                 box-sizing: border-box !important;
@@ -182,13 +182,13 @@ window.BingsuIconChooser = (function () {
                 transform: none !important;
                 letter-spacing: 0 !important;
             }
-            #bingsu-icon-backdrop button:hover,
-            #bingsu-icon-backdrop button:active,
-            #bingsu-icon-backdrop button:focus {
+            #onigiri-icon-backdrop button:hover,
+            #onigiri-icon-backdrop button:active,
+            #onigiri-icon-backdrop button:focus {
                 transform: none !important;
                 box-shadow: none !important;
             }
-            .bingsu-icon-modal {
+            .onigiri-icon-modal {
                 position: relative;
                 width: min(540px, 94vw);
                 height: min(660px, 90vh);
@@ -202,7 +202,7 @@ window.BingsuIconChooser = (function () {
                 overflow: hidden;
                 contain: layout paint;
             }
-            .bingsu-icon-modal-header {
+            .onigiri-icon-modal-header {
                 display: flex;
                 align-items: center;
                 gap: 10px;
@@ -211,7 +211,7 @@ window.BingsuIconChooser = (function () {
                 border-bottom: 1px solid var(--pk-hairline);
                 background: var(--pk-inset);
             }
-            .bingsu-icon-modal-footer {
+            .onigiri-icon-modal-footer {
                 display: flex;
                 align-items: center;
                 gap: 10px;
@@ -219,12 +219,12 @@ window.BingsuIconChooser = (function () {
                 flex-shrink: 0;
                 justify-content: center;
             }
-            .bingsu-icon-modal-title {
+            .onigiri-icon-modal-title {
                 font-size: 15.5px;
                 font-weight: 600;
                 flex: 1 1 auto;
             }
-            .bingsu-icon-modal-close {
+            .onigiri-icon-modal-close {
                 width: 28px;
                 height: 28px;
                 min-width: 28px !important;
@@ -237,11 +237,11 @@ window.BingsuIconChooser = (function () {
                 cursor: pointer;
                 flex: 0 0 auto;
             }
-            .bingsu-icon-modal-close:hover {
+            .onigiri-icon-modal-close:hover {
                 background: var(--pk-inset) !important;
                 color: var(--pk-fg) !important;
             }
-            .bingsu-icon-modal-close svg {
+            .onigiri-icon-modal-close svg {
                 display: block;
                 width: 15px;
                 height: 15px;
@@ -250,7 +250,7 @@ window.BingsuIconChooser = (function () {
             }
             /* Segmented switch: one inset track, the active segment lifted onto
                the modal's own surface. */
-            .bingsu-icon-tabs {
+            .onigiri-icon-tabs {
                 display: flex;
                 gap: 2px;
                 margin: 14px 20px 0;
@@ -259,7 +259,7 @@ window.BingsuIconChooser = (function () {
                 background: var(--pk-inset);
                 flex-shrink: 0;
             }
-            .bingsu-icon-tab {
+            .onigiri-icon-tab {
                 display: inline-flex !important;
                 align-items: center !important;
                 justify-content: center !important;
@@ -274,15 +274,15 @@ window.BingsuIconChooser = (function () {
                 font-size: 12.5px !important;
                 font-weight: 600 !important;
             }
-            .bingsu-icon-tab:hover {
+            .onigiri-icon-tab:hover {
                 color: var(--pk-fg) !important;
             }
-            .bingsu-icon-tab.active {
+            .onigiri-icon-tab.active {
                 background: var(--pk-surface) !important;
                 color: var(--pk-fg) !important;
                 box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
             }
-            .bingsu-icon-body {
+            .onigiri-icon-body {
                 flex: 1;
                 min-height: 0;
                 display: flex;
@@ -290,21 +290,21 @@ window.BingsuIconChooser = (function () {
                 padding: 14px 20px 6px;
                 overflow: hidden;
             }
-            .bingsu-icon-pane {
+            .onigiri-icon-pane {
                 flex: 1;
                 min-height: 0;
                 display: none;
                 flex-direction: column;
                 overflow: hidden;
             }
-            .bingsu-icon-pane.active {
+            .onigiri-icon-pane.active {
                 display: flex;
             }
-            .bingsu-icon-search-row {
+            .onigiri-icon-search-row {
                 flex: 0 0 auto;
                 padding: 0 0 12px;
             }
-            .bingsu-icon-search {
+            .onigiri-icon-search {
                 width: 100%;
                 box-sizing: border-box;
                 border: 1px solid transparent;
@@ -315,20 +315,20 @@ window.BingsuIconChooser = (function () {
                 margin-bottom: 0;
                 outline: none;
             }
-            .bingsu-icon-search:focus {
+            .onigiri-icon-search:focus {
                 border-color: var(--pk-accent);
             }
             /* No panel behind the grid any more — each tile floats directly
                on the modal's own surface, so there is nothing here left to
                round or clip (see the corner-rounding saga this class used
                to carry in history). */
-            .bingsu-icon-grid-wrap {
+            .onigiri-icon-grid-wrap {
                 flex: 1;
                 min-height: 0;
                 overflow: hidden;
                 display: flex;
             }
-            .bingsu-icon-grid {
+            .onigiri-icon-grid {
                 flex: 1;
                 min-height: 0;
                 min-width: 0;
@@ -341,8 +341,8 @@ window.BingsuIconChooser = (function () {
                 padding: 10px;
                 scrollbar-width: thin;
             }
-            .bingsu-icon-grid::-webkit-scrollbar { width: 8px; }
-            .bingsu-icon-grid::-webkit-scrollbar-thumb {
+            .onigiri-icon-grid::-webkit-scrollbar { width: 8px; }
+            .onigiri-icon-grid::-webkit-scrollbar-thumb {
                 background: var(--pk-muted);
                 border-radius: 8px;
                 background-clip: content-box;
@@ -351,7 +351,7 @@ window.BingsuIconChooser = (function () {
             /* Bleeds a slice of the modal's own surface over the panel behind
                the label, and sticks so a section's title stays put while its
                own tiles scroll under it. */
-            .bingsu-icon-section-title {
+            .onigiri-icon-section-title {
                 grid-column: 1 / -1;
                 color: var(--pk-muted);
                 font-size: 10.5px;
@@ -367,7 +367,7 @@ window.BingsuIconChooser = (function () {
             }
             /* Idle cells carry no outline — only the selected one does. No
                transitions here either: the grid can hold hundreds of cells. */
-            .bingsu-icon-cell {
+            .onigiri-icon-cell {
                 position: relative;
                 height: 44px;
                 min-height: 44px;
@@ -383,10 +383,10 @@ window.BingsuIconChooser = (function () {
                 background: var(--pk-inset);
                 cursor: pointer;
             }
-            .bingsu-icon-cell:hover {
+            .onigiri-icon-cell:hover {
                 background: var(--pk-inset-hover);
             }
-            .bingsu-icon-cell.selected {
+            .onigiri-icon-cell.selected {
                 border-color: var(--pk-accent);
                 background: var(--pk-inset-hover); /* fallback for older WebEngine */
                 background: color-mix(in srgb, var(--pk-accent) 16%, transparent);
@@ -394,13 +394,13 @@ window.BingsuIconChooser = (function () {
             /* --icon-color is declared on :root (light) and .night-mode (dark),
                so it can only be read from inside the modal — resolving it on
                documentElement would always pick the light value. */
-            .bingsu-icon-modal.theme-icon-color .bingsu-icon-mask {
+            .onigiri-icon-modal.theme-icon-color .onigiri-icon-mask {
                 background: var(--icon-color, #888888);
             }
-            .bingsu-icon-mask {
+            .onigiri-icon-mask {
                 width: 20px;
                 height: 20px;
-                background: var(--bingsu-selected-icon-color, #888888);
+                background: var(--onigiri-selected-icon-color, #888888);
                 mask-size: contain;
                 -webkit-mask-size: contain;
                 mask-repeat: no-repeat;
@@ -408,16 +408,16 @@ window.BingsuIconChooser = (function () {
                 mask-position: center;
                 -webkit-mask-position: center;
             }
-            .bingsu-icon-image {
+            .onigiri-icon-image {
                 width: 24px;
                 height: 24px;
                 object-fit: contain;
             }
-            .bingsu-icon-emoji {
+            .onigiri-icon-emoji {
                 font-size: 20px;
                 line-height: 1;
             }
-            .bingsu-icon-emoji-img {
+            .onigiri-icon-emoji-img {
                 width: 26px;
                 height: 26px;
                 max-width: 26px;
@@ -426,7 +426,7 @@ window.BingsuIconChooser = (function () {
                 object-fit: contain;
                 pointer-events: none;
             }
-            .bingsu-icon-custom-emoji {
+            .onigiri-icon-custom-emoji {
                 grid-column: 1 / -1;
                 display: flex;
                 align-items: center;
@@ -437,7 +437,7 @@ window.BingsuIconChooser = (function () {
                 border-radius: 14px;
                 background: var(--pk-inset);
             }
-            .bingsu-icon-custom-emoji button {
+            .onigiri-icon-custom-emoji button {
                 height: 32px !important;
                 min-width: 118px !important;
                 padding: 0 12px !important;
@@ -449,7 +449,7 @@ window.BingsuIconChooser = (function () {
                 font-size: 13px !important;
                 font-weight: 600 !important;
             }
-            .bingsu-icon-custom-emoji input {
+            .onigiri-icon-custom-emoji input {
                 flex: 1;
                 min-width: 80px;
                 height: 32px;
@@ -460,10 +460,10 @@ window.BingsuIconChooser = (function () {
                 padding: 0 10px;
                 font-size: 18px;
             }
-            .bingsu-icon-custom-emoji input:focus {
+            .onigiri-icon-custom-emoji input:focus {
                 border-color: var(--pk-accent);
             }
-            .bingsu-icon-delete {
+            .onigiri-icon-delete {
                 position: absolute;
                 top: 2px;
                 right: 2px;
@@ -478,23 +478,23 @@ window.BingsuIconChooser = (function () {
                 opacity: 0;
                 pointer-events: none;
             }
-            .bingsu-icon-delete svg {
+            .onigiri-icon-delete svg {
                 display: block;
                 width: 8px;
                 height: 8px;
                 pointer-events: none;
             }
-            .bingsu-icon-cell:hover .bingsu-icon-delete {
+            .onigiri-icon-cell:hover .onigiri-icon-delete {
                 opacity: 1;
                 pointer-events: auto;
             }
-            .bingsu-icon-color-section {
+            .onigiri-icon-color-section {
                 margin: 12px 20px 0;
                 padding-top: 12px;
                 border-top: 1px solid var(--pk-hairline);
                 flex-shrink: 0;
             }
-            .bingsu-icon-color-label {
+            .onigiri-icon-color-label {
                 margin-bottom: 8px;
                 color: var(--pk-muted);
                 font-size: 11px;
@@ -506,12 +506,12 @@ window.BingsuIconChooser = (function () {
                renderColorPair: one pill per light/dark role, swatch + role
                glyph + hex on the left, a Change affordance on the right.
                Clicking opens the native colour-palette pop-up (Python side,
-               bingsu_icon_chooser_color) instead of a flat swatch row. */
-            .bingsu-icon-color-slots {
+               onigiri_icon_chooser_color) instead of a flat swatch row. */
+            .onigiri-icon-color-slots {
                 display: flex;
                 gap: 8px;
             }
-            .bingsu-icon-color-slot {
+            .onigiri-icon-color-slot {
                 flex: 1 1 0;
                 display: flex;
                 align-items: center;
@@ -526,10 +526,10 @@ window.BingsuIconChooser = (function () {
                 cursor: pointer;
                 text-align: left;
             }
-            .bingsu-icon-color-slot:hover {
+            .onigiri-icon-color-slot:hover {
                 background: var(--pk-inset-hover);
             }
-            .bingsu-icon-color-swatch {
+            .onigiri-icon-color-swatch {
                 flex: 0 0 auto;
                 width: 22px;
                 height: 22px;
@@ -537,17 +537,17 @@ window.BingsuIconChooser = (function () {
                 border: 1px solid var(--pk-hairline);
                 box-sizing: border-box;
             }
-            .bingsu-icon-color-swatch.theme-default {
+            .onigiri-icon-color-swatch.theme-default {
                 background: var(--icon-color, #888888) !important;
             }
-            .bingsu-icon-color-meta {
+            .onigiri-icon-color-meta {
                 flex: 1 1 auto;
                 min-width: 0;
                 display: flex;
                 flex-direction: column;
                 gap: 2px;
             }
-            .bingsu-icon-color-role {
+            .onigiri-icon-color-role {
                 display: flex;
                 align-items: center;
                 gap: 5px;
@@ -557,11 +557,11 @@ window.BingsuIconChooser = (function () {
                 letter-spacing: 0.05em;
                 color: var(--pk-muted);
             }
-            .bingsu-icon-color-role svg {
+            .onigiri-icon-color-role svg {
                 width: 11px;
                 height: 11px;
             }
-            .bingsu-icon-color-hex {
+            .onigiri-icon-color-hex {
                 font-size: 12.5px;
                 font-weight: 600;
                 font-variant-numeric: tabular-nums;
@@ -569,7 +569,7 @@ window.BingsuIconChooser = (function () {
                 text-overflow: ellipsis;
                 white-space: nowrap;
             }
-            .bingsu-icon-btn {
+            .onigiri-icon-btn {
                 display: inline-flex !important;
                 align-items: center !important;
                 justify-content: center !important;
@@ -584,19 +584,19 @@ window.BingsuIconChooser = (function () {
                 font-size: 13px !important;
                 font-weight: 500 !important;
             }
-            .bingsu-icon-btn:hover {
+            .onigiri-icon-btn:hover {
                 background: var(--pk-inset-hover) !important;
             }
-            .bingsu-icon-btn.primary {
+            .onigiri-icon-btn.primary {
                 min-width: 72px !important;
                 background: var(--pk-accent) !important;
                 color: white !important;
                 font-weight: 600 !important;
             }
-            .bingsu-icon-btn.primary:hover {
+            .onigiri-icon-btn.primary:hover {
                 opacity: 0.9;
             }
-            .bingsu-icon-upload {
+            .onigiri-icon-upload {
                 box-sizing: border-box !important;
                 width: 100% !important;
                 height: 48px !important;
@@ -614,7 +614,7 @@ window.BingsuIconChooser = (function () {
                 font-size: 14px !important;
                 font-weight: 500 !important;
             }
-            .bingsu-icon-upload:hover {
+            .onigiri-icon-upload:hover {
                 background: var(--pk-inset-hover) !important;
             }
         `;
@@ -623,17 +623,17 @@ window.BingsuIconChooser = (function () {
 
     function selectIcon(name) {
         state.selectedIcon = name;
-        document.querySelectorAll(".bingsu-icon-cell.selected").forEach(cell => cell.classList.remove("selected"));
-        document.querySelectorAll(".bingsu-icon-cell").forEach(cell => {
+        document.querySelectorAll(".onigiri-icon-cell.selected").forEach(cell => cell.classList.remove("selected"));
+        document.querySelectorAll(".onigiri-icon-cell").forEach(cell => {
             if (cell.dataset.iconName === name) cell.classList.add("selected");
         });
     }
 
     function makeSearch(placeholder, onInput) {
         const row = document.createElement("div");
-        row.className = "bingsu-icon-search-row";
+        row.className = "onigiri-icon-search-row";
         const input = document.createElement("input");
-        input.className = "bingsu-icon-search";
+        input.className = "onigiri-icon-search";
         input.placeholder = placeholder;
         input.addEventListener("input", () => onInput(input.value.trim().toLowerCase()));
         row.appendChild(input);
@@ -642,14 +642,14 @@ window.BingsuIconChooser = (function () {
 
     function makeGrid() {
         const grid = document.createElement("div");
-        grid.className = "bingsu-icon-grid";
+        grid.className = "onigiri-icon-grid";
         return grid;
     }
 
     // The grid scrolls inside its own inset panel; the panel owns the rounding.
     function wrapGrid(grid) {
         const wrap = document.createElement("div");
-        wrap.className = "bingsu-icon-grid-wrap";
+        wrap.className = "onigiri-icon-grid-wrap";
         wrap.appendChild(grid);
         return wrap;
     }
@@ -666,23 +666,23 @@ window.BingsuIconChooser = (function () {
             .filter(item => !filter || (item.label || item.name).toLowerCase().includes(filter))
             .forEach(item => {
                 const cell = document.createElement("div");
-                cell.className = "bingsu-icon-cell" + (state.selectedIcon === item.name ? " selected" : "");
+                cell.className = "onigiri-icon-cell" + (state.selectedIcon === item.name ? " selected" : "");
                 cell.dataset.iconName = item.name;
                 cell.title = item.label || item.name;
 
                 const icon = document.createElement("div");
-                icon.className = "bingsu-icon-mask";
+                icon.className = "onigiri-icon-mask";
                 icon.style.maskImage = `url("${item.url}")`;
                 icon.style.webkitMaskImage = `url("${item.url}")`;
                 cell.appendChild(icon);
 
                 if (!item.system) {
                     const del = document.createElement("span");
-                    del.className = "bingsu-icon-delete";
+                    del.className = "onigiri-icon-delete";
                     del.innerHTML = xIconSvg(11);
                     del.addEventListener("click", event => {
                         event.stopPropagation();
-                        py(`bingsu_icon_chooser_delete_icon:${state.deckId}:${item.name}`);
+                        py(`onigiri_icon_chooser_delete_icon:${state.deckId}:${item.name}`);
                     });
                     cell.appendChild(del);
                 }
@@ -694,7 +694,7 @@ window.BingsuIconChooser = (function () {
 
     function buildIconsPane(data) {
         const pane = document.createElement("div");
-        pane.className = "bingsu-icon-pane";
+        pane.className = "onigiri-icon-pane";
         pane.dataset.tabPane = "icons";
         const grid = makeGrid();
         pane.appendChild(makeSearch(T("search_icons_placeholder", "Search icons..."), filter => renderSvgGrid(grid, data.icons || [], filter)));
@@ -705,7 +705,7 @@ window.BingsuIconChooser = (function () {
 
     function buildImagesPane(data) {
         const pane = document.createElement("div");
-        pane.className = "bingsu-icon-pane";
+        pane.className = "onigiri-icon-pane";
         pane.dataset.tabPane = "images";
         const grid = makeGrid();
         const render = (filter) => {
@@ -714,18 +714,18 @@ window.BingsuIconChooser = (function () {
                 .filter(item => !filter || item.name.toLowerCase().includes(filter))
                 .forEach(item => {
                     const cell = document.createElement("div");
-                    cell.className = "bingsu-icon-cell" + (state.selectedIcon === item.name ? " selected" : "");
+                    cell.className = "onigiri-icon-cell" + (state.selectedIcon === item.name ? " selected" : "");
                     cell.dataset.iconName = item.name;
                     const img = document.createElement("img");
-                    img.className = "bingsu-icon-image";
+                    img.className = "onigiri-icon-image";
                     img.src = item.url;
                     cell.appendChild(img);
                     const del = document.createElement("span");
-                    del.className = "bingsu-icon-delete";
+                    del.className = "onigiri-icon-delete";
                     del.innerHTML = xIconSvg(11);
                     del.addEventListener("click", event => {
                         event.stopPropagation();
-                        py(`bingsu_icon_chooser_delete_icon:${state.deckId}:${item.name}`);
+                        py(`onigiri_icon_chooser_delete_icon:${state.deckId}:${item.name}`);
                     });
                     cell.appendChild(del);
                     cell.addEventListener("click", () => selectIcon(item.name));
@@ -740,28 +740,28 @@ window.BingsuIconChooser = (function () {
 
     function buildEmojiPane() {
         const pane = document.createElement("div");
-        pane.className = "bingsu-icon-pane";
+        pane.className = "onigiri-icon-pane";
         pane.dataset.tabPane = "emoji";
         const grid = makeGrid();
         const renderEmojis = (filter) => {
-            Array.prototype.slice.call(grid.querySelectorAll(".bingsu-icon-cell")).forEach(cell => cell.remove());
+            Array.prototype.slice.call(grid.querySelectorAll(".onigiri-icon-cell")).forEach(cell => cell.remove());
             EMOJIS.filter(item => !filter || item.label.toLowerCase().includes(filter)).forEach(item => {
                 const name = `emoji:${item.value}`;
                 const cell = document.createElement("div");
-                cell.className = "bingsu-icon-cell" + (state.selectedIcon === name ? " selected" : "");
+                cell.className = "onigiri-icon-cell" + (state.selectedIcon === name ? " selected" : "");
                 cell.dataset.iconName = name;
                 cell.title = item.label;
                 const img = document.createElement("img");
-                img.className = "bingsu-icon-emoji-img";
+                img.className = "onigiri-icon-emoji-img";
                 img.alt = item.label;
                 img.src = `${state.emojiBaseUrl}/${item.asset}`;
                 cell.appendChild(img);
                 cell.addEventListener("click", () => selectIcon(name));
-                grid.insertBefore(cell, grid.querySelector(".bingsu-icon-custom-emoji"));
+                grid.insertBefore(cell, grid.querySelector(".onigiri-icon-custom-emoji"));
             });
         };
         const custom = document.createElement("div");
-        custom.className = "bingsu-icon-custom-emoji";
+        custom.className = "onigiri-icon-custom-emoji";
         const button = document.createElement("button");
         button.type = "button";
         button.textContent = T("type_your_own", "Type your own:");
@@ -797,15 +797,15 @@ window.BingsuIconChooser = (function () {
 
     function buildUploadPane() {
         const pane = document.createElement("div");
-        pane.className = "bingsu-icon-pane";
+        pane.className = "onigiri-icon-pane";
         pane.dataset.tabPane = "upload";
         pane.style.gap = "10px";
         ["Upload SVG icon", "Upload PNG image"].forEach((label, index) => {
             const button = document.createElement("span");
-            button.className = "bingsu-icon-upload";
+            button.className = "onigiri-icon-upload";
             button.textContent = label;
             button.addEventListener("click", () => {
-                py(`${index === 0 ? "bingsu_icon_chooser_add_icon" : "bingsu_icon_chooser_add_image"}:${state.deckId}`);
+                py(`${index === 0 ? "onigiri_icon_chooser_add_icon" : "onigiri_icon_chooser_add_image"}:${state.deckId}`);
             });
             pane.appendChild(button);
         });
@@ -813,20 +813,20 @@ window.BingsuIconChooser = (function () {
     }
 
     function setTab(tab) {
-        document.querySelectorAll(".bingsu-icon-tab").forEach(btn => {
+        document.querySelectorAll(".onigiri-icon-tab").forEach(btn => {
             btn.classList.toggle("active", btn.dataset.tab === tab);
         });
-        document.querySelectorAll(".bingsu-icon-pane").forEach(pane => {
+        document.querySelectorAll(".onigiri-icon-pane").forEach(pane => {
             pane.classList.toggle("active", pane.dataset.tabPane === tab);
         });
-        const colorSection = document.querySelector(".bingsu-icon-color-section");
+        const colorSection = document.querySelector(".onigiri-icon-color-section");
         if (colorSection) colorSection.style.display = tab === "icons" ? "" : "none";
     }
 
     function applyThemeColorMode() {
-        const modal = document.querySelector(".bingsu-icon-modal");
+        const modal = document.querySelector(".onigiri-icon-modal");
         if (modal) modal.classList.toggle("theme-icon-color", activeColor() === THEME_COLOR);
-        document.documentElement.style.setProperty("--bingsu-selected-icon-color", activeColor() || "#888888");
+        document.documentElement.style.setProperty("--onigiri-selected-icon-color", activeColor() || "#888888");
     }
 
     // Two colour slots — Light and Dark — same shape as the WebUI settings
@@ -834,50 +834,50 @@ window.BingsuIconChooser = (function () {
     // (Python side) instead of a flat swatch row baked into the page.
     function buildColorSection() {
         const section = document.createElement("div");
-        section.className = "bingsu-icon-color-section";
+        section.className = "onigiri-icon-color-section";
         const label = document.createElement("div");
-        label.className = "bingsu-icon-color-label";
+        label.className = "onigiri-icon-color-label";
         label.textContent = T("icon_label", "Icon Color");
         section.appendChild(label);
 
         const slots = document.createElement("div");
-        slots.className = "bingsu-icon-color-slots";
+        slots.className = "onigiri-icon-color-slots";
         section.appendChild(slots);
 
         function paintSlot(slotEl, hex) {
-            const swatch = slotEl.querySelector(".bingsu-icon-color-swatch");
+            const swatch = slotEl.querySelector(".onigiri-icon-color-swatch");
             swatch.classList.toggle("theme-default", hex === THEME_COLOR);
             swatch.style.background = hex || "";
-            slotEl.querySelector(".bingsu-icon-color-hex").textContent =
+            slotEl.querySelector(".onigiri-icon-color-hex").textContent =
                 hex ? hex.toUpperCase() : "Default";
         }
 
         function makeSlot(role, glyph, roleLabel) {
             const slot = document.createElement("button");
             slot.type = "button";
-            slot.className = "bingsu-icon-color-slot";
+            slot.className = "onigiri-icon-color-slot";
             const swatch = document.createElement("span");
-            swatch.className = "bingsu-icon-color-swatch";
+            swatch.className = "onigiri-icon-color-swatch";
             slot.appendChild(swatch);
             const meta = document.createElement("span");
-            meta.className = "bingsu-icon-color-meta";
+            meta.className = "onigiri-icon-color-meta";
             const roleRow = document.createElement("span");
-            roleRow.className = "bingsu-icon-color-role";
+            roleRow.className = "onigiri-icon-color-role";
             roleRow.innerHTML = glyph;
             roleRow.appendChild(document.createTextNode(roleLabel));
             meta.appendChild(roleRow);
             const hexLabel = document.createElement("span");
-            hexLabel.className = "bingsu-icon-color-hex";
+            hexLabel.className = "onigiri-icon-color-hex";
             meta.appendChild(hexLabel);
             slot.appendChild(meta);
             slot.addEventListener("click", () => {
                 const current = role === "dark" ? state.selectedColorDark : state.selectedColorLight;
-                if (window.BingsuMobile && BingsuMobile.isTouch()) {
+                if (window.OnigiriMobile && OnigiriMobile.isTouch()) {
                     // iOS: the system colour picker, from the page itself.
-                    pickColorInPage(current || "#00A982", (hex) => window.BingsuIconChooser.applyColor(role, hex));
+                    pickColorInPage(current || "#00A982", (hex) => window.OnigiriIconChooser.applyColor(role, hex));
                     return;
                 }
-                py(`bingsu_icon_chooser_color:${state.deckId}:${role}:${current || "#00A982"}`);
+                py(`onigiri_icon_chooser_color:${state.deckId}:${role}:${current || "#00A982"}`);
             });
             slots.appendChild(slot);
             return slot;
@@ -902,11 +902,11 @@ window.BingsuIconChooser = (function () {
     // UIColorPickerViewController) over the page. It has to be in the
     // document and is reused.
     function pickColorInPage(current, done) {
-        let input = document.getElementById("bingsu-icon-color-input");
+        let input = document.getElementById("onigiri-icon-color-input");
         if (!input) {
             input = document.createElement("input");
             input.type = "color";
-            input.id = "bingsu-icon-color-input";
+            input.id = "onigiri-icon-color-input";
             input.setAttribute("aria-hidden", "true");
             input.style.cssText = "position:fixed;left:50%;bottom:0;width:1px;height:1px;opacity:0;border:0;padding:0;";
             document.body.appendChild(input);
@@ -926,23 +926,23 @@ window.BingsuIconChooser = (function () {
         state.selectedColorDark = (data.current && data.current.colorDark) || state.selectedColorLight;
         state.emojiBaseUrl = data.emojiBaseUrl || state.emojiBaseUrl;
         state.data = data;
-        document.documentElement.style.setProperty("--bingsu-selected-icon-color", activeColor() || "#888888");
+        document.documentElement.style.setProperty("--onigiri-selected-icon-color", activeColor() || "#888888");
 
         const backdrop = document.createElement("div");
-        backdrop.id = "bingsu-icon-backdrop";
+        backdrop.id = "onigiri-icon-backdrop";
         backdrop.addEventListener("click", close);
 
         const modal = document.createElement("div");
-        modal.className = "bingsu-icon-modal" + (activeColor() === THEME_COLOR ? " theme-icon-color" : "");
+        modal.className = "onigiri-icon-modal" + (activeColor() === THEME_COLOR ? " theme-icon-color" : "");
         modal.addEventListener("click", event => event.stopPropagation());
 
         const header = document.createElement("div");
-        header.className = "bingsu-icon-modal-header";
+        header.className = "onigiri-icon-modal-header";
         const title = document.createElement("div");
-        title.className = "bingsu-icon-modal-title";
+        title.className = "onigiri-icon-modal-title";
         title.textContent = T("edit_icon", "Edit Icon");
         const closeBtn = document.createElement("span");
-        closeBtn.className = "bingsu-icon-modal-close";
+        closeBtn.className = "onigiri-icon-modal-close";
         closeBtn.innerHTML = xIconSvg(15);
         closeBtn.setAttribute("aria-label", T("close", "Close"));
         closeBtn.title = T("close", "Close");
@@ -952,7 +952,7 @@ window.BingsuIconChooser = (function () {
         modal.appendChild(header);
 
         const tabs = document.createElement("div");
-        tabs.className = "bingsu-icon-tabs";
+        tabs.className = "onigiri-icon-tabs";
         [
             ["emoji", "Emoji"],
             ["icons", "Icons"],
@@ -960,7 +960,7 @@ window.BingsuIconChooser = (function () {
             ["upload", "Upload"],
         ].forEach(([id, label]) => {
             const btn = document.createElement("span");
-            btn.className = "bingsu-icon-tab";
+            btn.className = "onigiri-icon-tab";
             btn.dataset.tab = id;
             btn.textContent = label;
             btn.addEventListener("click", () => setTab(id));
@@ -969,7 +969,7 @@ window.BingsuIconChooser = (function () {
         modal.appendChild(tabs);
 
         const body = document.createElement("div");
-        body.className = "bingsu-icon-body";
+        body.className = "onigiri-icon-body";
         body.appendChild(buildEmojiPane());
         body.appendChild(buildIconsPane(data));
         body.appendChild(buildImagesPane(data));
@@ -978,20 +978,20 @@ window.BingsuIconChooser = (function () {
         modal.appendChild(buildColorSection());
 
         const footer = document.createElement("div");
-        footer.className = "bingsu-icon-modal-footer";
+        footer.className = "onigiri-icon-modal-footer";
         const reset = document.createElement("span");
-        reset.className = "bingsu-icon-btn";
+        reset.className = "onigiri-icon-btn";
         reset.textContent = T("reset_to_default_tooltip", "Reset to Default");
         reset.addEventListener("click", () => {
-            py(`bingsu_icon_chooser_reset:${state.deckId}`);
+            py(`onigiri_icon_chooser_reset:${state.deckId}`);
             close();
         });
         const cancel = document.createElement("span");
-        cancel.className = "bingsu-icon-btn";
+        cancel.className = "onigiri-icon-btn";
         cancel.textContent = T("cancel", "Cancel");
         cancel.addEventListener("click", close);
         const save = document.createElement("span");
-        save.className = "bingsu-icon-btn primary";
+        save.className = "onigiri-icon-btn primary";
         save.textContent = T("save", "Save");
         save.addEventListener("click", () => {
             const payload = JSON.stringify({
@@ -999,7 +999,7 @@ window.BingsuIconChooser = (function () {
                 color: state.selectedColorLight,
                 colorDark: state.selectedColorDark,
             });
-            py(`bingsu_icon_chooser_save:${state.deckId}:${payload}`);
+            py(`onigiri_icon_chooser_save:${state.deckId}:${payload}`);
             close();
         });
         // Same order as the Qt pickers: Save, Cancel, Reset, centred.
@@ -1021,15 +1021,15 @@ window.BingsuIconChooser = (function () {
         open,
         close,
         // Called from Python once the native colour-palette pop-up closes
-        // (webview_handlers._cmd via bingsu_icon_chooser_color); the modal
+        // (webview_handlers._cmd via onigiri_icon_chooser_color); the modal
         // itself never runs a colour dialog, it only relays the result.
         applyColor(role, hex) {
             if (role === "dark") state.selectedColorDark = hex;
             else state.selectedColorLight = hex;
-            document.documentElement.style.setProperty("--bingsu-selected-icon-color", activeColor() || "#888888");
-            const modal = document.querySelector(".bingsu-icon-modal");
+            document.documentElement.style.setProperty("--onigiri-selected-icon-color", activeColor() || "#888888");
+            const modal = document.querySelector(".onigiri-icon-modal");
             if (modal) modal.classList.toggle("theme-icon-color", activeColor() === THEME_COLOR);
-            const section = document.querySelector(".bingsu-icon-color-section");
+            const section = document.querySelector(".onigiri-icon-color-section");
             if (section && section.__paint) section.__paint();
         },
         refreshData(data) {

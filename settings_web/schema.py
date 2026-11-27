@@ -1,4 +1,4 @@
-# Declarative description of the Bingsu settings dialog.
+# Declarative description of the Onigiri settings dialog.
 #
 # This is the whole point of the WebUI migration: pages are data, not 2,000-line
 # Qt builder methods. `web/settings.js` renders whatever this file describes and
@@ -126,7 +126,7 @@ def _current_simple_font_size(role):
     try:
         return max(
             8,
-            min(72, int(mw.col.conf.get(f"bingsu_font_size_{role}", default))),
+            min(72, int(mw.col.conf.get(f"onigiri_font_size_{role}", default))),
         )
     except (TypeError, ValueError):
         return default
@@ -242,7 +242,7 @@ def _modes_page():
             "level": 1,
             "label": tr("mode_focus", "Focus"),
             "desc": tr("hide_anki_bars", "Hide Anki's bars"),
-            "notes": [tr("replaces_top_bar", ""), tr("best_bingsu_experience", "The best Bingsu experience")],
+            "notes": [tr("replaces_top_bar", ""), tr("best_onigiri_experience", "The best Onigiri experience")],
             "icon": "mode-focus-eye.svg",
             "bind": {"kind": "config", "key": "hideNativeHeaderAndBottomBar"},
             "default": True,
@@ -255,7 +255,7 @@ def _modes_page():
             "level": 2,
             "label": tr("mode_flow", "Flow"),
             "desc": tr("everything_in_focus", ""),
-            "notes": [tr("hides_bingsu_top_bar", ""), tr("restart_anki_note", "")],
+            "notes": [tr("hides_onigiri_top_bar", ""), tr("restart_anki_note", "")],
             "icon": "mode-flow-wind.svg",
             "bind": {"kind": "config", "key": "flowMode"},
             "default": False,
@@ -730,7 +730,7 @@ def _profile_page():
                         "advanced": True,
                         "label": tr("profile_bio", "Bio"),
                         "multiline": True,
-                        "bind": {"kind": "config", "path": ["bingsuProfile", "bio"]},
+                        "bind": {"kind": "config", "path": ["onigiriProfile", "bio"]},
                         "default": "",
                     },
                     {
@@ -739,7 +739,7 @@ def _profile_page():
                         "advanced": True,
                         "label": tr("profile_music", "Music Link"),
                         "placeholder": "https://open.spotify.com/... | https://music.apple.com/...",
-                        "bind": {"kind": "config", "path": ["bingsuProfile", "spotifyLink"]},
+                        "bind": {"kind": "config", "path": ["onigiriProfile", "spotifyLink"]},
                         "default": "",
                     },
                 ],
@@ -753,42 +753,42 @@ def _profile_page():
                         "id": "profile_sidebar_active_cards",
                         "type": "toggle",
                         "label": tr("profile_sidebar_active_cards", "Active Cards"),
-                        "bind": {"kind": "config", "path": ["bingsuProfilePanel", "show_active_cards"]},
+                        "bind": {"kind": "config", "path": ["onigiriProfilePanel", "show_active_cards"]},
                         "default": True,
                     },
                     {
                         "id": "profile_sidebar_today_stats",
                         "type": "toggle",
                         "label": tr("profile_sidebar_today_stats", "Today's Study Stats"),
-                        "bind": {"kind": "config", "path": ["bingsuProfilePanel", "show_today_stats"]},
+                        "bind": {"kind": "config", "path": ["onigiriProfilePanel", "show_today_stats"]},
                         "default": True,
                     },
                     {
                         "id": "profile_panel_weekly_chart",
                         "type": "toggle",
                         "label": tr("profile_panel_weekly_chart", "Weekly Study Chart"),
-                        "bind": {"kind": "config", "path": ["bingsuProfilePanel", "show_weekly_chart"]},
+                        "bind": {"kind": "config", "path": ["onigiriProfilePanel", "show_weekly_chart"]},
                         "default": True,
                     },
                     {
                         "id": "profile_panel_nook_level",
                         "type": "toggle",
                         "label": tr("profile_panel_nook_level", "Nook Level Progress"),
-                        "bind": {"kind": "config", "path": ["bingsuProfilePanel", "show_nook_level"]},
+                        "bind": {"kind": "config", "path": ["onigiriProfilePanel", "show_nook_level"]},
                         "default": True,
                     },
                     {
                         "id": "profile_panel_hexagon_land",
                         "type": "toggle",
                         "label": tr("profile_panel_hexagon_land", "Hexagon Land Count"),
-                        "bind": {"kind": "config", "path": ["bingsuProfilePanel", "show_hexagon_land"]},
+                        "bind": {"kind": "config", "path": ["onigiriProfilePanel", "show_hexagon_land"]},
                         "default": True,
                     },
                     {
                         "id": "profile_panel_onigimon_hp",
                         "type": "toggle",
                         "label": tr("profile_panel_onigimon_hp", "Onigimon HP"),
-                        "bind": {"kind": "config", "path": ["bingsuProfilePanel", "show_onigimon_hp"]},
+                        "bind": {"kind": "config", "path": ["onigiriProfilePanel", "show_onigimon_hp"]},
                         "default": True,
                     },
                 ],
@@ -802,10 +802,10 @@ def _profile_page():
                 "title": tr("profile_page_background", "Profile Page Background"),
                 "fields": [
                     {
-                        "id": "bingsu_profile_page_bg_mode",
+                        "id": "onigiri_profile_page_bg_mode",
                         "type": "choice",
                         "label": tr("bg_mode", "Background Mode"),
-                        "bind": {"kind": "col", "key": "bingsu_profile_page_bg_mode"},
+                        "bind": {"kind": "col", "key": "onigiri_profile_page_bg_mode"},
                         "default": "color",
                         "options": [
                             {"value": "color", "label": tr("color_only", "Color only")},
@@ -813,45 +813,45 @@ def _profile_page():
                         ],
                     },
                     {
-                        "id": "bingsu_profile_page_bg_dynamic_mode",
+                        "id": "onigiri_profile_page_bg_dynamic_mode",
                         "type": "toggle",
                         "label": tr("dynamic_mode", "Dynamic mode"),
-                        "bind": {"kind": "col", "key": "bingsu_profile_page_bg_dynamic_mode"},
+                        "bind": {"kind": "col", "key": "onigiri_profile_page_bg_dynamic_mode"},
                         "default": True,
                     },
                     _color_pair_field(
-                        "bingsu_profile_page_bg_color1",
+                        "onigiri_profile_page_bg_color1",
                         tr("color", "Color"),
-                        "bingsu_profile_page_bg_light_color1",
-                        "bingsu_profile_page_bg_dark_color1",
-                        "bingsu_profile_page_bg_dynamic_mode",
+                        "onigiri_profile_page_bg_light_color1",
+                        "onigiri_profile_page_bg_dark_color1",
+                        "onigiri_profile_page_bg_dynamic_mode",
                     ),
-                    _hidden_field("bingsu_profile_page_bg_light_color1", "#F5F5F5"),
-                    _hidden_field("bingsu_profile_page_bg_dark_color1", "#2C2C2C"),
-                    _hidden_field("bingsu_profile_page_bg_color1_theme_mode"),
+                    _hidden_field("onigiri_profile_page_bg_light_color1", "#F5F5F5"),
+                    _hidden_field("onigiri_profile_page_bg_dark_color1", "#2C2C2C"),
+                    _hidden_field("onigiri_profile_page_bg_color1_theme_mode"),
                     _color_pair_field(
-                        "bingsu_profile_page_bg_color2",
+                        "onigiri_profile_page_bg_color2",
                         tr("gradient_second_color", "Second Color"),
-                        "bingsu_profile_page_bg_light_color2",
-                        "bingsu_profile_page_bg_dark_color2",
-                        "bingsu_profile_page_bg_dynamic_mode",
-                        show_when={"field": "bingsu_profile_page_bg_mode", "values": ["gradient"]},
+                        "onigiri_profile_page_bg_light_color2",
+                        "onigiri_profile_page_bg_dark_color2",
+                        "onigiri_profile_page_bg_dynamic_mode",
+                        show_when={"field": "onigiri_profile_page_bg_mode", "values": ["gradient"]},
                     ),
-                    _hidden_field("bingsu_profile_page_bg_light_color2", "#E0E0E0"),
-                    _hidden_field("bingsu_profile_page_bg_dark_color2", "#1A1A1A"),
-                    _hidden_field("bingsu_profile_page_bg_color2_theme_mode"),
+                    _hidden_field("onigiri_profile_page_bg_light_color2", "#E0E0E0"),
+                    _hidden_field("onigiri_profile_page_bg_dark_color2", "#1A1A1A"),
+                    _hidden_field("onigiri_profile_page_bg_color2_theme_mode"),
                     _image_field(
-                        "bingsu_profile_sidebar_cover_image",
+                        "onigiri_profile_sidebar_cover_image",
                         "profile_bg",
                         tr("profile_sidebar_cover", "Profile Sidebar Cover"),
-                        dynamic_field="bingsu_profile_page_bg_dynamic_mode",
-                        light_field="bingsu_profile_sidebar_cover_image_light",
-                        dark_field="bingsu_profile_sidebar_cover_image_dark",
+                        dynamic_field="onigiri_profile_page_bg_dynamic_mode",
+                        light_field="onigiri_profile_sidebar_cover_image_light",
+                        dark_field="onigiri_profile_sidebar_cover_image_dark",
                         empty_label=tr("none_default", "Default"),
                     ),
-                    _hidden_field("bingsu_profile_sidebar_cover_image_light"),
-                    _hidden_field("bingsu_profile_sidebar_cover_image_dark"),
-                    _hidden_field("bingsu_profile_sidebar_cover_image_theme_mode"),
+                    _hidden_field("onigiri_profile_sidebar_cover_image_light"),
+                    _hidden_field("onigiri_profile_sidebar_cover_image_dark"),
+                    _hidden_field("onigiri_profile_sidebar_cover_image_theme_mode"),
                 ],
             },
             {
@@ -877,22 +877,22 @@ def _profile_page():
                 "title": tr("profile_name_appearance", "Profile Name Appearance"),
                 "fields": [
                     {
-                        "id": "bingsu_font_profile_name",
+                        "id": "onigiri_font_profile_name",
                         "type": "font",
                         "advanced": True,
                         "label": tr("profile_name_font", "Name Font"),
-                        "bind": {"kind": "col", "key": "bingsu_font_profile_name"},
+                        "bind": {"kind": "col", "key": "onigiri_font_profile_name"},
                         "default": "sync",
                         "options": [
                             {"value": "sync", "label": tr("sync_with_theme", "Sync with theme")},
                         ] + _font_options(),
                     },
                     {
-                        "id": "bingsu_font_size_profile_name",
+                        "id": "onigiri_font_size_profile_name",
                         "type": "number",
                         "advanced": True,
                         "label": tr("font_size", "Size"),
-                        "bind": {"kind": "col", "key": "bingsu_font_size_profile_name"},
+                        "bind": {"kind": "col", "key": "onigiri_font_size_profile_name"},
                         "default": _current_simple_font_size("main"),
                         "min": 8,
                         "max": 72,
@@ -901,22 +901,22 @@ def _profile_page():
                         "reset_to": _current_simple_font_size("main"),
                     },
                     {
-                        "id": "bingsu_font_profile_level",
+                        "id": "onigiri_font_profile_level",
                         "type": "font",
                         "advanced": True,
                         "label": tr("profile_level_font", "Level Font"),
-                        "bind": {"kind": "col", "key": "bingsu_font_profile_level"},
+                        "bind": {"kind": "col", "key": "onigiri_font_profile_level"},
                         "default": "sync",
                         "options": [
                             {"value": "sync", "label": tr("sync_with_theme", "Sync with theme")},
                         ] + _font_options(),
                     },
                     {
-                        "id": "bingsu_font_size_profile_level",
+                        "id": "onigiri_font_size_profile_level",
                         "type": "number",
                         "advanced": True,
                         "label": tr("font_size", "Size"),
-                        "bind": {"kind": "col", "key": "bingsu_font_size_profile_level"},
+                        "bind": {"kind": "col", "key": "onigiri_font_size_profile_level"},
                         "default": 11,
                         "min": 8,
                         "max": 72,
@@ -1207,7 +1207,7 @@ def _themes_page():
         "group": "general",
         "description": tr(
             "themes_description",
-            "Choose the visual system for Bingsu, then tune its appearance.",
+            "Choose the visual system for Onigiri, then tune its appearance.",
         ),
         "sections": [
             {
@@ -1215,10 +1215,10 @@ def _themes_page():
                 "title": tr("theme_style", "Theme style"),
                 "layout": "theme_style",
                 "fields": [{
-                    "id": "bingsu_ui_theme",
+                    "id": "onigiri_ui_theme",
                     "type": "choice",
                     "label": tr("theme_style", "Theme style"),
-                    "bind": {"kind": "config", "key": "bingsu_ui_theme"},
+                    "bind": {"kind": "config", "key": "onigiri_ui_theme"},
                     "default": "classic",
                     # Shima starts with quiet supporting UI: sidebar actions
                     # use the compact icon strip and reviewer notifications use
@@ -1233,10 +1233,10 @@ def _themes_page():
                     "options": [
                         {
                             "value": "classic",
-                            "label": tr("theme_classic", "Bingsu"),
+                            "label": tr("theme_classic", "Onigiri"),
                             "sub": tr(
                                 "theme_classic_desc",
-                                "Bingsu's flexible widget dashboard",
+                                "Onigiri's flexible widget dashboard",
                             ),
                         },
                         {
@@ -1262,18 +1262,18 @@ def _themes_page():
                 "id": "theme_color_mode",
                 "title": tr("theme_mode", "Color mode"),
                 "fields": [{
-                    "id": "bingsu_theme_mode",
+                    "id": "onigiri_theme_mode",
                     "type": "choice",
                     # The section heading already labels this control.
                     "label": "",
                     "desc": tr(
                         "theme_mode_desc",
                         "Follow Anki's light/dark mode or choose a fixed mode "
-                        "for Bingsu.",
+                        "for Onigiri.",
                     ),
                     # One shared preference for every visual style. Keep the
                     # existing config key so saved Kome preferences carry over.
-                    "bind": {"kind": "config", "key": "bingsuThemeMode"},
+                    "bind": {"kind": "config", "key": "onigiriThemeMode"},
                     "default": "system",
                     "options": [
                         {
@@ -1371,7 +1371,7 @@ def _things_theme_section():
         "icon": "themes.svg",
         "layout": "things_theme",
         "show_when": {
-            "field": "bingsu_ui_theme",
+            "field": "onigiri_ui_theme",
             "values": ["things3"],
         },
         "description": tr(
@@ -1793,7 +1793,7 @@ def _tool_visibility_section(tool_id, title, header_field=None):
             "desc": tr("study_tool_header_visibility_desc"),
             "bind": ({"kind": "config", "path": ["hashi_notes", "show_in_reviewer_header"]}
                      if tool_id == "hashi_notes" else
-                     {"kind": "config", "key": "bingsu_pomodoro_show_in_reviewer_header"}),
+                     {"kind": "config", "key": "onigiri_pomodoro_show_in_reviewer_header"}),
             "default": True,
             "show_when": {"field": visible_id, "values": [True]},
         })
@@ -1849,7 +1849,7 @@ def _prep_station_page():
             # Keep the persisted percentage for existing users, but expose the
             # main 17px plan title as an editable absolute size in the UI.
             "scale": 100 / 17,
-            "bind": col("bingsu_prep_station_widget_font_scale", 100), "default": 100,
+            "bind": col("onigiri_prep_station_widget_font_scale", 100), "default": 100,
             "min": 10, "max": 27, "step": 1, "suffix": "px",
         },
         {
@@ -1909,13 +1909,13 @@ def _prep_station_page():
                         "id": "prep_include_suspended", "type": "toggle",
                         "label": tr("prep_suspended_label", "Count suspended cards"),
                         "desc": tr("prep_suspended_setting_desc", "When on, suspended cards count toward each plan's pace calculation and statistics."),
-                        "bind": col("bingsu_prep_station_include_suspended", False), "default": False,
+                        "bind": col("onigiri_prep_station_include_suspended", False), "default": False,
                     },
                     {
                         "id": "prep_week_start", "type": "choice",
                         "label": tr("week_start_label", "Week Starts On"),
                         "desc": tr("prep_week_start_desc", "Sets the first day shown in Prep Station's weekly charts."),
-                        "bind": col("bingsu_prep_station_week_start", "monday"), "default": "monday",
+                        "bind": col("onigiri_prep_station_week_start", "monday"), "default": "monday",
                         "options": [
                             {"value": "monday", "label": tr("week_start_monday", "Monday")},
                             {"value": "sunday", "label": tr("week_start_sunday", "Sunday")},
@@ -1937,7 +1937,7 @@ def _prep_station_page():
                     "prep_widget_color_box_bg", "prep_widget_color_box_border",
                 ],
                 show_when={
-                    "field": "bingsu_ui_theme",
+                    "field": "onigiri_ui_theme",
                     "values": ["classic"],
                 },
                 fields=widget_fields,
@@ -2039,7 +2039,7 @@ def _hashi_notes_page():
                 ],
                 full_width_color_grid=True,
                 show_when={
-                    "field": "bingsu_ui_theme",
+                    "field": "onigiri_ui_theme",
                     "values": ["classic"],
                 },
                 fields=widget_fields,
@@ -2049,7 +2049,7 @@ def _hashi_notes_page():
 
 
 def _pomodoro_page():
-    path = lambda *parts: _col_path("bingsu_pomodoro_settings", *parts)
+    path = lambda *parts: _col_path("onigiri_pomodoro_settings", *parts)
 
     def tone_options(event):
         """Matching numbers indicate a pair, not a linked selection."""
@@ -2371,7 +2371,7 @@ def _overview_background_section():
                 "head": True,
                 "head_label": tr("style", "Style"),
                 "label": tr("bg_mode", "Background Mode"),
-                "bind": {"kind": "config", "key": "bingsu_overview_bg_mode"},
+                "bind": {"kind": "config", "key": "onigiri_overview_bg_mode"},
                 "default": "color",
                 "options": [
                     {"value": "image_color", "label": tr("image", "Image")},
@@ -2387,9 +2387,9 @@ def _overview_background_section():
                 None,
                 show_when={"field": "overview_background_mode", "values": ["color", "image_color"]},
             ),
-            _hidden_config_field("overview_bg_color_light", ["bingsu_overview_bg_light_color"], "#f2f2f2"),
-            _hidden_config_field("overview_bg_color_dark", ["bingsu_overview_bg_dark_color"], "#2C2C2C"),
-            _hidden_config_field("overview_bg_color_theme_mode", ["bingsu_overview_bg_color_theme_mode"], "separate"),
+            _hidden_config_field("overview_bg_color_light", ["onigiri_overview_bg_light_color"], "#f2f2f2"),
+            _hidden_config_field("overview_bg_color_dark", ["onigiri_overview_bg_dark_color"], "#2C2C2C"),
+            _hidden_config_field("overview_bg_color_theme_mode", ["onigiri_overview_bg_color_theme_mode"], "separate"),
             _image_field(
                 "overview_background_image",
                 # Same on-disk folder as Main Background (GALLERY_ASSET_FOLDERS
@@ -2402,17 +2402,17 @@ def _overview_background_section():
                 theme_mode_field="overview_bg_image_theme_mode",
                 empty_label=tr("none_default", "Default"),
                 show_when={"field": "overview_background_mode", "values": ["image_color"]},
-                bind={"kind": "config", "key": "bingsu_overview_bg_image"},
+                bind={"kind": "config", "key": "onigiri_overview_bg_image"},
             ),
-            _hidden_config_field("overview_background_image_light", ["bingsu_overview_bg_image_light"]),
-            _hidden_config_field("overview_background_image_dark", ["bingsu_overview_bg_image_dark"]),
-            _hidden_config_field("overview_bg_image_theme_mode", ["bingsu_overview_bg_image_theme_mode"], "separate"),
-            _hidden_config_field("overview_background_image_mode", ["bingsu_overview_bg_image_mode"], "separate"),
+            _hidden_config_field("overview_background_image_light", ["onigiri_overview_bg_image_light"]),
+            _hidden_config_field("overview_background_image_dark", ["onigiri_overview_bg_image_dark"]),
+            _hidden_config_field("overview_bg_image_theme_mode", ["onigiri_overview_bg_image_theme_mode"], "separate"),
+            _hidden_config_field("overview_background_image_mode", ["onigiri_overview_bg_image_mode"], "separate"),
             {
                 "id": "overview_background_blur",
                 "type": "slider",
                 "label": tr("blur_intensity", "Blur Intensity"),
-                "bind": {"kind": "config", "key": "bingsu_overview_bg_blur"},
+                "bind": {"kind": "config", "key": "onigiri_overview_bg_blur"},
                 "default": 0, "min": 0, "max": 100, "step": 1, "suffix": "%",
                 "show_when": {"not": {"field": "overview_background_mode", "values": ["main"]}},
             },
@@ -2420,13 +2420,13 @@ def _overview_background_section():
                 "id": "overview_background_opacity",
                 "type": "slider",
                 "label": tr("opacity", "Opacity"),
-                "bind": {"kind": "config", "key": "bingsu_overview_bg_opacity"},
+                "bind": {"kind": "config", "key": "onigiri_overview_bg_opacity"},
                 "default": 100, "min": 0, "max": 100, "step": 1, "suffix": "%",
                 "show_when": {"not": {"field": "overview_background_mode", "values": ["main"]}},
             },
             # Keep legacy keys loadable without exposing independent Match effects.
-            _hidden_config_field("overview_background_main_blur", ["bingsu_overview_bg_main_blur"], 0),
-            _hidden_config_field("overview_background_main_opacity", ["bingsu_overview_bg_main_opacity"], 100),
+            _hidden_config_field("overview_background_main_blur", ["onigiri_overview_bg_main_blur"], 0),
+            _hidden_config_field("overview_background_main_opacity", ["onigiri_overview_bg_main_opacity"], 100),
         ],
         hide_deck_when={"field": "overview_background_mode", "values": ["main"]},
     )
@@ -2464,7 +2464,7 @@ def _overview_style_section():
             # from the legacy light/dark colour values, which remain the only
             # values the overview renderer consumes.
             {"id": f"ovstyle_color_{key}_theme_mode", "type": "hidden", "label": "",
-             "bind": {"kind": "config", "key": f"bingsu_web_ovstyle_color_{key}_theme_mode"},
+             "bind": {"kind": "config", "key": f"onigiri_web_ovstyle_color_{key}_theme_mode"},
              "default": "separate"},
         ]
 
@@ -2474,7 +2474,7 @@ def _overview_style_section():
             # Rendered in the settings deck; the preview header is reserved
             # for its local Overview/Congrats selector and utility controls.
             "head": False,
-            "bind": {"kind": "col", "key": "bingsu_overview_style"}, "default": "pro",
+            "bind": {"kind": "col", "key": "onigiri_overview_style"}, "default": "pro",
             "options": [
                 {"value": "pro", "label": tr("overview_style_pro", "Pro")},
                 {"value": "mini", "label": tr("overview_style_mini", "Mini")},
@@ -2769,7 +2769,7 @@ def _reviewer_background_section():
                 "head": True,
                 "head_label": tr("style", "Style"),
                 "label": tr("bg_mode", "Background Mode"),
-                "bind": {"kind": "config", "key": "bingsu_reviewer_bg_mode"},
+                "bind": {"kind": "config", "key": "onigiri_reviewer_bg_mode"},
                 "default": "color",
                 "options": [
                     {"value": "image_color", "label": tr("image", "Image")},
@@ -2786,9 +2786,9 @@ def _reviewer_background_section():
                 None,
                 show_when={"field": "reviewer_background_mode", "values": ["color", "image_color"]},
             ),
-            _hidden_config_field("reviewer_bg_color_light", ["bingsu_reviewer_bg_light_color"], "#f2f2f2"),
-            _hidden_config_field("reviewer_bg_color_dark", ["bingsu_reviewer_bg_dark_color"], "#2C2C2C"),
-            _hidden_config_field("reviewer_bg_color_theme_mode", ["bingsu_reviewer_bg_color_theme_mode"], "separate"),
+            _hidden_config_field("reviewer_bg_color_light", ["onigiri_reviewer_bg_light_color"], "#f2f2f2"),
+            _hidden_config_field("reviewer_bg_color_dark", ["onigiri_reviewer_bg_dark_color"], "#2C2C2C"),
+            _hidden_config_field("reviewer_bg_color_theme_mode", ["onigiri_reviewer_bg_color_theme_mode"], "separate"),
             _image_field(
                 "reviewer_background_image",
                 "reviewer_bg",
@@ -2798,24 +2798,24 @@ def _reviewer_background_section():
                 theme_mode_field="reviewer_bg_image_theme_mode",
                 empty_label=tr("none_default", "Default"),
                 show_when={"field": "reviewer_background_mode", "values": ["image_color"]},
-                bind={"kind": "config", "key": "bingsu_reviewer_bg_image"},
+                bind={"kind": "config", "key": "onigiri_reviewer_bg_image"},
             ),
-            _hidden_config_field("reviewer_background_image_light", ["bingsu_reviewer_bg_image_light"]),
-            _hidden_config_field("reviewer_background_image_dark", ["bingsu_reviewer_bg_image_dark"]),
-            _hidden_config_field("reviewer_bg_image_theme_mode", ["bingsu_reviewer_bg_image_theme_mode"], "separate"),
-            _hidden_config_field("reviewer_background_image_mode", ["bingsu_reviewer_bg_image_mode"], "separate"),
+            _hidden_config_field("reviewer_background_image_light", ["onigiri_reviewer_bg_image_light"]),
+            _hidden_config_field("reviewer_background_image_dark", ["onigiri_reviewer_bg_image_dark"]),
+            _hidden_config_field("reviewer_bg_image_theme_mode", ["onigiri_reviewer_bg_image_theme_mode"], "separate"),
+            _hidden_config_field("reviewer_background_image_mode", ["onigiri_reviewer_bg_image_mode"], "separate"),
             _image_list_field(
                 "reviewer_slideshow_images",
                 "reviewer_bg",
                 tr("slideshow_images", "Slideshow Images"),
                 show_when={"field": "reviewer_background_mode", "values": ["slideshow"]},
-                bind={"kind": "config", "key": "bingsu_reviewer_slideshow_images"},
+                bind={"kind": "config", "key": "onigiri_reviewer_slideshow_images"},
             ),
             {
                 "id": "reviewer_slideshow_interval",
                 "type": "duration",
                 "label": tr("slideshow_interval", "Slide Interval"),
-                "bind": {"kind": "config", "key": "bingsu_reviewer_slideshow_interval"},
+                "bind": {"kind": "config", "key": "onigiri_reviewer_slideshow_interval"},
                 "default": 5,
                 "show_when": {"field": "reviewer_background_mode", "values": ["slideshow"]},
             },
@@ -2823,7 +2823,7 @@ def _reviewer_background_section():
                 "id": "reviewer_background_blur",
                 "type": "slider",
                 "label": tr("blur_intensity", "Blur Intensity"),
-                "bind": {"kind": "config", "key": "bingsu_reviewer_bg_blur"},
+                "bind": {"kind": "config", "key": "onigiri_reviewer_bg_blur"},
                 "default": 0, "min": 0, "max": 100, "step": 1, "suffix": "%",
                 "show_when": {"not": {"field": "reviewer_background_mode", "values": ["main"]}},
             },
@@ -2831,13 +2831,13 @@ def _reviewer_background_section():
                 "id": "reviewer_background_opacity",
                 "type": "slider",
                 "label": tr("opacity", "Opacity"),
-                "bind": {"kind": "config", "key": "bingsu_reviewer_bg_opacity"},
+                "bind": {"kind": "config", "key": "onigiri_reviewer_bg_opacity"},
                 "default": 100, "min": 0, "max": 100, "step": 1, "suffix": "%",
                 "show_when": {"not": {"field": "reviewer_background_mode", "values": ["main"]}},
             },
             # Keep legacy keys loadable without exposing independent Match effects.
-            _hidden_config_field("reviewer_background_main_blur", ["bingsu_reviewer_bg_main_blur"], 0),
-            _hidden_config_field("reviewer_background_main_opacity", ["bingsu_reviewer_bg_main_opacity"], 100),
+            _hidden_config_field("reviewer_background_main_blur", ["onigiri_reviewer_bg_main_blur"], 0),
+            _hidden_config_field("reviewer_background_main_opacity", ["onigiri_reviewer_bg_main_opacity"], 100),
         ],
         hide_deck_when={"field": "reviewer_background_mode", "values": ["main"]},
     )
@@ -2861,7 +2861,7 @@ def _reviewer_bottom_bar_section():
             # keys: the patcher consumes the light/dark colours, while this
             # flag records whether the web UI should present them as linked.
             {"id": f"bbar_{suffix}_theme_mode", "type": "hidden", "label": "",
-             "bind": {"kind": "config", "key": f"bingsu_web_bbar_{suffix}_theme_mode"}, "default": "separate"},
+             "bind": {"kind": "config", "key": f"onigiri_web_bbar_{suffix}_theme_mode"}, "default": "separate"},
             {"id": f"bbar_{suffix}_light", "type": "hidden", "label": "",
              "bind": {"kind": "config", "key": f"{config_key}_light"}, "default": default_light},
             {"id": f"bbar_{suffix}_dark", "type": "hidden", "label": "",
@@ -2876,7 +2876,7 @@ def _reviewer_bottom_bar_section():
             "head": False,
             "label": tr("style", "Style"),
             "control_style": "modern",
-            "bind": {"kind": "config", "key": "bingsu_reviewer_bottom_bar_bg_mode"},
+            "bind": {"kind": "config", "key": "onigiri_reviewer_bottom_bar_bg_mode"},
             "default": "match_reviewer_bg",
             "options": [
                 {"value": "image_color", "label": tr("image", "Image")},
@@ -2891,31 +2891,31 @@ def _reviewer_bottom_bar_section():
             show_when=CUSTOM_ONLY,
         ),
         {"id": "bbar_bg_color_theme_mode", "type": "hidden", "label": "",
-         "bind": {"kind": "config", "key": "bingsu_web_bbar_bg_color_theme_mode"}, "default": "separate"},
+         "bind": {"kind": "config", "key": "onigiri_web_bbar_bg_color_theme_mode"}, "default": "separate"},
         {"id": "bbar_bg_color_light", "type": "hidden", "label": "",
-         "bind": {"kind": "config", "key": "bingsu_reviewer_bottom_bar_bg_light_color"}, "default": "#f2f2f2"},
+         "bind": {"kind": "config", "key": "onigiri_reviewer_bottom_bar_bg_light_color"}, "default": "#f2f2f2"},
         {"id": "bbar_bg_color_dark", "type": "hidden", "label": "",
-         "bind": {"kind": "config", "key": "bingsu_reviewer_bottom_bar_bg_dark_color"}, "default": "#2C2C2C"},
+         "bind": {"kind": "config", "key": "onigiri_reviewer_bottom_bar_bg_dark_color"}, "default": "#2C2C2C"},
         _image_field(
             "bbar_bg_image", "reviewer_bar_bg", tr("select_bg_image", "Background Image"),
             empty_label=tr("none_default", "Default"),
             show_when={"field": "bbar_bg_mode", "values": ["image_color"]},
-            bind={"kind": "config", "key": "bingsu_reviewer_bottom_bar_bg_image"},
+            bind={"kind": "config", "key": "onigiri_reviewer_bottom_bar_bg_image"},
         ),
         {
             "id": "bbar_bg_blur", "type": "slider", "label": tr("blur_intensity", "Blur Intensity"),
-            "bind": {"kind": "config", "key": "bingsu_reviewer_bottom_bar_bg_blur"},
+            "bind": {"kind": "config", "key": "onigiri_reviewer_bottom_bar_bg_blur"},
             "default": 0, "min": 0, "max": 100, "step": 1, "suffix": "%",
             "show_when": CUSTOM_ONLY,
         },
         {
             "id": "bbar_bg_opacity", "type": "slider", "label": tr("opacity", "Opacity"),
-            "bind": {"kind": "config", "key": "bingsu_reviewer_bottom_bar_bg_opacity"},
+            "bind": {"kind": "config", "key": "onigiri_reviewer_bottom_bar_bg_opacity"},
             "default": 100, "min": 0, "max": 100, "step": 1, "suffix": "%",
             "show_when": CUSTOM_ONLY,
         },
-        _hidden_config_field("bbar_match_main_blur", ["bingsu_reviewer_bottom_bar_match_main_blur"], 0),
-        _hidden_config_field("bbar_match_main_opacity", ["bingsu_reviewer_bottom_bar_match_main_opacity"], 100),
+        _hidden_config_field("bbar_match_main_blur", ["onigiri_reviewer_bottom_bar_match_main_blur"], 0),
+        _hidden_config_field("bbar_match_main_opacity", ["onigiri_reviewer_bottom_bar_match_main_opacity"], 100),
         {
             "id": "bbar_match_overview_note", "type": "note", "label": "",
             "desc": tr("bbar_inherits_overview", "Blur and opacity are inherited from the Overviewer Background."),
@@ -2930,13 +2930,13 @@ def _reviewer_bottom_bar_section():
             "id": "bbar_custom_enabled", "type": "toggle",
             "head": False,
             "label": tr("enable_custom_buttons_label", "Enable custom buttons"),
-            "bind": {"kind": "config", "key": "bingsu_reviewer_btn_custom_enabled"}, "default": True,
+            "bind": {"kind": "config", "key": "onigiri_reviewer_btn_custom_enabled"}, "default": True,
         },
         {
             "id": "bbar_stattxt_mode", "type": "choice",
             "head": False,
             "label": tr("stats_numbers_label", "Stats Numbers"),
-            "bind": {"kind": "config", "key": "bingsu_reviewer_stattxt_mode"}, "default": "hover",
+            "bind": {"kind": "config", "key": "onigiri_reviewer_stattxt_mode"}, "default": "hover",
             "options": [
                 {"value": "hover", "label": tr("stats_numbers_hover_short", "Hover")},
                 {"value": "inverted", "label": tr("stats_numbers_inverted_short", "Inverted")},
@@ -2948,7 +2948,7 @@ def _reviewer_bottom_bar_section():
             "id": "bbar_timer_position", "type": "choice",
             "head": False,
             "label": tr("timer_position_label", "Timer Position"),
-            "bind": {"kind": "config", "key": "bingsu_reviewer_timer_position"}, "default": "right",
+            "bind": {"kind": "config", "key": "onigiri_reviewer_timer_position"}, "default": "right",
             "options": [
                 {"value": "left", "label": tr("timer_position_left_short", "Left")},
                 {"value": "right", "label": tr("timer_position_right_short", "Right")},
@@ -2958,48 +2958,48 @@ def _reviewer_bottom_bar_section():
         },
         {
             "id": "bbar_btn_radius", "type": "slider", "label": tr("border_radius_label", "Border Radius"),
-            "bind": {"kind": "config", "key": "bingsu_reviewer_btn_radius"},
+            "bind": {"kind": "config", "key": "onigiri_reviewer_btn_radius"},
             "default": 12, "min": 0, "max": 100, "step": 1, "suffix": "px",
         },
         {
             "id": "bbar_btn_border_size", "type": "slider", "label": tr("button_border", "Button border"),
-            "bind": {"kind": "config", "key": "bingsu_reviewer_btn_border_size"},
+            "bind": {"kind": "config", "key": "onigiri_reviewer_btn_border_size"},
             "default": 0, "min": 0, "max": 10, "step": 1, "suffix": "px",
         },
         {
             "id": "bbar_btn_padding", "type": "slider", "label": tr("button_padding_label", "Button Padding"),
-            "bind": {"kind": "config", "key": "bingsu_reviewer_btn_padding"},
+            "bind": {"kind": "config", "key": "onigiri_reviewer_btn_padding"},
             "default": 5, "min": 0, "max": 100, "step": 1, "suffix": "px",
         },
         {
             "id": "bbar_btn_height", "type": "slider", "label": tr("min_height_label", "Min Height"),
-            "bind": {"kind": "config", "key": "bingsu_reviewer_btn_height"},
+            "bind": {"kind": "config", "key": "onigiri_reviewer_btn_height"},
             "default": 40, "min": 0, "max": 200, "step": 1, "suffix": "px",
         },
         {
             "id": "bbar_bar_height", "type": "slider", "label": tr("bar_height_label", "Bar Height"),
-            "bind": {"kind": "config", "key": "bingsu_reviewer_bar_height"},
+            "bind": {"kind": "config", "key": "onigiri_reviewer_bar_height"},
             "default": 60, "min": 20, "max": 300, "step": 1, "suffix": "px",
         },
     ]
-    fields += color("border", "bingsu_reviewer_btn_border_color", tr("border_color", "Border Color"), "#DBDBDB", "#444444")
-    fields += color("timer_bg", "bingsu_reviewer_timer_bg", tr("bbar_timer_bg", "Timer Background"), "#e5e5e5", "#3a3a3a")
-    fields += color("timer_text", "bingsu_reviewer_timer_text", tr("bbar_timer_text", "Timer Text"), "#2c2c2c", "#e0e0e0")
-    fields += color("interval_text", "bingsu_reviewer_stattxt_color", tr("bbar_interval_text", "Interval Text"), "#666666", "#aaaaaa")
+    fields += color("border", "onigiri_reviewer_btn_border_color", tr("border_color", "Border Color"), "#DBDBDB", "#444444")
+    fields += color("timer_bg", "onigiri_reviewer_timer_bg", tr("bbar_timer_bg", "Timer Background"), "#e5e5e5", "#3a3a3a")
+    fields += color("timer_text", "onigiri_reviewer_timer_text", tr("bbar_timer_text", "Timer Text"), "#2c2c2c", "#e0e0e0")
+    fields += color("interval_text", "onigiri_reviewer_stattxt_color", tr("bbar_interval_text", "Interval Text"), "#666666", "#aaaaaa")
     fields += color(
-        "show_answer_bg", "bingsu_reviewer_show_answer_btn_bg",
+        "show_answer_bg", "onigiri_reviewer_show_answer_btn_bg",
         tr("bbar_show_answer_button", "Button Background"), "#ffffff", "#3a3a3a",
     )
     fields += color(
-        "show_answer_text", "bingsu_reviewer_show_answer_btn_text",
+        "show_answer_text", "onigiri_reviewer_show_answer_btn_text",
         tr("bbar_show_answer_text", "Button Text"), "#2c2c2c", "#e0e0e0",
     )
     fields += color(
-        "show_answer_hover_bg", "bingsu_reviewer_show_answer_btn_hover_bg",
+        "show_answer_hover_bg", "onigiri_reviewer_show_answer_btn_hover_bg",
         tr("bbar_show_answer_hover_bg", "Active Background"), "#2c2c2c", "#e0e0e0",
     )
     fields += color(
-        "show_answer_hover_text", "bingsu_reviewer_show_answer_btn_hover_text",
+        "show_answer_hover_text", "onigiri_reviewer_show_answer_btn_hover_text",
         tr("bbar_show_answer_hover_text", "Active Text"), "#f0f0f0", "#3a3a3a",
     )
     fields += [
@@ -3007,25 +3007,25 @@ def _reviewer_bottom_bar_section():
             "id": "bbar_stats_sync", "type": "toggle",
             "head": False,
             "label": tr("sync_stats_bar_bg_label", "Sync with Stats Bar"),
-            "bind": {"kind": "config", "key": "bingsu_reviewer_show_answer_bar_bg_sync"}, "default": True,
+            "bind": {"kind": "config", "key": "onigiri_reviewer_show_answer_bar_bg_sync"}, "default": True,
         },
     ]
     fields += color(
-        "stats_bar_bg", "bingsu_reviewer_show_answer_bar_bg", tr("stats_bar_bg_section_title", "Stats Bar Background"),
+        "stats_bar_bg", "onigiri_reviewer_show_answer_bar_bg", tr("stats_bar_bg_section_title", "Stats Bar Background"),
         "#2c2c2c", "#e0e0e0", show_when={"field": "bbar_stats_sync", "values": [False]},
     )
-    fields += color("again_bg", "bingsu_reviewer_btn_again_bg", tr("bbar_again_button", "Again Button"), "#ffb3b3", "#ffcccb")
-    fields += color("again_text", "bingsu_reviewer_btn_again_text", tr("bbar_again_text", "Again Text"), "#4d0000", "#4a0000")
-    fields += color("hard_bg", "bingsu_reviewer_btn_hard_bg", tr("bbar_hard_button", "Hard Button"), "#ffe0b3", "#ffd699")
-    fields += color("hard_text", "bingsu_reviewer_btn_hard_text", tr("bbar_hard_text", "Hard Text"), "#4d2600", "#4d1d00")
-    fields += color("good_bg", "bingsu_reviewer_btn_good_bg", tr("bbar_good_button", "Good Button"), "#b3ffb3", "#90ee90")
-    fields += color("good_text", "bingsu_reviewer_btn_good_text", tr("bbar_good_text", "Good Text"), "#004d00", "#004000")
-    fields += color("easy_bg", "bingsu_reviewer_btn_easy_bg", tr("bbar_easy_button", "Easy Button"), "#b3d9ff", "#add8e6")
-    fields += color("easy_text", "bingsu_reviewer_btn_easy_text", tr("bbar_easy_text", "Easy Text"), "#00264d", "#002952")
-    fields += color("other_bg", "bingsu_reviewer_other_btn_bg", tr("bbar_other_button", "Other Button"), "#ffffff", "#3a3a3a")
-    fields += color("other_text", "bingsu_reviewer_other_btn_text", tr("bbar_other_text", "Other Text"), "#2c2c2c", "#e0e0e0")
-    fields += color("other_hover_bg", "bingsu_reviewer_other_btn_hover_bg", tr("bbar_other_hover_bg", "Hover Background"), "#2c2c2c", "#e0e0e0")
-    fields += color("other_hover_text", "bingsu_reviewer_other_btn_hover_text", tr("bbar_other_hover_text", "Hover Text"), "#f0f0f0", "#3a3a3a")
+    fields += color("again_bg", "onigiri_reviewer_btn_again_bg", tr("bbar_again_button", "Again Button"), "#ffb3b3", "#ffcccb")
+    fields += color("again_text", "onigiri_reviewer_btn_again_text", tr("bbar_again_text", "Again Text"), "#4d0000", "#4a0000")
+    fields += color("hard_bg", "onigiri_reviewer_btn_hard_bg", tr("bbar_hard_button", "Hard Button"), "#ffe0b3", "#ffd699")
+    fields += color("hard_text", "onigiri_reviewer_btn_hard_text", tr("bbar_hard_text", "Hard Text"), "#4d2600", "#4d1d00")
+    fields += color("good_bg", "onigiri_reviewer_btn_good_bg", tr("bbar_good_button", "Good Button"), "#b3ffb3", "#90ee90")
+    fields += color("good_text", "onigiri_reviewer_btn_good_text", tr("bbar_good_text", "Good Text"), "#004d00", "#004000")
+    fields += color("easy_bg", "onigiri_reviewer_btn_easy_bg", tr("bbar_easy_button", "Easy Button"), "#b3d9ff", "#add8e6")
+    fields += color("easy_text", "onigiri_reviewer_btn_easy_text", tr("bbar_easy_text", "Easy Text"), "#00264d", "#002952")
+    fields += color("other_bg", "onigiri_reviewer_other_btn_bg", tr("bbar_other_button", "Other Button"), "#ffffff", "#3a3a3a")
+    fields += color("other_text", "onigiri_reviewer_other_btn_text", tr("bbar_other_text", "Other Text"), "#2c2c2c", "#e0e0e0")
+    fields += color("other_hover_bg", "onigiri_reviewer_other_btn_hover_bg", tr("bbar_other_hover_bg", "Hover Background"), "#2c2c2c", "#e0e0e0")
+    fields += color("other_hover_text", "onigiri_reviewer_other_btn_hover_text", tr("bbar_other_hover_text", "Hover Text"), "#f0f0f0", "#3a3a3a")
 
     section = _designer_preview_section(
         "reviewer_bottom_bar",
@@ -3052,7 +3052,7 @@ def _reviewer_bottom_bar_section():
     # omit one family's border while retaining the shared width elsewhere.
     for family in ("show_answer", "again", "hard", "good", "easy", "other", "timer"):
         section["fields"] += color(
-            family + "_border", "bingsu_reviewer_" + family + "_border",
+            family + "_border", "onigiri_reviewer_" + family + "_border",
             tr("border_color", "Border Color"), "", "",
         )
         section["dynamic_keys"].append("bbar_" + family + "_border_theme_mode")
@@ -3168,14 +3168,14 @@ def _reviewer_progress_fields():
             "head": True,
             "head_label": tr("progress_bar", "Progress Bar"),
             "label": tr("progress_enable", "Show progress bar"),
-            "bind": {"kind": "config", "key": "bingsu_reviewer_progress_enabled"},
+            "bind": {"kind": "config", "key": "onigiri_reviewer_progress_enabled"},
             "default": True,
         },
         {
             "id": "rprog_style", "type": "choice",
             "head": False,
             "label": tr("progress_style", "Style"),
-            "bind": {"kind": "config", "key": "bingsu_reviewer_progress_style"},
+            "bind": {"kind": "config", "key": "onigiri_reviewer_progress_style"},
             "default": "bar",
             "options": [
                 {"value": "bar", "label": tr("progress_style_bar", "Bar"),
@@ -3192,7 +3192,7 @@ def _reviewer_progress_fields():
             "id": "rprog_label", "type": "choice",
             "head": False,
             "label": tr("progress_label", "Label"),
-            "bind": {"kind": "config", "key": "bingsu_reviewer_progress_label"},
+            "bind": {"kind": "config", "key": "onigiri_reviewer_progress_label"},
             "default": "fraction",
             "options": [
                 {"value": "fraction", "label": tr("progress_label_fraction", "12/40")},
@@ -3206,7 +3206,7 @@ def _reviewer_progress_fields():
             "id": "rprog_scope", "type": "choice",
             "head": False,
             "label": tr("progress_scope", "Counts from"),
-            "bind": {"kind": "config", "key": "bingsu_reviewer_progress_scope"},
+            "bind": {"kind": "config", "key": "onigiri_reviewer_progress_scope"},
             "default": "session",
             "options": [
                 {"value": "session", "label": tr("progress_scope_session", "This session"),
@@ -3219,7 +3219,7 @@ def _reviewer_progress_fields():
             "id": "rprog_position", "type": "choice",
             "head": False,
             "label": tr("progress_position", "Position"),
-            "bind": {"kind": "config", "key": "bingsu_reviewer_progress_position"},
+            "bind": {"kind": "config", "key": "onigiri_reviewer_progress_position"},
             "default": "right",
             "options": [
                 {"value": "right", "label": tr("progress_position_right", "Right of buttons")},
@@ -3228,25 +3228,25 @@ def _reviewer_progress_fields():
         },
         {
             "id": "rprog_width", "type": "slider", "label": tr("progress_width", "Bar Width"),
-            "bind": {"kind": "config", "key": "bingsu_reviewer_progress_width"},
+            "bind": {"kind": "config", "key": "onigiri_reviewer_progress_width"},
             "default": 96, "min": 40, "max": 320, "step": 1, "suffix": "px",
             "show_when": IS_BAR,
         },
         {
             "id": "rprog_ring_size", "type": "slider", "label": tr("progress_ring_size", "Ring Size"),
-            "bind": {"kind": "config", "key": "bingsu_reviewer_progress_ring_size"},
+            "bind": {"kind": "config", "key": "onigiri_reviewer_progress_ring_size"},
             "default": 16, "min": 12, "max": 40, "step": 1, "suffix": "px",
             "show_when": IS_RING,
         },
         {
             "id": "rprog_thickness", "type": "slider", "label": tr("progress_thickness", "Thickness"),
-            "bind": {"kind": "config", "key": "bingsu_reviewer_progress_thickness"},
+            "bind": {"kind": "config", "key": "onigiri_reviewer_progress_thickness"},
             "default": 6, "min": 2, "max": 20, "step": 1, "suffix": "px",
             "show_when": NOT_TEXT,
         },
         {
             "id": "rprog_radius", "type": "slider", "label": tr("progress_radius", "Corner Radius"),
-            "bind": {"kind": "config", "key": "bingsu_reviewer_progress_radius"},
+            "bind": {"kind": "config", "key": "onigiri_reviewer_progress_radius"},
             "default": 999, "min": 0, "max": 999, "step": 1, "suffix": "px",
             "show_when": IS_BAR,
         },
@@ -3255,28 +3255,28 @@ def _reviewer_progress_fields():
             "head": False,
             "label": tr("progress_chrome", "Button-style background"),
             "desc": tr("progress_chrome_desc", "Wrap the gauge in the same chip the header buttons use."),
-            "bind": {"kind": "config", "key": "bingsu_reviewer_progress_chrome"},
+            "bind": {"kind": "config", "key": "onigiri_reviewer_progress_chrome"},
             "default": True,
         },
         {
             "id": "rprog_animate", "type": "toggle",
             "head": False,
             "label": tr("progress_animate", "Animate changes"),
-            "bind": {"kind": "config", "key": "bingsu_reviewer_progress_animate"},
+            "bind": {"kind": "config", "key": "onigiri_reviewer_progress_animate"},
             "default": True,
         },
         {
             "id": "rprog_hide_when_done", "type": "toggle",
             "head": False,
             "label": tr("progress_hide_when_done", "Hide when the deck is finished"),
-            "bind": {"kind": "config", "key": "bingsu_reviewer_progress_hide_when_done"},
+            "bind": {"kind": "config", "key": "onigiri_reviewer_progress_hide_when_done"},
             "default": False,
         },
         {
             "id": "rprog_gradient", "type": "toggle",
             "head": False,
             "label": tr("progress_gradient", "Gradient fill"),
-            "bind": {"kind": "config", "key": "bingsu_reviewer_progress_gradient"},
+            "bind": {"kind": "config", "key": "onigiri_reviewer_progress_gradient"},
             "default": True,
             "show_when": NOT_TEXT,
         },
@@ -3289,7 +3289,7 @@ def _reviewer_progress_fields():
                 **({"show_when": show_when} if show_when else {}),
             ),
             {"id": f"rprog_{suffix}_theme_mode", "type": "hidden", "label": "",
-             "bind": {"kind": "config", "key": f"bingsu_web_rprog_{suffix}_theme_mode"}, "default": "separate"},
+             "bind": {"kind": "config", "key": f"onigiri_web_rprog_{suffix}_theme_mode"}, "default": "separate"},
             {"id": f"rprog_{suffix}_light", "type": "hidden", "label": "",
              "bind": {"kind": "config", "key": f"{config_key}_light"}, "default": default_light},
             {"id": f"rprog_{suffix}_dark", "type": "hidden", "label": "",
@@ -3297,20 +3297,20 @@ def _reviewer_progress_fields():
         ]
 
     fields += color(
-        "fill", "bingsu_reviewer_progress_fill", tr("progress_fill", "Fill"),
+        "fill", "onigiri_reviewer_progress_fill", tr("progress_fill", "Fill"),
         "#19c96b", "#12b765", show_when=NOT_TEXT,
     )
     fields += color(
-        "fill_end", "bingsu_reviewer_progress_fill_end", tr("progress_fill_end", "Gradient End"),
+        "fill_end", "onigiri_reviewer_progress_fill_end", tr("progress_fill_end", "Gradient End"),
         "#5ad6f0", "#4bc4de",
         show_when={"all": [NOT_TEXT, {"field": "rprog_gradient", "values": [True]}]},
     )
     fields += color(
-        "track", "bingsu_reviewer_progress_track", tr("progress_track", "Track"),
+        "track", "onigiri_reviewer_progress_track", tr("progress_track", "Track"),
         "rgba(0, 0, 0, 0.12)", "rgba(255, 255, 255, 0.16)", show_when=NOT_TEXT,
     )
     fields += color(
-        "text", "bingsu_reviewer_progress_text", tr("progress_text_color", "Label Text"),
+        "text", "onigiri_reviewer_progress_text", tr("progress_text_color", "Label Text"),
         "#2c2c2c", "#e8e8e8",
     )
     fields += [
@@ -3318,7 +3318,7 @@ def _reviewer_progress_fields():
             "id": "rprog_segment_source", "type": "choice",
             "head": False,
             "label": tr("progress_segment_source", "Segment Colors"),
-            "bind": {"kind": "config", "key": "bingsu_reviewer_progress_segment_source"},
+            "bind": {"kind": "config", "key": "onigiri_reviewer_progress_segment_source"},
             "default": "counts",
             "options": [
                 {"value": "counts", "label": tr("progress_segment_counts", "Follow count bubbles"),
@@ -3332,11 +3332,11 @@ def _reviewer_progress_fields():
         {"field": "rprog_style", "values": ["segments"]},
         {"field": "rprog_segment_source", "values": ["custom"]},
     ]}
-    fields += color("seg_new", "bingsu_reviewer_progress_seg_new", tr("new_count_label", "New Count"),
+    fields += color("seg_new", "onigiri_reviewer_progress_seg_new", tr("new_count_label", "New Count"),
                     "#1e8cff", "#0a84ff", show_when=SEG_CUSTOM)
-    fields += color("seg_learn", "bingsu_reviewer_progress_seg_learn", tr("learn_count_label", "Learning Count"),
+    fields += color("seg_learn", "onigiri_reviewer_progress_seg_learn", tr("learn_count_label", "Learning Count"),
                     "#ff5757", "#ff453a", show_when=SEG_CUSTOM)
-    fields += color("seg_review", "bingsu_reviewer_progress_seg_review", tr("review_count_label", "Review Count"),
+    fields += color("seg_review", "onigiri_reviewer_progress_seg_review", tr("review_count_label", "Review Count"),
                     "#19c96b", "#12b765", show_when=SEG_CUSTOM)
 
     return fields, [
@@ -3363,14 +3363,14 @@ def _reviewer_flags_section():
         "description_in_tab": True,
         "description": tr(
             "reviewer_flags_desc",
-            "Choose an icon for each flag in the reviewer. Icons keep the flag's color. Use Default restores Bingsu's flag icon.",
+            "Choose an icon for each flag in the reviewer. Icons keep the flag's color. Use Default restores Onigiri's flag icon.",
         ),
         "fields": [
             {
                 "id": f"reviewer_flag_icon_{number}",
                 "type": "icon",
                 "label": tr(f"reviewer_flag_{name}", label),
-                "bind": {"kind": "config", "path": ["bingsu_reviewer_flag_icons", str(number)]},
+                "bind": {"kind": "config", "path": ["onigiri_reviewer_flag_icons", str(number)]},
                 "default": "",
                 "default_icon": "system:flag.svg",
                 "icon_tint": tint,
@@ -3409,12 +3409,12 @@ def _dock_icon_tint_fields(button_id):
         ),
         _hidden_config_field(
             light_id,
-            ["bingsu_reviewer_dock_icon_colors_light", button_id],
+            ["onigiri_reviewer_dock_icon_colors_light", button_id],
             "",
         ),
         _hidden_config_field(
             dark_id,
-            ["bingsu_reviewer_dock_icon_colors_dark", button_id],
+            ["onigiri_reviewer_dock_icon_colors_dark", button_id],
             "",
         ),
     ]
@@ -3431,7 +3431,7 @@ def _reviewer_dock_section():
             "id": "reviewer_dock_mode",
             "type": "choice",
             "label": tr("reviewer_dock_mode", "Dock Style"),
-            "bind": {"kind": "config", "key": "bingsu_reviewer_dock_mode"},
+            "bind": {"kind": "config", "key": "onigiri_reviewer_dock_mode"},
             "default": "static",
             "advanced": False,
             "options": [
@@ -3450,9 +3450,9 @@ def _reviewer_dock_section():
             show_when=IS_ISLAND,
             advanced=False,
         ),
-        _hidden_config_field("rdock_goo_color_theme_mode", ["bingsu_web_rdock_goo_theme_mode"], "separate"),
-        _hidden_config_field("rdock_goo_color_light", ["bingsu_reviewer_dock_goo_color_light"], "#17181a"),
-        _hidden_config_field("rdock_goo_color_dark", ["bingsu_reviewer_dock_goo_color_dark"], "#ffffff"),
+        _hidden_config_field("rdock_goo_color_theme_mode", ["onigiri_web_rdock_goo_theme_mode"], "separate"),
+        _hidden_config_field("rdock_goo_color_light", ["onigiri_reviewer_dock_goo_color_light"], "#17181a"),
+        _hidden_config_field("rdock_goo_color_dark", ["onigiri_reviewer_dock_goo_color_dark"], "#ffffff"),
     ]
 
     # Icons must form one contiguous run so rebalanceDeck groups them into one grid,
@@ -3462,7 +3462,7 @@ def _reviewer_dock_section():
             "id": f"rdock_icon_{button_id}",
             "type": "icon",
             "label": tr(label_key, fallback_label),
-            "bind": {"kind": "config", "path": ["bingsu_reviewer_dock_icons", button_id]},
+            "bind": {"kind": "config", "path": ["onigiri_reviewer_dock_icons", button_id]},
             "default": "",
             "default_icon": default_icon,
             "icon_group": "dock_icons",
@@ -3628,7 +3628,7 @@ def _widget_effect_fields():
             "widget_box_color_light",
             "widget_box_color_dark",
             None,
-            theme_mode_field="bingsu_canvas_inset_color_theme_mode",
+            theme_mode_field="onigiri_canvas_inset_color_theme_mode",
             always_split=True,
         ),
         _hidden_config_field(
@@ -3647,7 +3647,7 @@ def _widget_effect_fields():
             "widget_border_color_light",
             "widget_border_color_dark",
             None,
-            theme_mode_field="bingsu_canvas_inset_color_theme_mode",
+            theme_mode_field="onigiri_canvas_inset_color_theme_mode",
             always_split=True,
         ),
         _hidden_config_field(
@@ -3660,13 +3660,13 @@ def _widget_effect_fields():
             ["colors", "dark", "--border"],
             "#424242",
         ),
-        _hidden_field("bingsu_canvas_inset_color_theme_mode", "separate"),
+        _hidden_field("onigiri_canvas_inset_color_theme_mode", "separate"),
         {
-            "id": "bingsu_canvas_inset_effect_blur",
+            "id": "onigiri_canvas_inset_effect_blur",
             "type": "slider",
             "advanced": False,
             "label": tr("blur", "Blur"),
-            "bind": {"kind": "col", "key": "bingsu_canvas_inset_effect_blur"},
+            "bind": {"kind": "col", "key": "onigiri_canvas_inset_effect_blur"},
             "default": 0,
             "min": 0,
             "max": 100,
@@ -3674,11 +3674,11 @@ def _widget_effect_fields():
             "suffix": "%",
         },
         {
-            "id": "bingsu_canvas_inset_effect_opacity",
+            "id": "onigiri_canvas_inset_effect_opacity",
             "type": "slider",
             "advanced": False,
             "label": tr("opacity", "Opacity"),
-            "bind": {"kind": "col", "key": "bingsu_canvas_inset_effect_opacity"},
+            "bind": {"kind": "col", "key": "onigiri_canvas_inset_effect_opacity"},
             "default": 100,
             "min": 0,
             "max": 100,
@@ -3686,11 +3686,11 @@ def _widget_effect_fields():
             "suffix": "%",
         },
         {
-            "id": "bingsu_canvas_inset_border_radius",
+            "id": "onigiri_canvas_inset_border_radius",
             "type": "slider",
             "advanced": True,
             "label": tr("border_radius", "Border Radius"),
-            "bind": {"kind": "col", "key": "bingsu_canvas_inset_border_radius"},
+            "bind": {"kind": "col", "key": "onigiri_canvas_inset_border_radius"},
             "default": 20,
             "min": 0,
             "max": 60,
@@ -3698,11 +3698,11 @@ def _widget_effect_fields():
             "suffix": "px",
         },
         {
-            "id": "bingsu_canvas_inset_border_width",
+            "id": "onigiri_canvas_inset_border_width",
             "type": "slider",
             "advanced": True,
             "label": tr("border_width", "Border Width"),
-            "bind": {"kind": "col", "key": "bingsu_canvas_inset_border_width"},
+            "bind": {"kind": "col", "key": "onigiri_canvas_inset_border_width"},
             "default": 1,
             "min": 0,
             "max": 10,
@@ -4269,10 +4269,10 @@ def _mainmenu_organize_section():
         # and the widget grid. Hidden light/dark companion fields remain
         # in this section so the regular settings store persists them.
         "compact_fields": [
-            "bingsu_canvas_inset_effect_blur",
-            "bingsu_canvas_inset_effect_opacity",
-            "bingsu_canvas_inset_border_radius",
-            "bingsu_canvas_inset_border_width",
+            "onigiri_canvas_inset_effect_blur",
+            "onigiri_canvas_inset_effect_opacity",
+            "onigiri_canvas_inset_border_radius",
+            "onigiri_canvas_inset_border_width",
             "widget_box_color",
             "widget_border_color",
         ],
@@ -4289,22 +4289,22 @@ def _mainmenu_organize_section():
                 "default": config.DEFAULTS["statsTitle"],
             },
             {
-                "id": "bingsu_font_dashboard_title",
+                "id": "onigiri_font_dashboard_title",
                 "type": "font",
                 "advanced": True,
                 "label": tr("font", "Font"),
-                "bind": {"kind": "col", "key": "bingsu_font_dashboard_title"},
+                "bind": {"kind": "col", "key": "onigiri_font_dashboard_title"},
                 "default": "sync",
                 "options": [
                     {"value": "sync", "label": tr("sync_with_theme", "Sync with theme")},
                 ] + _font_options(),
             },
             {
-                "id": "bingsu_font_size_dashboard_title",
+                "id": "onigiri_font_size_dashboard_title",
                 "type": "number",
                 "advanced": True,
                 "label": tr("font_size", "Size"),
-                "bind": {"kind": "col", "key": "bingsu_font_size_dashboard_title"},
+                "bind": {"kind": "col", "key": "onigiri_font_size_dashboard_title"},
                 "default": _current_simple_font_size("subtle"),
                 "min": 8,
                 "max": 72,
@@ -4488,8 +4488,8 @@ def _mainmenu_organize_section():
             },
         ] + _widget_effect_fields() + [
             {
-                "id": "bingsuWidgetLayout", "type": "hidden", "label": "",
-                "bind": {"kind": "config", "key": "bingsuWidgetLayout"},
+                "id": "onigiriWidgetLayout", "type": "hidden", "label": "",
+                "bind": {"kind": "config", "key": "onigiriWidgetLayout"},
                 "default": {"grid": {}, "archive": {}, "column_count": 4, "grid_width": 250,
                             "grid_alignment": "center", "widget_height": 150},
             },
@@ -4565,7 +4565,7 @@ def _single_color_slot(field_id, label, bind, default, **extra):
 def _key_color_pair(field_id, label, light_key, dark_key, light_default, dark_default,
                     theme_mode_field=None, **extra):
     """Like `_theme_color_pair`, but for a setting stored as two flat config
-    keys (`bingsu_reviewer_btn_again_bg_light` / `…_dark`) rather than as one
+    keys (`onigiri_reviewer_btn_again_bg_light` / `…_dark`) rather than as one
     token under `colors`."""
     mode_field = theme_mode_field or f"{field_id}_theme_mode"
     fields = [
@@ -4648,7 +4648,7 @@ MARKER_DEFINITIONS = (
 def _icon_field(field_id, label, default, **extra):
     """An icon slot backed by the icon popover. `default` is the fallback glyph
     written as a "system:<file>" reference, which every reader already resolves
-    (patcher.py:4619, bingsu_renderer.py:1102)."""
+    (patcher.py:4619, onigiri_renderer.py:1102)."""
     field = {
         "id": field_id,
         "type": "icon",
@@ -4702,7 +4702,7 @@ def _sidebar_background_section():
             # Deck colours use the Sidebar frame's light/dark policy. Keeping
             # their mode here makes this the Sidebar page's single Dynamic
             # mode control instead of surfacing a second switch in Decks.
-            "bingsu_sidebar_deck_colors_theme_mode",
+            "onigiri_sidebar_deck_colors_theme_mode",
         ],
         sync_toggle_id="modern_menu_sidebar_sync_box_effect",
         sync_hidden_fields=[
@@ -4881,10 +4881,10 @@ def _sidebar_background_section():
             # decide what is laid over it. patcher.py reads them only while
             # `modern_menu_sidebar_bg_mode` is "main".
             {
-                "id": "bingsu_sidebar_main_bg_effect_mode",
+                "id": "onigiri_sidebar_main_bg_effect_mode",
                 "type": "choice",
                 "label": tr("effect", "Effect"),
-                "bind": {"kind": "col", "key": "bingsu_sidebar_main_bg_effect_mode"},
+                "bind": {"kind": "col", "key": "onigiri_sidebar_main_bg_effect_mode"},
                 "default": "opaque",
                 "show_when": _SIDEBAR_MAIN,
                 "options": [
@@ -4893,36 +4893,36 @@ def _sidebar_background_section():
                 ],
             },
             {
-                "id": "bingsu_sidebar_main_bg_effect_intensity",
+                "id": "onigiri_sidebar_main_bg_effect_intensity",
                 "type": "slider",
                 "label": tr("effect_intensity", "Effect Intensity"),
-                "bind": {"kind": "col", "key": "bingsu_sidebar_main_bg_effect_intensity"},
+                "bind": {"kind": "col", "key": "onigiri_sidebar_main_bg_effect_intensity"},
                 "default": 50, "min": 0, "max": 100, "step": 1, "suffix": "%",
                 "show_when": {"all": [_SIDEBAR_MAIN,
-                                      {"field": "bingsu_sidebar_main_bg_effect_mode",
+                                      {"field": "onigiri_sidebar_main_bg_effect_mode",
                                        "values": ["glassmorphism"]}]},
             },
             _color_pair_field(
-                "bingsu_sidebar_opaque_tint_color",
+                "onigiri_sidebar_opaque_tint_color",
                 tr("overlay_color", "Overlay Color"),
-                "bingsu_sidebar_opaque_tint_color_light",
-                "bingsu_sidebar_opaque_tint_color_dark",
+                "onigiri_sidebar_opaque_tint_color_light",
+                "onigiri_sidebar_opaque_tint_color_dark",
                 None,
                 show_when={"all": [_SIDEBAR_MAIN,
-                                   {"field": "bingsu_sidebar_main_bg_effect_mode",
+                                   {"field": "onigiri_sidebar_main_bg_effect_mode",
                                     "values": ["opaque"]}]},
             ),
-            _hidden_field("bingsu_sidebar_opaque_tint_color_light", "#FFFFFF"),
-            _hidden_field("bingsu_sidebar_opaque_tint_color_dark", "#1D1D1D"),
-            _hidden_field("bingsu_sidebar_opaque_tint_color_theme_mode", "separate"),
+            _hidden_field("onigiri_sidebar_opaque_tint_color_light", "#FFFFFF"),
+            _hidden_field("onigiri_sidebar_opaque_tint_color_dark", "#1D1D1D"),
+            _hidden_field("onigiri_sidebar_opaque_tint_color_theme_mode", "separate"),
             {
-                "id": "bingsu_sidebar_opaque_tint_intensity",
+                "id": "onigiri_sidebar_opaque_tint_intensity",
                 "type": "slider",
                 "label": tr("overlay_intensity", "Overlay Intensity"),
-                "bind": {"kind": "col", "key": "bingsu_sidebar_opaque_tint_intensity"},
+                "bind": {"kind": "col", "key": "onigiri_sidebar_opaque_tint_intensity"},
                 "default": 30, "min": 0, "max": 100, "step": 1, "suffix": "%",
                 "show_when": {"all": [_SIDEBAR_MAIN,
-                                      {"field": "bingsu_sidebar_main_bg_effect_mode",
+                                      {"field": "onigiri_sidebar_main_bg_effect_mode",
                                        "values": ["opaque"]}]},
             },
             # Legacy zeroed this on every save through the designer: it is a
@@ -5092,19 +5092,19 @@ def _advanced_font_role(role, sync_label=None):
         "role_key": role,
         "fallback_role_key": fallback_role,
         "fields": [{
-            "id": f"bingsu_font_{role}",
+            "id": f"onigiri_font_{role}",
             "type": "font",
             "advanced": True,
             "label": tr("font", "Font"),
-            "bind": {"kind": "col", "key": f"bingsu_font_{role}"},
+            "bind": {"kind": "col", "key": f"onigiri_font_{role}"},
             "default": "sync",
             "options": sync_option + _font_options(),
         }, {
-            "id": f"bingsu_font_size_{role}",
+            "id": f"onigiri_font_size_{role}",
             "type": "number",
             "advanced": True,
             "label": tr("font_size", "Size"),
-            "bind": {"kind": "col", "key": f"bingsu_font_size_{role}"},
+            "bind": {"kind": "col", "key": f"onigiri_font_size_{role}"},
             "default": size,
             "min": 8,
             "max": 72,
@@ -5604,7 +5604,7 @@ def _sidebar_decks_section():
             "default": False,
         },
     ]
-    palette_mode = "bingsu_sidebar_deck_colors_theme_mode"
+    palette_mode = "onigiri_sidebar_deck_colors_theme_mode"
     # Keep the theme palette values available to the JS preview painter as
     # fallbacks. The visible bubble controls below alias the Overview Style
     # values that the live sidebar uses when explicit colors are set.
@@ -5796,7 +5796,7 @@ def _sidebar_page():
     ]
     for section in classic_sections:
         section["show_when"] = {
-            "field": "bingsu_ui_theme",
+            "field": "onigiri_ui_theme",
             "values": ["classic"],
         }
     # Shima reuses both the deck appearance and the island surface controls,
@@ -5815,7 +5815,7 @@ def _sidebar_page():
     for field in deck_section.get("fields", []):
         if field.get("id") == "sidebarContentMode":
             field["show_when"] = {
-                "field": "bingsu_ui_theme",
+                "field": "onigiri_ui_theme",
                 "values": ["classic"],
             }
     _kome_main, kome_sidebar = _things_sections_by_page()
@@ -5998,7 +5998,7 @@ def _mainmenu_page():
     ]
     for section in classic_sections:
         section["show_when"] = {
-            "field": "bingsu_ui_theme",
+            "field": "onigiri_ui_theme",
             "values": ["classic"],
         }
     # The surrounding canvas is Shima's only non-deck surface, so the existing
@@ -6041,8 +6041,8 @@ def _attach_font_colors(pages):
         if font_id == "pomodoro_font":
             prefix = "pomodoro_color_digits"
             field["color_dynamic_field"] = "pomodoro_dynamic"
-        elif font_id in ("bingsu_font_profile_name", "bingsu_font_profile_level"):
-            prefix = "modern_menu_" + font_id.removeprefix("bingsu_font_") + "_color"
+        elif font_id in ("onigiri_font_profile_name", "onigiri_font_profile_level"):
+            prefix = "modern_menu_" + font_id.removeprefix("onigiri_font_") + "_color"
             field["color_dynamic_field"] = "modern_menu_profile_name_dynamic_mode"
         else:
             prefix = font_id + "_color"

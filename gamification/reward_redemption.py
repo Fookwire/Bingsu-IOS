@@ -10,7 +10,7 @@ import requests
 from aqt import mw
 from aqt.qt import *
 
-from ..ui_kit.bingsu_notifications import notify_info as showInfo
+from ..ui_kit.onigiri_notifications import notify_info as showInfo
 from . import redeem_net
 from ..core.translations import tr
 
@@ -494,7 +494,7 @@ class RewardCodeDialog(QDialog):
         border: str,
         hover_bg: str,
     ) -> None:
-        support_text = QLabel(tr("support_bingsu_coins"))
+        support_text = QLabel(tr("support_onigiri_coins"))
         support_text.setWordWrap(True)
         support_text.setStyleSheet(f"color: {muted}; font-size: 12px; font-weight: 400;")
         layout.addWidget(support_text)

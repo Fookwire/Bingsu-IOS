@@ -24,7 +24,7 @@ def reviewer_button_visible(tool_id, conf=None):
     if tool_id == "hashi_notes":
         return (conf.get("hashi_notes", {}) or {}).get("show_in_reviewer_header", True)
     if tool_id == "pomodoro":
-        return conf.get("bingsu_pomodoro_show_in_reviewer_header", True)
+        return conf.get("onigiri_pomodoro_show_in_reviewer_header", True)
     return False
 
 

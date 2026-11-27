@@ -79,14 +79,14 @@
     root.className = "ba-cmdk-back";
     root.setAttribute("data-open", "false");
     root.innerHTML =
-      window.bingsuTemplate('<div class="ba-cmdk" role="dialog" aria-label="Command palette">') +
+      window.onigiriTemplate('<div class="ba-cmdk" role="dialog" aria-label="Command palette">') +
       '  <div class="ba-cmdk-input-row">' +
       '    <span class="ba-cmdk-glyph">' + svg("search") + "</span>" +
       '    <input class="ba-cmdk-input" type="text" autocomplete="off" ' +
       '           spellcheck="false" autocapitalize="off" ' +
-      window.bingsuTemplate('           placeholder="Search decks, cards, tags, actions…" />') +
+      window.onigiriTemplate('           placeholder="Search decks, cards, tags, actions…" />') +
       '    <span class="ba-cmdk-hint">' +
-      '      <span class="ba-cmdk-kbd">Esc</span> ' + window.bingsuText('to close') +
+      '      <span class="ba-cmdk-kbd">Esc</span> ' + window.onigiriText('to close') +
       "    </span>" +
       "  </div>" +
       '  <div class="ba-cmdk-list" role="listbox"></div>' +
@@ -94,10 +94,10 @@
       '    <span class="ba-cmdk-foot-l">' +
       '      <span class="ba-cmdk-foot-item">' +
       '        <span class="ba-cmdk-kbd">↑</span>' +
-      '        <span class="ba-cmdk-kbd">↓</span> ' + window.bingsuText('navigate') +
+      '        <span class="ba-cmdk-kbd">↓</span> ' + window.onigiriText('navigate') +
       "      </span>" +
       '      <span class="ba-cmdk-foot-item">' +
-      '        <span class="ba-cmdk-kbd">↵</span> ' + window.bingsuText('select') +
+      '        <span class="ba-cmdk-kbd">↵</span> ' + window.onigiriText('select') +
       "      </span>" +
       "    </span>" +
       '    <span class="ba-cmdk-foot-r">Anki Design</span>' +
@@ -292,9 +292,9 @@
 
     if (!currentItems.length) {
       var emptyMsg = q
-        ? window.bingsuTemplate('<div class="ba-cmdk-empty">No matches for <strong>')
+        ? window.onigiriTemplate('<div class="ba-cmdk-empty">No matches for <strong>')
             + escapeHtml(q) + "</strong></div>"
-        : window.bingsuTemplate('<div class="ba-cmdk-empty">Type to search decks, cards, tags, actions.</div>');
+        : window.onigiriTemplate('<div class="ba-cmdk-empty">Type to search decks, cards, tags, actions.</div>');
       list.innerHTML = emptyMsg;
       activeIdx = 0;
       return;
@@ -334,7 +334,7 @@
     if (initialQuery != null) input.value = initialQuery;
     root.setAttribute("data-open", "true");
     list.innerHTML =
-      window.bingsuTemplate('<div class="ba-cmdk-empty">Loading…</div>');
+      window.onigiriTemplate('<div class="ba-cmdk-empty">Loading…</div>');
     // Async focus so the open animation kicks in before the keyboard caret.
     requestAnimationFrame(function () {
       input.focus();

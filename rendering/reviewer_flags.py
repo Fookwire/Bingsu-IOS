@@ -1,4 +1,4 @@
-"""Resolve Bingsu reviewer flag glyphs without changing Anki's card flags."""
+"""Resolve Onigiri reviewer flag glyphs without changing Anki's card flags."""
 
 import json
 from pathlib import Path
@@ -6,9 +6,9 @@ from urllib.parse import quote
 
 
 def icon_urls(conf, addon_root, package):
-    """Every flag uses Bingsu's bundled glyph unless a valid choice exists."""
+    """Every flag uses Onigiri's bundled glyph unless a valid choice exists."""
     root = Path(addon_root)
-    choices = conf.get("bingsu_reviewer_flag_icons", {})
+    choices = conf.get("onigiri_reviewer_flag_icons", {})
     if not isinstance(choices, dict):
         choices = {}
     urls = {}
@@ -50,9 +50,9 @@ def icon_urls(conf, addon_root, package):
 def settings_script(conf, addon_root, package):
     payload = json.dumps(icon_urls(conf, addon_root, package)).replace("</", "<\\/")
     return (
-        f"window.bingsuReviewerFlagIcons={payload};"
-        "if(window.BingsuReviewerFlags){"
-        "window.BingsuReviewerFlags.setIcons(window.bingsuReviewerFlagIcons);}"
+        f"window.onigiriReviewerFlagIcons={payload};"
+        "if(window.OnigiriReviewerFlags){"
+        "window.OnigiriReviewerFlags.setIcons(window.onigiriReviewerFlagIcons);}"
     )
 
 

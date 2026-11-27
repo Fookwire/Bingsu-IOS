@@ -20,14 +20,14 @@ host=types.ModuleType('aqt');sys.modules['aqt']=host
 def load(name, path):
  spec=importlib.util.spec_from_file_location(name,path);m=importlib.util.module_from_spec(spec);sys.modules[name]=m;spec.loader.exec_module(m);return m
 
-with tempfile.TemporaryDirectory(prefix='bingsu-real-anki-') as tmp:
+with tempfile.TemporaryDirectory(prefix='onigiri-real-anki-') as tmp:
  collection=Collection(str(Path(tmp)/'collection.anki2'))
  try:
-  values={'bingsu_hashi_notes':[{'id':'note-1','body_md':'Keep my notes'}], 'modern_menu_statsTitle':'Saved title', 'unrelated_setting':{'keep':True}}
+  values={'onigiri_hashi_notes':[{'id':'note-1','body_md':'Keep my notes'}], 'modern_menu_statsTitle':'Saved title', 'unrelated_setting':{'keep':True}}
   for k,v in values.items():collection.set_config(k,v)
   host.mw=types.SimpleNamespace(col=collection,pm=types.SimpleNamespace(name='Audit',base=tmp))
   storage=load('warning_audit.core.safe_storage',ROOT/'core/safe_storage.py');core.safe_storage=storage
-  storage.__file__=str(Path(tmp)/'addons21/bingsu/core/safe_storage.py')
+  storage.__file__=str(Path(tmp)/'addons21/onigiri/core/safe_storage.py')
   Path(storage.user_files_dir(),'settings_Audit.json').write_text('{"userName":"Learner"}')
   try:dict(collection.conf)
   except TypeError as exc:assert str(exc)=='bad argument type for built-in operation';print('Reproduced the exact reported error with installed Anki ConfigManager.')
@@ -43,9 +43,9 @@ with tempfile.TemporaryDirectory(prefix='bingsu-real-anki-') as tmp:
   assert manager.pack_user_files(force=True)
   with zipfile.ZipFile(manager.get_sync_file_path()) as z:manifest=json.loads(z.read(sync.SYNC_MANIFEST))
   saved={k:v for group in manifest['collection_config'].values() for k,v in group.items()}
-  assert saved['bingsu_hashi_notes']==values['bingsu_hashi_notes'] and saved['modern_menu_statsTitle']==values['modern_menu_statsTitle']
+  assert saved['onigiri_hashi_notes']==values['onigiri_hashi_notes'] and saved['modern_menu_statsTitle']==values['modern_menu_statsTitle']
   assert 'unrelated_setting' not in saved
-  print('PASS: actual Anki collection backup is complete and unchanged; sync retains Bingsu collection keys.')
+  print('PASS: actual Anki collection backup is complete and unchanged; sync retains Onigiri collection keys.')
  finally:collection.close()
 
 host.mw=None
@@ -56,22 +56,22 @@ for module in (QtWidgets, QtGui, QtCore):
 sys.modules['aqt.qt']=qt
 theme=types.ModuleType('aqt.theme');theme.theme_manager=types.SimpleNamespace(night_mode=False);sys.modules['aqt.theme']=theme
 app=QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
-notifications=load('warning_audit.ui_kit.bingsu_notifications',ROOT/'ui_kit/bingsu_notifications.py')
+notifications=load('warning_audit.ui_kit.onigiri_notifications',ROOT/'ui_kit/onigiri_notifications.py')
 for dark in (False,True):
  theme.theme_manager.night_mode=dark
- dialog=notifications.BingsuInfoDialog('Bingsu could not back up your collection settings. Your saved settings were not changed.\n\nDetails: bad argument type for built-in operation',title='Backup and recovery')
+ dialog=notifications.OnigiriInfoDialog('Onigiri could not back up your collection settings. Your saved settings were not changed.\n\nDetails: bad argument type for built-in operation',title='Backup and recovery')
  dialog.show();app.processEvents()
- assert dialog.windowTitle()=='Bingsu · Backup and recovery'
- icon=dialog.findChild(QtWidgets.QLabel,'bingsuInfoIcon');assert not icon.pixmap().isNull()
- assert dialog.findChild(QtWidgets.QLabel,'bingsuInfoTitle').text().startswith('Bingsu')
- path=f'/tmp/bingsu-warning-preview-{ "dark" if dark else "light"}.png';assert dialog.grab().save(path)
- dialog.findChild(QtWidgets.QPushButton,'bingsuInfoOk').click();assert dialog.result()==QtWidgets.QDialog.DialogCode.Accepted
- long=notifications.BingsuInfoDialog('\n\n'.join(['Arquivo / folder: ' + 'very-long-name-'*20]*12),title='Aviso')
+ assert dialog.windowTitle()=='Onigiri · Backup and recovery'
+ icon=dialog.findChild(QtWidgets.QLabel,'onigiriInfoIcon');assert not icon.pixmap().isNull()
+ assert dialog.findChild(QtWidgets.QLabel,'onigiriInfoTitle').text().startswith('Onigiri')
+ path=f'/tmp/onigiri-warning-preview-{ "dark" if dark else "light"}.png';assert dialog.grab().save(path)
+ dialog.findChild(QtWidgets.QPushButton,'onigiriInfoOk').click();assert dialog.result()==QtWidgets.QDialog.DialogCode.Accepted
+ long=notifications.OnigiriInfoDialog('\n\n'.join(['Arquivo / folder: ' + 'very-long-name-'*20]*12),title='Aviso')
  long.show();app.processEvents()
  scroll=long.findChild(QtWidgets.QScrollArea);assert scroll.verticalScrollBar().maximum()>0
  assert long.height()<=app.primaryScreen().availableGeometry().height()*.8
  long.reject()
- box=QtWidgets.QMessageBox();notifications.brand_message_box(box,'Aviso');assert box.text()=='Bingsu · Aviso' and not box.iconPixmap().isNull()
+ box=QtWidgets.QMessageBox();notifications.brand_message_box(box,'Aviso');assert box.text()=='Onigiri · Aviso' and not box.iconPixmap().isNull()
  print(f'PASS: native {"dark" if dark else "light"} logo, title, OK, scroll, confirmation branding; screenshot {path}')
 with patch.object(notifications,'_native_show_info') as show:
  notifications.notify_warning('Saved data needs attention', title='Warning', gamification=True)
@@ -79,11 +79,11 @@ with patch.object(notifications,'_native_show_info') as show:
 print('PASS: warnings are persistent and bypass game-notification silent mode.')
 
 seen=[]
-with patch.object(notifications, 'BingsuInfoDialog', side_effect=RuntimeError('dialog unavailable')):
+with patch.object(notifications, 'OnigiriInfoDialog', side_effect=RuntimeError('dialog unavailable')):
  with patch.object(notifications.QMessageBox, 'exec', lambda box: seen.append((box.text(), box.informativeText(), box.iconPixmap().isNull()))):
   notifications._native_show_info('Keep these technical details', title='Warning')
-assert seen == [('Bingsu · Warning', 'Keep these technical details', False)]
-print('PASS: fallback retains the Bingsu name, logo, and warning details.')
+assert seen == [('Onigiri · Warning', 'Keep these technical details', False)]
+print('PASS: fallback retains the Onigiri name, logo, and warning details.')
 
 # Demonstrate the startup ordering defect using Qt's real nested event loop.
 # No live Anki instance is involved; these are offscreen native dialogs.
@@ -91,7 +91,7 @@ events=[]
 def dismiss_blocking_warning():
  events.append('timer')
  for widget in app.topLevelWidgets():
-  if isinstance(widget, notifications.BingsuInfoDialog) and widget.isVisible(): widget.accept()
+  if isinstance(widget, notifications.OnigiriInfoDialog) and widget.isVisible(): widget.accept()
 QtCore.QTimer.singleShot(0, dismiss_blocking_warning)
 notifications.notify_warning('Recovered settings', title='Backup and recovery')
 events.append('remaining profile hook')
@@ -105,9 +105,9 @@ hook=next(node for node in tree.body if isinstance(node,ast.FunctionDef) and nod
 profile_col=object()
 profile_host=types.SimpleNamespace(col=profile_col,pm=types.SimpleNamespace(name='Audit'),addonManager=types.SimpleNamespace(getConfig=lambda _:{}))
 storage_stub=types.SimpleNamespace(backup_before_upgrade=lambda _:None,run_startup_check=lambda _:['Recovered settings from a dated snapshot.'],take_notices=lambda:[])
-namespace=dict(__package__='warning_audit',mw=profile_host,addon_package='bingsu',safe_storage=storage_stub,config=types.SimpleNamespace(invalidate_config_cache=lambda:None),tr=lambda _:'Backup and recovery',QTimer=QtCore.QTimer)
+namespace=dict(__package__='warning_audit',mw=profile_host,addon_package='onigiri',safe_storage=storage_stub,config=types.SimpleNamespace(invalidate_config_cache=lambda:None),tr=lambda _:'Backup and recovery',QTimer=QtCore.QTimer)
 exec(compile(ast.Module(body=[hook],type_ignores=[]),'__init__.py','exec'),namespace)
-with patch.object(notifications.BingsuInfoDialog,'exec',side_effect=AssertionError('Startup must not call exec')):
+with patch.object(notifications.OnigiriInfoDialog,'exec',side_effect=AssertionError('Startup must not call exec')):
  with patch.object(notifications.QMessageBox,'exec',side_effect=AssertionError('Startup fallback must not call exec')):
   namespace['_storage_integrity_check']()
   assert not notifications._open_info_dialogs
@@ -117,14 +117,14 @@ with patch.object(notifications.BingsuInfoDialog,'exec',side_effect=AssertionErr
   assert events==['remaining profile hook','timer']
   assert len(notifications._open_info_dialogs)==1
   dialog=next(iter(notifications._open_info_dialogs))
-  assert dialog.isVisible() and dialog.windowTitle()=='Bingsu · Backup and recovery'
-  dialog.findChild(QtWidgets.QPushButton,'bingsuInfoOk').click()
+  assert dialog.isVisible() and dialog.windowTitle()=='Onigiri · Backup and recovery'
+  dialog.findChild(QtWidgets.QPushButton,'onigiriInfoOk').click()
   assert not notifications._open_info_dialogs
   assert dialog.result()==QtWidgets.QDialog.DialogCode.Accepted
   QtCore.QCoreApplication.sendPostedEvents(None,QtCore.QEvent.Type.DeferredDelete)
 print('PASS: actual profile hook completes before warning; async warning persists until OK and then releases.')
 
-with patch.object(notifications,'BingsuInfoDialog',side_effect=RuntimeError('dialog unavailable')):
+with patch.object(notifications,'OnigiriInfoDialog',side_effect=RuntimeError('dialog unavailable')):
  with patch.object(notifications.QMessageBox,'exec',side_effect=AssertionError('Fallback must not call exec')):
   notifications.notify_warning('Recovered settings',title='Backup and recovery',blocking=False)
   assert len(notifications._open_info_dialogs)==1

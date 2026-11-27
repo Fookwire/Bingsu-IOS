@@ -72,9 +72,9 @@ const widgetVals = { modern_menu_sidebar_bg_mode: 'custom', modern_menu_sidebar_
   modern_menu_sidebar_sync_box_effect: false, modern_menu_sidebar_border_custom: true,
   modern_menu_sidebar_bg_image: 'stale.png', modern_menu_sidebar_radius: 55, modern_menu_sidebar_stroke: 9,
   modern_menu_sidebar_bg_blur: 99, modern_menu_sidebar_bg_opacity: 99,
-  widget_box_color_light: '#123456', widget_box_color_dark: '#654321', bingsu_canvas_inset_color_theme_mode: 'separate',
-  bingsu_canvas_inset_effect_blur: 35, bingsu_canvas_inset_effect_opacity: 42,
-  bingsu_canvas_inset_border_radius: 18, bingsu_canvas_inset_border_width: 2 };
+  widget_box_color_light: '#123456', widget_box_color_dark: '#654321', onigiri_canvas_inset_color_theme_mode: 'separate',
+  onigiri_canvas_inset_effect_blur: 35, onigiri_canvas_inset_effect_opacity: 42,
+  onigiri_canvas_inset_border_radius: 18, onigiri_canvas_inset_border_width: 2 };
 const spec = sandbox.api.designerSidebarSpec(widgetVals, true);
 assert.equal(spec.color, '#654321');
 assert.equal(spec.blur, 35);

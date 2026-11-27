@@ -43,19 +43,19 @@ class ThingsThemeIntegrationTests(unittest.TestCase):
     def test_standalone_folder_became_an_internal_package(self):
         self.assertFalse((ROOT / "Things-theme").exists())
         self.assertTrue((ROOT / "things_theme" / "web" / "theme.css").exists())
-        self.assertIn("EMBEDDED_IN_BINGSU = True", THINGS_INIT)
+        self.assertIn("EMBEDDED_IN_ONIGIRI = True", THINGS_INIT)
         self.assertNotIn("setWebExports", THINGS_INIT)
         self.assertIn('setWebExports(__name__, r"(.*)")', INIT)
 
     def test_classic_is_the_safe_default(self):
-        self.assertIn('"bingsu_ui_theme": "classic"', CONFIG)
+        self.assertIn('"onigiri_ui_theme": "classic"', CONFIG)
         self.assertIn('"default": "classic"', SCHEMA)
 
     def test_deck_renderer_dispatches_by_selected_theme(self):
         self.assertIn("def _render_selected_deck_browser", INIT)
         self.assertIn("def _load_things_theme", INIT)
         self.assertIn("return _anki_render_page", INIT)
-        self.assertIn("return bingsu_renderer.render_bingsu_deck_browser", INIT)
+        self.assertIn("return onigiri_renderer.render_onigiri_deck_browser", INIT)
         self.assertIn(".on_webview_will_set_content(web_content, context)", INIT)
 
     def test_settings_offer_visual_selector_and_small_customizer(self):
@@ -103,7 +103,7 @@ class ThingsThemeIntegrationTests(unittest.TestCase):
         partition = SCHEMA.split("def _things_sections_by_page", 1)[1].split(
             "def _legacy_page", 1
         )[0]
-        self.assertIn('"field": "bingsu_ui_theme"', sidebar_page)
+        self.assertIn('"field": "onigiri_ui_theme"', sidebar_page)
         self.assertIn('"values": ["classic"]', sidebar_page)
         for section_id in (
             "kome_dashboard",
@@ -119,7 +119,7 @@ class ThingsThemeIntegrationTests(unittest.TestCase):
         self.assertIn('"showWhen": page.get("show_when")', SETTINGS_RENDER)
         self.assertIn("function pageIsAvailable", SCRIPT)
         self.assertNotIn(
-            'page.id === "sidebar" && values.bingsu_ui_theme !== "classic"',
+            'page.id === "sidebar" && values.onigiri_ui_theme !== "classic"',
             SCRIPT,
         )
         self.assertIn("refreshPageVisibility();", SCRIPT)
@@ -176,7 +176,7 @@ class ThingsThemeIntegrationTests(unittest.TestCase):
         self.assertIn("const visibleOpacity = Math.min", SCRIPT)
         self.assertIn("will-change: backdrop-filter", THINGS_SIDEBAR_CSS)
 
-    def test_kome_uses_bingsus_exact_base_canvas(self):
+    def test_kome_uses_onigiris_exact_base_canvas(self):
         self.assertIn('"bg": "#eeeeee"', THINGS_INIT)
         self.assertIn('"bg": "#171717"', THINGS_INIT)
         self.assertIn('== "#f6f3ec"', THINGS_INIT)
@@ -201,7 +201,7 @@ class ThingsThemeIntegrationTests(unittest.TestCase):
         self.assertIn("osw-theme-style-decoration", theme_style)
         self.assertIn('decoration.textContent = "米"', theme_style)
         self.assertIn('"system:onigiri.svg"', theme_style)
-        self.assertIn("is-bingsu", theme_style)
+        self.assertIn("is-onigiri", theme_style)
         self.assertIn('"by Max"', theme_style)
         self.assertIn("osw-theme-style-name", theme_style)
         self.assertIn("osw-theme-style-desc", theme_style)
@@ -232,7 +232,7 @@ class ThingsThemeIntegrationTests(unittest.TestCase):
 
     def test_things_uses_shared_palette_and_official_gallery(self):
         self.assertIn(
-            'cfg["theme"] = root.get("bingsuThemeMode", "system")',
+            'cfg["theme"] = root.get("onigiriThemeMode", "system")',
             THINGS_INIT,
         )
         self.assertIn('cfg["_palette_light"] = light', THINGS_INIT)
@@ -260,7 +260,7 @@ class ThingsThemeIntegrationTests(unittest.TestCase):
             section = SCHEMA.split(f'"{section_id}"', 1)[1].split(
                 "fields=widget_fields", 1
             )[0]
-            self.assertIn('"field": "bingsu_ui_theme"', section)
+            self.assertIn('"field": "onigiri_ui_theme"', section)
             self.assertIn('"values": ["classic"]', section)
 
     def test_prep_station_and_hashi_pages_are_hidden_for_things3(self):
@@ -272,7 +272,7 @@ class ThingsThemeIntegrationTests(unittest.TestCase):
                 f"def {next_function}", 1
             )[0]
             self.assertIn(f'"id": "{page_id}"', page)
-            self.assertIn('"field": "bingsu_ui_theme"', page)
+            self.assertIn('"field": "onigiri_ui_theme"', page)
             self.assertIn('"values": ["classic"]', page)
         self.assertIn(
             'page.id === "prepstation" || page.id === "hashinotes"',
@@ -315,12 +315,12 @@ class ThingsThemeIntegrationTests(unittest.TestCase):
         )
 
     def test_things_reuses_classic_deck_icon_chooser_and_storage(self):
-        self.assertIn('"bingsu_custom_deck_icons"', THINGS_INIT)
+        self.assertIn('"onigiri_custom_deck_icons"', THINGS_INIT)
         self.assertIn("def _resolved_deck_icon", THINGS_INIT)
         self.assertIn('icon_modal.js', THINGS_INIT)
-        self.assertIn("bingsu_ctx_change_icon:", THINGS_DECKLIST)
-        self.assertIn('label: window.bingsuText("Change icon…")', THINGS_DECKOPTS)
-        self.assertIn("bingsu_ctx_change_icon:", THINGS_DECKOPTS)
+        self.assertIn("onigiri_ctx_change_icon:", THINGS_DECKLIST)
+        self.assertIn('label: window.onigiriText("Change icon…")', THINGS_DECKOPTS)
+        self.assertIn("onigiri_ctx_change_icon:", THINGS_DECKOPTS)
 
     def test_deck_options_uses_inline_lucide_gear(self):
         self.assertIn('class="ad-list-gear-icon"', THINGS_DECKLIST)
@@ -343,7 +343,7 @@ class ThingsThemeIntegrationTests(unittest.TestCase):
     def test_things_sidebar_clears_macos_traffic_lights(self):
         self.assertIn('_mac_titlebar.inset_css("things3")', THINGS_INIT)
         self.assertIn('elif context_kind == "things3"', MAC_TITLEBAR)
-        self.assertIn("var(--bingsu-mac-titlebar-inset) + 12px", MAC_TITLEBAR)
+        self.assertIn("var(--onigiri-mac-titlebar-inset) + 12px", MAC_TITLEBAR)
 
     def test_tasks_add_button_uses_lucide_plus_without_native_chrome(self):
         self.assertIn('class="ba-side-tasks-add-icon"', THINGS_SIDEBAR)

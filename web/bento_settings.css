@@ -1,4 +1,4 @@
-/* Bento settings share Bingsu settings_web's three-depth palette, geometry,
+/* Bento settings share Onigiri settings_web's three-depth palette, geometry,
    control timing, and explicit defence against Anki's injected button skin. */
 :root {
   --bws-outer: #ececeb;

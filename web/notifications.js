@@ -1,28 +1,28 @@
 (function () {
-    if (window.BingsuNotifications) {
+    if (window.OnigiriNotifications) {
         return;
     }
 
-    const STACK_ID = "bingsu-notification-stack";
-    const SHADOW_HOST_ID = "bingsu-notification-shadow-host";
-    const SHADOW_STYLE_ID = "bingsu-notification-shadow-style";
+    const STACK_ID = "onigiri-notification-stack";
+    const SHADOW_HOST_ID = "onigiri-notification-shadow-host";
+    const SHADOW_STYLE_ID = "onigiri-notification-shadow-style";
     const CARD_VISIBLE_CLASS = "is-visible";
     const DEFAULT_DURATION = 5200;
     const MOCHI_ICON_IMAGE = "/_addons/1011095603/system_files/gamification_images/mochi_messenger.webp";
-    // The generic Bingsu toast's icon. "On" is what bingsu_notifications.notify()
+    // The generic Onigiri toast's icon. "On" is what onigiri_notifications.notify()
     // sends when a caller names no icon of its own, and it was being drawn as
     // those two letters; the logo is what that placeholder always meant.
-    const BINGSU_ICON_IMAGE = "/_addons/1011095603/system_files/bingsu_mini_logo.svg";
+    const ONIGIRI_ICON_IMAGE = "/_addons/1011095603/system_files/onigiri_mini_logo.svg";
 
     function defaultIconImage(data) {
         const icon = data && data.icon;
-        return (!icon || icon === "On") ? BINGSU_ICON_IMAGE : null;
+        return (!icon || icon === "On") ? ONIGIRI_ICON_IMAGE : null;
     }
     const pendingQueue = [];
     let domReady = document.readyState !== "loading" && !!document.body;
 
     function reviewerIsolationEnabled() {
-        return window.bingsuIsReviewerCardWebview === true;
+        return window.onigiriIsReviewerCardWebview === true;
     }
 
     function isNightMode() {
@@ -36,18 +36,18 @@
     }
 
     function reviewerHeaderOffset() {
-        const offset = Number(window.bingsuReviewerHeaderOffsetPx);
+        const offset = Number(window.onigiriReviewerHeaderOffsetPx);
         return Number.isFinite(offset) && offset >= 0 ? offset : 0;
     }
 
     function shadowCssText() {
         return `
             :host {
-                --bingsu-notification-max-width: min(360px, calc(100vw - 32px));
-                --bingsu-notification-bg-light: #ffffff;
-                --bingsu-notification-bg-dark: #2c2c2c;
-                --bingsu-notification-text-light: #2c2c2c;
-                --bingsu-notification-text-dark: #ffffff;
+                --onigiri-notification-max-width: min(360px, calc(100vw - 32px));
+                --onigiri-notification-bg-light: #ffffff;
+                --onigiri-notification-bg-dark: #2c2c2c;
+                --onigiri-notification-text-light: #2c2c2c;
+                --onigiri-notification-text-dark: #ffffff;
                 all: initial;
                 position: fixed !important;
                 inset: 0 !important;
@@ -56,7 +56,7 @@
                 pointer-events: none !important;
                 contain: layout style paint !important;
             }
-        ` + (window.bingsuNotificationCssText || "") + "\n" + (window.bingsuNotificationPositionCssText || "");
+        ` + (window.onigiriNotificationCssText || "") + "\n" + (window.onigiriNotificationPositionCssText || "");
     }
 
     function ensureReviewerRoot() {
@@ -119,7 +119,7 @@
         const night = isNightMode();
         stack.classList.toggle("night-mode", night);
         stack.classList.toggle("nightMode", night);
-        stack.style.setProperty("--bingsu-reviewer-header-offset", reviewerHeaderOffset() + "px");
+        stack.style.setProperty("--onigiri-reviewer-header-offset", reviewerHeaderOffset() + "px");
     }
 
     function removeReviewerHostIfEmpty() {
@@ -133,7 +133,7 @@
     }
 
     function displayDuration(data) {
-        const configured = Number(window.bingsuNotificationDuration);
+        const configured = Number(window.onigiriNotificationDuration);
         if (Number.isFinite(configured) && configured > 0) {
             return Math.max(1000, Math.min(30000, configured));
         }
@@ -161,7 +161,7 @@
                 const job = pendingQueue.shift();
                 job();
             } catch (err) {
-                console.error("BingsuNotifications: pending job failed", err);
+                console.error("OnigiriNotifications: pending job failed", err);
             }
         }
     }
@@ -183,7 +183,7 @@
         if (!stack) {
             stack = document.createElement("div");
             stack.id = STACK_ID;
-            stack.className = "bingsu-notification-stack";
+            stack.className = "onigiri-notification-stack";
             if (reviewerIsolationEnabled()) {
                 root.appendChild(stack);
             } else {
@@ -268,13 +268,13 @@
 
         if (mode === "mini") {
             const card = document.createElement("div");
-            card.className = "bingsu-mini-notification";
+            card.className = "onigiri-mini-notification";
 
             if (data.textColorLight) {
-                card.style.setProperty("--bingsu-notification-text-light", data.textColorLight);
+                card.style.setProperty("--onigiri-notification-text-light", data.textColorLight);
             }
             if (data.textColorDark) {
-                card.style.setProperty("--bingsu-notification-text-dark", data.textColorDark);
+                card.style.setProperty("--onigiri-notification-text-dark", data.textColorDark);
             }
             if (data.fontFamily) {
                 card.style.setProperty("--notification-font", data.fontFamily);
@@ -282,19 +282,19 @@
 
             if (!data.hideIcon) {
                 card.appendChild(createNotificationIcon(
-                    data, "bingsu-mini-notification-icon", variant
+                    data, "onigiri-mini-notification-icon", variant
                 ));
             }
 
             const content = document.createElement("div");
-            content.className = "bingsu-mini-notification-content";
+            content.className = "onigiri-mini-notification-content";
             content.textContent = data.description || data.name || "";
             card.appendChild(content);
             return card;
         }
 
         const card = document.createElement("article");
-        card.className = "bingsu-notification-card";
+        card.className = "onigiri-notification-card";
         if (data.forceTop) {
             card.dataset.forceTop = "true";
         }
@@ -323,19 +323,19 @@
 
         if (!data.hideIcon) {
             card.appendChild(createNotificationIcon(
-                data, "bingsu-notification-icon", variant
+                data, "onigiri-notification-icon", variant
             ));
         }
 
         const content = document.createElement("div");
-        content.className = "bingsu-notification-content";
+        content.className = "onigiri-notification-content";
 
         const title = document.createElement("p");
-        title.className = "bingsu-notification-title";
-        title.textContent = data.name || "Bingsu";
+        title.className = "onigiri-notification-title";
+        title.textContent = data.name || "Onigiri";
 
         const description = document.createElement("p");
-        description.className = "bingsu-notification-description";
+        description.className = "onigiri-notification-description";
         description.textContent = data.description || "";
 
         if (!data.hideTitle) {
@@ -346,10 +346,10 @@
         }
         if (data.rewardItems && data.rewardItems.forEach) {
             const rewards = document.createElement("div");
-            rewards.className = "bingsu-notification-rewards";
+            rewards.className = "onigiri-notification-rewards";
             data.rewardItems.forEach((item) => {
                 const reward = document.createElement("span");
-                reward.className = "bingsu-notification-reward";
+                reward.className = "onigiri-notification-reward";
                 if (item.iconImage) {
                     const img = document.createElement("img");
                     img.src = item.iconImage;
@@ -390,25 +390,25 @@
     }
 
     function renderNotification(data) {
-        if (window.bingsuIsReviewerCardWebview &&
-            window.bingsuReviewerDockMode === "island" &&
-            window.BingsuReviewerIsland &&
-            typeof window.BingsuReviewerIsland.notify === "function") {
-            window.BingsuReviewerIsland.notify(data);
+        if (window.onigiriIsReviewerCardWebview &&
+            window.onigiriReviewerDockMode === "island" &&
+            window.OnigiriReviewerIsland &&
+            typeof window.OnigiriReviewerIsland.notify === "function") {
+            window.OnigiriReviewerIsland.notify(data);
             return;
         }
-        if (window.bingsuNotificationMode === "mini") {
+        if (window.onigiriNotificationMode === "mini") {
             let headerBtnContainer = null;
-            if (window.bingsuIsReviewerCardWebview) {
-                const uiHost = document.getElementById('bingsu-reviewer-ui-host');
+            if (window.onigiriIsReviewerCardWebview) {
+                const uiHost = document.getElementById('onigiri-reviewer-ui-host');
                 if (uiHost && uiHost.shadowRoot) {
-                    headerBtnContainer = uiHost.shadowRoot.querySelector('.bingsu-reviewer-header-buttons');
+                    headerBtnContainer = uiHost.shadowRoot.querySelector('.onigiri-reviewer-header-buttons');
                 }
             } else {
-                headerBtnContainer = document.querySelector('.bingsu-reviewer-header-buttons');
+                headerBtnContainer = document.querySelector('.onigiri-reviewer-header-buttons');
             }
             if (headerBtnContainer) {
-                const existing = headerBtnContainer.querySelector('.bingsu-mini-notification');
+                const existing = headerBtnContainer.querySelector('.onigiri-mini-notification');
                 if (existing) {
                     existing.remove();
                 }
@@ -433,7 +433,7 @@
 
     const api = {
         show(payload) {
-            if (!reviewerIsolationEnabled() || window.bingsuSilentNotifications) {
+            if (!reviewerIsolationEnabled() || window.onigiriSilentNotifications) {
                 return;
             }
             ensureDomReady(() => renderNotification(payload || {}));
@@ -447,8 +447,8 @@
             });
         },
         clear() {
-            if (window.BingsuReviewerIsland && typeof window.BingsuReviewerIsland.clear === "function") {
-                window.BingsuReviewerIsland.clear();
+            if (window.OnigiriReviewerIsland && typeof window.OnigiriReviewerIsland.clear === "function") {
+                window.OnigiriReviewerIsland.clear();
             }
             const stack = findStack();
             if (stack) {
@@ -463,9 +463,9 @@
         },
     };
 
-    window.addEventListener("bingsu-reviewer-header-offset", () => {
+    window.addEventListener("onigiri-reviewer-header-offset", () => {
         syncReviewerState(findStack());
     });
 
-    window.BingsuNotifications = api;
+    window.OnigiriNotifications = api;
 })();

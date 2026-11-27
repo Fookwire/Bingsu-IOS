@@ -1,5 +1,5 @@
 """
-Crash-safe persistence for everything Bingsu keeps in ``user_files``.
+Crash-safe persistence for everything Onigiri keeps in ``user_files``.
 
 Anki preserves ``user_files`` across add-on updates (it renames the folder
 aside, deletes the add-on, then renames it back), so a normal AnkiWeb update
@@ -46,14 +46,14 @@ def dataclass_from_dict(cls, data):
     """Load known fields without throwing away older or extension fields."""
     names = {item.name for item in fields(cls)}
     state = cls(**{key: value for key, value in data.items() if key in names})
-    state._bingsu_extra_fields = copy.deepcopy(
+    state._onigiri_extra_fields = copy.deepcopy(
         {key: value for key, value in data.items() if key not in names}
     )
     return state
 
 
 def dataclass_payload(state):
-    payload = copy.deepcopy(getattr(state, "_bingsu_extra_fields", {}))
+    payload = copy.deepcopy(getattr(state, "_onigiri_extra_fields", {}))
     payload.update(asdict(state))
     return payload
 
@@ -107,7 +107,7 @@ def backup_before_upgrade(shared_config=None):
                 if not atomic_write_json(collection_path, data, mirror=False):
                     return None
             except Exception as exc:
-                _note(f"Bingsu could not back up your collection settings. Your saved settings were not changed. Details: {exc}",
+                _note(f"Onigiri could not back up your collection settings. Your saved settings were not changed. Details: {exc}",
                       key="storage_collection_backup_error", error=str(exc))
                 return None
     if os.path.exists(target):
@@ -126,7 +126,7 @@ def backup_before_upgrade(shared_config=None):
                     archive.write(source, "user_files/" + os.path.relpath(source, root))
             if isinstance(shared_config, dict):
                 archive.writestr("legacy_addon_config.json", json.dumps(shared_config))
-            for name in (".bingsu_sync_state.json", "bingsu_layout.json"):
+            for name in (".onigiri_sync_state.json", "onigiri_layout.json"):
                 source = os.path.join(addon_root(), name)
                 if os.path.isfile(source):
                     archive.write(source, name)
@@ -176,7 +176,7 @@ def anki_base_dir():
 
 def external_backup_dir():
     """Mirror location outside addons21 - a manual reinstall cannot touch it."""
-    path = os.path.join(anki_base_dir(), "bingsu_backups")
+    path = os.path.join(anki_base_dir(), "onigiri_backups")
     try:
         os.makedirs(path, exist_ok=True)
     except OSError:
@@ -210,7 +210,7 @@ def _notice_copy(key, fallback, values):
 
 
 def _note(message, *, key="", **values):
-    print(f"Bingsu storage: {message}")
+    print(f"Onigiri storage: {message}")
     if key:
         _notice_localization[message] = (key, message, values)
     if message not in _pending_notices:
@@ -245,7 +245,7 @@ def _rotate_backup(path):
     try:
         shutil.copy2(path, path + ".bak")
     except OSError as exc:
-        print(f"Bingsu storage: could not rotate backup for {path}: {exc}")
+        print(f"Onigiri storage: could not rotate backup for {path}: {exc}")
 
 
 def atomic_write_json(path, data, mirror=True):
@@ -269,7 +269,7 @@ def atomic_write_json(path, data, mirror=True):
             handle.flush()
             os.fsync(handle.fileno())
     except Exception as exc:
-        print(f"Bingsu storage: failed writing {path}: {exc}")
+        print(f"Onigiri storage: failed writing {path}: {exc}")
         _cleanup(tmp)
         return False
 
@@ -278,7 +278,7 @@ def atomic_write_json(path, data, mirror=True):
     try:
         os.replace(tmp, path)
     except OSError as exc:
-        print(f"Bingsu storage: failed replacing {path}: {exc}")
+        print(f"Onigiri storage: failed replacing {path}: {exc}")
         _cleanup(tmp)
         return False
 
@@ -384,12 +384,6 @@ def _try_load(path):
 
 
 def read_json(path, default=None, label=None, validator=None):
-    """``_read_json`` plus the carry-over from the old Onigiri key names."""
-    from . import legacy_names
-    return legacy_names.normalize(_read_json(path, default=default, label=label, validator=validator))
-
-
-def _read_json(path, default=None, label=None, validator=None):
     """
     Load ``path``, falling back through ``.bak``, dated snapshots and the
     external mirror before giving up.
@@ -449,7 +443,7 @@ def _read_json(path, default=None, label=None, validator=None):
         _quarantine(path)
         _note(
             f"{label} was damaged and no backup could be read. "
-            "Bingsu fell back to defaults; the damaged file was kept as .corrupt.",
+            "Onigiri fell back to defaults; the damaged file was kept as .corrupt.",
             key="storage_damaged", label=label,
         )
     return copy.deepcopy(default) if default is not None else {}
@@ -464,7 +458,7 @@ def _repair(path, source):
             shutil.copy2(path, path + ".corrupt")
         shutil.copy2(source, path)
     except OSError as exc:
-        print(f"Bingsu storage: could not repair {path}: {exc}")
+        print(f"Onigiri storage: could not repair {path}: {exc}")
 
 
 def _quarantine(path):
@@ -544,7 +538,7 @@ def _snapshot(path):
         shutil.copy2(path, target)
         os.utime(target, None)
     except OSError as exc:
-        print(f"Bingsu storage: could not snapshot {path}: {exc}")
+        print(f"Onigiri storage: could not snapshot {path}: {exc}")
         return
 
     for stale in _snapshots_for(path)[_MAX_SNAPSHOTS:]:
@@ -573,7 +567,7 @@ def mirror_file(path):
         shutil.copy2(path, temporary)
         os.replace(temporary, target)
     except OSError as exc:
-        print(f"Bingsu storage: could not mirror {path}: {exc}")
+        print(f"Onigiri storage: could not mirror {path}: {exc}")
 
 
 def mirror_all():
@@ -673,7 +667,7 @@ def _known_profiles():
 
 def adopt_orphaned_profile_files(current_profile):
     """
-    Renaming an Anki profile leaves ``settings_<old>.json`` behind and Bingsu
+    Renaming an Anki profile leaves ``settings_<old>.json`` behind and Onigiri
     starts from defaults under the new name. If exactly one leftover file
     belongs to a profile Anki no longer knows about, it is that rename - so
     carry it over instead of letting the user think the update ate it.
@@ -714,7 +708,7 @@ def adopt_orphaned_profile_files(current_profile):
             shutil.copy2(os.path.join(root, orphan), target)
             adopted.append(orphan)
         except OSError as exc:
-            print(f"Bingsu storage: could not adopt {orphan}: {exc}")
+            print(f"Onigiri storage: could not adopt {orphan}: {exc}")
 
     return adopted
 
@@ -743,7 +737,7 @@ def run_startup_check(profile_name=None):
     adopted = adopt_orphaned_profile_files(profile_name)
     if adopted:
         messages.append(
-            "Your Anki profile appears to have been renamed. Bingsu carried "
+            "Your Anki profile appears to have been renamed. Onigiri carried "
             f"your settings over from: {', '.join(adopted)}"
         )
 
@@ -751,7 +745,7 @@ def run_startup_check(profile_name=None):
         restored = restore_from_mirror()
         if restored:
             messages.append(
-                f"Bingsu's data folder was empty, so {restored} file(s) were "
+                f"Onigiri's data folder was empty, so {restored} file(s) were "
                 "restored from the backup kept outside the add-on folder. This "
                 "usually means the add-on was reinstalled by hand instead of "
                 "through Anki's updater."
@@ -771,7 +765,7 @@ def run_startup_check(profile_name=None):
         messages[0] = _notice_copy("storage_profile_renamed", messages[0],
                                   {"profiles": ", ".join(adopted)})
     for index, message in enumerate(messages):
-        if message.startswith("Bingsu's data folder was empty"):
+        if message.startswith("Onigiri's data folder was empty"):
             messages[index] = _notice_copy("storage_folder_restored", message,
                                           {"amount": restored})
         elif message.startswith("Anki left an unfinished"):

@@ -1,1 +1,1 @@
-"""Manual maintenance utilities for the Bingsu add-on."""
+"""Manual maintenance utilities for the Onigiri add-on."""

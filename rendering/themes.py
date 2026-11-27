@@ -1,5 +1,5 @@
 #
-# Bingsu Theme Definitions
+# Onigiri Theme Definitions
 #
 
 # --- Helper to define a theme structure ---

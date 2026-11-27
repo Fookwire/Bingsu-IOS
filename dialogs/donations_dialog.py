@@ -9,7 +9,7 @@ from .info_dialog import CenteredInfoDialog
 
 
 class DonationsDialog(CenteredInfoDialog):
-    """A pop-up webview that shows Bingsu donation channels."""
+    """A pop-up webview that shows Onigiri donation channels."""
 
     def __init__(self, parent=None):
         super().__init__(parent)

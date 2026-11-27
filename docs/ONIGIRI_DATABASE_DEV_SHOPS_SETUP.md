@@ -1,8 +1,8 @@
-# Bingsu Database: developer Nooks setup
+# Onigiri Database: developer Nooks setup
 
-The add-on now sends the following developer Nooks to the Bingsu Database:
+The add-on now sends the following developer Nooks to the Onigiri Database:
 
-| Restaurant ID | Bingsu name | Rush group | Rush title | Theme |
+| Restaurant ID | Onigiri name | Rush group | Rush title | Theme |
 |---|---|---|---|---|
 | `koeni_nook` | Koeni's Maple Mornings | `koeni_maple` | Maple Morning Rush | `#D9822B` |
 | `dyzur_sushi` | Dyzur's Nigiri Nook | `dyzur_nigiri` | Nigiri Nook Rush | `#2F8575` |
@@ -21,12 +21,12 @@ pools in the supplied Apps Script. Their missing local images are now connected.
 1. Back up the Google Sheet and the current Apps Script project.
 2. Open the spreadsheet, then open **Extensions → Apps Script**.
 3. Replace the database web-app source with the updated
-   [supplied script](../integrations/apps_script/Bingsu_Database_Apps_Script.gs).
+   [supplied script](../integrations/apps_script/Onigiri_Database_Apps_Script.gs).
 4. Save the project. If Google requests authorization while deploying, approve
    the spreadsheet access used by the existing database script.
 5. Use **Deploy → Manage deployments**, edit the existing web-app deployment,
    select a new version, and deploy it. Updating the existing deployment keeps
-   the `/exec` URL already embedded in Bingsu.
+   the `/exec` URL already embedded in Onigiri.
 6. Keep the web app executing as the deploying user. It must allow anonymous
    access because the desktop add-on posts JSON without a Google sign-in
    (`executeAs: USER_DEPLOYING`, `access: ANYONE_ANONYMOUS`).

@@ -63,9 +63,9 @@ KEYS_BY_FOLDER = {
         "modern_menu_background_image_light",
         "modern_menu_background_image_dark",
         "modern_menu_slideshow_images",
-        "bingsu_overview_bg_image",
-        "bingsu_overview_bg_image_light",
-        "bingsu_overview_bg_image_dark",
+        "onigiri_overview_bg_image",
+        "onigiri_overview_bg_image_light",
+        "onigiri_overview_bg_image_dark",
     ],
     "sidebar_bg": [
         "modern_menu_sidebar_bg_image",
@@ -74,13 +74,13 @@ KEYS_BY_FOLDER = {
         "modern_menu_sidebar_slideshow_images",
     ],
     "reviewer_bg": [
-        "bingsu_reviewer_bg_image",
-        "bingsu_reviewer_bg_image_light",
-        "bingsu_reviewer_bg_image_dark",
-        "bingsu_reviewer_slideshow_images",
+        "onigiri_reviewer_bg_image",
+        "onigiri_reviewer_bg_image_light",
+        "onigiri_reviewer_bg_image_dark",
+        "onigiri_reviewer_slideshow_images",
     ],
-    "reviewer_bar_bg": ["bingsu_reviewer_bottom_bar_bg_image"],
-    "toolbar_bg": ["bingsu_toolbar_bg_image"],
+    "reviewer_bar_bg": ["onigiri_reviewer_bottom_bar_bg_image"],
+    "toolbar_bg": ["onigiri_toolbar_bg_image"],
 }
 
 # The same idea for settings that sit inside a nested config object rather than
@@ -174,7 +174,7 @@ def import_images(folder, parent=None, title="Import image", extensions=IMAGE_EX
             shutil.copy(source, os.path.join(directory, name))
             added.append(name)
         except Exception as exc:  # noqa: BLE001 - one bad file must not lose the rest
-            print(f"[Bingsu] settings_web gallery: could not import {source}: {exc}")
+            print(f"[Onigiri] settings_web gallery: could not import {source}: {exc}")
     if not added:
         return [], "No file could be imported"
     return added, None

@@ -124,7 +124,7 @@ class GamificationData:
 
         try:
             data = safe_storage.read_json(
-                data_path, default={}, label="Your Bingsu progress"
+                data_path, default={}, label="Your Onigiri progress"
             )
             if not isinstance(data, dict) or not data:
                 return
@@ -220,7 +220,7 @@ class GamificationData:
             final_data = dict(pending)
         elif os.path.exists(data_path):
             final_data = safe_storage.read_json(
-                data_path, default={}, label="Your Bingsu progress"
+                data_path, default={}, label="Your Onigiri progress"
             ) or {}
 
         # Preserve legacy nested metadata as well as top-level extension keys.
@@ -233,7 +233,7 @@ class GamificationData:
             if '_security_token' in merged_restaurant:
                 import hashlib
                 merged_restaurant['_security_token'] = hashlib.sha256(
-                    f"{merged_restaurant['taiyaki_coins']}:bingsu_secret_salt_2024".encode()
+                    f"{merged_restaurant['taiyaki_coins']}:onigiri_secret_salt_2024".encode()
                 ).hexdigest()
             new_data['restaurant_level'] = merged_restaurant
 

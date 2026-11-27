@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  let data = window.BINGSU_NOOK_DATA || {};
+  let data = window.ONIGIRI_NOOK_DATA || {};
   let activeGroup = 'restaurants';
   let toastTimer;
   const deliveryMessageIndex = Math.floor(Math.random() * 5) + 1;

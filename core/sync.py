@@ -11,10 +11,9 @@ from aqt import mw
 
 from . import config
 from . import safe_storage
-from . import legacy_names
 
 
-SYNC_MANIFEST = "_bingsu_sync_manifest.json"
+SYNC_MANIFEST = "_onigiri_sync_manifest.json"
 SYNC_FORMAT_VERSION = 2
 
 SYNC_CATEGORY_FLAGS = {
@@ -32,16 +31,16 @@ GAME_CONFIG_KEYS = {
     "restaurant_level",
 }
 PROFILE_CONFIG_KEYS = {
-    "lastBirthdayShown", "bingsuProfile", "showCongratsProfileBar",
+    "lastBirthdayShown", "onigiriProfile", "showCongratsProfileBar",
     "showHeatmapOnProfile", "showOverviewProfileBar", "userBirthday", "userName",
 }
 STUDY_TOOL_CONFIG_KEYS = {
-    "hashi_notes", "bingsu_pomodoro_show_in_reviewer_header", "prep_station",
+    "hashi_notes", "onigiri_pomodoro_show_in_reviewer_header", "prep_station",
     "study_tools_visibility",
 }
 LAYOUT_CONFIG_KEYS = {
-    "externalWidgetIdentity", "externalWidgetLayout", "bingsuDecklineAutoEmbed",
-    "bingsuWidgetLayout", "sidebarButtonLayout", "sidebarCollapsed",
+    "externalWidgetIdentity", "externalWidgetLayout", "onigiriDecklineAutoEmbed",
+    "onigiriWidgetLayout", "sidebarButtonLayout", "sidebarCollapsed",
     "sidebarPosition", "unifiedGridRows",
 }
 LOCAL_CONFIG_KEYS = {
@@ -89,7 +88,7 @@ def _addon_config_category(key):
         return "games"
     if key in PROFILE_CONFIG_KEYS:
         return "profile"
-    if key in STUDY_TOOL_CONFIG_KEYS or str(key).startswith("bingsu_pomodoro_"):
+    if key in STUDY_TOOL_CONFIG_KEYS or str(key).startswith("onigiri_pomodoro_"):
         return "study_tools"
     if _is_layout_key(key):
         return "layout"
@@ -119,9 +118,9 @@ def _split_nested_layout(value):
     return (portable or None), (layout or None)
 
 
-def _is_bingsu_collection_key(key):
+def _is_onigiri_collection_key(key):
     text = str(key or "")
-    return text.startswith(("modern_menu_", "bingsu_")) or text in {
+    return text.startswith(("modern_menu_", "onigiri_")) or text in {
         "heatmapDefaultView", "heatmapShowMonths", "heatmapShowStreak",
         "heatmapShowWeekHeader", "heatmapShowWeekdays", "heatmapWeekStart",
         "heatmapParticlesAnimation",
@@ -130,11 +129,11 @@ def _is_bingsu_collection_key(key):
 
 def _collection_config_category(key):
     text = str(key or "")
-    if text.startswith(("modern_menu_profile_", "bingsu_profile_")) or text in {
+    if text.startswith(("modern_menu_profile_", "onigiri_profile_")) or text in {
         "modern_menu_hide_profile_bar", "modern_menu_userName",
     }:
         return "profile"
-    if text.startswith(("bingsu_prep_station_", "bingsu_hashi_", "bingsu_pomodoro_")):
+    if text.startswith(("onigiri_prep_station_", "onigiri_hashi_", "onigiri_pomodoro_")):
         return "study_tools"
     if _is_layout_key(text):
         return "layout"
@@ -143,7 +142,7 @@ def _collection_config_category(key):
 
 def _file_category(relative_path):
     path = str(relative_path or "").replace("\\", "/").lstrip("/")
-    if not path or path in (SYNC_MANIFEST, legacy_names.LEGACY_SYNC_MANIFEST):
+    if not path or path == SYNC_MANIFEST:
         return None
     parts = path.split("/")
     name = parts[-1]
@@ -166,7 +165,7 @@ def _file_category(relative_path):
 
 
 class SyncManager:
-    """Category-aware Bingsu data sync through Anki's media bridge."""
+    """Category-aware Onigiri data sync through Anki's media bridge."""
 
     def __init__(self):
         self._sync_filename = None
@@ -176,21 +175,19 @@ class SyncManager:
         self._migrate_legacy_state_file()
 
     def _migrate_legacy_state_file(self):
-        base = os.path.dirname(os.path.dirname(__file__))
-        legacy = next((p for p in (os.path.join(base, ".bingsu_sync_state.json"),
-                                   os.path.join(base, ".onigiri_sync_state.json")) if os.path.exists(p)), "")
-        if legacy and not os.path.exists(self._state_file):
+        legacy = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".onigiri_sync_state.json")
+        if os.path.exists(legacy) and not os.path.exists(self._state_file):
             try:
                 os.makedirs(self._user_files_dir, exist_ok=True)
                 shutil.copy2(legacy, self._state_file)
             except OSError as exc:
-                print(f"Bingsu Sync: could not migrate sync state: {exc}")
+                print(f"Onigiri Sync: could not migrate sync state: {exc}")
 
     def _ensure_init(self):
         if not mw.col:
             return False
         profile_name = mw.pm.name
-        self._sync_filename = f"_bingsu_sync_{profile_name}.zip"
+        self._sync_filename = f"_onigiri_sync_{profile_name}.zip"
         self._media_dir = mw.col.media.dir()
         return True
 
@@ -244,12 +241,6 @@ class SyncManager:
             for category, flag in SYNC_CATEGORY_FLAGS.items()
         }
 
-    def _legacy_sync_path(self):
-        """The AnkiWeb file an older Onigiri build wrote for this profile."""
-        if not self._media_dir:
-            return None
-        return os.path.join(self._media_dir, self._sync_filename.replace("_bingsu_sync_", legacy_names.LEGACY_SYNC_PREFIX, 1))
-
     def get_sync_file_path(self):
         if not self._ensure_init():
             return None
@@ -274,7 +265,7 @@ class SyncManager:
         collection_groups = {category: {} for category in SYNC_CATEGORY_FLAGS}
         collection_conf = safe_storage.collection_config_snapshot(mw.col)
         for key, value in collection_conf.items():
-            if not _is_bingsu_collection_key(key):
+            if not _is_onigiri_collection_key(key):
                 continue
             category = _collection_config_category(key)
             if enabled.get(category):
@@ -359,7 +350,7 @@ class SyncManager:
             manifest = self._settings_manifest(conf, enabled)
             local_signature = self._content_signature(conf, enabled, manifest)
         except Exception as exc:
-            print(f"Bingsu Sync: Could not read collection settings; existing sync archive retained: {exc}")
+            print(f"Onigiri Sync: Could not read collection settings; existing sync archive retained: {exc}")
             return False
         state = self._load_state()
         profile_name = mw.pm.name
@@ -386,7 +377,7 @@ class SyncManager:
             self._save_state(stat.st_mtime, stat.st_size, local_signature)
             return True
         except Exception as exc:
-            print(f"Bingsu Sync: Failed to pack files: {exc}")
+            print(f"Onigiri Sync: Failed to pack files: {exc}")
             try:
                 if os.path.exists(temp_zip):
                     os.remove(temp_zip)
@@ -396,9 +387,7 @@ class SyncManager:
 
     def _read_manifest(self, archive):
         try:
-            names = set(archive.namelist())
-            name = SYNC_MANIFEST if SYNC_MANIFEST in names else legacy_names.LEGACY_SYNC_MANIFEST
-            payload = json.loads(archive.read(name).decode("utf-8"))
+            payload = json.loads(archive.read(SYNC_MANIFEST).decode("utf-8"))
             return payload if isinstance(payload, dict) else None
         except Exception:
             return None
@@ -449,7 +438,7 @@ class SyncManager:
             if not enabled.get(category) or not isinstance(patch, dict):
                 continue
             for key, value in patch.items():
-                if _is_bingsu_collection_key(key):
+                if _is_onigiri_collection_key(key):
                     config.set_collection_config(key, value)
 
     def _extract_selected_files(self, archive, enabled):
@@ -464,7 +453,7 @@ class SyncManager:
                 continue
             target = os.path.realpath(os.path.join(root, *relative.split("/")))
             if target != root and not target.startswith(root + os.sep):
-                print(f"Bingsu Sync: skipped unsafe archive path {relative!r}")
+                print(f"Onigiri Sync: skipped unsafe archive path {relative!r}")
                 continue
             os.makedirs(os.path.dirname(target), exist_ok=True)
             temp_target = target + ".sync-tmp"
@@ -478,11 +467,7 @@ class SyncManager:
             return False
         sync_path = self.get_sync_file_path()
         if not sync_path or not os.path.exists(sync_path):
-            legacy = self._legacy_sync_path()
-            if legacy and os.path.exists(legacy):
-                sync_path = legacy  # data written by Onigiri; the next sync writes the Bingsu file
-            else:
-                return False
+            return False
         enabled = self.categories(config.get_config_readonly())
         try:
             if not safe_storage.flush_pending():
@@ -493,12 +478,11 @@ class SyncManager:
                 self._apply_manifest(manifest, enabled)
                 self._extract_selected_files(archive, enabled)
             self._invalidate_loaded_state()
-            legacy_names.migrate_all()
             stat = os.stat(sync_path)
             self._save_state(stat.st_mtime, stat.st_size)
             return True
         except Exception as exc:
-            print(f"Bingsu Sync: Failed to unpack files: {exc}")
+            print(f"Onigiri Sync: Failed to unpack files: {exc}")
             return False
 
     @staticmethod
@@ -580,4 +564,4 @@ class SyncManager:
         return "cloud_newer"
 
 
-bingsu_sync = SyncManager()
+onigiri_sync = SyncManager()

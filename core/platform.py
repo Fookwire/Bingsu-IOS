@@ -1,4 +1,4 @@
-"""Where Bingsu is running: Kioku on iPhone/iPad, or a desktop Anki.
+"""Where Onigiri is running: Kioku on iPhone/iPad, or a desktop Anki.
 
 This fork targets Kioku (github.com/krmanik/kioku), the unmodified Anki
 desktop app built for iOS. Things to know about that environment:
@@ -11,7 +11,7 @@ desktop app built for iOS. Things to know about that environment:
   of a web view is blank, and unknown WebEngine APIs are silent no-ops.
 * No subprocesses, no ctypes libraries, touch only, phone-sized screens.
 
-Set ``BINGSU_FORCE_MOBILE=1`` on a desktop Anki to preview the iOS code
+Set ``ONIGIRI_FORCE_MOBILE=1`` on a desktop Anki to preview the iOS code
 paths (dialog sizing, touch UI) without a device; ``=phone`` also treats the
 screen as a phone's.
 """
@@ -24,7 +24,7 @@ import sys
 IS_IOS: bool = sys.platform == "ios"
 IS_ANDROID: bool = sys.platform == "android"
 IS_KIOKU: bool = "kioku" in sys.modules or "kioku_platform" in sys.modules
-_FORCE = os.environ.get("BINGSU_FORCE_MOBILE", "").strip().lower()
+_FORCE = os.environ.get("ONIGIRI_FORCE_MOBILE", "").strip().lower()
 FORCE_MOBILE: bool = _FORCE not in ("", "0")
 FORCE_PHONE: bool = _FORCE == "phone"
 
@@ -82,9 +82,9 @@ def body_classes() -> str:
     """Classes for <body>/<html> so CSS can target the iOS build."""
     if not IS_MOBILE:
         return ""
-    classes = ["bingsu-mobile"]
+    classes = ["onigiri-mobile"]
     if IS_IOS:
-        classes.append("bingsu-ios")
+        classes.append("onigiri-ios")
     return " ".join(classes)
 
 
@@ -108,7 +108,7 @@ def make_managed_window(widget) -> bool:
         widget.setMaximumSize(16777215, 16777215)
         return True
     except Exception as exc:
-        print(f"Bingsu: could not adapt window for mobile: {exc}")
+        print(f"Onigiri: could not adapt window for mobile: {exc}")
         return False
 
 
@@ -125,7 +125,7 @@ def pick_files(parent, title: str, name_filter: str, multi: bool = False) -> lis
 
             result = getFile(parent, title, None, filter=name_filter, multi=multi)
         except Exception as exc:
-            print(f"Bingsu: file picker failed: {exc}")
+            print(f"Onigiri: file picker failed: {exc}")
             return []
         if not result:
             return []
@@ -147,9 +147,9 @@ def save_file(parent, title: str, suggested_path: str, name_filter: str, ext: st
             from aqt.utils import getSaveFile
 
             name = os.path.basename(suggested_path) or ("export" + ext)
-            return getSaveFile(parent, title, "bingsu", "", ext, name) or ""
+            return getSaveFile(parent, title, "onigiri", "", ext, name) or ""
         except Exception as exc:
-            print(f"Bingsu: save picker failed: {exc}")
+            print(f"Onigiri: save picker failed: {exc}")
             return ""
     from aqt.qt import QFileDialog
 

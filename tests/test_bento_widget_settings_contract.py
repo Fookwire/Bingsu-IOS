@@ -55,7 +55,7 @@ def _classes(source, name):
 
 
 class BentoWidgetSettingsContractTest(unittest.TestCase):
-    def test_shared_shell_assets_use_bingsu_structure(self):
+    def test_shared_shell_assets_use_onigiri_structure(self):
         api = (ADDONS / "1011095603" / "api" / "widget_settings.py").read_text()
         css = (ADDONS / "1011095603" / "web" / "bento_settings.css").read_text()
         js = (ADDONS / "1011095603" / "web" / "bento_settings.js").read_text()
@@ -124,17 +124,17 @@ class BentoWidgetSettingsContractTest(unittest.TestCase):
         self.assertIn("css += _preview_opacity_css(self.config)", source)
         self.assertIn("css += _preview_opacity_css(updated)", source)
 
-    def test_bingsu_owns_layout_with_standalone_footprint_fallback(self):
+    def test_onigiri_owns_layout_with_standalone_footprint_fallback(self):
         api = (ADDONS / "1011095603" / "api" / "widget_settings.py").read_text()
         js = (ADDONS / "1011095603" / "web" / "bento_settings.js").read_text()
         html = (ADDONS / "1011095603" / "web" / "bento_settings.html").read_text()
 
-        self.assertIn('"bingsuConnected": self.bingsu_connected', api)
-        self.assertIn("if not self.bingsu_connected:", api)
+        self.assertIn('"onigiriConnected": self.onigiri_connected', api)
+        self.assertIn("if not self.onigiri_connected:", api)
         self.assertIn('id="bwsBridgeStatus"', html)
         self.assertIn('id="bwsFootprint" hidden', html)
         self.assertIn('footprint.hidden = connected;', js)
-        self.assertIn("Bingsu installed · Bento bridge active", js)
+        self.assertIn("Onigiri installed · Bento bridge active", js)
         for folder in WEBUI_TARGETS:
             with self.subTest(folder=folder):
                 source = (ADDONS / folder / "settings.py").read_text()
@@ -226,9 +226,9 @@ class BentoWidgetSettingsContractTest(unittest.TestCase):
                 )
                 self.assertIn("1011095603.api.widget_settings", source)
                 if folder == "DuoAnki":
-                    self.assertIn("bento.is_bingsu_active()", source)
+                    self.assertIn("bento.is_onigiri_active()", source)
                 else:
-                    self.assertIn("Bingsu Bento API is not active", source)
+                    self.assertIn("Onigiri Bento API is not active", source)
                 self.assertIn(renderer_token, source)
 
     def test_each_shared_widget_uses_its_packaged_logo(self):

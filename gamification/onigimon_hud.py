@@ -1,4 +1,4 @@
-"""Onigimon Reviewer HUD — minimal, battle, and war modes with Bingsu-aligned notifications & items."""
+"""Onigimon Reviewer HUD — minimal, battle, and war modes with Onigiri-aligned notifications & items."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ except Exception:  # pragma: no cover
 
 from ..core import config
 from ..core.translations import tr
-from ..ui_kit.bingsu_notifications import notify as show_bingsu_notification
+from ..ui_kit.onigiri_notifications import notify as show_onigiri_notification
 
 
 ANKIMON_ADDON_IDS = ("1908235722", "Ankimon")
@@ -61,7 +61,7 @@ _cached_css_text: str = ""
 _hooks_registered: bool = False
 
 
-def _bingsu_addon_package() -> str:
+def _onigiri_addon_package() -> str:
     try:
         if mw and hasattr(mw, "addonManager"):
             pkg = mw.addonManager.addonFromModule(__name__)
@@ -375,7 +375,7 @@ def _compute_xp_next(pkg: Optional[str], main_pokemon: Any, settings_obj: Any) -
 
 def build_inventory_snapshot(addon_package: Optional[str] = None) -> Dict[str, Any]:
     """Read Onigimon's live inventory & currencies for the HUD quick-items popover."""
-    pkg = addon_package or _bingsu_addon_package()
+    pkg = addon_package or _onigiri_addon_package()
     try:
         from . import onigimon as og_mod
 
@@ -637,7 +637,7 @@ def build_hud_payload(
 
 
 def classify_ankimon_tooltip(msg: Any, color: Any = "", x: int = 0) -> Dict[str, Any]:
-    """Classify an Ankimon reviewer tooltip into either a HUD HP delta or an Bingsu notification."""
+    """Classify an Ankimon reviewer tooltip into either a HUD HP delta or an Onigiri notification."""
     raw = str(msg or "")
     delta_match = _HP_DELTA_RE.match(raw)
     if delta_match:
@@ -819,7 +819,7 @@ def _dispatch_ankimon_notification(
     icon_fallbacks: List[str] = []
     if not icon_image:
         icon_image, icon_fallbacks = _active_companion_sprite_urls(pkg)
-    show_bingsu_notification(
+    show_onigiri_notification(
         clean_text,
         title="",
         context=reviewer,
@@ -985,7 +985,7 @@ def use_hud_item(item_key: str) -> bool:
     reviewer = getattr(mw, "reviewer", None) if mw else None
     if message:
         icon_image, icon_fallbacks = _active_companion_sprite_urls()
-        show_bingsu_notification(
+        show_onigiri_notification(
             str(message),
             title="",
             context=reviewer,

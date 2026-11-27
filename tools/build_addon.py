@@ -1,6 +1,6 @@
 """Build a distributable without personal saves or the attached snapshots.
 
-Usage: python3 tools/build_addon.py /absolute/path/Bingsu.ankiaddon
+Usage: python3 tools/build_addon.py /absolute/path/Onigiri.ankiaddon
 """
 from pathlib import Path
 import argparse
@@ -41,7 +41,7 @@ def build_addon(destination, root=ROOT):
             # upgrading. Never distribute the developer's values for either.
             archive.writestr("config.json", json.dumps({}))
             archive.writestr("user_files/README.txt",
-                             "Bingsu stores your personal settings and imported files here.\n"
+                             "Onigiri stores your personal settings and imported files here.\n"
                              "Anki preserves this folder when updating the same add-on.\n")
         temporary.replace(destination)
     except Exception:

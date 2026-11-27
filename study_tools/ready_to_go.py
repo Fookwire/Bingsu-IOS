@@ -23,31 +23,31 @@ READY_ACTIONS = {
     "inbox": {
         "label": "Inbox",
         "query": "is:new -is:suspended",
-        "deck_name": "Bingsu Ready — Inbox",
+        "deck_name": "Onigiri Ready — Inbox",
         "icon": "lucide-inbox.svg",
         "respect_daily_new_limit": True,
     },
     "warm_up": {
         "label": "Warm up",
         "query": "is:learn is:due -is:suspended",
-        "deck_name": "Bingsu Ready — Warm up",
+        "deck_name": "Onigiri Ready — Warm up",
         "icon": "lucide-flame.svg",
     },
     "today": {
         "label": "Today",
         "query": "is:review prop:due=0 -is:suspended",
-        "deck_name": "Bingsu Ready — Today",
+        "deck_name": "Onigiri Ready — Today",
         "icon": "lucide-calendar-check.svg",
     },
     "cool_down": {
         "label": "Cool-Down",
         "query": "is:review prop:due<0 -is:suspended",
-        "deck_name": "Bingsu Ready — Cool-Down",
+        "deck_name": "Onigiri Ready — Cool-Down",
         "icon": "lucide-droplet.svg",
     },
 }
 
-TAG_STUDY_DECK_NAME = "Bingsu Ready — Tags"
+TAG_STUDY_DECK_NAME = "Onigiri Ready — Tags"
 INTERNAL_DECK_NAMES = frozenset(
     [str(action["deck_name"]) for action in READY_ACTIONS.values()]
     + [TAG_STUDY_DECK_NAME]
@@ -88,7 +88,7 @@ def restore_internal_cards(col: Any = None) -> bool:
                 collection.sched.empty_filtered_deck(DeckId(deck_id))
                 restored = True
         except Exception as exc:
-            print(f"Bingsu: could not empty Ready-to-go deck {deck_name}: {exc}")
+            print(f"Onigiri: could not empty Ready-to-go deck {deck_name}: {exc}")
     return restored
 
 
@@ -165,13 +165,13 @@ def _appearance_style() -> str:
         "modern_menu_ready_button_background", "transparent"
     )
     return (
-        f"--bingsu-ready-icon-size:{icon_size}px;"
-        f"--bingsu-ready-gap:{gap}px;"
-        f"--bingsu-ready-radius:{radius}px;"
-        f"--bingsu-ready-border-width:{border_width}px;"
-        f"--bingsu-ready-text-color:{text};"
-        f"--bingsu-ready-border-color:{border};"
-        f"--bingsu-ready-button-bg:{background};"
+        f"--onigiri-ready-icon-size:{icon_size}px;"
+        f"--onigiri-ready-gap:{gap}px;"
+        f"--onigiri-ready-radius:{radius}px;"
+        f"--onigiri-ready-border-width:{border_width}px;"
+        f"--onigiri-ready-text-color:{text};"
+        f"--onigiri-ready-border-color:{border};"
+        f"--onigiri-ready-button-bg:{background};"
     )
 
 
@@ -183,11 +183,11 @@ def _buttons_html(class_name: str, circles: bool = False) -> str:
         icon = html.escape(_icon_url(action_id), quote=True)
         icon_color = html.escape(
             config.themed_icon_color(f"modern_menu_icon_color_ready_{action_id}")
-            or "var(--bingsu-ready-text-color)",
+            or "var(--onigiri-ready-text-color)",
             quote=True,
         )
         content = (
-            f'<i class="bingsu-ready-icon" style="mask-image:url(\'{icon}\');'
+            f'<i class="onigiri-ready-icon" style="mask-image:url(\'{icon}\');'
             f'-webkit-mask-image:url(\'{icon}\');background-color:{icon_color};"></i>'
         )
         if circles:
@@ -199,10 +199,10 @@ def _buttons_html(class_name: str, circles: bool = False) -> str:
             content += f'<span>{label}</span>'
         title_attribute = "" if circles else f'title="{label}" '
         buttons.append(
-            f'<button type="button" class="bingsu-ready-action '
-            f'bingsu-ready-{action_id}" '
+            f'<button type="button" class="onigiri-ready-action '
+            f'onigiri-ready-{action_id}" '
             f'{title_attribute}aria-label="{label}" '
-            f'onclick="pycmd(\'bingsu_ready:{action_id}\')">'
+            f'onclick="pycmd(\'onigiri_ready:{action_id}\')">'
             f'{content}</button>'
         )
     return f'<div class="{class_name}">{"".join(buttons)}</div>'
@@ -223,11 +223,11 @@ def render_sidebar_html() -> str:
         else ""
     )
     return (
-        f'<section class="bingsu-ready-sidebar{layout_class}" '
+        f'<section class="onigiri-ready-sidebar{layout_class}" '
         f'aria-label="Ready to go" '
         f'style="{_appearance_style()}">'
         f'{heading}'
-        f'{_buttons_html("bingsu-ready-actions")}'
+        f'{_buttons_html("onigiri-ready-actions")}'
         '</section>'
     )
 
@@ -238,16 +238,16 @@ def render_widget_html(design: str = "squares") -> str:
         return ""
     title = html.escape(localized_default(str(_setting("modern_menu_ready_title", "Ready to go")), ("ready_to_go",)))
     heading = (
-        f'<div class="bingsu-widget-head"><h3>{title}</h3></div>'
+        f'<div class="onigiri-widget-head"><h3>{title}</h3></div>'
         if bool(_setting("modern_menu_ready_show_title", True))
         else ""
     )
     circles = design == "circles"
-    actions = _buttons_html("mag" if circles else "bingsu-ready-actions", circles)
+    actions = _buttons_html("mag" if circles else "onigiri-ready-actions", circles)
     if circles:
-        actions = f'<div class="bingsu-ready-magnetic-stage">{actions}</div>'
+        actions = f'<div class="onigiri-ready-magnetic-stage">{actions}</div>'
     return (
-        f'<section class="bingsu-ready-widget{" is-circles" if circles else ""}" aria-label="Ready to go" '
+        f'<section class="onigiri-ready-widget{" is-circles" if circles else ""}" aria-label="Ready to go" '
         f'style="{_appearance_style()}">'
         f'{heading}'
         f'{actions}'
@@ -435,7 +435,7 @@ def _start_studying(deck_id: Any) -> None:
 
 def _report_error(error: Exception) -> None:
     """Surface operation failures instead of silently ignoring a click."""
-    print(f"Bingsu: Ready to go failed: {error}")
+    print(f"Onigiri: Ready to go failed: {error}")
     try:
         tooltip(tr("ready_to_go_error").format(error=error), parent=mw)
     except Exception:

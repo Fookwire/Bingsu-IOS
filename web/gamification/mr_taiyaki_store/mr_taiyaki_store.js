@@ -1,5 +1,5 @@
 (() => {
-  let data = window.BINGSU_NOOK_DATA || {};
+  let data = window.ONIGIRI_NOOK_DATA || {};
   let group = 'restaurants';
   let toastTimer;
   let rewardTimer;
@@ -20,9 +20,9 @@
   const t = (key, fallback) => S()[key] || fallback;
   const labels = () => ({
     restaurants: [t('restaurants_header', 'Restaurants'), t('store_desc_restaurants', 'Give your study space a new flavor.')],
-    evolutions: [t('evolutions_header', 'Sushi Evolutions'), t('store_desc_evolutions', 'Grow the original Bingsu Stand into something extraordinary.')],
+    evolutions: [t('evolutions_header', 'Sushi Evolutions'), t('store_desc_evolutions', 'Grow the original Onigiri Stand into something extraordinary.')],
     shops: [t('shops_header', 'Shops'), t('store_desc_shops', 'Special destinations for your Nook.')],
-    devs: [t('devs_header', 'Developers'), t('store_desc_devs', 'An homage to everyone who helped build Bingsu.')],
+    devs: [t('devs_header', 'Developers'), t('store_desc_devs', 'An homage to everyone who helped build Onigiri.')],
   });
   function applyI18n(root) {
     root.querySelectorAll('[data-i18n-text]').forEach(el => { const v = S()[el.dataset.i18nText]; if (v) el.textContent = v; });
@@ -38,7 +38,7 @@
   function syncTheme() {
     const root = document.documentElement, body = document.body;
     if (!body) return;
-    // The payload reflects Bingsu's effective setting, including a user
+    // The payload reflects Onigiri's effective setting, including a user
     // light-mode override on a dark operating system.
     const mode = data.colorMode === 'dark' ? 'dark' : 'light';
     root.dataset.storeTheme = mode;
