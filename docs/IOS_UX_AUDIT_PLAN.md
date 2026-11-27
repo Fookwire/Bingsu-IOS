@@ -218,3 +218,20 @@ Not done: a "due now + Study" card at the top of Home and a calendar legend (new
 
 ### Kioku (upstream) notes, no code here
 SYS-01 launch screen, SYS-02 restart after installing an add-on, SYS-05 menus drawn under the web view, and the title bar not eliding long titles.
+
+---
+
+## Progress (audit 2): `docs/audit2_2026-11/`
+Second audit of build ios.31 (42 issues, R2-01 to R2-42). Builds are `1.1.0-beta.N`; nothing is marked done from emulation alone.
+
+### Phase 1 (build 1.1.0-beta.1), done in emulation
+Done:
+- R2-02 editor toolbar: Anki wraps its toolbar through `--buttons-wrap`, set inline on `.button-toolbar` and read by every `.button-group`. The old rule switched wrapping off on the toolbar only. The variable is now overridden on the toolbar, its groups and slots, so it is one row that scrolls sideways. Harness (Add window at 390pt): toolbar 49px high, 1 row, 20 buttons (before: 185px, 6 rows).
+- R2-03 overview: the page reserves the fixed nav bar's height (62px) and the bar gets a background once the page scrolls (`html.onigiri-nav-scrolled`). Harness with a 1500px column: title starts at 82px, below the bar (54px).
+- R2-04 Settings header: new `ios_native.kioku_supports(option)` reads `kioku.windows.OPTIONS` (Kioku v0.2.12 and later). The Settings window and Edit Current only set `kioku_hide_titlebar` when it is supported; the page's own Done is shown only when it is supported and Kioku's bar is absent, checked again at 0 ms and 300 ms because Kioku adds the bar in a deferred step. On an older Kioku Done stays hidden and Kioku's Back is the way out. Tests: `tests/test_ios_native.py`.
+- R2-05/R2-06 themes: Apply theme and Reset theme return the whole palette (`appearance`), the page applies it before repainting, and the Qt palette and screen edges are refreshed at once instead of when Settings closes. Harness: applying two themes returns different panel colours.
+- R2-07 Show Answer: it takes the accent on phones when its colours are the factory pair or equal the Edit/More pair (what a theme apply or the old migration writes). `mobile_theme.show_answer_uses_accent`, tested.
+- R2-12 gaps: the phone `min-height` no longer applies to hidden rows, and a hidden field host takes no height, padding or margin whatever a phone rule says. Harness: hidden field hosts that still took space went from 66 (up to 126px) to 0.
+Checked: unit tests at the known 87 failures (the two `.cjs` and two Bento contract tests that differ from `baseline.txt` fail the same on the previous commit); Settings sweep at 390pt: 52 pages, 0 off-screen, all open at the top; card answered in the harness: revlog +1, reps +1, undo available, no tracebacks.
+Needs the phone: Kioku version is at least v0.2.12 and Settings shows one header; the editor toolbar in WebKit; the overview with Deck details and widgets open; the bars and home-indicator strip change at once on Apply theme and on forcing light mode; Show Answer is accent filled after applying any theme.
+**Update Kioku on the phone to v0.2.12 or newer.** The single Settings header only appears with that version.

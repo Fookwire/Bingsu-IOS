@@ -65,5 +65,35 @@ class MobileThemeTests(unittest.TestCase):
             self.assertFalse(self.mt.style_toast(None))
 
 
+class ShowAnswerAccentTests(unittest.TestCase):
+    """Audit 2, R2-07: Show Answer takes the accent unless the user chose colours."""
+
+    def setUp(self):
+        self.mt = load()["mobile_theme"]
+
+    def test_factory_colours_use_the_accent(self):
+        self.assertTrue(self.mt.show_answer_uses_accent({}, "light"))
+        self.assertTrue(self.mt.show_answer_uses_accent({}, "dark"))
+
+    def test_theme_applied_colours_use_the_accent(self):
+        # theme_store writes the same inset/fg pair into Show Answer and Edit/More
+        conf = {
+            "onigiri_reviewer_show_answer_btn_bg_dark": "#2b2020",
+            "onigiri_reviewer_show_answer_btn_text_dark": "#e8d9c8",
+            "onigiri_reviewer_other_btn_bg_dark": "#2B2020",
+            "onigiri_reviewer_other_btn_text_dark": "#E8D9C8",
+        }
+        self.assertTrue(self.mt.show_answer_uses_accent(conf, "dark"))
+
+    def test_users_own_colours_are_kept(self):
+        conf = {
+            "onigiri_reviewer_show_answer_btn_bg_light": "#ff0000",
+            "onigiri_reviewer_show_answer_btn_text_light": "#ffffff",
+            "onigiri_reviewer_other_btn_bg_light": "#eeeeee",
+            "onigiri_reviewer_other_btn_text_light": "#222222",
+        }
+        self.assertFalse(self.mt.show_answer_uses_accent(conf, "light"))
+
+
 if __name__ == "__main__":
     unittest.main()

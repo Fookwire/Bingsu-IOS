@@ -987,6 +987,15 @@
         nav.appendChild(more);
         document.body.appendChild(nav);
         root.classList.add('onigiri-has-phone-nav');
+        // A background for the bar once the page has scrolled under it (R2-03).
+        var scrolled = false;
+        window.addEventListener('scroll', function () {
+            var now = (window.scrollY || document.documentElement.scrollTop || 0) > 4;
+            if (now !== scrolled) {
+                scrolled = now;
+                root.classList.toggle('onigiri-nav-scrolled', now);
+            }
+        }, { passive: true });
         hideHeaderButtonsInShadow();
         // the reviewer mounts its header after load
         var tries = 0;

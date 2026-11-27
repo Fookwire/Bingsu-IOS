@@ -8755,13 +8755,13 @@ def generate_reviewer_buttons_css(conf):
         from ..core import mobile_theme
 
         if mobile_theme.active():
-            if (show_answer_bg_light.lower(), show_answer_text_light.lower()) == ("#ffffff", "#2c2c2c"):
+            if mobile_theme.show_answer_uses_accent(conf, "light"):
                 light_tokens = mobile_theme.tokens(False)
                 show_answer_bg_light = light_tokens["accent"]
                 show_answer_text_light = light_tokens["on_accent"]
                 show_answer_hover_bg_light = light_tokens["accent"]
                 show_answer_hover_text_light = light_tokens["on_accent"]
-            if (show_answer_bg_dark.lower(), show_answer_text_dark.lower()) == ("#3a3a3a", "#e0e0e0"):
+            if mobile_theme.show_answer_uses_accent(conf, "dark"):
                 dark_tokens = mobile_theme.tokens(True)
                 show_answer_bg_dark = dark_tokens["accent"]
                 show_answer_text_dark = dark_tokens["on_accent"]

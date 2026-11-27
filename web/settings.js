@@ -14296,8 +14296,15 @@
             CTX.thingsPreview.palettes = res.palettes;
           }
           if (res.accent) CTX.accent = res.accent;
+          // The whole palette follows the theme, not only its accent (R2-05).
+          if (res.appearance) {
+            CTX.dark = res.appearance.dark;
+            CTX.palette = res.appearance.palette;
+            CTX.accent = res.appearance.accent;
+          }
           applyTheme();
           applyThemeRefresh(res.refresh, res.preview);
+          if (res.appearance) refreshSettingsPreviews();
           document.querySelectorAll(".osw-theme-tile.is-current").forEach(function (t) { t.classList.remove("is-current"); });
           tile.classList.add("is-current");
           CTX.currentThemeColors = { lightBg: colors.lightBg, darkBg: colors.darkBg, lightAccent: colors.lightAccent, darkAccent: colors.darkAccent };
@@ -14409,8 +14416,14 @@
           CTX.thingsPreview.palettes = res.palettes;
         }
         if (res.accent) CTX.accent = res.accent;
+        if (res.appearance) {
+          CTX.dark = res.appearance.dark;
+          CTX.palette = res.appearance.palette;
+          CTX.accent = res.appearance.accent;
+        }
         applyTheme();
         applyThemeRefresh(res.refresh, res.preview);
+        if (res.appearance) refreshSettingsPreviews();
         toast(str("default_theme", "Default theme"));
       });
     }, { title: str("reset_theme_to_default", "Reset to default") });

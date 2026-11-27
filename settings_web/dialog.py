@@ -113,7 +113,10 @@ class SettingsWebDialog(QDialog):
             # Settings page already has its own header (Done / back), so ask
             # Kioku to leave its bar off; older builds ignore the property.
             try:
-                self.setProperty("kioku_hide_titlebar", True)
+                from ..core import ios_native
+
+                if ios_native.kioku_supports("kioku_hide_titlebar"):
+                    self.setProperty("kioku_hide_titlebar", True)
             except Exception:
                 pass
 
@@ -294,6 +297,9 @@ class SettingsWebDialog(QDialog):
         self.raise_()
         self.activateWindow()
         self._sync_own_header()
+        # Kioku adds (or drops) its title bar in a deferred step: check again.
+        QTimer.singleShot(0, self._sync_own_header)
+        QTimer.singleShot(300, self._sync_own_header)
         # Measurements made while a WebView is hidden can be stale on some Qt
         # builds. Re-run only the cheap layout measurements after the first show.
         self._eval_js(
@@ -305,20 +311,29 @@ class SettingsWebDialog(QDialog):
     def _sync_own_header(self):
         """Tell the page whether it is the only header (phones).
 
-        Kioku's title bar is a child widget named TitleBar. When it is absent
-        or hidden, the page's own Done button must be visible; when an older
-        Kioku still shows it, keep today's layout so there are not two.
+        The page's own Done header is shown only when this Kioku honours
+        ``kioku_hide_titlebar`` AND its "Back" title bar is not on screen.
+        Kioku adds that bar in a deferred step after the window is shown
+        (QTimer 0), so this runs again a little later; an older Kioku that
+        ignores the property keeps its bar and the page shows no Done.
         """
         from ..core.platform import IS_MOBILE
 
-        if not IS_MOBILE:
+        if not IS_MOBILE or self._closed:
             return
         try:
+            from ..core import ios_native
+
+            supported = ios_native.kioku_supports("kioku_hide_titlebar")
             bar = next(
-                (w for w in self.findChildren(QWidget) if type(w).__name__ == "TitleBar"),
+                (
+                    w
+                    for w in self.findChildren(QWidget)
+                    if type(w).__name__ == "TitleBar" or w.objectName() == "kiokuTitleBar"
+                ),
                 None,
             )
-            own = bar is None or bar.isHidden()
+            own = bool(supported and (bar is None or bar.isHidden()))
         except Exception:
             own = False
         self._eval_js(
@@ -415,14 +430,7 @@ class SettingsWebDialog(QDialog):
             self.setWindowTitle(tr("settings_title"))
             result["localization"] = render.build_context(self.store, self.pages)
         if "onigiri_theme_mode" in touched:
-            dark = render.is_dark()
-            palette = render.palette(dark)
-            self.web.page().setBackgroundColor(QColor(palette["outer"]))
-            result["appearance"] = {
-                "dark": dark,
-                "palette": palette,
-                "accent": render.accent_color(),
-            }
+            result["appearance"] = self._appearance_payload()
         return result
 
     def _cmd_profile_context(self, _arg):
@@ -861,6 +869,27 @@ class SettingsWebDialog(QDialog):
             if field.get("bind")
         }
 
+    def _appearance_payload(self):
+        """The whole Settings palette for the active theme, and repaint the
+        phone's Qt chrome (Kioku's bar, edges) now instead of when Settings
+        closes (audit 2, R2-05/R2-06). No-op off mobile for the Qt part."""
+        dark = render.is_dark()
+        palette = render.palette(dark)
+        try:
+            self.web.page().setBackgroundColor(QColor(palette["outer"]))
+        except Exception:
+            pass
+        try:
+            from ..core.platform import IS_MOBILE
+
+            if IS_MOBILE:
+                from ..core import mobile_theme
+
+                QTimer.singleShot(0, mobile_theme.refresh)
+        except Exception:
+            pass
+        return {"dark": dark, "palette": palette, "accent": render.accent_color()}
+
     def _cmd_theme_apply(self, arg):
         payload = self._theme_arg(arg)
         kind, name = payload.get("kind", ""), payload.get("name", "")
@@ -872,6 +901,7 @@ class SettingsWebDialog(QDialog):
         return {"ok": True, "name": name, "refresh": self._theme_refresh_payload(touched),
                 "preview": self._theme_preview_payload(),
                 "accent": render.accent_color(),
+                "appearance": self._appearance_payload(),
                 "palettes": self.store.config.get("colors", {})}
 
     def _cmd_theme_reset(self, _arg):
@@ -880,6 +910,7 @@ class SettingsWebDialog(QDialog):
         return {"ok": True, "refresh": self._theme_refresh_payload(touched),
                 "preview": self._theme_preview_payload(),
                 "accent": render.accent_color(),
+                "appearance": self._appearance_payload(),
                 "palettes": self.store.config.get("colors", {})}
 
     def _cmd_theme_import(self, _arg):

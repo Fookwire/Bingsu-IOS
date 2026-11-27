@@ -37,6 +37,34 @@ def active() -> bool:
     return onigiri_platform.IS_IOS
 
 
+# --- Kioku capability check (audit 2, R2-04) -------------------------------------
+# Kioku lets an add-on opt a window out of its "Back" title bar with the Qt
+# property ``kioku_hide_titlebar`` only from v0.2.12 on (kioku/windows.py lists
+# the supported names in ``OPTIONS``). Older builds ignore the property, so the
+# add-on must not behave as if the bar were gone.
+
+_supports_cache: dict[str, bool] = {}
+
+
+def kioku_supports(option: str) -> bool:
+    """True when the running Kioku honours the window option ``option``."""
+    if option in _supports_cache:
+        return _supports_cache[option]
+    try:
+        import kioku.windows as kioku_windows  # type: ignore
+
+        result = option in tuple(getattr(kioku_windows, "OPTIONS", ()) or ())
+    except Exception:
+        result = False
+    _supports_cache[option] = result
+    return result
+
+
+def forget_kioku_support() -> None:
+    """For tests."""
+    _supports_cache.clear()
+
+
 # --- helpers -------------------------------------------------------------------
 
 

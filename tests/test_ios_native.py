@@ -185,5 +185,44 @@ class AuditStepOneTests(unittest.TestCase):
             self.assertFalse(self.native.play_sound("/x.wav"))
 
 
+class KiokuSupportTests(unittest.TestCase):
+    """Audit 2, R2-04: Kioku honours kioku_hide_titlebar only from v0.2.12."""
+
+    def setUp(self):
+        self.platform, self.native = load()
+        self.native.forget_kioku_support()
+        self._saved = {k: sys.modules.get(k) for k in ("kioku", "kioku.windows")}
+
+    def tearDown(self):
+        for k, v in self._saved.items():
+            if v is None:
+                sys.modules.pop(k, None)
+            else:
+                sys.modules[k] = v
+
+    def _fake_kioku(self, **attrs):
+        kioku = types.ModuleType("kioku")
+        windows = types.ModuleType("kioku.windows")
+        for k, v in attrs.items():
+            setattr(windows, k, v)
+        kioku.windows = windows
+        sys.modules["kioku"] = kioku
+        sys.modules["kioku.windows"] = windows
+
+    def test_supported_when_listed_in_options(self):
+        self._fake_kioku(OPTIONS=("kioku_hide_titlebar", "kioku_edge_to_edge"))
+        self.assertTrue(self.native.kioku_supports("kioku_hide_titlebar"))
+        self.assertFalse(self.native.kioku_supports("something_else"))
+
+    def test_older_kioku_without_options(self):
+        self._fake_kioku()
+        self.assertFalse(self.native.kioku_supports("kioku_hide_titlebar"))
+
+    def test_no_kioku_at_all(self):
+        sys.modules["kioku"] = None  # import raises ImportError
+        sys.modules["kioku.windows"] = None
+        self.assertFalse(self.native.kioku_supports("kioku_hide_titlebar"))
+
+
 if __name__ == "__main__":
     unittest.main()

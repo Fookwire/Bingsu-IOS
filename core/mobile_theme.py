@@ -140,6 +140,39 @@ def paint_initial_edges():
         return False
 
 
+# Show Answer's colours when the user has not picked their own (audit 2, R2-07).
+_SHOW_ANSWER_FACTORY = {
+    "light": ("#ffffff", "#2c2c2c"),
+    "dark": ("#3a3a3a", "#e0e0e0"),
+}
+_UTILITY_FACTORY = {
+    "light": ("#ffffff", "#2c2c2c"),
+    "dark": ("#3a3a3a", "#e0e0e0"),
+}
+
+
+def show_answer_uses_accent(conf, mode):
+    """True when Show Answer should be filled with the accent on phones.
+
+    That is when its (background, text) is still the factory pair, or equals
+    the Edit/More buttons' pair: applying a theme and the old settings
+    migration both write the same colours into both, which looked like a
+    choice but is not one. A pair that differs from both is the user's own.
+    """
+    mode = "dark" if mode == "dark" else "light"
+    pair = (
+        str(conf.get("onigiri_reviewer_show_answer_btn_bg_" + mode, _SHOW_ANSWER_FACTORY[mode][0])).lower(),
+        str(conf.get("onigiri_reviewer_show_answer_btn_text_" + mode, _SHOW_ANSWER_FACTORY[mode][1])).lower(),
+    )
+    if pair == _SHOW_ANSWER_FACTORY[mode]:
+        return True
+    utility = (
+        str(conf.get("onigiri_reviewer_other_btn_bg_" + mode, _UTILITY_FACTORY[mode][0])).lower(),
+        str(conf.get("onigiri_reviewer_other_btn_text_" + mode, _UTILITY_FACTORY[mode][1])).lower(),
+    )
+    return pair == utility
+
+
 def refresh():
     apply_qt_palette()
     paint_initial_edges()
@@ -254,6 +287,11 @@ def _one_dismiss_for_editor(editor):
     try:
         window = getattr(editor, "parentWindow", None)
         if window is not None and type(window).__name__ == "EditCurrent":
-            window.setProperty("kioku_hide_titlebar", True)
+            from . import ios_native
+
+            # Only where Kioku honours it: older builds keep their bar, and
+            # then Anki's Close button stays as the second dismiss.
+            if ios_native.kioku_supports("kioku_hide_titlebar"):
+                window.setProperty("kioku_hide_titlebar", True)
     except Exception:
         pass

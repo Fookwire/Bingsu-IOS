@@ -2223,6 +2223,28 @@ html.onigiri-phone.onigiri-screen-overview .overview-container {
     margin-bottom: auto;
 }
 
+/* The nav bar is fixed (top 10px, 44px high) and transparent, so a column that
+   reached the top of the page printed the deck title over "‹ Decks" and ⋯, and
+   scrolling ran the cards underneath them (audit 2, R2-03). Reserve its height
+   (10 + 44 + 8) at the top of the page, for the finished screen as well. */
+html.onigiri-phone.onigiri-screen-overview.onigiri-has-phone-nav body {
+    padding-top: 62px;
+    box-sizing: border-box;
+}
+
+/* Once the page scrolls the bar gets a background of its own so content never
+   shows through it. */
+html.onigiri-phone.onigiri-nav-scrolled #onigiri-phone-nav {
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 54px;
+    padding: 10px calc(10px + var(--onigiri-safe-right)) 0 calc(10px + var(--onigiri-safe-left));
+    box-sizing: border-box;
+    background: var(--canvas, var(--bg, #fff));
+    box-shadow: 0 1px 0 rgba(127, 127, 127, 0.25);
+}
+
 /* ------------------------------------------------------------------------- */
 /* Sheets: one typeface on every page                                         */
 /* ------------------------------------------------------------------------- */
@@ -2368,10 +2390,30 @@ html.onigiri-phone .osw-shell .osw-subtabs .osw-subtab {
     white-space: nowrap !important;
 }
 
-/* Settings rows: at least 44pt. */
-html.onigiri-phone .osw-shell .osw-row {
+/* Settings rows: at least 44pt. Rows a setting has switched off (.is-hidden)
+   keep no height: this rule used to out-rank settings.css's collapse
+   (min-height: 0) and left 40-120pt blank gaps inside cards (audit 2, R2-12). */
+html.onigiri-phone .osw-shell .osw-row:not(.is-hidden) {
     min-height: 44px;
     box-sizing: border-box;
+}
+
+/* A field host that is switched off takes no space, whatever phone rule
+   (min-height, !important padding on slider cards) would otherwise hold it open. */
+/* doubled class: out-ranks the later !important slider-card rules */
+html.onigiri-phone .osw-shell [data-field-host].is-hidden.is-hidden {
+    min-height: 0 !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    border-top-width: 0 !important;
+    border-bottom-width: 0 !important;
+    overflow: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
 }
 
 /* Organize Widgets (Main Menu) on phones: number chips two per row, every
@@ -2647,10 +2689,19 @@ html.onigiri-phone .onigiri-sidebar-profile .onigiri-sidebar-profile-back {
 /* ------------------------------------------------------------------------- */
 /* Anki's note editor on phones (audit THM-02)                                */
 /* ------------------------------------------------------------------------- */
-/* A dense, wrapping row of ~20pt icons: one row that scrolls sideways, with
-   44pt targets. Field text keeps the note type's own font and size. */
-html.onigiri-phone .editor-toolbar .button-toolbar {
+/* A dense, wrapping row of ~20pt icons: ONE row that scrolls sideways.
+   Anki wraps its toolbar through a CSS variable it sets inline
+   (--buttons-wrap: wrap on .button-toolbar) that every .button-group also
+   reads, so switching off wrapping on the toolbar alone left each group
+   wrapping into a column (audit 2, R2-02). Override the variable itself. */
+html.onigiri-phone .editor-toolbar .button-toolbar,
+html.onigiri-phone .editor-toolbar .button-toolbar .button-group,
+html.onigiri-phone .editor-toolbar .button-toolbar .dynamically-slottable {
+    --buttons-wrap: nowrap !important;
     flex-wrap: nowrap !important;
+}
+
+html.onigiri-phone .editor-toolbar .button-toolbar {
     overflow-x: auto !important;
     overflow-y: hidden !important;
     -webkit-overflow-scrolling: touch;
@@ -2662,13 +2713,18 @@ html.onigiri-phone .editor-toolbar .button-toolbar::-webkit-scrollbar {
     display: none;
 }
 
-html.onigiri-phone .editor-toolbar .button-toolbar > * {
+html.onigiri-phone .editor-toolbar .button-toolbar > *,
+html.onigiri-phone .editor-toolbar .button-toolbar .item {
     flex: 0 0 auto !important;
 }
 
-html.onigiri-phone .editor-toolbar button {
-    min-width: 44px !important;
-    min-height: 44px !important;
+/* Touch-sized buttons without forcing the narrow dropdown toggles wider. */
+html.onigiri-phone .editor-toolbar .button-toolbar button {
+    min-height: 40px !important;
+}
+
+html.onigiri-phone .editor-toolbar .button-toolbar button.icon-button {
+    min-width: 40px !important;
 }
 
 html.onigiri-phone .editor-field .label-name,
