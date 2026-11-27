@@ -121,6 +121,28 @@ def _paint_web_views(window: Any) -> None:
         pass
 
 
+# Windows that only need their web views and background painted in the theme
+# before the first frame (audit 3, R3-26: the editor opened on a grey box).
+PAINT_ONLY = {"NewEditCurrent", "Previewer", "MultiCardPreviewer", "BrowserPreviewer", "CardLayout", "FieldDialog"}
+
+
+def paint_window(window: Any) -> None:
+    """Theme background behind and in the window's web views, no adapter."""
+    _paint_web_views(window)
+    color = _theme_background()
+    if not color:
+        return
+    try:
+        from aqt.qt import QColor, QPalette
+
+        pal = window.palette()
+        pal.setColor(QPalette.ColorRole.Window, QColor(color))
+        window.setPalette(pal)
+        window.setAutoFillBackground(True)
+    except Exception:
+        pass
+
+
 def _make_focus_filter():
     from aqt.qt import QEvent, QObject, Qt, QTimer
 
@@ -475,6 +497,18 @@ ADAPTERS: dict[str, Callable[[Any], None]] = {
 }
 
 
+def _style_bar(window: Any) -> None:
+    try:
+        from . import mobile_theme
+
+        if window.isVisible():
+            mobile_theme.style_kioku_bar(window)
+    except RuntimeError:
+        pass  # window already gone
+    except Exception:
+        pass
+
+
 def adapt_window(window: Any) -> bool:
     """Run the adapter for `window` once. Returns True if one ran."""
     name = type(window).__name__
@@ -502,7 +536,7 @@ def install() -> None:
     if not onigiri_platform.IS_MOBILE or _state["installed"]:
         return
     try:
-        from aqt.qt import QApplication, QEvent, QObject, QTimer, QWidget
+        from aqt.qt import QApplication, QEvent, QMenu, QObject, QTimer, QWidget
     except Exception:
         return
     _state["installed"] = True
@@ -514,11 +548,18 @@ def install() -> None:
                     event.type() == QEvent.Type.Show
                     and isinstance(obj, QWidget)
                     and obj.isWindow()
-                    and type(obj).__name__ in ADAPTERS
-                    and not obj.property(ADAPTED)
+                    and not isinstance(obj, QMenu)
                 ):
-                    # after Kioku has fitted the window to the screen
-                    QTimer.singleShot(0, lambda w=obj: adapt_window(w))
+                    name = type(obj).__name__
+                    if name in PAINT_ONLY:
+                        paint_window(obj)  # before the first frame
+                    if name in ADAPTERS and not obj.property(ADAPTED):
+                        # after Kioku has fitted the window to the screen
+                        QTimer.singleShot(0, lambda w=obj: adapt_window(w))
+                    # Kioku builds its "Back" bar in a deferred step: colour it
+                    # once it exists, and again after a re-layout (R3-01)
+                    for delay in (0, 150, 600):
+                        QTimer.singleShot(delay, lambda w=obj: _style_bar(w))
             except Exception:
                 pass
             return False

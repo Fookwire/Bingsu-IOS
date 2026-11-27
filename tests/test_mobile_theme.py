@@ -47,6 +47,40 @@ class MobileThemeTests(unittest.TestCase):
         self.assertLess(self.tp.contrast(t["surface"], t["background"]), 1.3)
         self.assertGreater(self.tp.contrast(t["text"], t["surface"]), 4.5)
 
+    def test_light_theme_on_a_pale_background_stays_readable(self):
+        # audit 3, R3-17: pale blue background from the harness theme
+        pale = {"--bg": "#d2e0fd", "--fg": "#3a4a6b", "--fg-subtle": "#8fa0c4", "--accent-color": "#5b7bd5"}
+        t = self.mt.tokens(False, pale)
+        c = self.tp.contrast
+        self.assertGreaterEqual(c(t["secondary"], t["background"]), 4.5)
+        self.assertGreaterEqual(c(t["faint"], t["background"]), 3.0)
+        self.assertGreaterEqual(c(t["surface"], t["background"]), 1.08)
+        self.assertGreaterEqual(c(t["separator"], t["background"]), 1.3)
+
+    def test_dark_tokens_unchanged_by_the_light_rules(self):
+        navy = {"--bg": "#1b1b28", "--fg": "#e6e6f0", "--fg-subtle": "#9a9ab0", "--accent-color": "#8aa4ff"}
+        t = self.mt.tokens(True, navy)
+        self.assertEqual(t["secondary"], "#9a9ab0")
+        self.assertEqual(t["surface"], self.tp.mix("#e6e6f0", "#1b1b28", 0.05))
+        self.assertEqual(t["separator"], self.tp.mix("#e6e6f0", "#1b1b28", 0.16))
+
+    def test_kioku_bar_stylesheet_uses_token_colours_in_both_modes(self):
+        for dark in (False, True):
+            t = self.mt.tokens(dark, {"--bg": "#d2e0fd" if not dark else "#1b1b28",
+                                      "--fg": "#3a4a6b" if not dark else "#e6e6f0"})
+            css = self.mt.kioku_bar_stylesheet(t)
+            self.assertIn("color: %s" % t["text"], css)
+            self.assertIn("background: %s" % t["inset"], css)
+            self.assertGreaterEqual(self.tp.contrast(t["text"], t["inset"]), 4.5)
+
+    def test_deck_options_bootstrap_blue_is_the_accent(self):
+        pal = {"--bg": "#1b1b28", "--fg": "#e6e6f0", "--accent-color": "#8aa4ff"}
+        css = self.mt.anki_page_css(True, pal)
+        self.assertIn("--bs-primary: #8aa4ff", css)
+        self.assertIn("--bs-btn-bg: #8aa4ff !important", css)
+        self.assertIn(".form-check-input:checked { background-color: #8aa4ff !important", css)
+        self.assertNotIn("#0d6efd", css)
+
     def test_settings_palette_has_every_chrome_key(self):
         navy = {"--bg": "#1b1b28", "--fg": "#e6e6f0", "--accent-color": "#8aa4ff"}
         themed = self.mt.settings_palette(navy, True)

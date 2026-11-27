@@ -2,7 +2,7 @@
   "name": "Onigiri for iOS",
   "package": "onigiri_ios",
   "author": "PeaceMonk (iOS fork)",
-  "version": "1.1.0-beta.7",
+  "version": "1.1.0-beta.8",
   "homepage": "",
   "conflicts": ["1011095603"]
 }

@@ -156,7 +156,11 @@ def utility_chrome_palette(palette, dark=False):
     both timer layouts share Settings' surfaces and typography contrast.
     Feature-specific user colors are applied by callers after these defaults.
     """
-    result = chrome_palette(palette, dark)
+    return add_utility_aliases(chrome_palette(palette, dark))
+
+
+def add_utility_aliases(result):
+    """The legacy token names study utilities use, added to a chrome palette."""
     result.update({
         "bg": result["outer"], "shell": result["panel"],
         "surface2": result["inset"], "hover": result["inset_hover"],
