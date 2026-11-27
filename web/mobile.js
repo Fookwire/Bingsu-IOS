@@ -1158,7 +1158,7 @@
         try { return sessionStorage.getItem(TAB_KEY) || 'decks'; } catch (e) { return 'decks'; }
     }
 
-    var TAB_ORDER = { decks: 0, home: 1, menu: 2 };
+    var TAB_ORDER = { decks: 0, home: 1 };
     var currentTab = null;
 
     // The pane coming in slides from the side of its tab (Decks is left of

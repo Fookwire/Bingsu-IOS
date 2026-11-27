@@ -88,9 +88,11 @@ html.onigiri-touch.onigiri-app body {
     overscroll-behavior: none;
 }
 
-/* A drag inside a list ends at the list's edge instead of pulling the page
-   (and with it the whole interface) along. */
-html.onigiri-touch.onigiri-app body * {
+/* A drag inside a scrolling area ends at its edge instead of pulling the
+   page (and with it the whole interface) along. Named scrollers only: a
+   universal selector put this on every element of the page. */
+html.onigiri-touch.onigiri-app :is(.container.modern-main-menu, .osw-page-scroll, .osw-rail,
+    .onigiri-quick-menu, #onigiri-app-menu .oam-body, .onigiri-sidebar-profile) {
     overscroll-behavior: contain;
 }
 
@@ -124,10 +126,6 @@ html.onigiri-touch.onigiri-app :focus:not(:focus-visible) {
 html.onigiri-touch.onigiri-app .onigiri-pressed {
     opacity: 0.55 !important;
     transition: none !important;
-}
-
-html.onigiri-touch.onigiri-app :is(button, a, [role="button"], .menu-item, summary):not(.onigiri-pressed) {
-    transition-property: opacity, background-color, color, transform, border-color, box-shadow;
 }
 
 /* List rows highlight instead of fading (like a table cell). */
@@ -391,32 +389,6 @@ html.onigiri-touch .onigiri-quick-menu .quick-menu-group.is-open > .quick-menu-a
     transform: rotate(90deg);
 }
 
-/* Base look for sheets on pages without menu.css (overview, reviewer). */
-.onigiri-quick-menu.is-sheet {
-    position: fixed;
-    background: var(--onigiri-quick-menu-bg, var(--canvas-overlay, var(--canvas-elevated, var(--canvas, #fff))));
-    border: 0.5px solid var(--border, rgba(127, 127, 127, 0.3));
-}
-
-/* Sheets in the theme's own colours (mobile.js setSurfaces). */
-html .onigiri-quick-menu.is-sheet {
-    background: var(--onigiri-surface-raised, var(--onigiri-quick-menu-bg, var(--canvas-overlay, var(--canvas, #fff)))) !important;
-    border-color: var(--onigiri-surface-line, var(--border, rgba(127, 127, 127, 0.3))) !important;
-    color: var(--onigiri-surface-ink, var(--fg, inherit)) !important;
-}
-
-html .onigiri-quick-menu.is-sheet hr {
-    border: 0;
-    border-top: 0.5px solid var(--onigiri-surface-line, rgba(127, 127, 127, 0.3));
-}
-
-html .onigiri-quick-menu.is-sheet .onigiri-sheet-grabber {
-    background: var(--onigiri-surface-line, rgba(127, 127, 127, 0.5));
-    opacity: 1;
-    color: var(--fg, #111);
-    font-family: inherit;
-}
-
 .onigiri-quick-menu.is-sheet .quick-menu-item {
     display: flex;
     align-items: center;
@@ -450,8 +422,15 @@ html .onigiri-quick-menu.is-sheet .onigiri-sheet-grabber {
 }
 
 /* iOS sheet: flush with the bottom of the screen, rounded top, grab
-   handle, Cancel. mobile.js adds the backdrop, handle, Cancel and swipe. */
+   handle, Cancel. mobile.js adds the backdrop, handle, Cancel and swipe.
+   Colours are shades of the page's own background (mobile.js setSurfaces);
+   this also covers pages without menu.css (overview, reviewer). */
 .onigiri-quick-menu.is-sheet {
+    position: fixed;
+    border-style: solid;
+    background: var(--onigiri-surface-raised, var(--onigiri-quick-menu-bg, var(--canvas-overlay, var(--canvas, #fff)))) !important;
+    border-color: var(--onigiri-surface-line, var(--border, rgba(127, 127, 127, 0.3))) !important;
+    color: var(--onigiri-surface-ink, var(--fg, inherit)) !important;
     left: var(--onigiri-safe-left) !important;
     right: var(--onigiri-safe-right) !important;
     top: auto !important;
@@ -472,13 +451,13 @@ html .onigiri-quick-menu.is-sheet .onigiri-sheet-grabber {
     transition: transform 0.2s ease;
 }
 
+
 .onigiri-quick-menu.is-sheet .onigiri-sheet-grabber {
     width: 36px;
     height: 5px;
     margin: 2px auto 10px;
     border-radius: 3px;
-    background: var(--fg-subtle, rgba(127, 127, 127, 0.5));
-    opacity: 0.5;
+    background: var(--onigiri-surface-line, rgba(127, 127, 127, 0.5));
 }
 
 /* Grab handle area also starts the swipe. */
@@ -508,6 +487,8 @@ html.onigiri-touch .onigiri-quick-menu.is-sheet .onigiri-action-icon-host .icon 
 .onigiri-quick-menu.is-sheet hr {
     margin: 6px 12px;
     opacity: 0.6;
+    border: 0;
+    border-top: 0.5px solid var(--onigiri-surface-line, rgba(127, 127, 127, 0.3));
 }
 
 .onigiri-sheet-cancel {
@@ -781,11 +762,9 @@ html.onigiri-phone.onigiri-has-phone-tabs.onigiri-phone-tab-home .container.mode
     display: none;
 }
 
-/* Tab bar: a floating bar (iOS 26) just above the home indicator, with
-   full-size icons. Content scrolls behind it (the lists are padded so the
-   last row clears it). */
 /* Tab bar: full width, flush with the bottom of the screen (the strip
-   under it is painted the same colour). */
+   under it is painted the same colour), full-size icons. Content scrolls
+   behind it; the lists are padded so the last row clears it. */
 html.onigiri-phone #onigiri-phone-tabs {
     display: flex;
     align-items: stretch;
@@ -815,10 +794,7 @@ html.onigiri-phone #onigiri-phone-tabs {
     align-items: center;
     justify-content: center;
     gap: 1px;
-    min-height: 44px;
-    border: 0;
     border-radius: 999px;
-    background: transparent;
     color: var(--fg-subtle, #888);
     font: inherit;
     font-size: 10px;
@@ -1639,9 +1615,18 @@ html.onigiri-phone.onigiri-profile-open #onigiri-phone-tabs {
 }
 
 /* Close (×) is a 44pt target. */
-html.onigiri-phone .onigiri-sidebar-profile [class*="close"] {
-    min-width: 44px;
-    min-height: 44px;
+html.onigiri-phone .onigiri-sidebar-profile .onigiri-sidebar-profile-back {
+    /* 44pt tap target around the 26px circle: the extra 9px is a transparent
+       border (the background is clipped to the padding box), the ring is an
+       inset shadow, and the box moves 9px out so the circle stays put. */
+    box-sizing: content-box;
+    width: 26px;
+    height: 26px;
+    top: 3px;
+    right: 3px;
+    border: 9px solid transparent !important;
+    background-clip: padding-box !important;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22) !important;
 }
 
 /* Active-cards donut: the total fits inside the ring. */
