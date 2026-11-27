@@ -205,3 +205,16 @@ Not reproduced here: the flash of Anki's stock overview bottom bar when Study No
 ### Phase 6 (build ios.30), done in emulation
 Done: toasts (Anki's tooltip) are themed, centred 112pt above the bottom so they never sit on the tab bar, and let taps through; Onigiri wraps Kioku's own `_kioku_fit_tooltip` hook, so Anki's and Kioku's tooltip code stay as they are (INT-02). Onigiri's start-up storage notice waits until a running sync's progress window has closed instead of stacking on it (INT-03, Onigiri's part). Note editor on phones: the toolbar is one sideways-scrolling row with 44pt buttons; Edit Current asks Kioku to drop its "Back" bar so Close is the only dismiss (THM-02). Qt dialogs (Description, Add-ons, sync progress) take the theme colours from the Phase 3 palette.
 Not done: a slim sync banner replacing Anki's progress dialog (that window belongs to Anki's sync code, which is not changed); field text size in the editor follows the note type's font settings (inside the editor's own shadow DOM); Description's raw-HTML box layout.
+
+### Phase 7 (build ios.31), done in emulation
+Done: deck names on phones wrap to two lines, then an ellipsis (LAY-07); the expander column before top-level decks is kept so leaf decks and folders stay aligned. Home stat cards show their value at 28px (CON-01, grid sizes are the user's widget layout and unchanged). SYS-04 investigated and written up in `docs/READY_TO_GO_DECKS.md` (no change; needs approval).
+Not done: a "due now + Study" card at the top of Home and a calendar legend (new widget content; left for a decision); hiding the deck icon when every row has the same one (it is a user choice).
+
+### Final pass
+- Unit tests: 87 known failures, none new; new tests `tests/test_mobile_theme.py` and three in `tests/test_progress_upgrade.py`.
+- Card answer in the harness: review log +1, reps +1, counts updated, undo available, no tracebacks.
+- Settings sweep: 0 off-screen elements on all 51 pages at 375/390/430pt; every page opens at the top.
+- Still needs the phone: everything WebKit- or Kioku-specific listed per phase (scroll reset, edge colours, toasts' position on a real screen, title-bar property, keyboard focus, profile sheet height, overview layout with Deck details open).
+
+### Kioku (upstream) notes, no code here
+SYS-01 launch screen, SYS-02 restart after installing an add-on, SYS-05 menus drawn under the web view, and the title bar not eliding long titles.

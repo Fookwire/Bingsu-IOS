@@ -2675,3 +2675,62 @@ html.onigiri-phone .editor-field .label-name,
 html.onigiri-phone .field-container .label-name {
     font-size: 15px !important;
 }
+
+/* Deck names on phones: up to two lines, then an ellipsis (audit LAY-07).
+   Names that share their first words ("Korean Grammar…", "Korean
+   Vocabulary…") were cut before the part that tells them apart. */
+html.onigiri-phone #deck-list-container tr.deck td.decktd,
+html.onigiri-phone #deck-list-container tr.deck .deck-info {
+    white-space: normal !important;
+}
+
+html.onigiri-phone #deck-list-container tr.deck a.deck {
+    display: flex !important;
+    align-items: center;
+    white-space: normal !important;
+    min-width: 0;
+}
+
+html.onigiri-phone #deck-list-container tr.deck a.deck .deck-name {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden !important;
+    white-space: normal !important;
+    text-overflow: ellipsis;
+    overflow-wrap: anywhere;
+    line-height: 1.25 !important;
+    min-width: 0;
+}
+
+html.onigiri-phone #deck-list-container tr.deck .deck-info {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center;
+    min-width: 0;
+}
+
+html.onigiri-phone #deck-list-container tr.deck .deck-info > * {
+    flex: 0 0 auto;
+}
+
+html.onigiri-phone #deck-list-container tr.deck .deck-info > a.deck {
+    flex: 1 1 auto !important;
+}
+
+/* Home on phones (audit CON-01): the stat cards were mostly empty space
+   around one small number. The value reads at a glance; the unit stays
+   small beside it. Grid sizes are the user's widget layout and unchanged. */
+html.onigiri-phone .main-content .stat-card.onigiri-stat-card .stat-value {
+    font-size: 28px !important;
+    font-weight: 700 !important;
+    line-height: 1.1 !important;
+    letter-spacing: -0.01em;
+}
+
+html.onigiri-phone .main-content .stat-card.onigiri-stat-card .stat-unit {
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    margin-left: 4px;
+    opacity: 0.7;
+}
