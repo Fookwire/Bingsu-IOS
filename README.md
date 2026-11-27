@@ -12,7 +12,7 @@ Bingsu only changes how Anki looks and feels. Scheduling, FSRS, review history, 
 
 ### Get started
 
-1. Download [`Bingsu-iOS.ankiaddon`](https://github.com/Fookwire/Onigiri_IOS/raw/claude/practical-ritchie-w20lag/dist/Bingsu-iOS.ankiaddon).
+1. Download [`Bingsu-iOS.ankiaddon`](https://github.com/Fookwire/Bingsu_for_IOS/raw/claude/practical-ritchie-w20lag/dist/Bingsu-iOS.ankiaddon).
 2. In Kioku open **Tools → Add-ons → Install from file…** and pick it.
 3. Fully restart Kioku.
 
@@ -102,7 +102,7 @@ If Bingsu has made your study routine a little better, consider supporting Peace
   <img src=".github/slide_7.svg" alt="Slide 7" width="100%">
 </p>
 
-<a href="https://github.com/Fookwire/Onigiri_IOS/issues">
+<a href="https://github.com/Fookwire/Bingsu_for_IOS/issues">
 <p align="center">
   <img src=".github/report_bugs.svg" alt="Report a bug" width="100%">
 </p>

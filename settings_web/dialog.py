@@ -669,7 +669,7 @@ class SettingsWebDialog(QDialog):
         return "ok"
 
     def _cmd_bugs(self, _arg):
-        openLink("https://github.com/Fookwire/Onigiri_IOS")
+        openLink("https://github.com/Fookwire/Bingsu_for_IOS")
         return "ok"
 
     def _cmd_link(self, arg):
