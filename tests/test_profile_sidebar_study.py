@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def renderer(states, reviews=42, seconds=3900, streak=3):
-    source = ast.parse((ROOT / 'rendering/onigiri_renderer.py').read_text())
+    source = ast.parse((ROOT / 'rendering/bingsu_renderer.py').read_text())
     function = next(n for n in source.body if isinstance(n, ast.FunctionDef) and n.name == '_profile_study_summary_html')
     things = types.ModuleType('profile_fixture.things_theme')
     things._card_state_counts = lambda: states

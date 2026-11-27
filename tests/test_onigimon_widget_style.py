@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CONFIG = (ROOT / "core" / "config.py").read_text(encoding="utf-8")
 GAMES = (ROOT / "settings_web" / "games.py").read_text(encoding="utf-8")
 ONIGIMON = (ROOT / "gamification" / "onigimon.py").read_text(encoding="utf-8")
-RENDERER = (ROOT / "rendering" / "onigiri_renderer.py").read_text(encoding="utf-8")
+RENDERER = (ROOT / "rendering" / "bingsu_renderer.py").read_text(encoding="utf-8")
 SETTINGS_JS = (ROOT / "web" / "settings.js").read_text(encoding="utf-8")
 
 
@@ -125,16 +125,16 @@ class OnigimonWidgetStyleTests(unittest.TestCase):
 
     def test_renderer_follows_main_menu_widget_border_radius_and_sync_styles(self):
         self.assertIn(
-            "border-radius: var(--onigiri-widget-border-radius, var(--onigiri-box-effect-radius, 20px));",
+            "border-radius: var(--bingsu-widget-border-radius, var(--bingsu-box-effect-radius, 20px));",
             RENDERER,
         )
         self.assertIn(
-            "border-radius: max(0px, calc(var(--onigiri-widget-border-radius, var(--onigiri-box-effect-radius, 20px)) - 8px));",
+            "border-radius: max(0px, calc(var(--bingsu-widget-border-radius, var(--bingsu-box-effect-radius, 20px)) - 8px));",
             RENDERER,
         )
         self.assertIn(".onigimon-card.onigimon-sync-widgets", RENDERER)
         self.assertIn(
-            "background: var(--onigiri-box-effect-bg, var(--canvas-inset, #ffffff));",
+            "background: var(--bingsu-box-effect-bg, var(--canvas-inset, #ffffff));",
             RENDERER,
         )
 
@@ -178,7 +178,7 @@ class OnigimonWidgetStyleTests(unittest.TestCase):
 
     def test_settings_preview_follows_border_radius_and_sync_toggle(self):
         self.assertIn("vals.g_onigimon_sync_widget_colors", SETTINGS_JS)
-        self.assertIn("vals.onigiri_canvas_inset_border_radius", SETTINGS_JS)
+        self.assertIn("vals.bingsu_canvas_inset_border_radius", SETTINGS_JS)
         self.assertIn('card.style.borderRadius = widgetRadius + "px";', SETTINGS_JS)
         self.assertIn(
             'sceneColor.classList.toggle("is-hidden", isSyncHidden(card, "g_onigimon_scene_color"))',

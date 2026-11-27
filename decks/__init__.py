@@ -1,1 +1,1 @@
-"""Deck browser behavior helpers for the Onigiri add-on."""
+"""Deck browser behavior helpers for the Bingsu add-on."""

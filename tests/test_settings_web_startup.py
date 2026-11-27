@@ -11,7 +11,7 @@ JS = (ROOT / "web" / "settings.js").read_text(encoding="utf-8")
 CSS = (ROOT / "web" / "settings.css").read_text(encoding="utf-8")
 PALETTE = (ROOT / "rendering/theme_palette.py").read_text(encoding="utf-8")
 SCHEMA = (ROOT / "settings_web" / "schema.py").read_text(encoding="utf-8")
-RENDERER = (ROOT / "rendering/onigiri_renderer.py").read_text(encoding="utf-8")
+RENDERER = (ROOT / "rendering/bingsu_renderer.py").read_text(encoding="utf-8")
 INJECTOR = (ROOT / "web" / "injector.js").read_text(encoding="utf-8")
 MENU_CSS = (ROOT / "web" / "menu.css").read_text(encoding="utf-8")
 
@@ -27,9 +27,9 @@ class SettingsWebStartupTests(unittest.TestCase):
     def test_incomplete_html_shell_is_guarded(self):
         self.assertIn('<html class="osw-booting">', HTML)
         self.assertIn("html.osw-booting .osw-shell", HTML)
-        self.assertIn("/*__ONIGIRI_BOOT_BACKGROUND__*/", HTML)
+        self.assertIn("/*__BINGSU_BOOT_BACKGROUND__*/", HTML)
         self.assertIn(
-            '.replace("/*__ONIGIRI_BOOT_BACKGROUND__*/", boot_background)',
+            '.replace("/*__BINGSU_BOOT_BACKGROUND__*/", boot_background)',
             RENDER,
         )
 
@@ -38,7 +38,7 @@ class SettingsWebStartupTests(unittest.TestCase):
         self.assertIn("CTX.initialPage && pageById[CTX.initialPage]", JS)
 
     def test_webui_marks_ready_only_after_api_is_installed(self):
-        api_pos = JS.index("window.onigiriSettings = {")
+        api_pos = JS.index("window.bingsuSettings = {")
         unguard_pos = JS.index('classList.remove("osw-booting")')
         ready_pos = JS.index('classList.add("osw-ready")')
         self.assertLess(api_pos, unguard_pos)
@@ -105,7 +105,7 @@ class SettingsWebStartupTests(unittest.TestCase):
         self.assertIn('"min": 320', SCHEMA)
         self.assertIn('"max": 1200', SCHEMA)
         self.assertIn('"sidebarWidthPinned": sidebar_width_pinned', RENDERER)
-        self.assertIn("window.ONIGIRI_CONFIG.sidebarWidthPinned", INJECTOR)
+        self.assertIn("window.BINGSU_CONFIG.sidebarWidthPinned", INJECTOR)
         self.assertIn("sidebar-width-pinned .resize-handle", MENU_CSS)
 
     def test_simple_profile_mode_enforces_its_compact_defaults(self):
@@ -135,7 +135,7 @@ class SettingsWebStartupTests(unittest.TestCase):
         self.assertIn("[data-simple-profile-advanced]", JS)
         self.assertNotIn('"id": "profile_status"', SCHEMA)
         self.assertNotIn('profile["status"]', RENDERER)
-        self.assertNotIn("onigiri-sidebar-profile-status", MENU_CSS)
+        self.assertNotIn("bingsu-sidebar-profile-status", MENU_CSS)
 
     def test_simple_sync_enforces_everything_and_hides_policy_controls(self):
         self.assertIn("const SIMPLE_SYNC_VALUES", JS)

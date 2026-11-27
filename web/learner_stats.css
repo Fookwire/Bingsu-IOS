@@ -5,7 +5,7 @@
 
 /* Shared dialog theme tokens -- the deck-picker modal is an opaque surface on
    top of the page, so it must follow Anki's light/dark theme (same neutral
-   palette the Qt settings dialog uses) instead of the Onigiri page palette,
+   palette the Qt settings dialog uses) instead of the Bingsu page palette,
    which is tuned for the background image and renders unreadable on white. */
 :root {
     --odlg-surface: #ffffff;
@@ -36,10 +36,10 @@
            is exactly what "Sync with Widget Color and Effect" produces. */
         background-color: var(--stats-box-bg, var(--canvas-inset, #ffffff));
         border: var(--stats-box-stroke, 1px) solid var(--stats-box-border, var(--border, #e0e0e0));
-        border-radius: var(--stats-box-radius, var(--onigiri-box-effect-radius, 15px));
+        border-radius: var(--stats-box-radius, var(--bingsu-box-effect-radius, 15px));
         backdrop-filter: blur(var(--stats-box-blur, 0px));
         -webkit-backdrop-filter: blur(var(--stats-box-blur, 0px));
-        padding: var(--onigiri-widget-pad);
+        padding: var(--bingsu-widget-pad);
         height: 100%;
         width: 100%;
         box-sizing: border-box;
@@ -220,7 +220,7 @@
         color: var(--fg, #222222) !important;
     }
     /* Layout only. Typography is deliberately left to menu.css's shared
-       `.onigiri-widget-head>h3` rule so this title keeps following the
+       `.bingsu-widget-head>h3` rule so this title keeps following the
        user-configurable Small Title font/size/color like every other widget. */
     .learner-stats-header h3 {
         margin: 0;

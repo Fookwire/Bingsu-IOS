@@ -11,7 +11,7 @@ PATCHER = (ROOT / "rendering/patcher.py").read_text(encoding="utf-8")
 CONFIG = (ROOT / "core/config.py").read_text(encoding="utf-8")
 INIT = (ROOT / "__init__.py").read_text(encoding="utf-8")
 TEMPLATES = (ROOT / "rendering/templates.py").read_text(encoding="utf-8")
-RENDERER = (ROOT / "rendering/onigiri_renderer.py").read_text(encoding="utf-8")
+RENDERER = (ROOT / "rendering/bingsu_renderer.py").read_text(encoding="utf-8")
 INJECTOR = (ROOT / "web" / "injector.js").read_text(encoding="utf-8")
 
 
@@ -31,8 +31,8 @@ class FontsModeContractTests(unittest.TestCase):
         self.assertNotIn("def _fonts_page():", SCHEMA)
         self.assertNotIn("def _fonts_sections():", SCHEMA)
         self.assertNotIn("_fonts_page(),", SCHEMA)
-        self.assertNotIn("onigiri_sidebar_font_mode", SCHEMA)
-        self.assertNotIn("onigiri_sidebar_font_mode", PATCHER)
+        self.assertNotIn("bingsu_sidebar_font_mode", SCHEMA)
+        self.assertNotIn("bingsu_sidebar_font_mode", PATCHER)
 
     def test_advanced_typography_is_distributed_to_component_pages(self):
         self.assertNotIn('"overview_typography"', SCHEMA)
@@ -58,7 +58,7 @@ class FontsModeContractTests(unittest.TestCase):
             'designerFontRole(vals, "reviewer_controls", isDark, "main")',
             SCRIPT,
         )
-        self.assertIn('#outer button .onigiri-answer-label,', PATCHER)
+        self.assertIn('#outer button .bingsu-answer-label,', PATCHER)
         self.assertIn('#outer #ansbut::before,', PATCHER)
 
     def test_reviewer_colors_use_compact_element_groups(self):
@@ -77,10 +77,10 @@ class FontsModeContractTests(unittest.TestCase):
             SCHEMA,
         )
         self.assertIn('"bbar_show_answer_bg", "bbar_show_answer_text"', SCHEMA)
-        self.assertIn('onigiri_reviewer_show_answer_btn_bg_light', CONFIG)
+        self.assertIn('bingsu_reviewer_show_answer_btn_bg_light', CONFIG)
         self.assertIn('show_answer_bg_light = conf.get(', PATCHER)
-        self.assertIn('#outer button.onigiri-show-answer-btn', PATCHER)
-        self.assertIn('#outer button.onigiri-timer-out-btn,', PATCHER)
+        self.assertIn('#outer button.bingsu-show-answer-btn', PATCHER)
+        self.assertIn('#outer button.bingsu-timer-out-btn,', PATCHER)
         self.assertIn('vals["bbar_show_answer_bg_" + suffix]', SCRIPT)
 
     def test_reviewer_color_editor_is_a_viewport_safe_preview_gallery(self):
@@ -234,7 +234,7 @@ class FontsModeContractTests(unittest.TestCase):
         self.assertIn('color: var(--icon-color, var(--fg-subtle));', TEMPLATES)
 
     def test_every_sidebar_font_size_offers_the_circular_reset(self):
-        profile_start = SCHEMA.index('"id": "onigiri_font_size_profile_name"')
+        profile_start = SCHEMA.index('"id": "bingsu_font_size_profile_name"')
         profile_field = SCHEMA[profile_start:profile_start + 600]
         self.assertIn('"reset_to": _current_simple_font_size("main")', profile_field)
         self.assertIn('"reset_to": size', SCHEMA)
@@ -305,11 +305,11 @@ class FontsModeContractTests(unittest.TestCase):
         self.assertIn('"number_font", "sync"', PATCHER)
         self.assertIn('statsRoleFont("swidget_value_font", "widget_small", "main")', SCRIPT)
         self.assertIn('statsRoleFont("swidget_number_font", "widget_small", "main")', SCRIPT)
-        self.assertIn('".stat-card.onigiri-stat-card .stat-value",\n            "widget_small",', PATCHER)
+        self.assertIn('".stat-card.bingsu-stat-card .stat-value",\n            "widget_small",', PATCHER)
 
     def test_synced_stats_titles_use_the_widget_title_role_size(self):
-        self.assertIn('"onigiri_font_size_widget_title"', PATCHER)
-        self.assertIn('"onigiri_font_size_widget_small"', PATCHER)
+        self.assertIn('"bingsu_font_size_widget_title"', PATCHER)
+        self.assertIn('"bingsu_font_size_widget_small"', PATCHER)
 
     def test_simple_and_advanced_expose_the_same_distributed_controls(self):
         self.assertIn('const SETTINGS_MODE_PARITY = true;', SCRIPT)
@@ -332,7 +332,7 @@ class FontsModeContractTests(unittest.TestCase):
         self.assertIn('.osw-organize-font-role-list', STYLES)
 
     def test_stats_preview_distributes_all_cards_evenly(self):
-        self.assertIn('.osw-preview-swidget-row .stat-card.onigiri-stat-card', STYLES)
+        self.assertIn('.osw-preview-swidget-row .stat-card.bingsu-stat-card', STYLES)
         self.assertIn('flex: 1 1 0;', STYLES)
 
     def test_advanced_fonts_include_deck_stats_typography(self):
@@ -342,11 +342,11 @@ class FontsModeContractTests(unittest.TestCase):
 
     def test_dashboard_and_sidebar_roles_target_current_markup(self):
         self.assertIn(
-            '".injected-stats-block .onigiri-widget-title"',
+            '".injected-stats-block .bingsu-widget-title"',
             PATCHER,
         )
         self.assertIn(
-            '".sidebar-left .onigiri-sidebar-profile-summary-label"',
+            '".sidebar-left .bingsu-sidebar-profile-summary-label"',
             PATCHER,
         )
 

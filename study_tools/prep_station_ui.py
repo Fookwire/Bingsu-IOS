@@ -1,7 +1,7 @@
 """
-Native PyQt widgets for Prep Station — Onigiri's study planner.
+Native PyQt widgets for Prep Station — Bingsu's study planner.
 
-Everything here themes off Onigiri's own light/dark palette (not the OS palette)
+Everything here themes off Bingsu's own light/dark palette (not the OS palette)
 so it stays visually consistent with the rest of the add-on.
 """
 
@@ -29,7 +29,7 @@ from ..core import config
 from ..ui_kit.fonts import register_poppins_qt
 from ..rendering.theme_palette import utility_chrome_palette
 from ..core.translations import tr, current_locale
-from ..ui_kit.onigiri_color_picker import OnigiriColorDialog
+from ..ui_kit.bingsu_color_picker import BingsuColorDialog
 from ..ui_kit.widgets import AnimatedToggleButton, MainBackgroundEffectSlider
 
 PLAN_COLORS = ["#3B82F6", "#10B981", "#FBBF24", "#a855f7", "#F472B6", "#F97316", "#EF4444"]
@@ -399,7 +399,7 @@ def deck_icon_value(name: str, has_children: bool) -> str:
     if not mw or not mw.col:
         return "deck.svg"
     did = mw.col.decks.id_for_name(name)
-    custom_icons = mw.col.conf.get("onigiri_custom_deck_icons", {})
+    custom_icons = mw.col.conf.get("bingsu_custom_deck_icons", {})
     custom_data = custom_icons.get(str(did), {}) if did is not None else {}
     icon_file = custom_data.get("icon")
     if icon_file:
@@ -2496,7 +2496,7 @@ class IconButton(QPushButton):
 
 class DatePickerButton(QPushButton):
     """Shows the selected exam date; opens the shared modern date popup
-    (OnigiriDateDialog — same rounded/shadowed look as the color picker)."""
+    (BingsuDateDialog — same rounded/shadowed look as the color picker)."""
 
     dateChanged = pyqtSignal(object)
 
@@ -2520,8 +2520,8 @@ class DatePickerButton(QPushButton):
         self.setText(locale.toString(qd, "dd MMM yyyy"))
 
     def _open_picker(self) -> None:
-        from ..ui_kit.onigiri_date_picker import OnigiriDateDialog
-        chosen, ok = OnigiriDateDialog.getDate(
+        from ..ui_kit.bingsu_date_picker import BingsuDateDialog
+        chosen, ok = BingsuDateDialog.getDate(
             self._date, self, anchor=self, accent=self.pal["accent"], min_date=date.today()
         )
         if ok and chosen:
@@ -2831,7 +2831,7 @@ class PlanBackgroundPicker(QWidget):
         self.changed.emit()
 
     def _pick_color(self, state_key: str, swatch: "_ColorPillRow") -> None:
-        chosen, ok = OnigiriColorDialog.getColor(self._state[state_key], self, anchor=swatch)
+        chosen, ok = BingsuColorDialog.getColor(self._state[state_key], self, anchor=swatch)
         if ok and chosen:
             self._state[state_key] = chosen
             swatch.set_color(chosen)

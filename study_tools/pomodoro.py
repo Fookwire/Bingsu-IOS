@@ -6,7 +6,7 @@ window, so it keeps running while the floating island is closed. Settings and
 completed-session history live in mw.col.conf (mirrors Prep Station's plan
 storage), so they sync via AnkiWeb. They are also mirrored to
 user_files/pomodoro/ (mirrors Hashi Notes' pattern), so they are safe on disk
-too and ride the existing Onigiri media-zip sync (sync.py).
+too and ride the existing Bingsu media-zip sync (sync.py).
 """
 
 from __future__ import annotations
@@ -47,12 +47,12 @@ from ..core import safe_storage
 from ..ui_kit.fonts import register_poppins_qt
 from ..rendering.theme_palette import utility_chrome_palette
 from .pomodoro_tones import BUILTIN_SOUNDS
-from ..ui_kit.onigiri_notifications import notify as tooltip
+from ..ui_kit.bingsu_notifications import notify as tooltip
 from .prep_station_ui import WeeklyChart, render_icon_pixmap
 from ..core.translations import current_locale, tr
 
-SETTINGS_CONF_KEY = "onigiri_pomodoro_settings"
-SESSIONS_CONF_KEY = "onigiri_pomodoro_sessions"
+SETTINGS_CONF_KEY = "bingsu_pomodoro_settings"
+SESSIONS_CONF_KEY = "bingsu_pomodoro_sessions"
 MAX_HISTORY = 500
 SOUNDS_SUBDIR = "pomodoro_sounds"
 DEFAULT_ICON = "system:pomodoro.svg"

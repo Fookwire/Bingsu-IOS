@@ -23,11 +23,11 @@ class BackgroundMatchingTests(unittest.TestCase):
                          modern_menu_background_opacity=42, modern_menu_bg_color_light='#123456',
                          modern_menu_bg_color_dark='#654321', modern_menu_bg_image_theme_mode='separate',
                          modern_menu_background_image_light='day.png', modern_menu_background_image_dark='night.png')
-        self.local = dict(onigiri_overview_bg_mode='main', onigiri_reviewer_bg_mode='main',
-                          onigiri_overview_bg_main_blur=99, onigiri_overview_bg_main_opacity=99,
-                          onigiri_reviewer_bg_main_blur=98, onigiri_reviewer_bg_main_opacity=98,
-                          onigiri_reviewer_bottom_bar_match_main_blur=97,
-                          onigiri_reviewer_bottom_bar_match_main_opacity=97)
+        self.local = dict(bingsu_overview_bg_mode='main', bingsu_reviewer_bg_mode='main',
+                          bingsu_overview_bg_main_blur=99, bingsu_overview_bg_main_opacity=99,
+                          bingsu_reviewer_bg_main_blur=98, bingsu_reviewer_bg_main_opacity=98,
+                          bingsu_reviewer_bottom_bar_match_main_blur=97,
+                          bingsu_reviewer_bottom_bar_match_main_opacity=97)
         asset_env = {}
         load_functions('core/config.py', {'_dynamic_theme_enabled', 'themed_asset'}, asset_env)
         config = SimpleNamespace(get_config_readonly=lambda: self.local,
@@ -54,9 +54,9 @@ class BackgroundMatchingTests(unittest.TestCase):
                          modern_menu_sidebar_bg_image='stale.png', modern_menu_sidebar_sync_box_effect=False,
                          modern_menu_sidebar_border_custom=True, modern_menu_sidebar_radius=55,
                          modern_menu_sidebar_stroke=9, modern_menu_sidebar_bg_blur=99,
-                         modern_menu_sidebar_bg_opacity=99, onigiri_canvas_inset_effect_blur=35,
-                         onigiri_canvas_inset_effect_opacity=42, onigiri_canvas_inset_border_radius=18,
-                         onigiri_canvas_inset_border_width=2)
+                         modern_menu_sidebar_bg_opacity=99, bingsu_canvas_inset_effect_blur=35,
+                         bingsu_canvas_inset_effect_opacity=42, bingsu_canvas_inset_border_radius=18,
+                         bingsu_canvas_inset_border_width=2)
         self.local['colors'] = {'light': {'--canvas-inset': '#123456'}, 'dark': {'--canvas-inset': '#654321'}}
         for palette in self.env['config'].DEFAULTS['colors'].values():
             palette['--profile-page-bg'] = '#aaaaaa'
@@ -71,12 +71,12 @@ class BackgroundMatchingTests(unittest.TestCase):
     def test_main_matches_ignore_stale_local_overrides(self):
         for surface in ('overview', 'reviewer', 'reviewer_bottom_bar'):
             with self.subTest(surface=surface):
-                self.local['onigiri_reviewer_bottom_bar_bg_mode'] = 'main'
+                self.local['bingsu_reviewer_bottom_bar_bg_mode'] = 'main'
                 self.assert_main_appearance(self.render(surface))
 
     def test_chained_matches_follow_subsequent_source_changes(self):
         for mode in ('match_overview_bg', 'match_reviewer_bg'):
-            self.local['onigiri_reviewer_bottom_bar_bg_mode'] = mode
+            self.local['bingsu_reviewer_bottom_bar_bg_mode'] = mode
             self.assert_main_appearance(self.render('reviewer_bottom_bar'))
             self.main.update(modern_menu_background_blur=0, modern_menu_background_opacity=0)
             css = self.render('reviewer_bottom_bar')
@@ -86,9 +86,9 @@ class BackgroundMatchingTests(unittest.TestCase):
 
     def test_custom_background_effects_are_retained(self):
         for surface in ('overview', 'reviewer'):
-            self.local.update({f'onigiri_{surface}_bg_mode': 'image_color', f'onigiri_{surface}_bg_blur': 20,
-                               f'onigiri_{surface}_bg_opacity': 70, f'onigiri_{surface}_bg_image_theme_mode': 'single',
-                               f'onigiri_{surface}_bg_image': 'custom.png'})
+            self.local.update({f'bingsu_{surface}_bg_mode': 'image_color', f'bingsu_{surface}_bg_blur': 20,
+                               f'bingsu_{surface}_bg_opacity': 70, f'bingsu_{surface}_bg_image_theme_mode': 'single',
+                               f'bingsu_{surface}_bg_image': 'custom.png'})
             css = self.render(surface)
             self.assertIn('custom.png', css)
             self.assertIn('blur(4.0px)', css)
@@ -96,11 +96,11 @@ class BackgroundMatchingTests(unittest.TestCase):
 
     def test_bottom_bar_inherits_source_theme_image_and_effects(self):
         for source in ('overview', 'reviewer'):
-            self.local.update({f'onigiri_{source}_bg_mode': 'image_color', f'onigiri_{source}_bg_blur': 25,
-                               f'onigiri_{source}_bg_opacity': 60, f'onigiri_{source}_bg_image_theme_mode': 'separate',
-                               f'onigiri_{source}_bg_image_mode': 'single', f'onigiri_{source}_bg_image_light': 'source-day.png',
-                               f'onigiri_{source}_bg_image_dark': 'source-night.png',
-                               'onigiri_reviewer_bottom_bar_bg_mode': f'match_{source}_bg'})
+            self.local.update({f'bingsu_{source}_bg_mode': 'image_color', f'bingsu_{source}_bg_blur': 25,
+                               f'bingsu_{source}_bg_opacity': 60, f'bingsu_{source}_bg_image_theme_mode': 'separate',
+                               f'bingsu_{source}_bg_image_mode': 'single', f'bingsu_{source}_bg_image_light': 'source-day.png',
+                               f'bingsu_{source}_bg_image_dark': 'source-night.png',
+                               'bingsu_reviewer_bottom_bar_bg_mode': f'match_{source}_bg'})
             css = self.render('reviewer_bottom_bar')
             self.assertIn('source-day.png', css)
             self.assertIn('source-night.png', css)
@@ -109,10 +109,10 @@ class BackgroundMatchingTests(unittest.TestCase):
 
     def test_matching_recovers_shared_images_in_empty_theme_slots(self):
         for source in ('overview', 'reviewer'):
-            self.local.update({f'onigiri_{source}_bg_mode': 'image_color',
-                               f'onigiri_{source}_bg_image_theme_mode': 'separate',
-                               f'onigiri_{source}_bg_image': 'shared.png',
-                               'onigiri_reviewer_bottom_bar_bg_mode': f'match_{source}_bg'})
+            self.local.update({f'bingsu_{source}_bg_mode': 'image_color',
+                               f'bingsu_{source}_bg_image_theme_mode': 'separate',
+                               f'bingsu_{source}_bg_image': 'shared.png',
+                               'bingsu_reviewer_bottom_bar_bg_mode': f'match_{source}_bg'})
             self.assertIn('shared.png', self.render(source))
             self.assertIn('shared.png', self.render('reviewer_bottom_bar'))
 
@@ -137,9 +137,9 @@ class BackgroundMatchingTests(unittest.TestCase):
                 self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_bottom_bar_can_match_reviewer_slideshow(self):
-        self.local.update(onigiri_reviewer_bg_mode='slideshow', onigiri_reviewer_slideshow_images=['r1.png', 'r2.png'],
-                          onigiri_reviewer_slideshow_interval=23, onigiri_reviewer_bg_blur=15,
-                          onigiri_reviewer_bg_opacity=80, onigiri_reviewer_bottom_bar_bg_mode='match_reviewer_bg')
+        self.local.update(bingsu_reviewer_bg_mode='slideshow', bingsu_reviewer_slideshow_images=['r1.png', 'r2.png'],
+                          bingsu_reviewer_slideshow_interval=23, bingsu_reviewer_bg_blur=15,
+                          bingsu_reviewer_bg_opacity=80, bingsu_reviewer_bottom_bar_bg_mode='match_reviewer_bg')
         css = self.render('reviewer_bottom_bar')
         for fragment in ('/reviewer_bg/r1.png', '/reviewer_bg/r2.png', '23000', 'blur(3.0px)', 'opacity: 0.8'):
             self.assertIn(fragment, css)
@@ -234,7 +234,7 @@ class OverviewBackgroundRenderTests(unittest.TestCase):
             from PyQt6.QtCore import QEventLoop, QTimer
         except ImportError:
             raise unittest.SkipTest('PyQt6 WebEngine is required for rendered CSS checks')
-        cls.app = QApplication.instance() or QApplication(['onigiri-background-tests'])
+        cls.app = QApplication.instance() or QApplication(['bingsu-background-tests'])
         cls.Page, cls.Loop, cls.Timer = QWebEnginePage, QEventLoop, QTimer
         cls.delete_page = staticmethod(sip.delete)
 

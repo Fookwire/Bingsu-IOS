@@ -1,5 +1,5 @@
 (function () {
-    if (window.OnigiriRenameDialog) return;
+    if (window.BingsuRenameDialog) return;
 
     var state = {
         deckId: null,
@@ -11,8 +11,8 @@
     };
 
     function T(key, fallback) {
-        if (window.OnigiriI18n && typeof OnigiriI18n.t === 'function') {
-            return OnigiriI18n.t(key, fallback);
+        if (window.BingsuI18n && typeof BingsuI18n.t === 'function') {
+            return BingsuI18n.t(key, fallback);
         }
         return fallback;
     }
@@ -29,8 +29,8 @@
     }
 
     function iconUrl(name) {
-        if (window.OnigiriEngine && typeof OnigiriEngine.systemIconUrl === 'function') {
-            return OnigiriEngine.systemIconUrl(name);
+        if (window.BingsuEngine && typeof BingsuEngine.systemIconUrl === 'function') {
+            return BingsuEngine.systemIconUrl(name);
         }
         return '../system_files/system_icons/unavailable_for_users/' + name;
     }
@@ -39,15 +39,15 @@
         var url = String(iconRef || '');
         if (!url) return '';
         if (url.indexOf('/') !== -1) return url;
-        if (window.OnigiriEngine && typeof OnigiriEngine.systemIconUrl === 'function') {
-            return OnigiriEngine.systemIconUrl(url);
+        if (window.BingsuEngine && typeof BingsuEngine.systemIconUrl === 'function') {
+            return BingsuEngine.systemIconUrl(url);
         }
         return url;
     }
 
     function makeIcon(iconRef, className, size, color) {
-        if (window.OnigiriEngine && typeof OnigiriEngine.createMaskIcon === 'function') {
-            return OnigiriEngine.createMaskIcon(resolveIconUrl(iconRef), {
+        if (window.BingsuEngine && typeof BingsuEngine.createMaskIcon === 'function') {
+            return BingsuEngine.createMaskIcon(resolveIconUrl(iconRef), {
                 className: className || '',
                 size: size || 16,
                 color: color || 'currentColor'
@@ -60,8 +60,8 @@
 
     function preloadCommonIcons() {
         var urls = ['rename.svg', 'cancel.svg'].map(iconUrl);
-        if (window.OnigiriEngine && typeof OnigiriEngine.preloadMaskIcons === 'function') {
-            OnigiriEngine.preloadMaskIcons(urls);
+        if (window.BingsuEngine && typeof BingsuEngine.preloadMaskIcons === 'function') {
+            BingsuEngine.preloadMaskIcons(urls);
         }
         return urls.map(function (url) {
             var img = new Image();
@@ -71,13 +71,13 @@
         });
     }
 
-    // Shared light/dark tokens for Onigiri dialogs. They read the Onigiri palette
+    // Shared light/dark tokens for Bingsu dialogs. They read the Bingsu palette
     // (which flips on .night-mode) instead of Anki's --canvas*, so a dialog can
     // never end up with light-theme surfaces under dark-theme text.
     function ensureDialogThemeTokens() {
-        if (document.getElementById('onigiri-dialog-theme-tokens')) return;
+        if (document.getElementById('bingsu-dialog-theme-tokens')) return;
         var tokenStyle = document.createElement('style');
-        tokenStyle.id = 'onigiri-dialog-theme-tokens';
+        tokenStyle.id = 'bingsu-dialog-theme-tokens';
         tokenStyle.textContent = [
             ':root{--odlg-surface:#ffffff;--odlg-inset:#ffffff;',
             '  --odlg-fg:#202124;--odlg-fg-subtle:#6f7177;',
@@ -93,82 +93,82 @@
 
     function ensureStyles() {
         ensureDialogThemeTokens();
-        if (document.getElementById('onigiri-rename-dialog-style')) return;
+        if (document.getElementById('bingsu-rename-dialog-style')) return;
         var style = document.createElement('style');
-        style.id = 'onigiri-rename-dialog-style';
+        style.id = 'bingsu-rename-dialog-style';
         style.textContent = [
-            '#onigiri-rename-backdrop{position:fixed;inset:0;z-index:200000;display:flex;align-items:center;justify-content:center;',
+            '#bingsu-rename-backdrop{position:fixed;inset:0;z-index:200000;display:flex;align-items:center;justify-content:center;',
             '  background:var(--odlg-scrim, rgba(0,0,0,0.58));contain:layout paint style;isolation:isolate;transform:translateZ(0);',
             '  backface-visibility:hidden;-webkit-backface-visibility:hidden;}',
-            '#onigiri-rename-backdrop.is-preparing{visibility:hidden;}',
-            '#onigiri-rename-backdrop *{box-sizing:border-box;}',
-            '#onigiri-rename-backdrop button,#onigiri-rename-backdrop input{appearance:none;-webkit-appearance:none;',
+            '#bingsu-rename-backdrop.is-preparing{visibility:hidden;}',
+            '#bingsu-rename-backdrop *{box-sizing:border-box;}',
+            '#bingsu-rename-backdrop button,#bingsu-rename-backdrop input{appearance:none;-webkit-appearance:none;',
             '  font-family:var(--font-main,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif);}',
-            '#onigiri-rename-backdrop button{border:none !important;outline:none !important;box-shadow:none !important;background-image:none !important;}',
-            '.onigiri-rename-modal{width:460px;max-width:94vw;display:flex;flex-direction:column;overflow:hidden;',
+            '#bingsu-rename-backdrop button{border:none !important;outline:none !important;box-shadow:none !important;background-image:none !important;}',
+            '.bingsu-rename-modal{width:460px;max-width:94vw;display:flex;flex-direction:column;overflow:hidden;',
             '  border-radius:16px;border:1px solid var(--odlg-border, rgba(0,0,0,0.14));',
             '  background:var(--odlg-surface, #ffffff);color:var(--odlg-fg, #212121);',
             '  box-shadow:0 24px 70px rgba(0,0,0,0.42);backface-visibility:hidden;-webkit-backface-visibility:hidden;',
             '  transform:translateZ(0);contain:layout paint style;isolation:isolate;}',
-            '.onigiri-rename-header{display:flex;align-items:flex-start;gap:12px;padding:18px 18px 14px;border-bottom:1px solid var(--odlg-border, rgba(0,0,0,0.14));}',
-            '.onigiri-rename-header-icon{width:34px;height:34px;min-width:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;',
+            '.bingsu-rename-header{display:flex;align-items:flex-start;gap:12px;padding:18px 18px 14px;border-bottom:1px solid var(--odlg-border, rgba(0,0,0,0.14));}',
+            '.bingsu-rename-header-icon{width:34px;height:34px;min-width:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;',
             '  color:var(--odlg-accent, #0077C8);background:var(--odlg-highlight, rgba(0,0,0,0.06));}',
-            '.onigiri-rename-title-wrap{min-width:0;flex:1;}',
-            '.onigiri-rename-title{font-size:16px;font-weight:700;line-height:1.2;margin:0 0 5px;color:var(--odlg-fg, #212121);}',
-            '.onigiri-rename-subtitle{font-size:13px;color:var(--odlg-fg-subtle, #757575);line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}',
-            '.onigiri-rename-close{width:30px;height:30px;min-width:30px;padding:0;border:none !important;border-radius:8px;background:transparent !important;color:var(--odlg-fg-subtle, #757575);',
+            '.bingsu-rename-title-wrap{min-width:0;flex:1;}',
+            '.bingsu-rename-title{font-size:16px;font-weight:700;line-height:1.2;margin:0 0 5px;color:var(--odlg-fg, #212121);}',
+            '.bingsu-rename-subtitle{font-size:13px;color:var(--odlg-fg-subtle, #757575);line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}',
+            '.bingsu-rename-close{width:30px;height:30px;min-width:30px;padding:0;border:none !important;border-radius:8px;background:transparent !important;color:var(--odlg-fg-subtle, #757575);',
             '  display:flex;align-items:center;justify-content:center;cursor:pointer;outline:none !important;box-shadow:none !important;filter:none !important;',
             '  opacity:1;transition:none;}',
-            '.onigiri-rename-close:hover,.onigiri-rename-close:focus,.onigiri-rename-close:active{background:transparent !important;color:var(--odlg-fg-subtle, #757575);opacity:1;box-shadow:none !important;border:none !important;filter:none !important;}',
-            '.onigiri-rename-body{padding:16px 18px 12px;}',
-            '.onigiri-rename-label{font-size:11px;font-weight:700;color:var(--odlg-fg-subtle, #757575);margin:0 0 8px;text-transform:uppercase;}',
-            '.onigiri-rename-input-wrap{position:relative;}',
-            '.onigiri-rename-input{width:100%;height:40px;padding:0 13px;border-radius:999px;border:1px solid var(--odlg-border, rgba(0,0,0,0.14));',
+            '.bingsu-rename-close:hover,.bingsu-rename-close:focus,.bingsu-rename-close:active{background:transparent !important;color:var(--odlg-fg-subtle, #757575);opacity:1;box-shadow:none !important;border:none !important;filter:none !important;}',
+            '.bingsu-rename-body{padding:16px 18px 12px;}',
+            '.bingsu-rename-label{font-size:11px;font-weight:700;color:var(--odlg-fg-subtle, #757575);margin:0 0 8px;text-transform:uppercase;}',
+            '.bingsu-rename-input-wrap{position:relative;}',
+            '.bingsu-rename-input{width:100%;height:40px;padding:0 13px;border-radius:999px;border:1px solid var(--odlg-border, rgba(0,0,0,0.14));',
             '  background:var(--odlg-inset, #ffffff);color:var(--odlg-fg, #212121);font-size:13px;outline:none;box-shadow:none;',
             '  transition:none;}',
-            '.onigiri-rename-input::placeholder{color:var(--odlg-fg-subtle, #757575);}',
-            '.onigiri-rename-input:hover{background:var(--odlg-inset, #ffffff);}',
-            '.onigiri-rename-input:focus{border-color:var(--odlg-accent, #0077C8);}',
-            '.onigiri-rename-hint{font-size:12px;color:var(--odlg-fg-subtle, #757575);line-height:1.35;margin-top:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}',
-            '.onigiri-rename-error{display:none;margin:0 18px 10px;padding:9px 11px;border-radius:9px;background:rgba(192,48,48,0.12);',
+            '.bingsu-rename-input::placeholder{color:var(--odlg-fg-subtle, #757575);}',
+            '.bingsu-rename-input:hover{background:var(--odlg-inset, #ffffff);}',
+            '.bingsu-rename-input:focus{border-color:var(--odlg-accent, #0077C8);}',
+            '.bingsu-rename-hint{font-size:12px;color:var(--odlg-fg-subtle, #757575);line-height:1.35;margin-top:9px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}',
+            '.bingsu-rename-error{display:none;margin:0 18px 10px;padding:9px 11px;border-radius:9px;background:rgba(192,48,48,0.12);',
             '  color:#d84a4a;font-size:12px;line-height:1.35;}',
-            '.onigiri-rename-footer{display:flex;align-items:center;gap:8px;padding:12px 18px 16px;border-top:1px solid var(--odlg-border, rgba(0,0,0,0.14));}',
-            '.onigiri-rename-spacer{flex:1;}',
-            '.onigiri-rename-btn{height:36px;padding:0 15px;border:none !important;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;gap:7px;',
+            '.bingsu-rename-footer{display:flex;align-items:center;gap:8px;padding:12px 18px 16px;border-top:1px solid var(--odlg-border, rgba(0,0,0,0.14));}',
+            '.bingsu-rename-spacer{flex:1;}',
+            '.bingsu-rename-btn{height:36px;padding:0 15px;border:none !important;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;gap:7px;',
             '  cursor:pointer;font-size:13px;font-weight:650;outline:none !important;box-shadow:none !important;background-image:none !important;filter:none !important;',
             '  transition:none;}',
-            '.onigiri-rename-btn-secondary{background:var(--odlg-inset, #ffffff) !important;color:var(--odlg-fg, #212121);}',
-            '.onigiri-rename-btn-secondary:hover,.onigiri-rename-btn-secondary:focus,.onigiri-rename-btn-secondary:active{background:var(--odlg-inset, #ffffff) !important;border:none !important;box-shadow:none !important;outline:none !important;filter:none !important;}',
-            '.onigiri-rename-btn-secondary.is-active{background:var(--odlg-accent, #0077C8) !important;color:#fff;}',
-            '.onigiri-rename-btn-primary{background:var(--odlg-accent, #0077C8) !important;color:#fff;}',
-            '.onigiri-rename-btn-primary:hover,.onigiri-rename-btn-primary:focus,.onigiri-rename-btn-primary:active{background:var(--odlg-accent, #0077C8) !important;border:none !important;box-shadow:none !important;outline:none !important;filter:none !important;}',
-            '.onigiri-rename-btn:not(:disabled):hover{opacity:1;}',
-            '.onigiri-rename-btn:not(:disabled):active{opacity:1;}',
-            '.onigiri-rename-btn:disabled{opacity:0.42;cursor:not-allowed;filter:none !important;}',
-            '.onigiri-rename-btn-primary:disabled{color:rgba(255,255,255,0.82) !important;-webkit-text-fill-color:rgba(255,255,255,0.82);}',
-            '.onigiri-rename-btn:disabled:hover{filter:none !important;}'
+            '.bingsu-rename-btn-secondary{background:var(--odlg-inset, #ffffff) !important;color:var(--odlg-fg, #212121);}',
+            '.bingsu-rename-btn-secondary:hover,.bingsu-rename-btn-secondary:focus,.bingsu-rename-btn-secondary:active{background:var(--odlg-inset, #ffffff) !important;border:none !important;box-shadow:none !important;outline:none !important;filter:none !important;}',
+            '.bingsu-rename-btn-secondary.is-active{background:var(--odlg-accent, #0077C8) !important;color:#fff;}',
+            '.bingsu-rename-btn-primary{background:var(--odlg-accent, #0077C8) !important;color:#fff;}',
+            '.bingsu-rename-btn-primary:hover,.bingsu-rename-btn-primary:focus,.bingsu-rename-btn-primary:active{background:var(--odlg-accent, #0077C8) !important;border:none !important;box-shadow:none !important;outline:none !important;filter:none !important;}',
+            '.bingsu-rename-btn:not(:disabled):hover{opacity:1;}',
+            '.bingsu-rename-btn:not(:disabled):active{opacity:1;}',
+            '.bingsu-rename-btn:disabled{opacity:0.42;cursor:not-allowed;filter:none !important;}',
+            '.bingsu-rename-btn-primary:disabled{color:rgba(255,255,255,0.82) !important;-webkit-text-fill-color:rgba(255,255,255,0.82);}',
+            '.bingsu-rename-btn:disabled:hover{filter:none !important;}'
         ].join('');
         document.head.appendChild(style);
     }
 
     function warmDialogSurface() {
-        if (document.getElementById('onigiri-rename-warmup')) return;
+        if (document.getElementById('bingsu-rename-warmup')) return;
         var warmup = document.createElement('div');
-        warmup.id = 'onigiri-rename-warmup';
+        warmup.id = 'bingsu-rename-warmup';
         warmup.setAttribute('aria-hidden', 'true');
         warmup.style.cssText = 'position:fixed;left:-10000px;top:-10000px;width:460px;height:240px;visibility:hidden;pointer-events:none;contain:layout paint style;overflow:hidden;';
 
         var modal = document.createElement('div');
-        modal.className = 'onigiri-rename-modal';
+        modal.className = 'bingsu-rename-modal';
         var input = document.createElement('input');
-        input.className = 'onigiri-rename-input';
+        input.className = 'bingsu-rename-input';
         var footer = document.createElement('div');
-        footer.className = 'onigiri-rename-footer';
+        footer.className = 'bingsu-rename-footer';
         var secondary = document.createElement('span');
-        secondary.className = 'onigiri-rename-btn onigiri-rename-btn-secondary';
+        secondary.className = 'bingsu-rename-btn bingsu-rename-btn-secondary';
         secondary.textContent = T('cancel', 'Cancel');
         var primary = document.createElement('span');
-        primary.className = 'onigiri-rename-btn onigiri-rename-btn-primary';
+        primary.className = 'bingsu-rename-btn bingsu-rename-btn-primary';
         primary.textContent = T('save', 'Save');
         footer.appendChild(secondary);
         footer.appendChild(primary);
@@ -184,12 +184,12 @@
     warmDialogSurface();
 
     function close(skipUiClose) {
-        var backdrop = document.getElementById('onigiri-rename-backdrop');
+        var backdrop = document.getElementById('bingsu-rename-backdrop');
         runCleanup();
         if (backdrop) backdrop.remove();
 
-        if (window.OnigiriEngine && typeof OnigiriEngine.clearDialogFocus === 'function') {
-            OnigiriEngine.clearDialogFocus();
+        if (window.BingsuEngine && typeof BingsuEngine.clearDialogFocus === 'function') {
+            BingsuEngine.clearDialogFocus();
         } else {
             document.querySelectorAll('tr.deck.ctx-row-active').forEach(function (row) {
                 row.classList.remove('ctx-row-active');
@@ -204,7 +204,7 @@
         state.fullPath = false;
 
         if (!skipUiClose && backdrop && typeof pycmd === 'function') {
-            pycmd('onigiri_ui_close');
+            pycmd('bingsu_ui_close');
         }
     }
 
@@ -226,7 +226,7 @@
     }
 
     function setError(message) {
-        var error = document.getElementById('onigiri-rename-error');
+        var error = document.getElementById('bingsu-rename-error');
         if (!error) return;
         if (!message) {
             error.style.display = 'none';
@@ -238,15 +238,15 @@
     }
 
     function updateConfirmState() {
-        var input = document.getElementById('onigiri-rename-input');
-        var saveBtn = document.getElementById('onigiri-rename-save');
+        var input = document.getElementById('bingsu-rename-input');
+        var saveBtn = document.getElementById('bingsu-rename-save');
         if (saveBtn) saveBtn.disabled = !input || !input.value.trim();
     }
 
     function updatePathMode() {
-        var input = document.getElementById('onigiri-rename-input');
-        var toggle = document.getElementById('onigiri-rename-path-toggle');
-        var hint = document.getElementById('onigiri-rename-hint');
+        var input = document.getElementById('bingsu-rename-input');
+        var toggle = document.getElementById('bingsu-rename-path-toggle');
+        var hint = document.getElementById('bingsu-rename-hint');
         if (!input || !toggle || !hint) return;
 
         if (state.fullPath) {
@@ -272,7 +272,7 @@
     }
 
     function submit() {
-        var input = document.getElementById('onigiri-rename-input');
+        var input = document.getElementById('bingsu-rename-input');
         if (!input) return;
         var name = input.value.trim();
         if (!name) {
@@ -286,14 +286,14 @@
             fullPath: !!state.fullPath
         };
         if (typeof pycmd === 'function') {
-            pycmd('onigiri_rename_deck:' + encodeURIComponent(JSON.stringify(payload)));
+            pycmd('bingsu_rename_deck:' + encodeURIComponent(JSON.stringify(payload)));
         }
     }
 
     function buildDialog(data) {
         ensureStyles();
-        if (window.OnigiriEngine && typeof OnigiriEngine.preloadMaskIcons === 'function') {
-            OnigiriEngine.preloadMaskIcons([iconUrl('rename.svg'), iconUrl('cancel.svg')]);
+        if (window.BingsuEngine && typeof BingsuEngine.preloadMaskIcons === 'function') {
+            BingsuEngine.preloadMaskIcons([iconUrl('rename.svg'), iconUrl('cancel.svg')]);
         }
 
         state.deckId = data.deckId;
@@ -304,29 +304,29 @@
         state.cleanupFns = [];
 
         var backdrop = document.createElement('div');
-        backdrop.id = 'onigiri-rename-backdrop';
+        backdrop.id = 'bingsu-rename-backdrop';
         backdrop.className = 'is-preparing';
 
         var modal = document.createElement('div');
-        modal.className = 'onigiri-rename-modal';
+        modal.className = 'bingsu-rename-modal';
         modal.addEventListener('click', function (evt) { evt.stopPropagation(); });
         modal.addEventListener('pointerdown', function (evt) { evt.stopPropagation(); });
 
         var header = document.createElement('div');
-        header.className = 'onigiri-rename-header';
+        header.className = 'bingsu-rename-header';
         var headerIcon = document.createElement('div');
-        headerIcon.className = 'onigiri-rename-header-icon';
-        headerIcon.appendChild(makeIcon('rename.svg', 'onigiri-rename-header-svg', 18));
+        headerIcon.className = 'bingsu-rename-header-icon';
+        headerIcon.appendChild(makeIcon('rename.svg', 'bingsu-rename-header-svg', 18));
         header.appendChild(headerIcon);
 
         var titleWrap = document.createElement('div');
-        titleWrap.className = 'onigiri-rename-title-wrap';
+        titleWrap.className = 'bingsu-rename-title-wrap';
         var title = document.createElement('div');
-        title.className = 'onigiri-rename-title';
+        title.className = 'bingsu-rename-title';
         title.textContent = T('rename_deck_title', 'Rename Deck');
         titleWrap.appendChild(title);
         var subtitle = document.createElement('div');
-        subtitle.className = 'onigiri-rename-subtitle';
+        subtitle.className = 'bingsu-rename-subtitle';
         subtitle.title = state.fullName;
         subtitle.textContent = state.fullName || 'Selected deck';
         titleWrap.appendChild(subtitle);
@@ -337,25 +337,25 @@
         closeBtn.tabIndex = 0;
         // Set tabindex for accessibility
         try { arguments[0].tabIndex = 0; } catch(e){};
-        closeBtn.className = 'onigiri-rename-close';
+        closeBtn.className = 'bingsu-rename-close';
         closeBtn.title = T('close', 'Close');
-        closeBtn.appendChild(makeIcon('cancel.svg', 'onigiri-rename-close-svg', 14));
+        closeBtn.appendChild(makeIcon('cancel.svg', 'bingsu-rename-close-svg', 14));
         closeBtn.addEventListener('click', function () { close(false); });
         header.appendChild(closeBtn);
         modal.appendChild(header);
 
         var body = document.createElement('div');
-        body.className = 'onigiri-rename-body';
+        body.className = 'bingsu-rename-body';
         var label = document.createElement('div');
-        label.className = 'onigiri-rename-label';
+        label.className = 'bingsu-rename-label';
         label.textContent = T('deck_name_label', 'Deck name');
         body.appendChild(label);
 
         var inputWrap = document.createElement('div');
-        inputWrap.className = 'onigiri-rename-input-wrap';
+        inputWrap.className = 'bingsu-rename-input-wrap';
         var input = document.createElement('input');
-        input.id = 'onigiri-rename-input';
-        input.className = 'onigiri-rename-input';
+        input.id = 'bingsu-rename-input';
+        input.className = 'bingsu-rename-input';
         input.type = 'text';
         input.autocomplete = 'off';
         input.spellcheck = false;
@@ -374,37 +374,37 @@
         body.appendChild(inputWrap);
 
         var hint = document.createElement('div');
-        hint.id = 'onigiri-rename-hint';
-        hint.className = 'onigiri-rename-hint';
+        hint.id = 'bingsu-rename-hint';
+        hint.className = 'bingsu-rename-hint';
         body.appendChild(hint);
         modal.appendChild(body);
 
         var error = document.createElement('div');
-        error.id = 'onigiri-rename-error';
-        error.className = 'onigiri-rename-error';
+        error.id = 'bingsu-rename-error';
+        error.className = 'bingsu-rename-error';
         modal.appendChild(error);
 
         var footer = document.createElement('div');
-        footer.className = 'onigiri-rename-footer';
+        footer.className = 'bingsu-rename-footer';
         var pathToggle = document.createElement('span');
         pathToggle.setAttribute('role', 'button');
         pathToggle.tabIndex = 0;
         // Set tabindex for accessibility
         try { arguments[0].tabIndex = 0; } catch(e){};
-        pathToggle.id = 'onigiri-rename-path-toggle';
-        pathToggle.className = 'onigiri-rename-btn onigiri-rename-btn-secondary';
+        pathToggle.id = 'bingsu-rename-path-toggle';
+        pathToggle.className = 'bingsu-rename-btn bingsu-rename-btn-secondary';
         pathToggle.addEventListener('click', function () {
             state.fullPath = !state.fullPath;
             updatePathMode();
         });
         var spacer = document.createElement('div');
-        spacer.className = 'onigiri-rename-spacer';
+        spacer.className = 'bingsu-rename-spacer';
         var cancelBtn = document.createElement('span');
         cancelBtn.setAttribute('role', 'button');
         cancelBtn.tabIndex = 0;
         // Set tabindex for accessibility
         try { arguments[0].tabIndex = 0; } catch(e){};
-        cancelBtn.className = 'onigiri-rename-btn onigiri-rename-btn-secondary';
+        cancelBtn.className = 'bingsu-rename-btn bingsu-rename-btn-secondary';
         cancelBtn.textContent = T('cancel', 'Cancel');
         cancelBtn.addEventListener('click', function () { close(false); });
         var saveBtn = document.createElement('span');
@@ -412,8 +412,8 @@
         saveBtn.tabIndex = 0;
         // Set tabindex for accessibility
         try { arguments[0].tabIndex = 0; } catch(e){};
-        saveBtn.id = 'onigiri-rename-save';
-        saveBtn.className = 'onigiri-rename-btn onigiri-rename-btn-primary';
+        saveBtn.id = 'bingsu-rename-save';
+        saveBtn.className = 'bingsu-rename-btn bingsu-rename-btn-primary';
         saveBtn.textContent = T('save', 'Save');
         saveBtn.addEventListener('click', submit);
 
@@ -446,21 +446,21 @@
         revealWhenStable(backdrop, input);
     }
 
-    window.OnigiriRenameDialog = {
+    window.BingsuRenameDialog = {
         open: function (data) {
             close(true);
-            if (window.OnigiriEngine) {
-                OnigiriEngine._clearAllRowVisualStates();
-                OnigiriEngine._beginOverrideState('dialog-focus');
+            if (window.BingsuEngine) {
+                BingsuEngine._clearAllRowVisualStates();
+                BingsuEngine._beginOverrideState('dialog-focus');
                 var deckId = String(data && data.deckId || '');
-                var selectorId = typeof OnigiriEngine.escapeSelectorValue === 'function'
-                    ? OnigiriEngine.escapeSelectorValue(deckId)
+                var selectorId = typeof BingsuEngine.escapeSelectorValue === 'function'
+                    ? BingsuEngine.escapeSelectorValue(deckId)
                     : deckId.replace(/["\\]/g, '\\$&');
                 var row = document.querySelector('tr.deck[data-did="' + selectorId + '"]');
                 if (row) row.classList.add('ctx-row-active');
             }
             buildDialog(data || {});
-            if (typeof pycmd === 'function') pycmd('onigiri_ui_open');
+            if (typeof pycmd === 'function') pycmd('bingsu_ui_open');
         },
         close: close,
         showError: setError

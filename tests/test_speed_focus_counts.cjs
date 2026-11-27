@@ -7,8 +7,8 @@ const root = require('path').resolve(__dirname, '..');
 const configs = [];
 for (const mode of ['fixed', 'hover', 'inverted']) {
   for (const timer of ['right', 'left', 'out', 'off']) configs.push({
-    onigiri_reviewer_stattxt_mode: mode,
-    onigiri_reviewer_timer_position: timer,
+    bingsu_reviewer_stattxt_mode: mode,
+    bingsu_reviewer_timer_position: timer,
   });
 }
 const generated = JSON.parse(execFileSync('python3', ['-c',
@@ -26,7 +26,7 @@ function showQuestion(html){showAnswer(html);document.getElementById('time').tex
 // Same sibling cell and countdown IDs/classes used by Speed Focus's
 // sfm-bottom-bar.js. Keep its timer and More time! action alive through ticks.
 const speedFocus = `<td id="spdfControls" class="stat"><button onclick="window.spdfStopped=true">More time!<span id="spdfTime" class="stattxt"></span><br></button></td>`;
-const readCounts = page => page.locator('.onigiri-count-pill').allTextContents();
+const readCounts = page => page.locator('.bingsu-count-pill').allTextContents();
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
@@ -47,12 +47,12 @@ const readCounts = page => page.locator('.onigiri-count-pill').allTextContents()
       await page.waitForTimeout(150);
       assert.deepEqual(await readCounts(page), ['1201', '35', '44'], 'Speed Focus must not pollute real queue counts');
       assert.equal(await page.locator('#spdfTime').evaluate(n => getComputedStyle(n).display), 'inline', 'Speed Focus countdown must remain visible');
-      const firstPill = await page.locator('.onigiri-count-pill').first().elementHandle();
+      const firstPill = await page.locator('.bingsu-count-pill').first().elementHandle();
       for (const text of ['Reveal 0:07', 'Again 0:01', 'Stopped.', '']) {
         await page.evaluate(text => document.getElementById('spdfTime').textContent = text, text);
         await page.waitForTimeout(110);
         assert.deepEqual(await readCounts(page), ['1201', '35', '44'], 'Countdown ticks must preserve the cached counts');
-        assert.equal(await page.locator('#spdfControls button').getAttribute('data-onigiri-ease'), null, 'Again countdown must not turn More time! into an answer button');
+        assert.equal(await page.locator('#spdfControls button').getAttribute('data-bingsu-ease'), null, 'Again countdown must not turn More time! into an answer button');
         assert(await firstPill.evaluate(n => n.isConnected), 'Countdown ticks must not rebuild the Show Answer button');
       }
       await page.locator('#spdfControls button').click();

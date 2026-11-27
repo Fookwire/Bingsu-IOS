@@ -21,9 +21,9 @@ class NotificationPreviewTests(unittest.TestCase):
         )
 
     def test_settings_embeds_live_notification_runtime(self):
-        self.assertIn("/*__ONIGIRI_NOTIFICATIONS_JS__*/", SETTINGS_HTML)
+        self.assertIn("/*__BINGSU_NOTIFICATIONS_JS__*/", SETTINGS_HTML)
         self.assertIn('read_web_asset("notifications.js")', RENDER_PY)
-        self.assertIn('.replace("/*__ONIGIRI_NOTIFICATIONS_JS__*/", notifications_js)', RENDER_PY)
+        self.assertIn('.replace("/*__BINGSU_NOTIFICATIONS_JS__*/", notifications_js)', RENDER_PY)
 
     def test_mochi_preview_uses_live_stage_without_lookalike_css(self):
         self.assertIn('id: "mochi_message"', SETTINGS_JS)

@@ -31,21 +31,21 @@ except Exception:
 
 _FALLBACK_JS = r"""
 (function(){
-  if (window.OnigiriNotifications) return;
-  window.OnigiriNotifications = {
+  if (window.BingsuNotifications) return;
+  window.BingsuNotifications = {
     show: function(data) {
       data = data || {};
       var displayDuration = function() {
-        var configured = Number(window.onigiriNotificationDuration);
+        var configured = Number(window.bingsuNotificationDuration);
         if (isFinite(configured) && configured > 0) return Math.max(1000, Math.min(30000, configured));
         var payloadDuration = Number(data.duration);
         if (isFinite(payloadDuration) && payloadDuration > 0) return Math.max(1000, Math.min(30000, payloadDuration));
         return 4200;
       };
-      var stack = document.getElementById('onigiri-notification-stack');
+      var stack = document.getElementById('bingsu-notification-stack');
       if (!stack) {
         stack = document.createElement('div');
-        stack.id = 'onigiri-notification-stack';
+        stack.id = 'bingsu-notification-stack';
         stack.style.cssText = [
           'position:fixed',
           'top:10px',
@@ -96,10 +96,10 @@ _FALLBACK_JS = r"""
         'line-height:1'
       ].join(';');
       // Same default as web/notifications.js: no icon of the caller's own (or
-      // the bare "On" placeholder) means the Onigiri logo, not two letters.
+      // the bare "On" placeholder) means the Bingsu logo, not two letters.
       var iconSrc = data.iconImage ||
         ((!data.icon || data.icon === 'On')
-          ? '/_addons/__ONIGIRI_PACKAGE__/system_files/onigiri_mini_logo.svg' : '');
+          ? '/_addons/__BINGSU_PACKAGE__/system_files/bingsu_mini_logo.svg' : '');
       if (iconSrc) {
         var img = document.createElement('img');
         img.src = iconSrc;
@@ -156,7 +156,7 @@ def _silent_mode() -> bool:
     try:
         from ..core import config
 
-        return bool(config.get_config_readonly().get("onigiri_reviewer_silent_notifications", False))
+        return bool(config.get_config_readonly().get("bingsu_reviewer_silent_notifications", False))
     except Exception:
         return False
 
@@ -164,7 +164,7 @@ def _silent_mode() -> bool:
 def _configured_duration(fallback: int = 4200) -> int:
     try:
         from ..core import config
-        duration = int(config.get_config_readonly().get("onigiri_notification_duration_ms", fallback))
+        duration = int(config.get_config_readonly().get("bingsu_notification_duration_ms", fallback))
     except Exception:
         duration = fallback
     return max(1000, min(30000, duration))
@@ -198,7 +198,7 @@ def _native_tooltip(message: str) -> None:
         from aqt.utils import tooltip
         tooltip(str(message or ""))
     except Exception:
-        print(f"Onigiri notification: {message}")
+        print(f"Bingsu notification: {message}")
 
 
 def _info_dialog_palette() -> dict[str, str]:
@@ -234,11 +234,11 @@ def _info_dialog_icon_pixmap(color: str = "", size: int = 36) -> QPixmap:
     icon_path = os.path.join(
         os.path.dirname(os.path.dirname(__file__)),
         "system_files",
-        "onigiri_mini_logo.svg",
+        "bingsu_mini_logo.svg",
     )
     if QSvgRenderer is None or not os.path.exists(icon_path):
         return QPixmap(os.path.join(os.path.dirname(os.path.dirname(__file__)),
-                                    "system_files", "onigiri_logo.png")).scaled(
+                                    "system_files", "bingsu_logo.png")).scaled(
                                         size, size, Qt.AspectRatioMode.KeepAspectRatio,
                                         Qt.TransformationMode.SmoothTransformation)
 
@@ -287,7 +287,7 @@ def brand_message_box(box, title: str = "Bingsu") -> None:
     """)
 
 
-class OnigiriInfoDialog(QDialog):
+class BingsuInfoDialog(QDialog):
     def __init__(self, message: str, title: str = "Bingsu", parent: Any = None):
         super().__init__(parent)
         title = _branded_title(title)
@@ -312,7 +312,7 @@ class OnigiriInfoDialog(QDialog):
             QDialog {{
                 background: {palette["panel"] if IS_MOBILE else "transparent"};
             }}
-            QFrame#onigiriInfoPanel {{
+            QFrame#bingsuInfoPanel {{
                 background-color: {palette["panel"]};
                 border: 1px solid {palette["border"]};
                 border-radius: 18px;
@@ -321,17 +321,17 @@ class OnigiriInfoDialog(QDialog):
                 background: transparent;
                 color: {palette["fg"]};
             }}
-            QLabel#onigiriInfoTitle {{
+            QLabel#bingsuInfoTitle {{
                 font-size: 13px;
                 font-weight: 600;
                 color: {palette["fg"]};
             }}
-            QLabel#onigiriInfoMessage {{
+            QLabel#bingsuInfoMessage {{
                 font-size: 18px;
                 font-weight: 400;
                 line-height: 1.3;
             }}
-            QLabel#onigiriInfoIcon {{
+            QLabel#bingsuInfoIcon {{
                 background-color: {palette["accent_soft"]};
                 color: {palette["accent"]};
                 border: 1px solid {palette["accent"]};
@@ -339,7 +339,7 @@ class OnigiriInfoDialog(QDialog):
                 font-size: 22px;
                 font-weight: 400;
             }}
-            QPushButton#onigiriInfoOk {{
+            QPushButton#bingsuInfoOk {{
                 background-color: {palette["panel_alt"]};
                 color: {palette["fg"]};
                 border: 1px solid {palette["border"]};
@@ -350,7 +350,7 @@ class OnigiriInfoDialog(QDialog):
                 font-size: 13px;
                 font-weight: 400;
             }}
-            QPushButton#onigiriInfoOk:hover, QPushButton#onigiriInfoOk:focus {{
+            QPushButton#bingsuInfoOk:hover, QPushButton#bingsuInfoOk:focus {{
                 background-color: {palette["button_hover"]};
                 border-color: {palette["accent"]};
             }}
@@ -361,7 +361,7 @@ class OnigiriInfoDialog(QDialog):
         outer.setSpacing(0)
 
         panel = QFrame()
-        panel.setObjectName("onigiriInfoPanel")
+        panel.setObjectName("bingsuInfoPanel")
         outer.addWidget(panel)
 
         layout = QVBoxLayout(panel)
@@ -373,7 +373,7 @@ class OnigiriInfoDialog(QDialog):
         content.setSpacing(16)
 
         icon = QLabel()
-        icon.setObjectName("onigiriInfoIcon")
+        icon.setObjectName("bingsuInfoIcon")
         icon.setFixedSize(42, 42)
         icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
         icon.setAccessibleName("Bingsu")
@@ -389,12 +389,12 @@ class OnigiriInfoDialog(QDialog):
         text_stack.setSpacing(6)
 
         title_label = QLabel(title or "Bingsu")
-        title_label.setObjectName("onigiriInfoTitle")
+        title_label.setObjectName("bingsuInfoTitle")
         title_label.setWordWrap(True)
         text_stack.addWidget(title_label)
 
         message_label = QLabel(str(message or ""))
-        message_label.setObjectName("onigiriInfoMessage")
+        message_label.setObjectName("bingsuInfoMessage")
         message_label.setWordWrap(True)
         text_stack.addWidget(message_label)
 
@@ -418,7 +418,7 @@ class OnigiriInfoDialog(QDialog):
         buttons.setContentsMargins(0, 0, 0, 0)
         buttons.addStretch()
         ok_button = QPushButton("OK")
-        ok_button.setObjectName("onigiriInfoOk")
+        ok_button.setObjectName("bingsuInfoOk")
         ok_button.setCursor(Qt.CursorShape.PointingHandCursor)
         ok_button.clicked.connect(self.accept)
         ok_button.setDefault(True)
@@ -451,7 +451,7 @@ def _native_show_info(message: str, title: str = "Bingsu", parent: Any = None,
     title = _branded_title(title)
     try:
         parent = parent if parent is not None else mw
-        dialog = OnigiriInfoDialog(str(message or ""), title=title, parent=parent)
+        dialog = BingsuInfoDialog(str(message or ""), title=title, parent=parent)
         if blocking:
             dialog.exec()
         else:
@@ -469,7 +469,7 @@ def _native_show_info(message: str, title: str = "Bingsu", parent: Any = None,
         except Exception:
             if not blocking:
                 # Never reintroduce a nested event loop in the startup path.
-                print(f"[Onigiri] Could not display {title}: {message}")
+                print(f"[Bingsu] Could not display {title}: {message}")
                 return
             # Last-resort host dialog still identifies the add-on explicitly.
             from aqt.utils import showInfo
@@ -487,7 +487,7 @@ def notification_script(
     message: str,
     *args: Any,
     title: str = "Bingsu",
-    variant: str = "onigiri",
+    variant: str = "bingsu",
     icon: str = "On",
     icon_image: str = "",
     icon_fallbacks: Optional[Iterable[str]] = None,
@@ -509,8 +509,8 @@ def notification_script(
         "centered": centered,
     }
     return (
-        _FALLBACK_JS.replace("__ONIGIRI_PACKAGE__", _addon_package())
-        + "\nwindow.OnigiriNotifications.show("
+        _FALLBACK_JS.replace("__BINGSU_PACKAGE__", _addon_package())
+        + "\nwindow.BingsuNotifications.show("
         + json.dumps(payload, ensure_ascii=False)
         + ");"
     )
@@ -521,7 +521,7 @@ def notify(
     *args: Any,
     title: str = "Bingsu",
     context: Any = None,
-    variant: str = "onigiri",
+    variant: str = "bingsu",
     icon: str = "On",
     icon_image: str = "",
     icon_fallbacks: Optional[Iterable[str]] = None,
@@ -559,7 +559,7 @@ def notify(
             web.eval(script)
             return
         except Exception as exc:
-            print(f"Onigiri: Could not show custom notification: {exc}")
+            print(f"Bingsu: Could not show custom notification: {exc}")
 
 
 def notify_info(message: str, *args: Any, context: Optional[Any] = None, title: str = "Bingsu", **kwargs: Any) -> None:
@@ -571,10 +571,10 @@ def notify_info(message: str, *args: Any, context: Optional[Any] = None, title: 
 
 def notify_warning(message: str, *args: Any, context: Optional[Any] = None,
                    title: Optional[str] = None, blocking: bool = True, **kwargs: Any) -> None:
-    """Persistent Onigiri warnings always remain visible, including silent mode."""
+    """Persistent Bingsu warnings always remain visible, including silent mode."""
     if title is None:
         from ..core.translations import tr
-        title = tr("onigiri_warning")
+        title = tr("bingsu_warning")
     if blocking:
         _native_show_info(message, title=title, parent=context)
     else:

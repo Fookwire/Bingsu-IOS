@@ -1,1 +1,1 @@
-"""Auxiliary Onigiri dialogs."""
+"""Auxiliary Bingsu dialogs."""

@@ -1,5 +1,5 @@
-# --- Onigiri ---
-# Handles the creation of the top-level Onigiri menu.
+# --- Bingsu ---
+# Handles the creation of the top-level Bingsu menu.
 
 import os
 import json
@@ -30,7 +30,7 @@ def refresh_study_tool_visibility():
         _pomodoro_shortcut.setEnabled(tool_visible("pomodoro", conf))
 
 
-def get_onigiri_version():
+def get_bingsu_version():
     """Reads the version from manifest.json file."""
     global _addon_path
     if not _addon_path:
@@ -46,13 +46,13 @@ def get_onigiri_version():
 
 def open_settings(page_index=0):
     """
-    Opens the Onigiri settings dialog to a specific page.
+    Opens the Bingsu settings dialog to a specific page.
     This function now accepts a page_index to open to a specific tab.
     """
     global _addon_path
     if not _addon_path:
-        # This should not happen if setup_onigiri_menu is called correctly.
-        print("Onigiri Error: addon_path not set. Cannot open settings.")
+        # This should not happen if setup_bingsu_menu is called correctly.
+        print("Bingsu Error: addon_path not set. Cannot open settings.")
         return
         
     from .. import settings_web
@@ -145,45 +145,45 @@ def _show_welcome_message():
     
     if mw.state == "deckBrowser" and mw.deckBrowser.web:
         mw.deckBrowser.web.eval("""
-            if (!document.getElementById("onigiri-welcome-overlay")) {
+            if (!document.getElementById("bingsu-welcome-overlay")) {
                 const style = document.createElement("style");
-                style.id = "onigiri-welcome-style";
+                style.id = "bingsu-welcome-style";
                 style.innerHTML = `
                     @font-face {
-                        font-family: 'OnigiriPoppins';
-                        src: url('/_addons/__ONIGIRI_PACKAGE__/system_files/fonts/system_fonts/Poppins/Poppins-Regular.ttf');
+                        font-family: 'BingsuPoppins';
+                        src: url('/_addons/__BINGSU_PACKAGE__/system_files/fonts/system_fonts/Poppins/Poppins-Regular.ttf');
                         font-weight: 400;
                     }
                     @font-face {
-                        font-family: 'OnigiriPoppins';
-                        src: url('/_addons/__ONIGIRI_PACKAGE__/system_files/fonts/system_fonts/Poppins/Poppins-Medium.ttf');
+                        font-family: 'BingsuPoppins';
+                        src: url('/_addons/__BINGSU_PACKAGE__/system_files/fonts/system_fonts/Poppins/Poppins-Medium.ttf');
                         font-weight: 500 900;
                     }
-                    #onigiri-welcome-overlay {
+                    #bingsu-welcome-overlay {
                         position: fixed; inset: 0; z-index: 2147483647;
                         display: flex; flex-direction: column; align-items: center; justify-content: center;
                         backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
                         background: rgba(0, 0, 0, 0.55);
                         color: white;
-                        font-family: 'OnigiriPoppins', -apple-system, BlinkMacSystemFont, sans-serif;
+                        font-family: 'BingsuPoppins', -apple-system, BlinkMacSystemFont, sans-serif;
                         opacity: 0; transition: opacity 0.4s ease;
                     }
-                    #onigiri-welcome-overlay .btn-continue {
+                    #bingsu-welcome-overlay .btn-continue {
                         margin-top: 36px; padding: 16px 48px; font-size: 21px; font-weight: 700;
-                        font-family: 'OnigiriPoppins', sans-serif; color: #123034; background: white;
+                        font-family: 'BingsuPoppins', sans-serif; color: #123034; background: white;
                         border: none; border-radius: 40px; cursor: pointer;
                         box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: transform 0.2s, box-shadow 0.2s;
                     }
-                    #onigiri-welcome-overlay .btn-continue:hover {
+                    #bingsu-welcome-overlay .btn-continue:hover {
                         transform: scale(1.05); box-shadow: 0 6px 16px rgba(0,0,0,0.3);
                     }
                 `;
                 document.head.appendChild(style);
 
                 const overlay = document.createElement("div");
-                overlay.id = "onigiri-welcome-overlay";
+                overlay.id = "bingsu-welcome-overlay";
                 overlay.innerHTML = `
-                    <img src="/_addons/__ONIGIRI_PACKAGE__/system_files/onigiri_logo.png" style="width: 290px; height: auto; margin-bottom: 32px; filter: drop-shadow(0 6px 16px rgba(0,0,0,0.3));" />
+                    <img src="/_addons/__BINGSU_PACKAGE__/system_files/bingsu_logo.png" style="width: 290px; height: auto; margin-bottom: 32px; filter: drop-shadow(0 6px 16px rgba(0,0,0,0.3));" />
                     <h1 style="margin: 0 0 20px 0; font-size: 49px; font-weight: 700; text-shadow: 0 2px 6px rgba(0,0,0,0.5);">Welcome!</h1>
                     <p style="margin: 0; font-size: 26px; font-weight: 500; text-shadow: 0 1px 4px rgba(0,0,0,0.5);">Proceed to Settings to start customizing</p>
                     <button class="btn-continue">Continue</button>
@@ -194,22 +194,22 @@ def _show_welcome_message():
                     overlay.style.opacity = "0";
                     setTimeout(() => {
                         overlay.remove();
-                        const s = document.getElementById("onigiri-welcome-style");
+                        const s = document.getElementById("bingsu-welcome-style");
                         if (s) s.remove();
-                        pycmd("onigiri_welcome_dismissed");
+                        pycmd("bingsu_welcome_dismissed");
                     }, 400);
                 });
                 
                 document.body.appendChild(overlay);
                 setTimeout(() => { overlay.style.opacity = "1"; }, 50);
             }
-        """.replace("__ONIGIRI_PACKAGE__", mw.addonManager.addonFromModule(__name__)))
+        """.replace("__BINGSU_PACKAGE__", mw.addonManager.addonFromModule(__name__)))
     elif mw.state == "overview":
         mw.moveToState("deckBrowser")
     elif mw.state == "review":
         mw.moveToState("deckBrowser")
 
-def setup_onigiri_menu(addon_path):
+def setup_bingsu_menu(addon_path):
     """
     Creates and adds the 'Bingsu' top-level menu to Anki's main window.
     This menu will contain actions for general settings, profile settings, and viewing the profile.
@@ -217,8 +217,8 @@ def setup_onigiri_menu(addon_path):
     global _addon_path, _study_tool_actions, _study_tools_menu, _pomodoro_shortcut
     _addon_path = addon_path
 
-    # Create the top-level menu with the Onigiri icon
-    onigiri_menu = QMenu(tr("onigiri_menu"), mw)
+    # Create the top-level menu with the Bingsu icon
+    bingsu_menu = QMenu(tr("bingsu_menu"), mw)
 
     # Create Gamification submenu
     gamification_menu = QMenu(tr("gamification"), mw)
@@ -252,7 +252,7 @@ def setup_onigiri_menu(addon_path):
     gamification_menu.addAction(mochi_messages_action)
 
     # Add the Gamification submenu to the main menu
-    onigiri_menu.addMenu(gamification_menu)
+    bingsu_menu.addMenu(gamification_menu)
 
     # Create Study Tools submenu
     study_tools_menu = QMenu(tr("study_tools", "Study Tools"), mw)
@@ -273,7 +273,7 @@ def setup_onigiri_menu(addon_path):
     pomodoro_stats_action.triggered.connect(_open_pomodoro_stats)
     study_tools_menu.addAction(pomodoro_stats_action)
 
-    onigiri_menu.addMenu(study_tools_menu)
+    bingsu_menu.addMenu(study_tools_menu)
 
     # Shift+P toggles the Pomodoro floating island from anywhere in the main
     # window (deck browser, reviewer, etc.) - a window-wide shortcut fires
@@ -289,18 +289,18 @@ def setup_onigiri_menu(addon_path):
         ("pomodoro", pomodoro_stats_action),
     ]
     _pomodoro_shortcut = pomodoro_shortcut
-    onigiri_menu.aboutToShow.connect(refresh_study_tool_visibility)
+    bingsu_menu.aboutToShow.connect(refresh_study_tool_visibility)
     refresh_study_tool_visibility()
 
     # Create the 'Settings' action (opens settings to General tab, index 0)
-    settings_action = QAction(tr("onigiri_settings"), mw)
+    settings_action = QAction(tr("bingsu_settings"), mw)
     settings_action.triggered.connect(lambda _: open_settings(0))
-    onigiri_menu.addAction(settings_action)
+    bingsu_menu.addAction(settings_action)
 
-    onigiri_menu.addSeparator()
+    bingsu_menu.addSeparator()
 
     # --- ADD THIS BLOCK ---
-    info_menu = onigiri_menu.addMenu("Info")
+    info_menu = bingsu_menu.addMenu("Info")
 
     announcements_action = QAction(tr("communications_title", "Announcements"), mw)
     announcements_action.triggered.connect(_open_communications)
@@ -320,9 +320,9 @@ def setup_onigiri_menu(addon_path):
     # --- END: ADD THIS BLOCK ---
 
     # Add version info at the bottom (disabled)
-    version_action = QAction(f"{tr('version_label')}: {get_onigiri_version()}", mw)
+    version_action = QAction(f"{tr('version_label')}: {get_bingsu_version()}", mw)
     version_action.setEnabled(False)  # Make it non-clickable
-    onigiri_menu.addAction(version_action)
+    bingsu_menu.addAction(version_action)
 
     # Add the newly created menu to the main window's menubar
-    mw.form.menubar.addMenu(onigiri_menu)
+    mw.form.menubar.addMenu(bingsu_menu)

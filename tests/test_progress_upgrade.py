@@ -34,13 +34,13 @@ class ProgressUpgradeTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
-        self.root = Path(self.temp.name) / 'addons21' / 'onigiri'
+        self.root = Path(self.temp.name) / 'addons21' / 'bingsu'
         self.files = self.root / 'user_files'
         self.files.mkdir(parents=True)
         self.mw = types.SimpleNamespace(
             pm=types.SimpleNamespace(name='Upgrade', base=self.temp.name),
             col=types.SimpleNamespace(conf={}),
-            addonManager=types.SimpleNamespace(getConfig=lambda _: {}, addonFromModule=lambda _: 'onigiri'),
+            addonManager=types.SimpleNamespace(getConfig=lambda _: {}, addonFromModule=lambda _: 'bingsu'),
         )
         package = types.ModuleType('upgrade_test_addon')
         package.__path__ = [str(ROOT)]
@@ -61,10 +61,10 @@ class ProgressUpgradeTests(unittest.TestCase):
         path.write_text(json.dumps(data))
         return path
 
-    @unittest.skipUnless(all((ROOT / name).is_dir() for name in ("Onigiri(Original)", "Onigiri(Middle)")),
+    @unittest.skipUnless(all((ROOT / name).is_dir() for name in ("Bingsu(Original)", "Bingsu(Middle)")),
                          "Original and Middle attachment fixtures are not present")
     def test_real_earlier_writers_survive_current_load_save_and_reload(self):
-        for folder in ('Onigiri(Original)', 'Onigiri(Middle)'):
+        for folder in ('Bingsu(Original)', 'Bingsu(Middle)'):
             with self.subTest(version=folder):
                 old = load_module('upgrade_test_addon.legacy_game', ROOT / folder / 'gamification/gamification.py')
                 manager = old.GamificationData(str(self.root))
@@ -87,7 +87,7 @@ class ProgressUpgradeTests(unittest.TestCase):
                 path = self.files / 'gamification_Upgrade.json'
                 original = json.loads(path.read_text())
                 original['extension'] = {'keep': True}
-                original['restaurant_level']['_security_token'] = hashlib.sha256(b'739:onigiri_secret_salt_2024').hexdigest()
+                original['restaurant_level']['_security_token'] = hashlib.sha256(b'739:bingsu_secret_salt_2024').hexdigest()
                 original['restaurant_level']['legacy_metadata'] = 'keep'
                 original['achievements'][0]['legacy_metadata'] = {'keep': True}
                 original['daily_specials'][0]['legacy_metadata'] = {'keep': True}
@@ -101,12 +101,12 @@ class ProgressUpgradeTests(unittest.TestCase):
                 self.assertEqual(reloaded.get_restaurant_data()['taiyaki_coins'], 739)
                 current.update_restaurant_data({'taiyaki_coins': 800}, immediate=True)
                 self.assertEqual(json.loads(path.read_text())['restaurant_level']['_security_token'],
-                                 hashlib.sha256(b'800:onigiri_secret_salt_2024').hexdigest())
+                                 hashlib.sha256(b'800:bingsu_secret_salt_2024').hexdigest())
 
-    @unittest.skipUnless(all((ROOT / name).is_dir() for name in ("Onigiri(Original)", "Onigiri(Middle)")),
+    @unittest.skipUnless(all((ROOT / name).is_dir() for name in ("Bingsu(Original)", "Bingsu(Middle)")),
                          "Original and Middle attachment fixtures are not present")
     def test_real_earlier_settings_writers_preserve_saved_progress(self):
-        for folder in ('Onigiri(Original)', 'Onigiri(Middle)'):
+        for folder in ('Bingsu(Original)', 'Bingsu(Middle)'):
             with self.subTest(version=folder):
                 old = load_module('upgrade_test_addon.legacy_config', ROOT / folder / 'config.py')
                 old.__file__ = str(self.root / 'config.py')
@@ -218,14 +218,14 @@ class ProgressUpgradeTests(unittest.TestCase):
                 Path(path).unlink()
                 self.assertEqual(self.storage.read_json(path), original)
 
-    @unittest.skipUnless(all((ROOT / name).is_dir() for name in ("Onigiri(Original)", "Onigiri(Middle)")),
+    @unittest.skipUnless(all((ROOT / name).is_dir() for name in ("Bingsu(Original)", "Bingsu(Middle)")),
                          "Original and Middle attachment fixtures are not present")
     def test_all_earlier_game_state_fields_still_exist(self):
         def fields(path, name):
             tree = ast.parse(path.read_text())
             cls = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == name)
             return {n.target.id for n in cls.body if isinstance(n, ast.AnnAssign)}
-        for folder in ('Onigiri(Original)', 'Onigiri(Middle)'):
+        for folder in ('Bingsu(Original)', 'Bingsu(Middle)'):
             for filename, names in (
                 ('gamification/gamification.py', ('AchievementData', 'DailySpecialData', 'RestaurantLevelData')),
                 ('gamification/onigimon.py', ('OnigimonState',)),
@@ -291,7 +291,7 @@ class ProgressUpgradeTests(unittest.TestCase):
                 for key, value in payload.items():
                     self.assertEqual(saved[key], value)
 
-    @unittest.skipUnless(all((ROOT / name).is_dir() for name in ("Onigiri(Original)", "Onigiri(Middle)")),
+    @unittest.skipUnless(all((ROOT / name).is_dir() for name in ("Bingsu(Original)", "Bingsu(Middle)")),
                          "Original and Middle attachment fixtures are not present")
     def test_middle_study_tools_read_existing_collection_data(self):
         for filename, function, constant, saved in (
@@ -306,7 +306,7 @@ class ProgressUpgradeTests(unittest.TestCase):
                                       and any(isinstance(t, ast.Name) and t.id == constant for t in n.targets))
                     reader = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == function)
                     return assignment, reader
-                old_assignment, _ = nodes(ROOT / 'Onigiri(Middle)' / filename)
+                old_assignment, _ = nodes(ROOT / 'Bingsu(Middle)' / filename)
                 assignment, reader = nodes(ROOT / 'study_tools' / filename)
                 self.assertEqual(ast.literal_eval(old_assignment.value), ast.literal_eval(assignment.value))
                 self.mw.col.conf[ast.literal_eval(old_assignment.value)] = copy.deepcopy(saved)
@@ -314,10 +314,10 @@ class ProgressUpgradeTests(unittest.TestCase):
                 exec(compile(ast.Module(body=[assignment, reader], type_ignores=[]), filename, 'exec'), namespace)
                 self.assertEqual(namespace[function](), saved)
 
-    @unittest.skipUnless(all((ROOT / name).is_dir() for name in ("Onigiri(Original)", "Onigiri(Middle)")),
+    @unittest.skipUnless(all((ROOT / name).is_dir() for name in ("Bingsu(Original)", "Bingsu(Middle)")),
                          "Original and Middle attachment fixtures are not present")
     def test_saved_palettes_are_preserved_even_when_equal_to_old_defaults(self):
-        for folder in ('Onigiri(Original)', 'Onigiri(Middle)'):
+        for folder in ('Bingsu(Original)', 'Bingsu(Middle)'):
             with self.subTest(version=folder):
                 old = load_module('upgrade_test_addon.legacy_config', ROOT / folder / 'config.py')
                 saved = copy.deepcopy(old.DEFAULTS)
@@ -412,18 +412,18 @@ class ProgressUpgradeTests(unittest.TestCase):
         self.assertEqual(json.loads(mirror.read_text()), {'userName': 'Learner'})
 
     def test_collection_backup_is_immutable_and_separate_for_each_profile(self):
-        self.mw.col.conf = {'onigiri_hashi_notes': [{'id': 'one', 'body_md': 'My notes'}],
+        self.mw.col.conf = {'bingsu_hashi_notes': [{'id': 'one', 'body_md': 'My notes'}],
                             'modern_menu_profile_bg_image': 'cover.png', 'unrelated': 42}
         self.storage.backup_before_upgrade({'old': True})
-        self.mw.col.conf['onigiri_hashi_notes'] = []
+        self.mw.col.conf['bingsu_hashi_notes'] = []
         self.storage.backup_before_upgrade({})
         self.mw.pm.name = 'Second'
-        self.mw.col.conf = {'onigiri_prep_station_plans': [{'id': 'two'}]}
+        self.mw.col.conf = {'bingsu_prep_station_plans': [{'id': 'two'}]}
         self.storage.backup_before_upgrade({})
         backups = [json.loads(path.read_text()) for path in Path(self.storage.external_backup_dir()).glob('before_progress_upgrade_v2_*.json')]
         by_profile = {data['profile']: data['collection_config'] for data in backups}
-        self.assertEqual(by_profile['Upgrade']['onigiri_hashi_notes'][0]['body_md'], 'My notes')
-        self.assertEqual(by_profile['Second']['onigiri_prep_station_plans'][0]['id'], 'two')
+        self.assertEqual(by_profile['Upgrade']['bingsu_hashi_notes'][0]['body_md'], 'My notes')
+        self.assertEqual(by_profile['Second']['bingsu_prep_station_plans'][0]['id'], 'two')
 
     def modern_collection(self, values):
         class ConfigManager:
@@ -438,7 +438,7 @@ class ProgressUpgradeTests(unittest.TestCase):
         return types.SimpleNamespace(conf=ConfigManager(), all_config=lambda: copy.deepcopy(values))
 
     def test_modern_anki_config_manager_backup_uses_all_config(self):
-        values = {'onigiri_hashi_notes': [{'body_md': 'Keep my notes'}], 'unrelated': 42}
+        values = {'bingsu_hashi_notes': [{'body_md': 'Keep my notes'}], 'unrelated': 42}
         self.mw.col = self.modern_collection(values)
         with self.assertRaisesRegex(TypeError, 'bad argument type'):
             dict(self.mw.col.conf)
@@ -448,17 +448,17 @@ class ProgressUpgradeTests(unittest.TestCase):
         self.assertEqual(self.storage.take_notices(), [])
 
     def test_collection_export_is_detached_and_does_not_hide_bad_results(self):
-        values = {'onigiri_hashi_notes': [{'body_md': 'Original'}]}
+        values = {'bingsu_hashi_notes': [{'body_md': 'Original'}]}
         collection = self.modern_collection(values)
         collection.all_config = lambda: values
         snapshot = self.storage.collection_config_snapshot(collection)
-        snapshot['onigiri_hashi_notes'][0]['body_md'] = 'Changed'
-        self.assertEqual(values['onigiri_hashi_notes'][0]['body_md'], 'Original')
+        snapshot['bingsu_hashi_notes'][0]['body_md'] = 'Changed'
+        self.assertEqual(values['bingsu_hashi_notes'][0]['body_md'], 'Original')
         collection.all_config = lambda: []
         with self.assertRaises(TypeError):
             self.storage.collection_config_snapshot(collection)
 
-    def test_failed_collection_backup_remains_retryable_and_identifies_onigiri(self):
+    def test_failed_collection_backup_remains_retryable_and_identifies_bingsu(self):
         values = {'modern_menu_statsTitle': 'Saved title'}
         self.mw.col = self.modern_collection(values)
         with patch.object(self.mw.col, 'all_config', side_effect=RuntimeError('read unavailable')):
@@ -469,7 +469,7 @@ class ProgressUpgradeTests(unittest.TestCase):
         self.assertEqual(self.mw.col.all_config(), values)
 
     def test_sync_includes_modern_collection_config_and_preserves_archive_on_read_failure(self):
-        values = {'onigiri_hashi_notes': [{'body_md': 'Keep my notes'}],
+        values = {'bingsu_hashi_notes': [{'body_md': 'Keep my notes'}],
                   'modern_menu_statsTitle': 'Saved title', 'unrelated': 42}
         self.mw.col = self.modern_collection(values)
         media = Path(self.temp.name) / 'collection.media'
@@ -485,7 +485,7 @@ class ProgressUpgradeTests(unittest.TestCase):
         with zipfile.ZipFile(path) as archive:
             manifest = json.loads(archive.read(sync.SYNC_MANIFEST))
         saved = {key: value for group in manifest['collection_config'].values() for key, value in group.items()}
-        self.assertEqual(saved['onigiri_hashi_notes'], values['onigiri_hashi_notes'])
+        self.assertEqual(saved['bingsu_hashi_notes'], values['bingsu_hashi_notes'])
         self.assertEqual(saved['modern_menu_statsTitle'], values['modern_menu_statsTitle'])
         self.assertNotIn('unrelated', saved)
         with patch.object(self.mw.col, 'all_config', side_effect=RuntimeError('read unavailable')):
@@ -533,27 +533,27 @@ class ProgressUpgradeTests(unittest.TestCase):
         self.assertFalse(self.config.get_config()['ankiweb_sync_layout'])
 
     def test_sparse_layout_and_sidebar_more_choices_survive(self):
-        saved = {'onigiriWidgetLayout': {'grid': {'custom': {'pos': 12, 'row': 2, 'col': 2}},
+        saved = {'bingsuWidgetLayout': {'grid': {'custom': {'pos': 12, 'row': 2, 'col': 2}},
                                         'archive': ['stats_title']},
                  'sidebarButtonLayout': {'visible': ['profile', 'more'], 'more': ['gamification'], 'archived': ['add']}}
         self.write('settings_Upgrade.json', saved)
         conf = self.config._build_config()
-        self.assertEqual(conf['onigiriWidgetLayout']['grid'], saved['onigiriWidgetLayout']['grid'])
+        self.assertEqual(conf['bingsuWidgetLayout']['grid'], saved['bingsuWidgetLayout']['grid'])
         self.assertEqual(conf['sidebarButtonLayout'], saved['sidebarButtonLayout'])
 
     def test_overview_slideshow_keeps_all_uploads_and_selects_first_image(self):
-        saved = {'onigiri_overview_bg_mode': 'slideshow',
-                 'onigiri_overview_slideshow_images': ['one.png', 'two.png'],
-                 'onigiri_overview_slideshow_interval': 7}
+        saved = {'bingsu_overview_bg_mode': 'slideshow',
+                 'bingsu_overview_slideshow_images': ['one.png', 'two.png'],
+                 'bingsu_overview_slideshow_interval': 7}
         self.write('settings_Upgrade.json', saved)
         conf = self.config._build_config()
-        self.assertEqual(conf['onigiri_overview_slideshow_images'], saved['onigiri_overview_slideshow_images'])
-        self.assertEqual(conf['onigiri_overview_slideshow_interval'], 7)
-        self.assertEqual(conf['onigiri_overview_bg_image_light'], 'one.png')
-        self.assertEqual(conf['onigiri_overview_bg_image_dark'], 'one.png')
+        self.assertEqual(conf['bingsu_overview_slideshow_images'], saved['bingsu_overview_slideshow_images'])
+        self.assertEqual(conf['bingsu_overview_slideshow_interval'], 7)
+        self.assertEqual(conf['bingsu_overview_bg_image_light'], 'one.png')
+        self.assertEqual(conf['bingsu_overview_bg_image_dark'], 'one.png')
 
     def test_all_legacy_bundled_asset_paths_still_exist(self):
-        for folder in ('Onigiri(Original)', 'Onigiri(Middle)'):
+        for folder in ('Bingsu(Original)', 'Bingsu(Middle)'):
             source = ROOT / folder / 'system_files'
             for asset in source.rglob('*'):
                 if not asset.is_file() or asset.name == '.DS_Store':
@@ -561,7 +561,7 @@ class ProgressUpgradeTests(unittest.TestCase):
                 relative = asset.relative_to(source)
                 self.assertTrue((ROOT / 'system_files' / relative).is_file(), str(relative))
 
-    @unittest.skipUnless(all((ROOT / name).is_dir() for name in ("Onigiri(Original)", "Onigiri(Middle)")),
+    @unittest.skipUnless(all((ROOT / name).is_dir() for name in ("Bingsu(Original)", "Bingsu(Middle)")),
                          "Original and Middle attachment fixtures are not present")
     def test_all_purchased_ids_resolve_in_current_catalog(self):
         def dictionaries(path):
@@ -571,7 +571,7 @@ class ProgressUpgradeTests(unittest.TestCase):
                     and target.id in {'RESTAURANTS', 'EVOLUTIONS', 'SHOPS', 'DEVS', 'LEGACY_EVOLUTIONS'}}
         current = dictionaries(ROOT / 'gamification/nook_level.py')
         current_ids = set().union(*(group.keys() for group in current.values()))
-        for path in (ROOT / 'Onigiri(Original)/gamification/restaurant_level.py', ROOT / 'Onigiri(Middle)/gamification/nook_level.py'):
+        for path in (ROOT / 'Bingsu(Original)/gamification/restaurant_level.py', ROOT / 'Bingsu(Middle)/gamification/nook_level.py'):
             old = dictionaries(path)
             self.assertLessEqual(set().union(*(group.keys() for group in old.values())), current_ids)
         for item in current['LEGACY_EVOLUTIONS'].values():
@@ -581,15 +581,15 @@ class ProgressUpgradeTests(unittest.TestCase):
         source = ast.parse((ROOT / '__init__.py').read_text())
         method = next(node for node in source.body if isinstance(node, ast.FunctionDef) and node.name == 'verify_coin_integrity')
         path = self.write('gamification_Upgrade.json', {'restaurant_level': {'taiyaki_coins': 739, '_security_token': 'older-writer-token'}})
-        namespace = {'mw': self.mw, 'addon_path': str(self.root), 'addon_package': 'onigiri',
+        namespace = {'mw': self.mw, 'addon_path': str(self.root), 'addon_package': 'bingsu',
                      'os': os, 'safe_storage': self.storage, 'config': self.config}
         exec(compile(ast.Module(body=[method], type_ignores=[]), '__init__.py', 'exec'), namespace)
         namespace['verify_coin_integrity']()
         saved = json.loads(path.read_text())['restaurant_level']
         self.assertEqual(saved['taiyaki_coins'], 739)
-        self.assertEqual(saved['_security_token'], hashlib.sha256(b'739:onigiri_secret_salt_2024').hexdigest())
+        self.assertEqual(saved['_security_token'], hashlib.sha256(b'739:bingsu_secret_salt_2024').hexdigest())
 
-    @unittest.skipUnless(all((ROOT / name).is_dir() for name in ("Onigiri(Original)", "Onigiri(Middle)")),
+    @unittest.skipUnless(all((ROOT / name).is_dir() for name in ("Bingsu(Original)", "Bingsu(Middle)")),
                          "Original and Middle attachment fixtures are not present")
     def test_release_package_and_both_full_install_upgrades(self):
         builder = load_module('upgrade_release_builder', ROOT / 'tools/build_addon.py')
@@ -598,12 +598,12 @@ class ProgressUpgradeTests(unittest.TestCase):
             names = archive.namelist()
             self.assertEqual([name for name in names if name.startswith('user_files/')], ['user_files/README.txt'])
             self.assertNotIn('meta.json', names)
-            self.assertNotIn('onigiri_layout.json', names)
-            self.assertFalse(any(name.startswith(('Onigiri(', 'tests/', 'tools/')) for name in names))
+            self.assertNotIn('bingsu_layout.json', names)
+            self.assertFalse(any(name.startswith(('Bingsu(', 'tests/', 'tools/')) for name in names))
             self.assertEqual(json.loads(archive.read('config.json')), {})
-            self.assertEqual(json.loads(archive.read('manifest.json'))['package'], 'onigiri_ios')
+            self.assertEqual(json.loads(archive.read('manifest.json'))['package'], 'bingsu_ios')
 
-        for folder in ('Onigiri(Original)', 'Onigiri(Middle)'):
+        for folder in ('Bingsu(Original)', 'Bingsu(Middle)'):
             with self.subTest(version=folder):
                 fixture = ProgressUpgradeTests()
                 fixture.setUp()
@@ -612,7 +612,7 @@ class ProgressUpgradeTests(unittest.TestCase):
                     old_config = load_module('upgrade_test_addon.legacy_config', fixture.root / 'config.py')
                     saved = copy.deepcopy(old_config.DEFAULTS)
                     saved.update(userName='Existing learner', unknown_user_setting={'keep': [False, 0, '']})
-                    saved.setdefault('onigiriProfile', {})['bio'] = 'Saved bio'
+                    saved.setdefault('bingsuProfile', {})['bio'] = 'Saved bio'
                     saved['restaurant_level'].update(total_xp=14723, level=17, name='My restaurant')
                     old_config.write_config(saved)
                     old_game = load_module('upgrade_test_addon.legacy_game', fixture.root / 'gamification/gamification.py')
@@ -629,9 +629,9 @@ class ProgressUpgradeTests(unittest.TestCase):
                         path = fixture.files / relative
                         path.parent.mkdir(parents=True, exist_ok=True)
                         path.write_bytes(relative.encode())
-                    fixture.mw.col.conf.update(onigiri_hashi_notes=[{'id': 'note', 'body_md': 'My notes'}],
-                                               onigiri_prep_station_plans=[{'id': 'plan', 'deck_ids': [123]}],
-                                               onigiri_pomodoro_sessions=[{'id': 'session', 'actual_minutes': 25}],
+                    fixture.mw.col.conf.update(bingsu_hashi_notes=[{'id': 'note', 'body_md': 'My notes'}],
+                                               bingsu_prep_station_plans=[{'id': 'plan', 'deck_ids': [123]}],
+                                               bingsu_pomodoro_sessions=[{'id': 'session', 'actual_minutes': 25}],
                                                modern_menu_background_image='background.png')
                     collection = copy.deepcopy(fixture.mw.col.conf)
                     original_files = {path.relative_to(fixture.files).as_posix(): path.read_bytes()
@@ -657,7 +657,7 @@ class ProgressUpgradeTests(unittest.TestCase):
                     game.save(immediate=True)
                     reloaded = fixture.config.get_config()
                     self.assertEqual(reloaded['userName'], 'Existing learner')
-                    self.assertEqual(reloaded['onigiriProfile']['bio'], 'Saved bio')
+                    self.assertEqual(reloaded['bingsuProfile']['bio'], 'Saved bio')
                     self.assertEqual(reloaded['unknown_user_setting'], saved['unknown_user_setting'])
                     for mode, palette in saved['colors'].items():
                         for key, value in palette.items():
@@ -685,7 +685,7 @@ class ProgressUpgradeTests(unittest.TestCase):
         manager = sync.SyncManager()
         manager._user_files_dir = str(self.files)
         manager._state_file = str(self.files / 'sync_state.json')
-        cloud = media / '_onigiri_sync_Upgrade.zip'
+        cloud = media / '_bingsu_sync_Upgrade.zip'
         with zipfile.ZipFile(cloud, 'w') as archive:
             archive.writestr('settings_Upgrade.json', json.dumps({'userName': 'Cloud learner'}))
         original = cloud.read_bytes()
@@ -709,14 +709,14 @@ class ProgressUpgradeTests(unittest.TestCase):
         local.parent.mkdir()
         local.write_bytes(b'local artwork')
         layout = {'grid': {'time': {'pos': 20, 'row': 1, 'col': 1}}, 'archive': ['stats_title']}
-        with zipfile.ZipFile(media / '_onigiri_sync_Upgrade.zip', 'w') as archive:
-            archive.writestr('settings_Upgrade.json', json.dumps({'userName': 'Cloud learner', 'onigiriWidgetLayout': layout}))
+        with zipfile.ZipFile(media / '_bingsu_sync_Upgrade.zip', 'w') as archive:
+            archive.writestr('settings_Upgrade.json', json.dumps({'userName': 'Cloud learner', 'bingsuWidgetLayout': layout}))
             archive.writestr('profile/cloud.png', b'cloud artwork')
             archive.writestr('gamification_Upgrade.json', json.dumps({'restaurant_level': {'taiyaki_coins': 444}}))
         self.assertTrue(manager.unpack_user_files())
         conf = self.config.get_config()
         self.assertEqual(conf['userName'], 'Cloud learner')
-        self.assertEqual(conf['onigiriWidgetLayout']['grid']['time']['pos'], 20)
+        self.assertEqual(conf['bingsuWidgetLayout']['grid']['time']['pos'], 20)
         self.assertEqual(local.read_bytes(), b'local artwork')
         self.assertEqual((local.parent / 'cloud.png').read_bytes(), b'cloud artwork')
         self.assertEqual(json.loads((self.files / 'gamification_Upgrade.json').read_text())['restaurant_level']['taiyaki_coins'], 444)
@@ -766,7 +766,7 @@ class ProgressUpgradeTests(unittest.TestCase):
         source = (ROOT / '__init__.py').read_text()
         registration = 'gui_hooks.profile_did_open.append(_storage_integrity_check)'
         self.assertEqual(source.count(registration), 1)
-        self.assertLess(source.index(registration), source.index('from .rendering import onigiri_renderer'))
+        self.assertLess(source.index(registration), source.index('from .rendering import bingsu_renderer'))
         self.assertNotIn('profile_did_open.insert(', source)
 
     def test_companion_and_island_caches_do_not_overwrite_another_profile(self):
@@ -821,15 +821,15 @@ class ProgressUpgradeTests(unittest.TestCase):
         namespace['_save_history']([{'message': 'Second learner new message'}])
         self.assertEqual(json.loads((self.files / 'mochi_history_Upgrade.json').read_text())['history'], [{'message': 'First learner'}])
 
-    @unittest.skipUnless(all((ROOT / name).is_dir() for name in ("Onigiri(Original)", "Onigiri(Middle)")),
+    @unittest.skipUnless(all((ROOT / name).is_dir() for name in ("Bingsu(Original)", "Bingsu(Middle)")),
                          "Original and Middle attachment fixtures are not present")
     def test_original_stats_title_is_moved_to_a_free_tile(self):
-        old = load_module('upgrade_test_addon.legacy_config', ROOT / 'Onigiri(Original)/config.py')
+        old = load_module('upgrade_test_addon.legacy_config', ROOT / 'Bingsu(Original)/config.py')
         self.write('settings_Upgrade.json', copy.deepcopy(old.DEFAULTS))
         conf = self.config._build_config()
-        grid = conf['onigiriWidgetLayout']['grid']
+        grid = conf['bingsuWidgetLayout']['grid']
         self.assertIn('stats_title', grid)
-        for key, value in old.DEFAULTS['onigiriWidgetLayout']['grid'].items():
+        for key, value in old.DEFAULTS['bingsuWidgetLayout']['grid'].items():
             self.assertEqual(grid[key], value)
         occupied = self.config._widget_layout_occupied_cells(grid, 4, skip_id='stats_title')
         title = grid['stats_title']

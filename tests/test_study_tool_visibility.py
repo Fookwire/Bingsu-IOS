@@ -33,11 +33,11 @@ class StudyToolVisibilityTests(unittest.TestCase):
         self.conf = {
             "hashi_notes": {"show_in_reviewer_header": False, "font_size": 19},
             "prep_station": {"plans": [{"id": "exam", "target": 120}]},
-            "onigiri_pomodoro_show_in_reviewer_header": True,
-            "onigiriWidgetLayout": {"grid": {"hashi_notes": {"pos": 6}}, "archive": ["prep_station"]},
+            "bingsu_pomodoro_show_in_reviewer_header": True,
+            "bingsuWidgetLayout": {"grid": {"hashi_notes": {"pos": 6}}, "archive": ["prep_station"]},
         }
-        self.collection = {"onigiri_hashi_notes": [{"id": "note", "body_md": "Keep this"}],
-                           "onigiri_pomodoro_sessions": [{"actual_minutes": 25}]}
+        self.collection = {"bingsu_hashi_notes": [{"id": "note", "body_md": "Keep this"}],
+                           "bingsu_pomodoro_sessions": [{"actual_minutes": 25}]}
         self.config = types.ModuleType(PACKAGE + ".core.config")
         self.config.get_config = lambda: copy.deepcopy(self.conf)
         self.config.get_config_readonly = lambda: self.conf
@@ -105,7 +105,7 @@ class StudyToolVisibilityTests(unittest.TestCase):
                 binding = button["bind"]
                 self.assertEqual(binding.get("path", binding.get("key")),
                                  ["hashi_notes", "show_in_reviewer_header"] if tool == "hashi_notes"
-                                 else "onigiri_pomodoro_show_in_reviewer_header")
+                                 else "bingsu_pomodoro_show_in_reviewer_header")
 
     def test_each_tool_page_leads_with_reachable_visibility_controls(self):
         tree = ast.parse((ROOT / "settings_web/schema.py").read_text())
@@ -157,10 +157,10 @@ class StudyToolVisibilityTests(unittest.TestCase):
                                   ("pomodoro", "_widget"), ("pomodoro", "_stats_dialog")])
 
     def test_dashboard_hides_tools_without_changing_saved_widget_placement(self):
-        tree = ast.parse((ROOT / "rendering/onigiri_renderer.py").read_text())
+        tree = ast.parse((ROOT / "rendering/bingsu_renderer.py").read_text())
         loop = next(node for node in ast.walk(tree) if isinstance(node, ast.For)
                     and isinstance(node.iter, ast.Call) and isinstance(node.iter.func, ast.Attribute)
-                    and isinstance(node.iter.func.value, ast.Name) and node.iter.func.value.id == "onigiri_layout")
+                    and isinstance(node.iter.func.value, ast.Name) and node.iter.func.value.id == "bingsu_layout")
         layout = {"hashi_notes": {"pos": 6, "row": 2, "col": 2},
                   "prep_station": {"pos": 8, "row": 1, "col": 2}}
         before = copy.deepcopy(layout)
@@ -169,20 +169,20 @@ class StudyToolVisibilityTests(unittest.TestCase):
         namespace = {
             "TOOL_IDS": self.visibility.TOOL_IDS, "tool_visible": self.visibility.tool_visible,
             "conf": {"study_tools_visibility": {"hashi_notes": False, "prep_station": False}},
-            "onigiri_layout": layout, "col_count": 4, "onigiri_grid_html": "",
+            "bingsu_layout": layout, "col_count": 4, "bingsu_grid_html": "",
             "widget_generators": dict.fromkeys(layout), "_is_deck_stats_widget_id": lambda tool: False,
             "render_widget_safely": lambda tool, renderer: renderer(),
             "_hashi_notes": lambda: render("hashi_notes"), "_prep_station": lambda: render("prep_station"),
         }
-        code = compile(ast.Module(body=[loop], type_ignores=[]), "onigiri_renderer.py", "exec")
+        code = compile(ast.Module(body=[loop], type_ignores=[]), "bingsu_renderer.py", "exec")
         exec(code, namespace)
         self.assertEqual(calls, [])
-        self.assertEqual(namespace["onigiri_grid_html"], "")
+        self.assertEqual(namespace["bingsu_grid_html"], "")
         namespace["conf"]["study_tools_visibility"]["hashi_notes"] = True
         exec(code, namespace)
         self.assertEqual(calls, ["hashi_notes"])
-        self.assertIn("hashi_notes", namespace["onigiri_grid_html"])
-        self.assertNotIn("prep_station", namespace["onigiri_grid_html"])
+        self.assertIn("hashi_notes", namespace["bingsu_grid_html"])
+        self.assertNotIn("prep_station", namespace["bingsu_grid_html"])
         self.assertEqual(layout, before)
 
     def test_native_menu_and_shortcut_follow_each_tool(self):

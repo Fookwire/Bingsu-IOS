@@ -42,7 +42,7 @@ class ReviewerFlagTests(unittest.TestCase):
             reloaded.register(field["id"], field["bind"], field["default"])
             self.assertEqual(reloaded.read(field["id"]), "system:star.svg")
         reloaded.apply_now({fields[0]["id"]: ""})
-        saved = writes[-1]["onigiri_reviewer_flag_icons"]
+        saved = writes[-1]["bingsu_reviewer_flag_icons"]
         self.assertEqual(saved["1"], "")
         self.assertEqual(saved["7"], "system:star.svg")
 
@@ -54,7 +54,7 @@ class ReviewerFlagTests(unittest.TestCase):
             for path in (system, custom):
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_bytes(b"icon")
-            conf = {"onigiri_reviewer_flag_icons": {"1": "system:star.svg", "7": "my icon.png", "3": "missing.svg"}}
+            conf = {"bingsu_reviewer_flag_icons": {"1": "system:star.svg", "7": "my icon.png", "3": "missing.svg"}}
             urls = flags.icon_urls(conf, root, "1011095603")
             self.assertEqual(set(urls), {str(number) for number in range(1, 8)})
             self.assertIn("/available_for_users/star.svg?v=", urls["1"])
@@ -63,12 +63,12 @@ class ReviewerFlagTests(unittest.TestCase):
             custom.unlink()
             self.assertTrue(flags.icon_urls(conf, root, "1011095603")["7"].endswith("/available_for_users/flag.svg"))
 
-    def test_empty_and_invalid_values_use_onigiri_for_all_seven_flags(self):
+    def test_empty_and_invalid_values_use_bingsu_for_all_seven_flags(self):
         default = flags.icon_urls({}, ROOT, "test")
         self.assertEqual(len(default), 7)
         self.assertTrue(all("/available_for_users/flag.svg?v=" in url for url in default.values()))
         for value in (None, [], "invalid", {"1": "../star.svg", "2": 3, "3": "system:../../star.svg", "4": "file.html", "8": "system:star.svg"}):
-            self.assertEqual(flags.icon_urls({"onigiri_reviewer_flag_icons": value}, ROOT, "test"), default)
+            self.assertEqual(flags.icon_urls({"bingsu_reviewer_flag_icons": value}, ROOT, "test"), default)
 
     def test_serialized_choices_keep_preview_and_default_metadata(self):
         env = {"tr": lambda key, fallback: fallback}
@@ -101,21 +101,21 @@ function settle() {
   do {pending = false; callback(); assert.ok(++count < 5, 'observer must settle');} while(pending);
 }
 const icons = Object.fromEntries(Array.from({length: 7}, (_, i) => [String(i+1), '/icon-'+(i+1)+'.svg']));
-const context = {window: {onigiriReviewerFlagIcons: icons},
+const context = {window: {bingsuReviewerFlagIcons: icons},
   document: {readyState: 'complete', getElementById: id => id === '_flag' ? flag : null},
   MutationObserver: class {constructor(fn) {callback = fn;} disconnect() {} observe() {}}};
 vm.runInNewContext(fs.readFileSync(process.argv[1], 'utf8'), context);
 for (let i = 1; i <= 7; i++) {
   flag.hidden = false; flag.style.color = 'var(--flag-'+i+')'; settle();
-  assert.equal(props['--onigiri-flag-icon'], 'url("/icon-'+i+'.svg")');
+  assert.equal(props['--bingsu-flag-icon'], 'url("/icon-'+i+'.svg")');
   assert.equal(flag.textContent, '⚑');
   assert.equal(flag.style.color, 'var(--flag-'+i+')');
 }
 flag.hidden = true; flag.style.color = 'var(--flag-0)'; settle();
 assert.ok(flag.hidden);
 flag.hidden = false; flag.style.color = 'var(--flag-2)'; settle();
-context.window.OnigiriReviewerFlags.setIcons({}); settle();
-assert.equal(props['--onigiri-flag-icon'], undefined);
+context.window.BingsuReviewerFlags.setIcons({}); settle();
+assert.equal(props['--bingsu-flag-icon'], undefined);
 assert.equal(flag.textContent, '⚑');
 assert.equal(flag.style.color, 'var(--flag-2)');
 '''

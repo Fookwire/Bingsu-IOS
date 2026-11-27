@@ -1,9 +1,9 @@
 /*
-    Onigiri Heatmap Stylesheet
+    Bingsu Heatmap Stylesheet
 */
 
-#onigiri-heatmap-container,
-#onigiri-profile-heatmap-container {
+#bingsu-heatmap-container,
+#bingsu-profile-heatmap-container {
     /* Control scale matching Stats widget controls (26px height, 8px outer radius, 6px inner radius) */
     --hm-ctl-h: 26px;
     --hm-radius: 8px;
@@ -16,7 +16,7 @@
 
     /* Lets the header compact and wrap its controls on narrow widgets. */
     container-type: inline-size;
-    container-name: onigiri-heatmap;
+    container-name: bingsu-heatmap;
 
     padding: 14px;
     border-radius: 15px;
@@ -31,12 +31,12 @@
 }
 
 /* Only the deck-browser one is a grid widget */
-#onigiri-heatmap-container {
-    padding: var(--onigiri-widget-pad);
+#bingsu-heatmap-container {
+    padding: var(--bingsu-widget-pad);
 }
 
 /* --- Header Styles (Fixed Height & Single Line) --- */
-.onigiri-heatmap-header {
+.bingsu-heatmap-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -48,7 +48,7 @@
     flex: 0 0 auto;
 }
 
-.onigiri-heatmap-header .header-left {
+.bingsu-heatmap-header .header-left {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -57,7 +57,7 @@
     min-width: 0;
 }
 
-.onigiri-heatmap-header .header-right {
+.bingsu-heatmap-header .header-right {
     display: flex;
     align-items: center;
     gap: 6px;
@@ -66,7 +66,7 @@
     min-width: 0;
 }
 
-.onigiri-heatmap-header .heatmap-title {
+.bingsu-heatmap-header .heatmap-title {
     margin: 0;
     padding: 0;
     font-size: 15px;
@@ -133,32 +133,32 @@
     opacity: 0.55;
 }
 
-@container onigiri-heatmap (max-width: 560px) {
+@container bingsu-heatmap (max-width: 560px) {
     .streak-counter .streak-label {
         display: none;
     }
 }
 
-@container onigiri-heatmap (max-width: 480px) {
+@container bingsu-heatmap (max-width: 480px) {
     .streak-counter {
         display: none !important;
     }
 }
 
-@container onigiri-heatmap (max-width: 420px) {
+@container bingsu-heatmap (max-width: 420px) {
     .year-view .heatmap-cells {
         gap: 1px;
     }
-    .onigiri-heatmap-header {
+    .bingsu-heatmap-header {
         flex-wrap: wrap;
         gap: 8px;
     }
 
-    .onigiri-heatmap-header .header-left {
+    .bingsu-heatmap-header .header-left {
         flex: 1 0 100%;
     }
 
-    .onigiri-heatmap-header .header-right {
+    .bingsu-heatmap-header .header-right {
         flex: 1 0 100%;
         justify-content: space-between;
         flex-wrap: wrap;
@@ -178,19 +178,19 @@
     opacity: 1;
 }
 
-.streak-counter.onigiri-streak-tip {
+.streak-counter.bingsu-streak-tip {
     position: relative;
 }
 
-.streak-counter.onigiri-streak-tip::after {
+.streak-counter.bingsu-streak-tip::after {
     content: attr(data-tooltip);
     position: absolute;
     top: calc(100% + 8px);
     left: 50%;
     transform: translateX(-50%);
-    background-color: var(--onigiri-tooltip-bg, var(--canvas-overlay));
-    color: var(--onigiri-tooltip-fg, var(--fg));
-    border: 1px solid var(--onigiri-tooltip-border, var(--border));
+    background-color: var(--bingsu-tooltip-bg, var(--canvas-overlay));
+    color: var(--bingsu-tooltip-fg, var(--fg));
+    border: 1px solid var(--bingsu-tooltip-border, var(--border));
     border-radius: 6px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
     font-size: 11px;
@@ -205,7 +205,7 @@
     transition: opacity 0.12s ease, visibility 0.12s ease;
 }
 
-.streak-counter.onigiri-streak-tip:hover::after {
+.streak-counter.bingsu-streak-tip:hover::after {
     opacity: 1;
     visibility: visible;
 }
@@ -277,10 +277,10 @@
 }
 
 .heatmap-grid.is-entering {
-    animation: onigiri-heatmap-enter 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: bingsu-heatmap-enter 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@keyframes onigiri-heatmap-enter {
+@keyframes bingsu-heatmap-enter {
     from {
         opacity: 0.55;
         transform: translateY(4px);
@@ -310,7 +310,7 @@
     outline-offset: -2px !important;
 }
 
-@container onigiri-heatmap (max-width: 540px) {
+@container bingsu-heatmap (max-width: 540px) {
     .heatmap-filters .filter-btn {
         padding-inline: 6px !important;
     }
@@ -496,10 +496,10 @@
     box-sizing: border-box;
     transform: translateX(-50%);
     padding: 5px 10px;
-    border: 1px solid var(--onigiri-tooltip-border, var(--border));
+    border: 1px solid var(--bingsu-tooltip-border, var(--border));
     border-radius: 6px;
-    background: var(--onigiri-tooltip-bg, var(--canvas-inset, #333));
-    color: var(--onigiri-tooltip-fg, var(--fg, #fff));
+    background: var(--bingsu-tooltip-bg, var(--canvas-inset, #333));
+    color: var(--bingsu-tooltip-fg, var(--fg, #fff));
     font: 12px/1.4 'Poppins', system-ui, sans-serif;
     pointer-events: none;
 }
@@ -707,8 +707,8 @@
     bottom: 120%;
     left: 50%;
     transform: translateX(-50%);
-    background-color: var(--onigiri-tooltip-bg, #333) !important;
-    color: var(--onigiri-tooltip-fg, #fff) !important;
+    background-color: var(--bingsu-tooltip-bg, #333) !important;
+    color: var(--bingsu-tooltip-fg, #fff) !important;
     padding: 5px 10px;
     border-radius: 6px;
     font-size: 12px;
@@ -759,8 +759,8 @@
     }
 }
 
-#onigiri-heatmap-container:hover .heatmap-day-cell.today .day-shape,
-#onigiri-profile-heatmap-container:hover .heatmap-day-cell.today .day-shape {
+#bingsu-heatmap-container:hover .heatmap-day-cell.today .day-shape,
+#bingsu-profile-heatmap-container:hover .heatmap-day-cell.today .day-shape {
     animation: glow 3s ease-in-out;
 }
 

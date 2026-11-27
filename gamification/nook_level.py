@@ -170,7 +170,7 @@ RESTAURANTS = {
     },
 }
 
-# "Sushi Evolutions": upgrade stages for the starting Onigiri Stand.
+# "Sushi Evolutions": upgrade stages for the starting Bingsu Stand.
 EVOLUTIONS = {
     "restaurant_evo_i": {
         "name": "restaurant_evo_i_name",
@@ -291,7 +291,7 @@ SHOPS = {
 }
 
 # Developer tribute Nooks. These live in their own store/collection category
-# and each has a dedicated Recipe Rush pool in the Onigiri Database script.
+# and each has a dedicated Recipe Rush pool in the Bingsu Database script.
 DEVS = {
     "koeni_nook": {
         "name": "koeni_nook_name",
@@ -354,11 +354,11 @@ DEVS = {
 # Original sold these IDs before the current Sushi Evolution catalog existed.
 # Keep their identity and entitlement; show them only to existing owners.
 LEGACY_EVOLUTIONS = {
-    "onigiri_ii": {"name": "Onigiri II Restaurant", "price": 200, "theme": None, "description": "The upgrade is here!", "image": "../restaurant_folder/restaurant_level.png"},
-    "onigiri_iii": {"name": "Onigiri III Restaurant", "price": 300, "theme": None, "description": "Even better!", "image": "../restaurant_folder/restaurant_level.png"},
-    "onigiri_iv": {"name": "Onigiri IV Restaurant", "price": 400, "theme": None, "description": "Superb!", "image": "../restaurant_folder/restaurant_level.png"},
-    "onigiri_v": {"name": "Onigiri V Restaurant", "price": 500, "theme": None, "description": "Masterpiece!", "image": "../restaurant_folder/restaurant_level.png"},
-    "prev_onigiri_heaven": {"name": "Onigiri Heaven Restaurant", "price": 750, "theme": "#445b76", "description": "Heavenly!", "image": "../restaurant_folder/restaurant_level.png"},
+    "onigiri_ii": {"name": "Bingsu II Restaurant", "price": 200, "theme": None, "description": "The upgrade is here!", "image": "../restaurant_folder/restaurant_level.png"},
+    "onigiri_iii": {"name": "Bingsu III Restaurant", "price": 300, "theme": None, "description": "Even better!", "image": "../restaurant_folder/restaurant_level.png"},
+    "onigiri_iv": {"name": "Bingsu IV Restaurant", "price": 400, "theme": None, "description": "Superb!", "image": "../restaurant_folder/restaurant_level.png"},
+    "onigiri_v": {"name": "Bingsu V Restaurant", "price": 500, "theme": None, "description": "Masterpiece!", "image": "../restaurant_folder/restaurant_level.png"},
+    "prev_onigiri_heaven": {"name": "Bingsu Heaven Restaurant", "price": 750, "theme": "#445b76", "description": "Heavenly!", "image": "../restaurant_folder/restaurant_level.png"},
 }
 
 ITEM_GROUPS = (RESTAURANTS, EVOLUTIONS, SHOPS, DEVS, LEGACY_EVOLUTIONS)
@@ -641,7 +641,7 @@ class NookLevelManager:
             "xpToNextLevel": xp_to_next,
             "xpRemaining": remaining,
             "progressFraction": percent,
-            "notificationsEnabled": progress.notifications_enabled and not bool(config.get_config_readonly().get("onigiri_reviewer_silent_notifications", False)),
+            "notificationsEnabled": progress.notifications_enabled and not bool(config.get_config_readonly().get("bingsu_reviewer_silent_notifications", False)),
             "showProfileBar": progress.show_profile_bar_progress,
             "showProfilePage": progress.show_profile_page_progress,
             "phrase": self._get_motivational_phrase(progress.level),
@@ -731,7 +731,7 @@ class NookLevelManager:
     def _recipe_rush_restaurants_payload(self) -> List[Dict[str, Any]]:
         restaurants = [{
             "id": "default",
-            "name": tr("onigiri_stand_name", "Onigiri Stand"),
+            "name": tr("onigiri_stand_name", "Bingsu Stand"),
             "type": "restaurant",
             "price": 0,
         }]
@@ -925,7 +925,7 @@ class NookLevelManager:
             return None
         error = data.get("__error__")
         if error:
-            print(f"Onigiri: Nook Rush server unavailable: {error}")
+            print(f"Bingsu: Nook Rush server unavailable: {error}")
             self._last_recipe_rush_error = str(error)
             return None
         if str(data.get("result", "")).lower() != "success":
@@ -954,7 +954,7 @@ class NookLevelManager:
         try:
             payload = self._recipe_rush_payload(today, restaurant_id)
         except Exception as exc:
-            print(f"Onigiri: could not build Nook Rush request: {exc}")
+            print(f"Bingsu: could not build Nook Rush request: {exc}")
             return
 
         request = self._request_recipe_rush
@@ -978,7 +978,7 @@ class NookLevelManager:
             mw.taskman.run_in_background(work, done)
         except Exception as exc:
             self._recipe_rush_fetch_inflight = False
-            print(f"Onigiri: could not start Nook Rush fetch: {exc}")
+            print(f"Bingsu: could not start Nook Rush fetch: {exc}")
 
     def _apply_fetched_recipe_rush_ticket(self, today: str, ticket: Dict[str, Any]) -> None:
         """Install a ticket that arrived from the background fetch."""
@@ -1294,7 +1294,7 @@ class NookLevelManager:
                 self._last_daily_sync_time = now
                 self._cached_daily_count = today_reviews
             except Exception as e:
-                # print(f"Onigiri: Error syncing daily progress: {e}")
+                # print(f"Bingsu: Error syncing daily progress: {e}")
                 return False
 
         current_progress = daily_special.get("current_progress", 0)
@@ -1600,7 +1600,7 @@ class NookLevelManager:
         # Suppress popup notifications while Silent mode is on OR when the
         # user has explicitly disabled Nook Level notifications
         conf = config.get_config_readonly()
-        silent_mode = conf.get("onigiri_reviewer_silent_notifications", False)
+        silent_mode = conf.get("bingsu_reviewer_silent_notifications", False)
         restaurant_notifications_on = conf.get("restaurant_level", {}).get("notifications_enabled", True)
         if silent_mode or not restaurant_notifications_on:
             notifications = []
@@ -1634,9 +1634,9 @@ class NookLevelManager:
             if reviewer_web:
                 notification_script = (
                     "(function() {"
-                    "if (window.OnigiriNotifications) {"
+                    "if (window.BingsuNotifications) {"
                     f"const items = {payload};"
-                    "items.forEach(item => window.OnigiriNotifications.show(item));"
+                    "items.forEach(item => window.BingsuNotifications.show(item));"
                     "}"
                     "})();"
                 )
@@ -1702,7 +1702,7 @@ class NookLevelManager:
                 "const levelBind = document.querySelector('[data-bind=\"level\"]');"
                 "if (levelBind) levelBind.textContent = progress.level;"
 
-            "} catch (e) { console.error('Onigiri UI Update Error:', e); }"
+            "} catch (e) { console.error('Bingsu UI Update Error:', e); }"
             "})();"
         )
 
@@ -1842,7 +1842,7 @@ class NookLevelManager:
                 'id': special_id,
                 'name': f'{tr("recipe_rush_delivered", "Recipe delivered")}: {special_name}',
                 'description': f"{special_desc} (+{xp_earned} XP)",
-                'iconImage': f"{self._addon_prefix}/system_files/gamification_images/onigiri_trophy.webp",
+                'iconImage': f"{self._addon_prefix}/system_files/gamification_images/bingsu_trophy.webp",
                 'iconAlt': "Nook Rush Trophy",
                 'type': 'xp',
                 'amount': xp_earned,
@@ -1934,7 +1934,7 @@ class NookLevelManager:
         conf = config.get_config_readonly()
         restaurant_conf = self._restaurant_conf_readonly()
         if not restaurant_conf.get("enabled", False):
-            print("Onigiri: Nook Level disabled in config, not awarding XP.")
+            print("Bingsu: Nook Level disabled in config, not awarding XP.")
             return []
 
         # Read current state from gamification.json (source of truth for XP/level)
@@ -2013,7 +2013,7 @@ class NookLevelManager:
             update_data["taiyaki_coins"] = new_coins
             
         self._update_gamification_data(update_data, immediate=coins_changed)
-        # print(f"Onigiri: XP awarded. New Total: {new_total}, Level: {level}")
+        # print(f"Bingsu: XP awarded. New Total: {new_total}, Level: {level}")
         
         # Handle daily special progress and notifications
         # Get settings from config
@@ -2074,7 +2074,7 @@ class NookLevelManager:
                             'id': f"recipe_rush_progress_{milestone}",
                             'name': f'{rush_name}: {milestone}% complete!',
                             'description': f"You've reached {milestone}% of today's recipe ({new_progress}/{target}).",
-                            'iconImage': f"{self._addon_prefix}/system_files/gamification_images/onigiri_trophy.webp",
+                            'iconImage': f"{self._addon_prefix}/system_files/gamification_images/bingsu_trophy.webp",
                             'iconAlt': "Nook Rush Progress",
                             'type': 'info',
                             'progress': milestone,
@@ -2109,7 +2109,7 @@ class NookLevelManager:
                 recovery = _curve_loss_recovery(game_state, previous_state, multiplier)
                 if recovery:
                     self._update_gamification_data(recovery, immediate=True)
-                    print("[Onigiri] Restored Nook level and coins from a verified progression snapshot")
+                    print("[Bingsu] Restored Nook level and coins from a verified progression snapshot")
                     return self._get_gamification_state()
         previous = game_state.get("xp_multiplier")
         total = max(0, int(game_state.get("total_xp") or 0))
@@ -2381,7 +2381,7 @@ def default_chip_progress_color() -> str:
         if getattr(mw, "col", None) and hasattr(mw.col, "conf"):
             custom = _valid_hex_color(
                 mw.col.conf.get(
-                    "onigiri_profile_level_bar_custom_color",
+                    "bingsu_profile_level_bar_custom_color",
                     config.DEFAULT_PROFILE_LEVEL_COLOR,
                 )
             )

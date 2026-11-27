@@ -1,6 +1,6 @@
 # Icon picker dialogs (split out of the historical _legacy.py).
 from .common import *
-from .onigiri_notifications import notify_warning
+from .bingsu_notifications import notify_warning
 from .common import _contrast_icon_color
 from .widgets import *
 from .picker_chrome import (
@@ -574,7 +574,7 @@ class DeckIconPickerDialog(QDialog):
 
     def _choose_picker_color(self, key, anchor=None):
         current = self._valid_color(self.color_values.get(key, "#00A982"))
-        chosen, ok = OnigiriColorDialog.getColor(current, self, anchor=anchor)
+        chosen, ok = BingsuColorDialog.getColor(current, self, anchor=anchor)
         if not ok:
             return
         chosen = self._valid_color(chosen, current)
@@ -586,7 +586,7 @@ class DeckIconPickerDialog(QDialog):
         self._build_tabs()
 
     def _scroll_style(self):
-        """Modern, theme-aware scrollbar matching the rest of Onigiri's dialogs."""
+        """Modern, theme-aware scrollbar matching the rest of Bingsu's dialogs."""
         return scroll_qss(self._pal)
 
     def _search_field(self, placeholder, on_text):

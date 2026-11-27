@@ -11,10 +11,10 @@ RENDER_PY = (ROOT / "settings_web" / "render.py").read_text(encoding="utf-8")
 
 class HeatmapPreviewTests(unittest.TestCase):
     def test_settings_embeds_live_heatmap_runtime(self):
-        self.assertIn("/*__ONIGIRI_HEATMAP_JS__*/", SETTINGS_HTML)
+        self.assertIn("/*__BINGSU_HEATMAP_JS__*/", SETTINGS_HTML)
         self.assertIn('read_web_asset("heatmap.js")', RENDER_PY)
         self.assertIn(
-            '.replace("/*__ONIGIRI_HEATMAP_JS__*/", heatmap_js)',
+            '.replace("/*__BINGSU_HEATMAP_JS__*/", heatmap_js)',
             RENDER_PY,
         )
 
@@ -27,13 +27,13 @@ class HeatmapPreviewTests(unittest.TestCase):
 
     def test_detached_settings_preview_passes_its_container_element(self):
         self.assertIn(
-            "window.OnigiriHeatmap.render(\n"
+            "window.BingsuHeatmap.render(\n"
             "      container, HEATMAP_PREVIEW_DATA, previewConfig",
             SETTINGS_JS,
         )
         self.assertNotIn(
-            "window.OnigiriHeatmap.render(\n"
-            '      "onigiri-heatmap-container", HEATMAP_PREVIEW_DATA, previewConfig',
+            "window.BingsuHeatmap.render(\n"
+            '      "bingsu-heatmap-container", HEATMAP_PREVIEW_DATA, previewConfig',
             SETTINGS_JS,
         )
 

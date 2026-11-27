@@ -1,6 +1,6 @@
 # Open Bento issue fixes — 2026-10-13
 
-Implemented locally in the installed Onigiri add-on. The open issue list contained nine issues without the `pre-bento` label; #346 and #353 describe the same missing AI button. Issues #338, #336, #333, #328, #281 and #280 were excluded by that label.
+Implemented locally in the installed Bingsu add-on. The open issue list contained nine issues without the `pre-bento` label; #346 and #353 describe the same missing AI button. Issues #338, #336, #333, #328, #281 and #280 were excluded by that label.
 
 | Issue | Change | Validation boundary |
 | --- | --- | --- |
@@ -23,7 +23,7 @@ Implemented locally in the installed Onigiri add-on. The open issue list contain
 ## Checks completed
 
 - 13 new Python behavioral regression tests pass.
-- Headless Chromium passes 40 locale/selection cases, eight sidebar image cases, dashboard click testing and four reviewer font/button layouts at 360/1440 pixels in light/dark mode. Tests use generated Onigiri UI and shipped fonts, without loading an Anki profile.
+- Headless Chromium passes 40 locale/selection cases, eight sidebar image cases, dashboard click testing and four reviewer font/button layouts at 360/1440 pixels in light/dark mode. Tests use generated Bingsu UI and shipped fonts, without loading an Anki profile.
 - Existing background-matching and font-color JavaScript checks pass; changed Python and JavaScript syntax checks pass.
 - Full Python suite: 324 tests, 305 passed, eight skipped and 11 failures. The same 11 failures were present before these changes in the 311-test baseline; no new failing test names were introduced.
 - Six of the seven original files under `user_files` retain their SHA-256 hashes. At final inspection, the gamification file had initialized `xp_multiplier: 1` and updated its timestamp; XP, level, coins, purchases and every other field were unchanged. Its new `.bak` file matches the original SHA-256 hash exactly. This initialization was preserved. The automated checks use isolated fixtures and did not open Anki or load the live collection.
@@ -33,4 +33,4 @@ Implemented locally in the installed Onigiri add-on. The open issue list contain
 
 Restart Anki to load the modified Python code. Verify the reported Windows dashboard setup, the selected font in native macOS Anki and the relevant third-party add-on versions. For #354, automatic recovery is intentionally limited to an exact proven backup match; ambiguous affected profiles require inspection of their backups before restoring a balance.
 
-No GitHub issue was closed or commented on, and no release was published. The add-on directory is not a Git checkout. Original source copies are in `/tmp/onigiri-issues-2026-10-13-baseline`; baseline and final suite logs are alongside that directory.
+No GitHub issue was closed or commented on, and no release was published. The add-on directory is not a Git checkout. Original source copies are in `/tmp/bingsu-issues-2026-10-13-baseline`; baseline and final suite logs are alongside that directory.

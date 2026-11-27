@@ -233,7 +233,7 @@ class GamificationData:
             if '_security_token' in merged_restaurant:
                 import hashlib
                 merged_restaurant['_security_token'] = hashlib.sha256(
-                    f"{merged_restaurant['taiyaki_coins']}:onigiri_secret_salt_2024".encode()
+                    f"{merged_restaurant['taiyaki_coins']}:bingsu_secret_salt_2024".encode()
                 ).hexdigest()
             new_data['restaurant_level'] = merged_restaurant
 

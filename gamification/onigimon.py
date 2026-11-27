@@ -17,7 +17,7 @@ from aqt import gui_hooks, mw
 
 from ..core import config
 from ..core import safe_storage
-from ..ui_kit.onigiri_notifications import notify as show_onigiri_notification
+from ..ui_kit.bingsu_notifications import notify as show_bingsu_notification
 from ..core.translations import tr
 
 
@@ -495,7 +495,7 @@ class AnkimonBridge:
             return []
         now = time.time()
         # Never cache an empty result: Ankimon boots asynchronously and may
-        # attach ``mw.ankimon_db`` a moment after Onigiri's first render.
+        # attach ``mw.ankimon_db`` a moment after Bingsu's first render.
         if self._collection_cache and now - self._collection_cache_time < 10:
             return self._collection_cache
 
@@ -1064,10 +1064,10 @@ class AnkimonBridge:
         if not slug:
             return ""
 
-        onigiri_path = os.path.dirname(os.path.dirname(__file__))
+        bingsu_path = os.path.dirname(os.path.dirname(__file__))
         variant = "shiny" if shiny else "regular"
         local_rel = f"system_files/pokesprite/pokemon-gen8/{variant}/{slug}.png"
-        if os.path.exists(os.path.join(onigiri_path, local_rel)):
+        if os.path.exists(os.path.join(bingsu_path, local_rel)):
             try:
                 addon_package = mw.addonManager.addonFromModule(__name__)
                 return f"/_addons/{addon_package}/{local_rel}"
@@ -2238,7 +2238,7 @@ class OnigimonManager:
             context = None
             if getattr(mw, "state", "") == "review":
                 context = getattr(mw, "reviewer", None)
-            show_onigiri_notification(
+            show_bingsu_notification(
                 description,
                 title=title,
                 context=context,

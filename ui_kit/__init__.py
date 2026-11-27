@@ -13,9 +13,9 @@ handful of pieces with real users outside it live here:
   icon_picker    DeckIconPickerDialog
   fonts          font registry and Qt/web font helpers
   emoji_sprites  emoji asset registry
-  onigiri_color_picker, onigiri_date_picker  shared native pickers
-  onigiri_notifications  native notifications
-  menu_buttons   Onigiri menu actions
+  bingsu_color_picker, bingsu_date_picker  shared native pickers
+  bingsu_notifications  native notifications
+  menu_buttons   Bingsu menu actions
 """
 
 __all__ = ["FlowLayout"]

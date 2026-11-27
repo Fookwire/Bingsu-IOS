@@ -1,5 +1,5 @@
 (() => {
-  let data = window.ONIGIRI_ONIGIMON_DATA || {}, selected = null, busy = false, toastTimer = 0;
+  let data = window.BINGSU_ONIGIMON_DATA || {}, selected = null, busy = false, toastTimer = 0;
   let speechTimer = 0, lastSpeech = -1, spriteTimer = 0;
   let careTransition;
   const $ = s => document.querySelector(s), esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  let data = window.ONIGIRI_COMMUNICATIONS_DATA || {};
+  let data = window.BINGSU_COMMUNICATIONS_DATA || {};
   const $ = selector => document.querySelector(selector);
   const all = selector => [...document.querySelectorAll(selector)];
   const t = (key, fallback) => {

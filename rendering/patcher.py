@@ -16,8 +16,8 @@ from aqt import mw, gui_hooks
 from aqt.qt import *
 import aqt
 from aqt import mw, gui_hooks
-from ..ui_kit.onigiri_notifications import notify as tooltip
-from ..ui_kit.onigiri_notifications import notify_info as showInfo
+from ..ui_kit.bingsu_notifications import notify as tooltip
+from ..ui_kit.bingsu_notifications import notify_info as showInfo
 from aqt.webview import AnkiWebView
 from aqt.deckbrowser import DeckBrowser
 from aqt.main import MainWebView
@@ -40,7 +40,7 @@ from html.parser import HTMLParser
 from urllib.parse import urlparse, parse_qs, urlencode, unquote, quote_plus
 from typing import Optional, Dict, List, Tuple, Any, Callable, Union
 from ..core import config
-from . import onigiri_renderer
+from . import bingsu_renderer
 from . import overview_stats
 from ..decks import tree_updater as deck_tree_updater
 from . import heatmap
@@ -49,8 +49,8 @@ from ..core.translations import tr as tr_at
 from ..core.constants import COLOR_LABELS
 from ..ui_kit.emoji_sprites import asset_for_emoji
 
-# Use Onigiri's string-key translator throughout this module. Anki 25.09's
-# translator expects structured keys, so passing Onigiri keys to it crashes.
+# Use Bingsu's string-key translator throughout this module. Anki 25.09's
+# translator expects structured keys, so passing Bingsu keys to it crashes.
 tr = tr_at
 
 _OVERVIEW_FORMAT_KEYS = ("deck", "table", "shareLink", "desc")
@@ -156,7 +156,7 @@ def _learning_notice_enabled(conf, surface):
 
 
 def _learning_due_later_notice(col, enabled=True):
-    """Build the optional native-style next-learning notice for Onigiri.
+    """Build the optional native-style next-learning notice for Bingsu.
 
     This runs inside Anki's overview renderer. It is strictly decorative, so a
     scheduler or translation compatibility problem must never prevent a deck
@@ -170,7 +170,7 @@ def _learning_due_later_notice(col, enabled=True):
         if not enabled:
             return ""
         return (
-            '<div class="onigiri-learning-due-notice">'
+            '<div class="bingsu-learning-due-notice">'
             f"<p>{html.escape(str(tr_at('no_learning_cards_later_today', 'No learning cards later today here.')))}</p>"
             "</div>"
         )
@@ -182,7 +182,7 @@ def _build_learning_due_later_notice(col, enabled=True):
         return ""
 
     info = _learning_due_later_info(col)
-    notice_parts = ['<div class="onigiri-learning-due-notice">']
+    notice_parts = ['<div class="bingsu-learning-due-notice">']
     seconds = info["next_seconds"]
     ready_now = info["ready_now"]
     ready_count_text = ""
@@ -257,10 +257,10 @@ def _build_learning_due_later_notice(col, enabled=True):
             quote=True,
         )
         notice_parts.append(
-            '<button type="button" class="onigiri-learning-browse-button" '
+            '<button type="button" class="bingsu-learning-browse-button" '
             f'aria-label="{action_label}" title="{action_label}" '
-            'onclick="pycmd(\'onigiri_browse_ready_learning\'); return false;">'
-            f'<span class="onigiri-learning-ready-text">{ready_label}</span>'
+            'onclick="pycmd(\'bingsu_browse_ready_learning\'); return false;">'
+            f'<span class="bingsu-learning-ready-text">{ready_label}</span>'
             f"{suffix_label}</button>"
         )
     notice_parts.append("</div>")
@@ -272,12 +272,12 @@ def _escape_overview_body_percent_literals(html_text: str) -> str:
     if "%" not in html_text:
         return html_text
 
-    percent_token = "__ONIGIRI_LITERAL_PERCENT__"
+    percent_token = "__BINGSU_LITERAL_PERCENT__"
     format_tokens = {}
     escaped = html_text
     for key in _OVERVIEW_FORMAT_KEYS:
         placeholder = f"%({key})s"
-        token = f"__ONIGIRI_OVERVIEW_FORMAT_{key.upper()}__"
+        token = f"__BINGSU_OVERVIEW_FORMAT_{key.upper()}__"
         format_tokens[token] = placeholder
         escaped = escaped.replace(placeholder, token)
 
@@ -306,7 +306,7 @@ def _focus_dango():
         from ..gamification import focus_dango
         return focus_dango
     except Exception as e:
-        print(f"Onigiri: could not import focus_dango: {e}")
+        print(f"Bingsu: could not import focus_dango: {e}")
         return None
 
 # --- Menu Styling ---
@@ -335,7 +335,7 @@ def apply_menu_styling():
 
     # 3. Construct the QSS
     new_style_block = f"""
-    /* ONIGIRI_MENU_START */
+    /* BINGSU_MENU_START */
     QMenu {{
         background-color: {bg_color};
         border: 1px solid {border_color};
@@ -359,7 +359,7 @@ def apply_menu_styling():
         background-color: {border_color};
         margin: 4px 10px;
     }}
-    /* ONIGIRI_MENU_END */
+    /* BINGSU_MENU_END */
     """
     
     # 4. Inject the stylesheet safely (Replace if exists, Append if not)
@@ -368,7 +368,7 @@ def apply_menu_styling():
         current_sheet = app.styleSheet()
         
         # Regex to find existing block
-        pattern = re.compile(r'/\* ONIGIRI_MENU_START \*/.*?/\* ONIGIRI_MENU_END \*/', re.DOTALL)
+        pattern = re.compile(r'/\* BINGSU_MENU_START \*/.*?/\* BINGSU_MENU_END \*/', re.DOTALL)
         
         if pattern.search(current_sheet):
             # Replace existing block
@@ -388,7 +388,7 @@ def patch_qmenu():
     # to set the WA_TranslucentBackground attribute on every new menu instances.
     
     # Store reference to original init
-    if hasattr(QMenu, "_onigiri_patched"):
+    if hasattr(QMenu, "_bingsu_patched"):
         return
 
     original_init = QMenu.__init__
@@ -400,7 +400,7 @@ def patch_qmenu():
 
     # Apply the patch
     QMenu.__init__ = new_init
-    QMenu._onigiri_patched = True
+    QMenu._bingsu_patched = True
 
 
 # --- Toolbar Patching ---
@@ -459,7 +459,7 @@ _synapsepro_theme_hook_wrappers = {}
 _synapsepro_overview_bridge_installed = False
 
 
-class _OnigiriElementExtractor(HTMLParser):
+class _BingsuElementExtractor(HTMLParser):
     def __init__(self, required_classes: Tuple[str, ...]):
         super().__init__(convert_charrefs=False)
         self.required_classes = set(required_classes)
@@ -560,7 +560,7 @@ def _extract_html_by_classes(html_text: str, required_classes: Tuple[str, ...]) 
     if not html_text or not required_classes:
         return ""
     try:
-        parser = _OnigiriElementExtractor(required_classes)
+        parser = _BingsuElementExtractor(required_classes)
         parser.feed(str(html_text))
         parser.close()
         if not parser.match_html:
@@ -568,7 +568,7 @@ def _extract_html_by_classes(html_text: str, required_classes: Tuple[str, ...]) 
         styles = "".join(parser.style_parts)
         return styles + parser.match_html
     except Exception as exc:
-        print(f"Onigiri: failed to extract external widget {required_classes}: {exc}")
+        print(f"Bingsu: failed to extract external widget {required_classes}: {exc}")
         return ""
 
 
@@ -609,17 +609,17 @@ def _make_synapsepro_theme_passthrough_hook(original_hook):
     if cached:
         return cached
 
-    def onigiri_synapsepro_theme_passthrough(web_content, context):
+    def bingsu_synapsepro_theme_passthrough(web_content, context):
         if isinstance(context, Overview):
             return
         return original_hook(web_content, context)
 
-    onigiri_synapsepro_theme_passthrough.__name__ = "onigiri_synapsepro_theme_passthrough"
-    onigiri_synapsepro_theme_passthrough.__module__ = getattr(original_hook, "__module__", "synapsepro")
-    onigiri_synapsepro_theme_passthrough.__qualname__ = onigiri_synapsepro_theme_passthrough.__name__
-    onigiri_synapsepro_theme_passthrough._onigiri_synapsepro_theme_original_hook = original_hook
-    _synapsepro_theme_hook_wrappers[original_id] = onigiri_synapsepro_theme_passthrough
-    return onigiri_synapsepro_theme_passthrough
+    bingsu_synapsepro_theme_passthrough.__name__ = "bingsu_synapsepro_theme_passthrough"
+    bingsu_synapsepro_theme_passthrough.__module__ = getattr(original_hook, "__module__", "synapsepro")
+    bingsu_synapsepro_theme_passthrough.__qualname__ = bingsu_synapsepro_theme_passthrough.__name__
+    bingsu_synapsepro_theme_passthrough._bingsu_synapsepro_theme_original_hook = original_hook
+    _synapsepro_theme_hook_wrappers[original_id] = bingsu_synapsepro_theme_passthrough
+    return bingsu_synapsepro_theme_passthrough
 
 
 def take_control_of_synapsepro_overview_theme_hook():
@@ -627,7 +627,7 @@ def take_control_of_synapsepro_overview_theme_hook():
         hooks = gui_hooks.webview_will_set_content
         hook_list = getattr(hooks, "_hooks", hooks)
         for index, hook in enumerate(list(hook_list)):
-            if getattr(hook, "_onigiri_synapsepro_theme_original_hook", None):
+            if getattr(hook, "_bingsu_synapsepro_theme_original_hook", None):
                 continue
             if not _is_synapsepro_theme_assets_hook(hook):
                 continue
@@ -641,7 +641,7 @@ def take_control_of_synapsepro_overview_theme_hook():
                     pass
                 hooks.append(wrapper)
     except Exception as exc:
-        print(f"Onigiri: failed to isolate SynapsePro overview theme hook: {exc}")
+        print(f"Bingsu: failed to isolate SynapsePro overview theme hook: {exc}")
 
 
 def _remember_synapsepro_overview_hook(hook) -> None:
@@ -684,7 +684,7 @@ def take_control_of_synapsepro_overview_hook():
             except ValueError:
                 pass
     except Exception as exc:
-        print(f"Onigiri: failed to capture SynapsePro overview hook: {exc}")
+        print(f"Bingsu: failed to capture SynapsePro overview hook: {exc}")
 
 
 def is_synapsepro_identified() -> bool:
@@ -757,11 +757,11 @@ def _make_synapsepro_split_hook(original_hook, spec):
         )
         content.stats = _extract_html_by_classes(combined_html, spec["classes"])
 
-    split_hook.__name__ = f"onigiri_synapsepro_{spec['suffix']}"
+    split_hook.__name__ = f"bingsu_synapsepro_{spec['suffix']}"
     split_hook.__module__ = getattr(original_hook, "__module__", "synapsepro")
     split_hook.__qualname__ = split_hook.__name__
-    split_hook._onigiri_external_display_name = spec["label"]
-    split_hook._onigiri_synapsepro_original_hook = original_hook
+    split_hook._bingsu_external_display_name = spec["label"]
+    split_hook._bingsu_synapsepro_original_hook = original_hook
     return split_hook
 
 
@@ -778,7 +778,7 @@ def _get_synapsepro_split_hooks(original_hook):
 def get_external_hook_display_name(hook_id: str, fallback: str = "") -> str:
     hook_id = str(hook_id or "")
     for spec in _SYNAPSEPRO_DECK_WIDGETS:
-        if hook_id.endswith(f"onigiri_synapsepro_{spec['suffix']}"):
+        if hook_id.endswith(f"bingsu_synapsepro_{spec['suffix']}"):
             return spec["label"]
     return fallback or hook_id.split(".")[0]
 
@@ -831,9 +831,9 @@ def _sanitize_synapsepro_overview_widget_html(widget_html: str) -> str:
 
 
 def _synapsepro_overview_background_priority_css(addon_path: str) -> str:
-    """Keep SynapsePro's overview theme from taking over Onigiri's page background."""
+    """Keep SynapsePro's overview theme from taking over Bingsu's page background."""
     conf = config.get_config_readonly()
-    overview_mode = conf.get("onigiri_overview_bg_mode", "main")
+    overview_mode = conf.get("bingsu_overview_bg_mode", "main")
     if overview_mode == "slideshow":
         overview_mode = "image_color"
     main_mode = mw.col.conf.get("modern_menu_background_mode", "color")
@@ -852,19 +852,19 @@ def _synapsepro_overview_background_priority_css(addon_path: str) -> str:
             config.DEFAULTS["colors"]["dark"]["--bg"],
         )
     else:
-        light_color = conf.get("onigiri_overview_bg_light_color", "#FFFFFF")
-        dark_color = conf.get("onigiri_overview_bg_dark_color", "#2C2C2C")
+        light_color = conf.get("bingsu_overview_bg_light_color", "#FFFFFF")
+        dark_color = conf.get("bingsu_overview_bg_dark_color", "#2C2C2C")
 
     if has_image_layer:
         return f"""
-        <style id="onigiri-synapsepro-background-priority">
+        <style id="bingsu-synapsepro-background-priority">
             html {{
                 background-color: {light_color} !important;
                 background-image: none !important;
             }}
             body,
             body.overview,
-            body.onigiri-overview,
+            body.bingsu-overview,
             body:has(#custom-dashboard) {{
                 background: transparent !important;
                 background-image: none !important;
@@ -879,7 +879,7 @@ def _synapsepro_overview_background_priority_css(addon_path: str) -> str:
             .night-mode body,
             .nightMode body,
             body.nightMode.overview,
-            body.nightMode.onigiri-overview,
+            body.nightMode.bingsu-overview,
             body.nightMode:has(#custom-dashboard) {{
                 background: transparent !important;
                 background-image: none !important;
@@ -897,11 +897,11 @@ def _synapsepro_overview_background_priority_css(addon_path: str) -> str:
         """
 
     return f"""
-    <style id="onigiri-synapsepro-background-priority">
+    <style id="bingsu-synapsepro-background-priority">
         html,
         body,
         body.overview,
-        body.onigiri-overview,
+        body.bingsu-overview,
         body:has(#custom-dashboard) {{
             background-image: none !important;
             background-color: {light_color} !important;
@@ -912,7 +912,7 @@ def _synapsepro_overview_background_priority_css(addon_path: str) -> str:
         html.nightMode,
         .nightMode body,
         body.nightMode.overview,
-        body.nightMode.onigiri-overview,
+        body.nightMode.bingsu-overview,
         body.nightMode:has(#custom-dashboard) {{
             background-image: none !important;
             background-color: {dark_color} !important;
@@ -928,7 +928,7 @@ def extract_synapsepro_overview_widget(body_html: str) -> str:
         return ""
     widget_html = _sanitize_synapsepro_overview_widget_html(widget_html)
     return (
-        '<div class="onigiri-external-overview-addon onigiri-synapsepro-overview-widget">'
+        '<div class="bingsu-external-overview-addon bingsu-synapsepro-overview-widget">'
         f"{widget_html}"
         "</div>"
     )
@@ -948,7 +948,7 @@ def _render_synapsepro_overview_widget_from_hooks(context) -> str:
         try:
             hook(temp_content, context)
         except Exception as exc:
-            print(f"Onigiri: failed to render SynapsePro overview widget: {exc}")
+            print(f"Bingsu: failed to render SynapsePro overview widget: {exc}")
             continue
         widget_html = extract_synapsepro_overview_widget(getattr(temp_content, "body", "") or "")
         if widget_html:
@@ -966,7 +966,7 @@ def _strip_synapsepro_overview_assets(web_content) -> None:
                 if "236979321/theme/user_files/" not in str(css_file)
             ]
     except Exception as exc:
-        print(f"Onigiri: failed to strip SynapsePro overview CSS: {exc}")
+        print(f"Bingsu: failed to strip SynapsePro overview CSS: {exc}")
 
 
 def inject_synapsepro_overview_widget(web_content, context):
@@ -986,16 +986,16 @@ def inject_synapsepro_overview_widget(web_content, context):
         generate_overview_background_css(addon_path)
         + _synapsepro_overview_background_priority_css(addon_path)
         + """
-    <style id="onigiri-synapsepro-overview-guard">
+    <style id="bingsu-synapsepro-overview-guard">
         #overview-wrapper {
             background: transparent !important;
         }
-        body.onigiri-overview .overview-center-container,
-        body.onigiri-overview #overview-wrapper,
-        body.onigiri-overview #overview,
-        body.onigiri-overview .main,
-        body.onigiri-overview .toolbar,
-        body.onigiri-overview .bottom {
+        body.bingsu-overview .overview-center-container,
+        body.bingsu-overview #overview-wrapper,
+        body.bingsu-overview #overview,
+        body.bingsu-overview .main,
+        body.bingsu-overview .toolbar,
+        body.bingsu-overview .bottom {
             background: transparent !important;
             background-image: none !important;
         }
@@ -1007,11 +1007,11 @@ def inject_synapsepro_overview_widget(web_content, context):
     if not body:
         body = getattr(web_content, "body", "") or ""
         if "custom-dashboard" in body or "SynapsePro" in body:
-            print("Onigiri: SynapsePro overview override could not restore a captured body.")
+            print("Bingsu: SynapsePro overview override could not restore a captured body.")
     web_content.body = body + background_guard
 
 
-def capture_onigiri_overview_body(web_content, context):
+def capture_bingsu_overview_body(web_content, context):
     if not synapsepro_addon_installed():
         return
     if isinstance(context, Overview):
@@ -1064,19 +1064,19 @@ def ensure_synapsepro_overview_bridge_hook():
         hooks = gui_hooks.webview_will_set_content
         hook_list = getattr(hooks, "_hooks", None)
         if isinstance(hook_list, list):
-            for hook in (capture_onigiri_overview_body, inject_synapsepro_overview_widget):
+            for hook in (capture_bingsu_overview_body, inject_synapsepro_overview_widget):
                 try:
                     hook_list.remove(hook)
                 except ValueError:
                     pass
-            hook_list.insert(0, capture_onigiri_overview_body)
+            hook_list.insert(0, capture_bingsu_overview_body)
             hook_list.append(inject_synapsepro_overview_widget)
         else:
-            hooks.append(capture_onigiri_overview_body)
+            hooks.append(capture_bingsu_overview_body)
             hooks.append(inject_synapsepro_overview_widget)
         _synapsepro_overview_bridge_installed = True
     except Exception as exc:
-        print(f"Onigiri: failed to install SynapsePro overview bridge: {exc}")
+        print(f"Bingsu: failed to install SynapsePro overview bridge: {exc}")
 
 
 def apply_synapsepro_sidebar_visibility(conf=None):
@@ -1089,7 +1089,7 @@ def apply_synapsepro_sidebar_visibility(conf=None):
             dock.setVisible(False)
             dock.hide()
     except Exception as exc:
-        print(f"Onigiri: failed to hide SynapsePro sidebar: {exc}")
+        print(f"Bingsu: failed to hide SynapsePro sidebar: {exc}")
 
 
 def get_sync_status():
@@ -1197,7 +1197,7 @@ def _get_profile_pic_html(user_name: str, addon_package: str, css_class: str = "
 
 def take_control_of_deck_browser_hook():
     """
-    Finds external hooks and stores them for Onigiri to render inside its
+    Finds external hooks and stores them for Bingsu to render inside its
     custom deck browser.
 
     Keep the hooks registered with Anki. Some add-ons, including Anki
@@ -1205,7 +1205,7 @@ def take_control_of_deck_browser_hook():
     remove/re-append step fail and can break their home widget.
     """
     global _managed_hooks
-    onigiri_module_name = config.__name__.split('.')[0]
+    bingsu_module_name = config.__name__.split('.')[0]
     known_hook_indexes = {
         _get_hook_name(hook): index
         for index, hook in enumerate(_managed_hooks)
@@ -1215,7 +1215,7 @@ def take_control_of_deck_browser_hook():
         hook_id = _get_hook_name(hook)
         if hook_id.split(".")[0] == "Byte":
             continue
-        should_manage = onigiri_module_name not in hook_id or "learner_stats_widget" in hook_id
+        should_manage = bingsu_module_name not in hook_id or "learner_stats_widget" in hook_id
         if not should_manage:
             continue
         if hook_id in known_hook_indexes:
@@ -1582,9 +1582,9 @@ def _get_nook_level_chip_html():
     # Profile Level chip. Which game it reflects is chosen in
     # Settings > Games > Gamification > Profile Level.
     try:
-        from . import onigiri_renderer
-        game = onigiri_renderer._selected_profile_level_game()
-        enabled, level, fraction, level_color = onigiri_renderer._profile_level_progress()
+        from . import bingsu_renderer
+        game = bingsu_renderer._selected_profile_level_game()
+        enabled, level, fraction, level_color = bingsu_renderer._profile_level_progress()
         if not enabled:
             return ""
         # Nook keeps its own "show progress on profile bar" visibility gate.
@@ -1627,7 +1627,7 @@ def _get_nook_level_chip_html():
         </div>
         """
     except Exception as e:
-        print(f"Onigiri: Error rendering profile level chip: {e}")
+        print(f"Bingsu: Error rendering profile level chip: {e}")
         return ""
 
 
@@ -1665,7 +1665,7 @@ def _get_reviewer_nook_level_chip_html():
         </div>
         """
     except Exception as e:
-        print(f"Onigiri: Error rendering reviewer restaurant level chip: {e}")
+        print(f"Bingsu: Error rendering reviewer restaurant level chip: {e}")
         return ""
 
 
@@ -1882,12 +1882,12 @@ def _get_stats_html():
 
     heatmap_html = ""
     if show_heatmap:
-        heatmap_html = "<div id='onigiri-profile-heatmap-container'></div>"
+        heatmap_html = "<div id='bingsu-profile-heatmap-container'></div>"
 
     # 3. Construct the final HTML for the stats section
     html_content = f"""
     {stats_grid_html}
-    <div id='onigiri-profile-heatmap-wrapper' style='margin-top: 20px;'>
+    <div id='bingsu-profile-heatmap-wrapper' style='margin-top: 20px;'>
         {heatmap_html}
     </div>
     """
@@ -1943,10 +1943,10 @@ def _get_nook_level_profile_html() -> str:
     except Exception:
         pass
 
-    bar_mode = mw.col.conf.get("onigiri_profile_level_bar_mode", "theme")
+    bar_mode = mw.col.conf.get("bingsu_profile_level_bar_mode", "theme")
     if bar_mode == "custom":
         bar_color = mw.col.conf.get(
-            "onigiri_profile_level_bar_custom_color",
+            "bingsu_profile_level_bar_custom_color",
             config.DEFAULT_PROFILE_LEVEL_COLOR,
         )
     else:
@@ -2055,7 +2055,7 @@ def on_webview_js_message(handled, message, context):
         cmd = message
         
         # Let webview_handlers handle the command
-        # if cmd.startswith("onigiri_"):
+        # if cmd.startswith("bingsu_"):
         #    return webview_handlers.handle_webview_cmd((False, None), cmd, context)
         
         if cmd == "openTaiyakiStore":
@@ -2111,12 +2111,12 @@ def on_webview_js_message(handled, message, context):
                 mw.deckBrowser.web.eval("SyncStatusManager.setSyncing(true);")
             mw.onSync()
             return (True, None)
-        if cmd == "onigiri_check_sync_status":
+        if cmd == "bingsu_check_sync_status":
             sync_status = get_sync_status()
             if hasattr(mw.deckBrowser, 'web') and mw.deckBrowser.web:
                 mw.deckBrowser.web.eval(f"SyncStatusManager.setSyncStatus('{sync_status}');")
             return (True, None)
-        if cmd == "openOnigiriSettings":
+        if cmd == "openBingsuSettings":
             from .. import settings_web
 
             settings_web.open_settings(0)
@@ -2177,37 +2177,37 @@ def on_webview_js_message(handled, message, context):
         if cmd.startswith("saveSidebarState:"):
             try:
                 is_collapsed = cmd.split(":")[1] == 'true'
-                mw.col.conf["onigiri_sidebar_collapsed"] = is_collapsed
+                mw.col.conf["bingsu_sidebar_collapsed"] = is_collapsed
                 mw.col.setMod()
             except Exception as e:
-                print(f"Onigiri: Error saving sidebar state: {e}")
+                print(f"Bingsu: Error saving sidebar state: {e}")
             return (True, None)
         # --- Focus Mode ---
         if cmd.startswith("saveDeckFocusState:"):
             try:
                 is_focused = cmd.split(":")[1] == 'true'
-                mw.col.conf["onigiri_deck_focus_mode"] = is_focused
-                mw.col.conf["onigiri_deck_cycle_state"] = 1 if is_focused else 0
+                mw.col.conf["bingsu_deck_focus_mode"] = is_focused
+                mw.col.conf["bingsu_deck_cycle_state"] = 1 if is_focused else 0
                 mw.col.setMod()
             except Exception as e:
-                print(f"Onigiri: Error saving deck focus state: {e}")
+                print(f"Bingsu: Error saving deck focus state: {e}")
             return (True, None)
         if cmd.startswith("saveDeckCycleState:"):
             try:
                 value = int(cmd.split(":", 1)[1])
                 value = max(0, min(4, value))
-                mw.col.conf["onigiri_deck_cycle_state"] = value
-                mw.col.conf["onigiri_deck_focus_mode"] = value in (1, 2)
+                mw.col.conf["bingsu_deck_cycle_state"] = value
+                mw.col.conf["bingsu_deck_focus_mode"] = value in (1, 2)
                 mw.col.setMod()
             except Exception as e:
-                print(f"Onigiri: Error saving deck cycle state: {e}")
+                print(f"Bingsu: Error saving deck cycle state: {e}")
             return (True, None)
         # --- Focus Mode ---
 
     elif isinstance(context, Overview):
         cmd = message  # <-- This line must come FIRST
 
-        if cmd == "onigiri_browse_ready_learning":
+        if cmd == "bingsu_browse_ready_learning":
             try:
                 from aqt import dialogs
 
@@ -2249,7 +2249,7 @@ def on_webview_js_message(handled, message, context):
         if cmd == "sync":
             mw.onSync()
             return (True, None)
-        if cmd == "onigiri_check_sync_status":
+        if cmd == "bingsu_check_sync_status":
             return (True, None)
 
     elif isinstance(context, Reviewer):
@@ -2280,7 +2280,7 @@ def on_webview_js_message(handled, message, context):
         if cmd == "sync":
             mw.onSync()
             return (True, None)
-        if cmd == "onigiri_check_sync_status":
+        if cmd == "bingsu_check_sync_status":
             return (True, None)
 
     return handled
@@ -2294,7 +2294,7 @@ def patch_overview():
 	max_hide = conf.get("maxHide", False)
 	flow_mode = conf.get("flowMode", False)
     
-	overview_style = mw.col.conf.get("onigiri_overview_style", "pro")
+	overview_style = mw.col.conf.get("bingsu_overview_style", "pro")
 	style_class = "mini-overview" if overview_style == "mini" else ""
 
 	# Keep the Overview's component CSS coupled to the HTML patch. Recent Anki
@@ -2332,14 +2332,14 @@ def patch_overview():
 		+ generate_dynamic_css(conf)
 		+ generate_box_effect_button_vars_css(conf)
 		+ overview_dock_css
-		+ f"<script>window.onigiriReviewerDockMode = {json.dumps(overview_dock_mode)};</script>"
+		+ f"<script>window.bingsuReviewerDockMode = {json.dumps(overview_dock_mode)};</script>"
 		+ overview_script_tag("reviewer_dock.js")
 	)
 
 	mini_css = ""
 	if overview_style == "mini":
 		mini_css = """
-        <style id="onigiri-mini-overview-style">
+        <style id="bingsu-mini-overview-style">
             /* Keep Mini below the fixed navigation while Pro stays vertically centered. */
             body.mini-overview { align-items: flex-start !important; }
             .overview-center-container.mini-overview {
@@ -2436,10 +2436,10 @@ def patch_overview():
                 width: 100%;
             }
             .mini-overview .overview-bottom-actions .overview-button { 
-                background: var(--overview-action-button-bg, var(--onigiri-box-effect-bg, var(--canvas-inset, #f5f5f5))) !important; 
-                color: var(--overview-action-button-fg, var(--onigiri-box-effect-fg, var(--fg, #333))) !important; 
-                border: var(--onigiri-box-effect-stroke, 1px) solid var(--overview-action-button-border, var(--onigiri-box-effect-border, var(--border, #d9d9d9))); 
-                border-radius: var(--onigiri-box-effect-radius, 8px); 
+                background: var(--overview-action-button-bg, var(--bingsu-box-effect-bg, var(--canvas-inset, #f5f5f5))) !important; 
+                color: var(--overview-action-button-fg, var(--bingsu-box-effect-fg, var(--fg, #333))) !important; 
+                border: var(--bingsu-box-effect-stroke, 1px) solid var(--overview-action-button-border, var(--bingsu-box-effect-border, var(--border, #d9d9d9))); 
+                border-radius: var(--bingsu-box-effect-radius, 8px); 
                 text-decoration: none; 
                 font-family: var(--font-main), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
                 font-size: var(--font-size-main, 13px); 
@@ -2448,13 +2448,13 @@ def patch_overview():
                 transition: background-color 0.2s, border-color 0.2s, color 0.2s; 
                 opacity: 1 !important; 
                 box-shadow: none !important;
-                backdrop-filter: blur(var(--onigiri-box-effect-blur, 0px));
-                -webkit-backdrop-filter: blur(var(--onigiri-box-effect-blur, 0px));
+                backdrop-filter: blur(var(--bingsu-box-effect-blur, 0px));
+                -webkit-backdrop-filter: blur(var(--bingsu-box-effect-blur, 0px));
             }
             .mini-overview .overview-bottom-actions .overview-button:hover { 
-                background-color: var(--overview-action-button-bg, var(--onigiri-box-effect-bg, var(--button-hover-bg, #e6e6e6))) !important; 
-                border-color: var(--overview-action-button-border, var(--onigiri-box-effect-border-hover, var(--button-hover-border, #bfbfbf)));
-                color: var(--overview-action-button-fg, var(--onigiri-box-effect-fg, var(--button-hover-fg, #000))) !important;
+                background-color: var(--overview-action-button-bg, var(--bingsu-box-effect-bg, var(--button-hover-bg, #e6e6e6))) !important; 
+                border-color: var(--overview-action-button-border, var(--bingsu-box-effect-border-hover, var(--button-hover-border, #bfbfbf)));
+                color: var(--overview-action-button-fg, var(--bingsu-box-effect-fg, var(--button-hover-fg, #000))) !important;
                 box-shadow: none !important;
             }
             /* Dark mode overrides */
@@ -2494,7 +2494,7 @@ def patch_overview():
 	def ankimon_team_overview_html() -> str:
 		"""Render current selection at table-time, never at patch-time."""
 		# Ankimon's team hook normally prepends a fixed-size .poke-grid to the
-		# Overview table. Onigiri owns that table, so render the same selection as
+		# Overview table. Bingsu owns that table, so render the same selection as
 		# a compact native section instead. The hook check preserves Ankimon's own
 		# "Team Overview in Deck Overview" setting: if it is off, show nothing.
 		try:
@@ -2503,11 +2503,11 @@ def patch_overview():
 				for hook in gui_hooks.overview_will_render_content._hooks
 			)
 			if ankimon_team_enabled:
-				return onigiri_renderer.render_ankimon_team_widget_html(
+				return bingsu_renderer.render_ankimon_team_widget_html(
 					row_span=2, col_span=3, surface="overview"
 				)
 		except Exception as exc:
-			print(f"Onigiri: could not render Ankimon overview team: {exc}")
+			print(f"Bingsu: could not render Ankimon overview team: {exc}")
 		return ""
     
 	def new_table(self) -> str:
@@ -2520,7 +2520,7 @@ def patch_overview():
 		)
 		
 		# The add-on language can differ from Anki's own interface language.
-		# Keep these replacement labels consistent with the rest of Onigiri.
+		# Keep these replacement labels consistent with the rest of Bingsu.
 		count_data = [
 			{"label": tr_at("new"), "count": counts[0], "class": "new-count-bubble"},
 			{"label": tr_at("learning"), "count": counts[1], "class": "learn-count-bubble"},
@@ -2556,7 +2556,7 @@ def patch_overview():
 				# Filtered deck buttons: Options, Rebuild, Empty
 				bottom_actions_html = (
 					'<div class="overview-bottom-actions">'
-					f'<a href="#" key=O onclick="pycmd(\'opts\'); return false;" class="overview-button onigiri-overview-action-options">{tr_at("options")}</a>'
+					f'<a href="#" key=O onclick="pycmd(\'opts\'); return false;" class="overview-button bingsu-overview-action-options">{tr_at("options")}</a>'
 					f'<a href="#" key=R onclick="pycmd(\'refresh\'); return false;" class="overview-button">{tr_at("rebuild")}</a>'
 					f'<a href="#" key=E onclick="pycmd(\'empty\'); return false;" class="overview-button">{tr_at("empty")}</a>'
 					'</div>'
@@ -2565,9 +2565,9 @@ def patch_overview():
 				# Non-filtered deck buttons: Options, Custom Study, Description
 				bottom_actions_html = (
 					'<div class="overview-bottom-actions">'
-					f'<a href="#" key=O onclick="pycmd(\'opts\'); return false;" class="overview-button overview-button-normal onigiri-overview-action-options">{tr_at("options")}</a>'
-					f'<a href="#" key=C onclick="pycmd(\'studymore\'); return false;" class="overview-button overview-button-normal onigiri-overview-action-custom-study">{custom_study_text}</a>'
-					f'<a href="#" onclick="pycmd(\'description\'); return false;" class="overview-button overview-button-normal onigiri-overview-action-description">{tr_at("description")}</a>'
+					f'<a href="#" key=O onclick="pycmd(\'opts\'); return false;" class="overview-button overview-button-normal bingsu-overview-action-options">{tr_at("options")}</a>'
+					f'<a href="#" key=C onclick="pycmd(\'studymore\'); return false;" class="overview-button overview-button-normal bingsu-overview-action-custom-study">{custom_study_text}</a>'
+					f'<a href="#" onclick="pycmd(\'description\'); return false;" class="overview-button overview-button-normal bingsu-overview-action-description">{tr_at("description")}</a>'
 					'</div>'
 				)
 
@@ -2588,7 +2588,7 @@ def patch_overview():
 				f'<div class="{actions_stack_class}">'
 					f'{bottom_actions_html}'
 					'<div class="overview-bottom-actions overview-reveal-action">'
-						f'<a href="#" id="onigiri-reveal-btn" class="overview-button overview-button-normal onigiri-overview-action-options onigiri-overview-action-reveal">{tr_at("click_to_reveal")}</a>'
+						f'<a href="#" id="bingsu-reveal-btn" class="overview-button overview-button-normal bingsu-overview-action-options bingsu-overview-action-reveal">{tr_at("click_to_reveal")}</a>'
 					'</div>'
 				'</div>'
 			'</div>'
@@ -2604,9 +2604,9 @@ def patch_overview():
 
 	js_code = """
 	    document.addEventListener("DOMContentLoaded", function() {
-	        document.body.classList.add('onigiri-overview');
+	        document.body.classList.add('bingsu-overview');
 
-	        // Onigiri Deck Title Fix
+	        // Bingsu Deck Title Fix
 	        const titleElement = document.querySelector('.overview-title');
         if (titleElement) {
             // Anki provides the full deck path, so we split it by "::" and take the last part.
@@ -2615,16 +2615,16 @@ def patch_overview():
             titleElement.textContent = shortTitle;
         }
         
-	        if (!document.getElementById('onigiri-background-div')) {
+	        if (!document.getElementById('bingsu-background-div')) {
             const bgDiv = document.createElement('div');
-            bgDiv.id = 'onigiri-background-div';
+            bgDiv.id = 'bingsu-background-div';
             document.body.prepend(bgDiv);
 	        } 
 
         // The legacy Ankimon hook can have populated content before this
         // replacement table is installed. Its original grid carries global
         // CSS and oversized base64 sprites, so remove only that old surface;
-        // the native Onigiri team section above is already in the card.
+        // the native Bingsu team section above is already in the card.
         document.querySelectorAll('.poke-grid').forEach(function(grid) {
             grid.remove();
         });
@@ -2635,27 +2635,27 @@ def patch_overview():
             document.body.classList.add('mini-overview');
         }
         
-        // Collect all external content (anything not Onigiri)
+        // Collect all external content (anything not Bingsu)
         const container = document.querySelector('.overview-center-container');
-        const onigiriHeader = document.getElementById('onigiri-reviewer-header') || document.getElementById('onigiri-overview-header');
-        const onigiriTitle = document.querySelector('.overview-title');
-        const onigiriContainer = document.querySelector('.overview-container');
-        const revealBtn = document.getElementById('onigiri-reveal-btn');
+        const bingsuHeader = document.getElementById('bingsu-reviewer-header') || document.getElementById('bingsu-overview-header');
+        const bingsuTitle = document.querySelector('.overview-title');
+        const bingsuContainer = document.querySelector('.overview-container');
+        const revealBtn = document.getElementById('bingsu-reveal-btn');
         const revealAction = revealBtn ? revealBtn.closest('.overview-reveal-action') : null;
         
-        // Find all direct children of the container that are NOT Onigiri content
+        // Find all direct children of the container that are NOT Bingsu content
         const allExternalElements = [];
         if (container) {
             Array.from(container.children).forEach(function(child) {
-                // Skip Onigiri elements and the reveal button
-                if (child !== onigiriHeader &&
+                // Skip Bingsu elements and the reveal button
+                if (child !== bingsuHeader &&
                     !child.classList.contains('overview-profile-bar') &&
-                    child !== onigiriTitle && 
-                    child !== onigiriContainer && 
+                    child !== bingsuTitle && 
+                    child !== bingsuContainer && 
                     child !== revealBtn && 
-                    child.id !== 'onigiri-reviewer-header' &&
-                    child.id !== 'onigiri-overview-header' &&
-                    child.id !== 'onigiri-reveal-btn' &&
+                    child.id !== 'bingsu-reviewer-header' &&
+                    child.id !== 'bingsu-overview-header' &&
+                    child.id !== 'bingsu-reveal-btn' &&
                     !child.classList.contains('overview-header') &&
                     !child.classList.contains('overview-title') &&
                     !child.classList.contains('overview-container')) {
@@ -2670,7 +2670,7 @@ def patch_overview():
                     };
                     
                     if (hasVisibleContent(child)) {
-                        child.classList.add('onigiri-external-overview-addon');
+                        child.classList.add('bingsu-external-overview-addon');
                         allExternalElements.push(child);
                         child.style.display = 'none'; // Hide initially
                     }
@@ -2681,10 +2681,10 @@ def patch_overview():
         // External add-ons can prepend their widgets to Anki's overview body,
         // which places them beside the deck title in our column layout. Keep
         // them as full-width children of the center container, but move them
-        // after Onigiri's overview card. The reveal button is the card's final
+        // after Bingsu's overview card. The reveal button is the card's final
         // element, so revealed widgets now appear directly below it.
-        if (onigiriContainer && allExternalElements.length > 0) {
-            let externalInsertAnchor = onigiriContainer;
+        if (bingsuContainer && allExternalElements.length > 0) {
+            let externalInsertAnchor = bingsuContainer;
             allExternalElements.forEach(function(el) {
                 externalInsertAnchor.insertAdjacentElement('afterend', el);
                 externalInsertAnchor = el;
@@ -2692,7 +2692,7 @@ def patch_overview():
         }
 
         if (container) {
-            container.classList.remove('onigiri-mask-external');
+            container.classList.remove('bingsu-mask-external');
         }
         
         // Hide reveal button if there are no external elements with content
@@ -2712,13 +2712,13 @@ def patch_overview():
                     allExternalElements.forEach(function(el) {
                         el.style.display = '';
                     });
-	                    revealBtn.textContent = __ONIGIRI_CLICK_TO_HIDE_LABEL__;
+	                    revealBtn.textContent = __BINGSU_CLICK_TO_HIDE_LABEL__;
                 } else {
                     // Hide all external elements
                     allExternalElements.forEach(function(el) {
                         el.style.display = 'none';
                     });
-	                    revealBtn.textContent = __ONIGIRI_CLICK_TO_REVEAL_LABEL__;
+	                    revealBtn.textContent = __BINGSU_CLICK_TO_REVEAL_LABEL__;
                 }
             });
         }
@@ -2726,13 +2726,13 @@ def patch_overview():
 	    """
 	js_code = (
 		js_code
-		.replace("__ONIGIRI_CLICK_TO_HIDE_LABEL__", hide_label_js)
-		.replace("__ONIGIRI_CLICK_TO_REVEAL_LABEL__", reveal_label_js)
+		.replace("__BINGSU_CLICK_TO_HIDE_LABEL__", hide_label_js)
+		.replace("__BINGSU_CLICK_TO_REVEAL_LABEL__", reveal_label_js)
 	)
 
 	reveal_button_css = """
-    <style id="onigiri-reveal-button-style">
-        #onigiri-reveal-btn {
+    <style id="bingsu-reveal-button-style">
+        #bingsu-reveal-btn {
             display: block;
             width: 100%;
             box-sizing: border-box;
@@ -2757,7 +2757,7 @@ def patch_overview():
         .descfont.descmid.description.dyn {
             display: none !important;
         }
-        .overview-center-container.onigiri-mask-external > *:not(#onigiri-reviewer-header):not(#onigiri-overview-header):not(.overview-profile-bar):not(.overview-title):not(.overview-container):not(#onigiri-reveal-btn):not(style):not(script) {
+        .overview-center-container.bingsu-mask-external > *:not(#bingsu-reviewer-header):not(#bingsu-overview-header):not(.overview-profile-bar):not(.overview-title):not(.overview-container):not(#bingsu-reveal-btn):not(style):not(script) {
             opacity: 0 !important;
             pointer-events: none !important;
         }
@@ -2769,7 +2769,7 @@ def patch_overview():
 {overview_component_css}
 {mini_css}
 {reveal_button_css}
-<div class="overview-center-container {style_class} onigiri-mask-external">
+<div class="overview-center-container {style_class} bingsu-mask-external">
 	{header_html}
 	<h3 class="overview-title">%(deck)s</h3>
 	{profile_bar_html}
@@ -2853,7 +2853,7 @@ def patch_congrats_page():
                 # Filtered deck buttons: Options, Rebuild, Empty
                 bottom_actions_html = f"""
                 <div class="congrats-bottom-actions">
-                    <a href="#" key=O onclick="pycmd('opts'); return false;" class="overview-button onigiri-overview-action-options">{tr_at("options")}</a>
+                    <a href="#" key=O onclick="pycmd('opts'); return false;" class="overview-button bingsu-overview-action-options">{tr_at("options")}</a>
                     <a href="#" key=R onclick="pycmd('refresh'); return false;" class="overview-button">{tr_at("rebuild")}</a>
                     <a href="#" key=E onclick="pycmd('empty'); return false;" class="overview-button">{tr_at("empty")}</a>
                 </div>
@@ -2862,9 +2862,9 @@ def patch_congrats_page():
                 # Non-filtered deck buttons: Options, Custom Study, Description
                 bottom_actions_html = f"""
                 <div class="congrats-bottom-actions">
-                    <a href="#" key=O onclick="pycmd('opts'); return false;" class="overview-button onigiri-overview-action-options">{tr_at("options")}</a>
-                    <a href="#" key=C onclick="pycmd('studymore'); return false;" class="overview-button onigiri-overview-action-custom-study">{tr_at("custom_study")}</a>
-                    <a href="#" onclick="pycmd('description'); return false;" class="overview-button onigiri-overview-action-description">{tr_at("description")}</a>
+                    <a href="#" key=O onclick="pycmd('opts'); return false;" class="overview-button bingsu-overview-action-options">{tr_at("options")}</a>
+                    <a href="#" key=C onclick="pycmd('studymore'); return false;" class="overview-button bingsu-overview-action-custom-study">{tr_at("custom_study")}</a>
+                    <a href="#" onclick="pycmd('description'); return false;" class="overview-button bingsu-overview-action-description">{tr_at("description")}</a>
                 </div>
                 """
 
@@ -2893,7 +2893,7 @@ def patch_congrats_page():
         head_html += generate_box_effect_button_vars_css(conf)
         head_html += generate_overview_background_css(addon_path)
         head_html += dock_css
-        head_html += f"<script>window.onigiriReviewerDockMode = {json.dumps(dock_mode)};</script>"
+        head_html += f"<script>window.bingsuReviewerDockMode = {json.dumps(dock_mode)};</script>"
         dock_js_path = os.path.join(addon_path, "web", "reviewer_dock.js")
         try:
             dock_js_ver = os.stat(dock_js_path).st_mtime_ns
@@ -2913,9 +2913,9 @@ def patch_congrats_page():
         )
         # Manually run JS to create the background div after the page is loaded.
         self.web.eval("""
-            if (!document.getElementById('onigiri-background-div')) {
+            if (!document.getElementById('bingsu-background-div')) {
                 const bgDiv = document.createElement('div');
-                bgDiv.id = 'onigiri-background-div';
+                bgDiv.id = 'bingsu-background-div';
                 document.body.prepend(bgDiv);
             }
         """)
@@ -2925,15 +2925,15 @@ def patch_congrats_page():
             try:
                 self._renderBottom()
             except Exception as e:
-                print(f"Onigiri: Error drawing congrats bottom bar: {e}")
+                print(f"Bingsu: Error drawing congrats bottom bar: {e}")
 
     # patch_overview() re-runs on every settings save, so the wrapper must not
     # stack: each extra layer is one more nested call on the congrats screen.
-    if not getattr(Overview._show_finished_screen, "_onigiri_wrapped", False):
+    if not getattr(Overview._show_finished_screen, "_bingsu_wrapped", False):
         Overview._show_finished_screen = wrap(
             Overview._show_finished_screen, new_show_finished_screen, "around"
         )
-        Overview._show_finished_screen._onigiri_wrapped = True
+        Overview._show_finished_screen._bingsu_wrapped = True
 
 
 def generate_deck_browser_backgrounds(addon_path):
@@ -3140,7 +3140,7 @@ def generate_deck_browser_backgrounds(addon_path):
             side_light_color = box_colors.get("light", {}).get("--canvas-inset", side_light_color)
             side_dark_color = box_colors.get("dark", {}).get("--canvas-inset", side_dark_color)
             try:
-                side_blur = float(mw.col.conf.get("onigiri_canvas_inset_effect_blur", side_blur) or 0)
+                side_blur = float(mw.col.conf.get("bingsu_canvas_inset_effect_blur", side_blur) or 0)
             except (TypeError, ValueError):
                 pass
             try:
@@ -3150,7 +3150,7 @@ def generate_deck_browser_backgrounds(addon_path):
                         100.0,
                         float(
                             mw.col.conf.get(
-                                "onigiri_canvas_inset_effect_opacity",
+                                "bingsu_canvas_inset_effect_opacity",
                                 side_opacity_percent,
                             )
                         ),
@@ -3333,10 +3333,10 @@ def generate_deck_browser_backgrounds(addon_path):
                     .night-mode .sidebar-left {{ background-color: {_hex_to_rgba(side_dark_color, side_opacity_alpha)} !important; }}
                 </style>"""
     else: # sidebar_mode == 'main'
-        effect_mode = mw.col.conf.get("onigiri_sidebar_main_bg_effect_mode", "opaque")
+        effect_mode = mw.col.conf.get("bingsu_sidebar_main_bg_effect_mode", "opaque")
 
         if effect_mode == "glassmorphism":
-            intensity = mw.col.conf.get("onigiri_sidebar_main_bg_effect_intensity", 50)
+            intensity = mw.col.conf.get("bingsu_sidebar_main_bg_effect_intensity", 50)
             blur_px = (intensity / 100.0) * 15.0
             alpha = (intensity / 100.0) * 0.3
             main_tint = ("#FFFFFF", "#000000", alpha)
@@ -3354,11 +3354,11 @@ def generate_deck_browser_backgrounds(addon_path):
             </style>
             """
         else: # opaque color overlay
-            intensity = mw.col.conf.get("onigiri_sidebar_opaque_tint_intensity", 30)
+            intensity = mw.col.conf.get("bingsu_sidebar_opaque_tint_intensity", 30)
             alpha = intensity / 100.0
             
-            light_color_hex = mw.col.conf.get("onigiri_sidebar_opaque_tint_color_light", "#FFFFFF")
-            dark_color_hex = mw.col.conf.get("onigiri_sidebar_opaque_tint_color_dark", "#1D1D1D")
+            light_color_hex = mw.col.conf.get("bingsu_sidebar_opaque_tint_color_light", "#FFFFFF")
+            dark_color_hex = mw.col.conf.get("bingsu_sidebar_opaque_tint_color_dark", "#1D1D1D")
             main_tint = (light_color_hex, dark_color_hex, alpha)
 
             light_rgba = _hex_to_rgba(light_color_hex, alpha)
@@ -3391,8 +3391,8 @@ def generate_deck_browser_backgrounds(addon_path):
 
     ring_color_css = f"""
     <style id='modern-menu-sidebar-ring-style'>
-        :root {{ --onigiri-profile-ring-color: {ring_light_color}; }}
-        .night-mode {{ --onigiri-profile-ring-color: {ring_dark_color}; }}
+        :root {{ --bingsu-profile-ring-color: {ring_light_color}; }}
+        .night-mode {{ --bingsu-profile-ring-color: {ring_dark_color}; }}
     </style>
     """
 
@@ -3401,8 +3401,8 @@ def generate_deck_browser_backgrounds(addon_path):
     # against whatever it covers.
     quick_menu_css = f"""
     <style id='modern-menu-quick-menu-style'>
-        :root {{ --onigiri-quick-menu-bg: {menu_light_color}; }}
-        .night-mode {{ --onigiri-quick-menu-bg: {menu_dark_color}; }}
+        :root {{ --bingsu-quick-menu-bg: {menu_light_color}; }}
+        .night-mode {{ --bingsu-quick-menu-bg: {menu_dark_color}; }}
     </style>
     """
 
@@ -3462,7 +3462,7 @@ def generate_deck_browser_backgrounds(addon_path):
     if any(mw.col.conf.get(key) is not None for key in widget_margin_keys):
         top, right, bottom, left = widget_margin_values
         widget_margin_css = f"""
-        .onigiri-widget-container,
+        .bingsu-widget-container,
         .external-widget-container {{
             margin: {top}px {right}px {bottom}px {left}px !important;
             width: calc(100% - {left + right}px) !important;
@@ -3472,8 +3472,8 @@ def generate_deck_browser_backgrounds(addon_path):
     if (sidebar_mode == "custom" or
             (mw.col.conf.get("modern_menu_sidebar_sync_box_effect", True)
              and not mw.col.conf.get("modern_menu_sidebar_border_custom", False))):
-        sidebar_radius = _sidebar_int_setting("onigiri_canvas_inset_border_radius", sidebar_radius)
-        sidebar_stroke = _sidebar_int_setting("onigiri_canvas_inset_border_width", sidebar_stroke)
+        sidebar_radius = _sidebar_int_setting("bingsu_canvas_inset_border_radius", sidebar_radius)
+        sidebar_stroke = _sidebar_int_setting("bingsu_canvas_inset_border_width", sidebar_stroke)
     sidebar_frame_css = f"""
     <style id='modern-menu-sidebar-frame-style'>
         .sidebar-left {{
@@ -3481,8 +3481,8 @@ def generate_deck_browser_backgrounds(addon_path):
             border: {sidebar_stroke}px solid var(--border) !important;
             margin: {sidebar_margin}px !important;
         }}
-        .container.modern-main-menu.onigiri-cycle-stacked .sidebar-left,
-        .container.modern-main-menu.onigiri-sidebar-center .sidebar-left {{
+        .container.modern-main-menu.bingsu-cycle-stacked .sidebar-left,
+        .container.modern-main-menu.bingsu-sidebar-center .sidebar-left {{
             margin: {sidebar_margin}px auto !important;
         }}
         .sidebar-left::before,
@@ -3522,55 +3522,55 @@ def _build_sidebar_widget_gap_css(sidebar_margin, sidebar_widget_gap_mode="auto"
 
     if mode == "manual":
         mode_css = f"""
-        .container.modern-main-menu:not(.onigiri-sidebar-right):not(.onigiri-cycle-stacked):not(.onigiri-sidebar-center) .sidebar-left:not(.sidebar-collapsed) ~ .main-content {{
+        .container.modern-main-menu:not(.bingsu-sidebar-right):not(.bingsu-cycle-stacked):not(.bingsu-sidebar-center) .sidebar-left:not(.sidebar-collapsed) ~ .main-content {{
             margin-left: {gap_px}px !important;
             align-items: flex-start;
         }}
-        .container.modern-main-menu.onigiri-sidebar-right:not(.onigiri-cycle-stacked):not(.onigiri-sidebar-center) .sidebar-left:not(.sidebar-collapsed) ~ .main-content {{
+        .container.modern-main-menu.bingsu-sidebar-right:not(.bingsu-cycle-stacked):not(.bingsu-sidebar-center) .sidebar-left:not(.sidebar-collapsed) ~ .main-content {{
             margin-right: {gap_px}px !important;
             align-items: flex-end;
         }}
-        .container.modern-main-menu:not(.onigiri-sidebar-right):not(.onigiri-cycle-stacked):not(.onigiri-sidebar-center) .sidebar-left:not(.sidebar-collapsed) ~ .main-content .injected-stats-block {{
+        .container.modern-main-menu:not(.bingsu-sidebar-right):not(.bingsu-cycle-stacked):not(.bingsu-sidebar-center) .sidebar-left:not(.sidebar-collapsed) ~ .main-content .injected-stats-block {{
             align-items: flex-start;
         }}
-        .container.modern-main-menu:not(.onigiri-sidebar-right):not(.onigiri-cycle-stacked):not(.onigiri-sidebar-center) .sidebar-left:not(.sidebar-collapsed) ~ .main-content .unified-grid {{
+        .container.modern-main-menu:not(.bingsu-sidebar-right):not(.bingsu-cycle-stacked):not(.bingsu-sidebar-center) .sidebar-left:not(.sidebar-collapsed) ~ .main-content .unified-grid {{
             justify-content: start;
         }}
-        .container.modern-main-menu.onigiri-sidebar-right:not(.onigiri-cycle-stacked):not(.onigiri-sidebar-center) .sidebar-left:not(.sidebar-collapsed) ~ .main-content .injected-stats-block {{
+        .container.modern-main-menu.bingsu-sidebar-right:not(.bingsu-cycle-stacked):not(.bingsu-sidebar-center) .sidebar-left:not(.sidebar-collapsed) ~ .main-content .injected-stats-block {{
             align-items: flex-end;
         }}
-        .container.modern-main-menu.onigiri-sidebar-right:not(.onigiri-cycle-stacked):not(.onigiri-sidebar-center) .sidebar-left:not(.sidebar-collapsed) ~ .main-content .unified-grid {{
+        .container.modern-main-menu.bingsu-sidebar-right:not(.bingsu-cycle-stacked):not(.bingsu-sidebar-center) .sidebar-left:not(.sidebar-collapsed) ~ .main-content .unified-grid {{
             justify-content: end;
         }}"""
     else:
         mode_css = f"""
-        .container.modern-main-menu:not(.onigiri-cycle-stacked):not(.onigiri-sidebar-center) .main-content {{
+        .container.modern-main-menu:not(.bingsu-cycle-stacked):not(.bingsu-sidebar-center) .main-content {{
             margin-left: 0 !important;
             margin-right: 0 !important;
             align-items: center;
             align-items: safe center;
         }}
-        .container.modern-main-menu:not(.onigiri-sidebar-right):not(.onigiri-cycle-stacked):not(.onigiri-sidebar-center) .sidebar-left:not(.sidebar-collapsed) ~ .main-content {{
+        .container.modern-main-menu:not(.bingsu-sidebar-right):not(.bingsu-cycle-stacked):not(.bingsu-sidebar-center) .sidebar-left:not(.sidebar-collapsed) ~ .main-content {{
             padding-right: calc(15px + {margin_px}px) !important;
         }}
-        .container.modern-main-menu.onigiri-sidebar-right:not(.onigiri-cycle-stacked):not(.onigiri-sidebar-center) .sidebar-left:not(.sidebar-collapsed) ~ .main-content {{
+        .container.modern-main-menu.bingsu-sidebar-right:not(.bingsu-cycle-stacked):not(.bingsu-sidebar-center) .sidebar-left:not(.sidebar-collapsed) ~ .main-content {{
             padding-left: calc(15px + {margin_px}px) !important;
         }}"""
 
     return f"""/* Keep the gutter independent of the grid's column count. Negative
            legacy offsets must not let cards overlap the sidebar. */
-        .container.modern-main-menu:not(.onigiri-cycle-stacked):not(.onigiri-sidebar-center) {{
+        .container.modern-main-menu:not(.bingsu-cycle-stacked):not(.bingsu-sidebar-center) {{
             gap: 0 !important;
         }}{mode_css}
-        .container.modern-main-menu.onigiri-cycle-stacked .main-content,
-        .container.modern-main-menu.onigiri-sidebar-center .main-content {{
+        .container.modern-main-menu.bingsu-cycle-stacked .main-content,
+        .container.modern-main-menu.bingsu-sidebar-center .main-content {{
             margin-left: 0 !important;
             margin-right: 0 !important;
         }}"""
 
 
 def _resolve_night_mode():
-    """Current Onigiri mode, including its explicit light/dark override."""
+    """Current Bingsu mode, including its explicit light/dark override."""
     try:
         return config.effective_night_mode()
     except Exception:
@@ -3585,7 +3585,7 @@ def _reviewer_base_bg_color(conf):
     match it exactly.
     """
     night = _resolve_night_mode()
-    mode = conf.get("onigiri_reviewer_bg_mode", "main")
+    mode = conf.get("bingsu_reviewer_bg_mode", "main")
     if mode == "main":
         if night:
             return mw.col.conf.get(
@@ -3598,14 +3598,14 @@ def _reviewer_base_bg_color(conf):
         )
     # "color", "image_color" and "slideshow" all paint the body with these keys.
     if night:
-        return conf.get("onigiri_reviewer_bg_dark_color", "#2C2C2C")
-    return conf.get("onigiri_reviewer_bg_light_color", "#FFFFFF")
+        return conf.get("bingsu_reviewer_bg_dark_color", "#2C2C2C")
+    return conf.get("bingsu_reviewer_bg_light_color", "#FFFFFF")
 
 
 def _overview_base_bg_color(conf):
     """The solid color painted behind the overview body, for the current theme."""
     night = _resolve_night_mode()
-    mode = conf.get("onigiri_overview_bg_mode", "main")
+    mode = conf.get("bingsu_overview_bg_mode", "main")
     if mode == "main":
         if night:
             return mw.col.conf.get(
@@ -3617,8 +3617,8 @@ def _overview_base_bg_color(conf):
             config.DEFAULTS["colors"]["light"]["--bg"],
         )
     if night:
-        return conf.get("onigiri_overview_bg_dark_color", "#2C2C2C")
-    return conf.get("onigiri_overview_bg_light_color", "#FFFFFF")
+        return conf.get("bingsu_overview_bg_dark_color", "#2C2C2C")
+    return conf.get("bingsu_overview_bg_light_color", "#FFFFFF")
 
 
 def _deckbrowser_base_bg_color():
@@ -3663,7 +3663,7 @@ def set_main_webview_background_color(color):
             if current != qcolor:
                 page.setBackgroundColor(qcolor)
     except Exception as e:
-        print(f"Onigiri: could not set main webview background color: {e}")
+        print(f"Bingsu: could not set main webview background color: {e}")
 
 
 _main_webview_resize_repaint_filter = None
@@ -3718,7 +3718,7 @@ def _repaint_main_webview_after_resize():
         web.update()
         mw.update()
     except Exception as exc:
-        print(f"Onigiri: could not repaint main webview after resize: {exc}")
+        print(f"Bingsu: could not repaint main webview after resize: {exc}")
 
 
 def install_main_webview_resize_repaint_guard():
@@ -3745,13 +3745,13 @@ def install_main_webview_resize_repaint_guard():
         _main_webview_resize_repaint_timer = timer
         _main_webview_resize_repaint_filter = resize_filter
     except Exception as exc:
-        print(f"Onigiri: could not install resize repaint guard: {exc}")
+        print(f"Bingsu: could not install resize repaint guard: {exc}")
 
 
 def generate_reviewer_background_css(addon_path):
     """Generates CSS for the reviewer - exact copy of overview implementation with reviewer config keys."""
     conf = config.get_config_readonly()
-    reviewer_mode = conf.get("onigiri_reviewer_bg_mode", "main")
+    reviewer_mode = conf.get("bingsu_reviewer_bg_mode", "main")
     addon_name = os.path.basename(addon_path)
     
     # Show scrollbar with transparent background when needed
@@ -3798,16 +3798,16 @@ def generate_reviewer_background_css(addon_path):
     """
     
     if reviewer_mode == "slideshow":
-        light_color = conf.get("onigiri_reviewer_bg_light_color", "#FFFFFF")
-        dark_color = conf.get("onigiri_reviewer_bg_dark_color", "#2C2C2C")
-        blur_val = conf.get("onigiri_reviewer_bg_blur", 0)
-        opacity_val = conf.get("onigiri_reviewer_bg_opacity", 100)
-        images = conf.get("onigiri_reviewer_slideshow_images", []) or []
+        light_color = conf.get("bingsu_reviewer_bg_light_color", "#FFFFFF")
+        dark_color = conf.get("bingsu_reviewer_bg_dark_color", "#2C2C2C")
+        blur_val = conf.get("bingsu_reviewer_bg_blur", 0)
+        opacity_val = conf.get("bingsu_reviewer_bg_opacity", 100)
+        images = conf.get("bingsu_reviewer_slideshow_images", []) or []
         image_urls = [_addon_media_url(addon_name, "reviewer_bg", img) for img in images]
         return _render_body_slideshow_background_css(
-            "onigiri-reviewer-background-style",
+            "bingsu-reviewer-background-style",
             image_urls,
-            conf.get("onigiri_reviewer_slideshow_interval", 10),
+            conf.get("bingsu_reviewer_slideshow_interval", 10),
             light_color,
             dark_color,
             blur_val,
@@ -3833,7 +3833,7 @@ def generate_reviewer_background_css(addon_path):
             images = config.get_collection_config("modern_menu_slideshow_images", []) or []
             image_urls = [_addon_media_url(addon_name, "main_bg", img) for img in images]
             return _render_body_slideshow_background_css(
-                "onigiri-reviewer-background-style",
+                "bingsu-reviewer-background-style",
                 image_urls,
                 mw.col.conf.get("modern_menu_slideshow_interval", 10),
                 light_color,
@@ -3844,7 +3844,7 @@ def generate_reviewer_background_css(addon_path):
             )
 
         if mode not in ["image", "image_color"]:
-            return f"""<style id="onigiri-reviewer-background-style">
+            return f"""<style id="bingsu-reviewer-background-style">
                 body {{ background-color: {light_color} !important; }}
                 .night-mode body {{ background-color: {dark_color} !important; }}
             
@@ -3887,9 +3887,9 @@ def generate_reviewer_background_css(addon_path):
         
     elif reviewer_mode == "color":
         # Solid color only
-        light_color = conf.get("onigiri_reviewer_bg_light_color", "#FFFFFF")
-        dark_color = conf.get("onigiri_reviewer_bg_dark_color", "#2C2C2C")
-        return f"""<style id="onigiri-reviewer-background-style">
+        light_color = conf.get("bingsu_reviewer_bg_light_color", "#FFFFFF")
+        dark_color = conf.get("bingsu_reviewer_bg_dark_color", "#2C2C2C")
+        return f"""<style id="bingsu-reviewer-background-style">
             body {{ background-color: {light_color} !important; }}
             .night-mode body {{ background-color: {dark_color} !important; }}
             
@@ -3900,14 +3900,14 @@ def generate_reviewer_background_css(addon_path):
         </style>"""
     
     else:  # image_color mode
-        light_color = conf.get("onigiri_reviewer_bg_light_color", "#FFFFFF")
-        dark_color = conf.get("onigiri_reviewer_bg_dark_color", "#2C2C2C")
-        blur_val = conf.get("onigiri_reviewer_bg_blur", 0)
-        opacity_val = conf.get("onigiri_reviewer_bg_opacity", 100)
+        light_color = conf.get("bingsu_reviewer_bg_light_color", "#FFFFFF")
+        dark_color = conf.get("bingsu_reviewer_bg_dark_color", "#2C2C2C")
+        blur_val = conf.get("bingsu_reviewer_bg_blur", 0)
+        opacity_val = conf.get("bingsu_reviewer_bg_opacity", 100)
         
-        dynamic_key = ("onigiri_reviewer_bg_image_theme_mode", "onigiri_reviewer_bg_image_mode")
-        light_img_file = config.themed_asset(conf.get, "onigiri_reviewer_bg_image", False, dynamic_key=dynamic_key)
-        dark_img_file = config.themed_asset(conf.get, "onigiri_reviewer_bg_image", True, dynamic_key=dynamic_key)
+        dynamic_key = ("bingsu_reviewer_bg_image_theme_mode", "bingsu_reviewer_bg_image_mode")
+        light_img_file = config.themed_asset(conf.get, "bingsu_reviewer_bg_image", False, dynamic_key=dynamic_key)
+        dark_img_file = config.themed_asset(conf.get, "bingsu_reviewer_bg_image", True, dynamic_key=dynamic_key)
 
         light_img_url = _addon_media_url(addon_name, "reviewer_bg", light_img_file) if light_img_file else "none"
         dark_img_url = _addon_media_url(addon_name, "reviewer_bg", dark_img_file) if dark_img_file else "none"
@@ -3919,10 +3919,10 @@ def generate_reviewer_background_css(addon_path):
     bar_height = _reviewer_bottom_bar_height_px(conf)
 
     return f"""
-    <style id="onigiri-reviewer-background-style">
+    <style id="bingsu-reviewer-background-style">
         :root {{
-            --onigiri-reviewer-bottom-bar-height: {bar_height}px;
-            --onigiri-reviewer-background-blur-bleed: {blur_bleed_px}px;
+            --bingsu-reviewer-bottom-bar-height: {bar_height}px;
+            --bingsu-reviewer-background-blur-bleed: {blur_bleed_px}px;
         }}
 
         /* Use body::before pseudo-element for instant background rendering - no JavaScript delay */
@@ -3938,10 +3938,10 @@ def generate_reviewer_background_css(addon_path):
             content: '';
             position: fixed;
             top: auto;
-            bottom: calc(-1 * (var(--onigiri-reviewer-bottom-bar-height) + var(--onigiri-reviewer-background-blur-bleed)));
+            bottom: calc(-1 * (var(--bingsu-reviewer-bottom-bar-height) + var(--bingsu-reviewer-background-blur-bleed)));
             left: 50%;
             width: 100vw;
-            height: calc(100vh + var(--onigiri-reviewer-bottom-bar-height) + var(--onigiri-reviewer-background-blur-bleed));
+            height: calc(100vh + var(--bingsu-reviewer-bottom-bar-height) + var(--bingsu-reviewer-background-blur-bleed));
             transform-origin: center bottom;
             transform: translateX(-50%) scale({1.0 + (blur_px / 50.0) if blur_px > 0 else 1.0});
             background-position: center;
@@ -3972,7 +3972,7 @@ def generate_reviewer_background_css(addon_path):
 def generate_overview_background_css(addon_path):
     """Generates CSS for the overview screen with instant background rendering using CSS pseudo-elements."""
     conf = config.get_config_readonly()
-    overview_mode = conf.get("onigiri_overview_bg_mode", "main")
+    overview_mode = conf.get("bingsu_overview_bg_mode", "main")
     # The Overviewer no longer offers a slideshow. Treat profiles that saved
     # the retired value as Image mode, retaining their colour/effect settings.
     if overview_mode == "slideshow":
@@ -4024,40 +4024,40 @@ def generate_overview_background_css(addon_path):
                 
     elif overview_mode == "color":
         # Solid color only
-        light_color = conf.get("onigiri_overview_bg_light_color", "#FFFFFF")
-        dark_color = conf.get("onigiri_overview_bg_dark_color", "#2C2C2C")
+        light_color = conf.get("bingsu_overview_bg_light_color", "#FFFFFF")
+        dark_color = conf.get("bingsu_overview_bg_dark_color", "#2C2C2C")
         is_image_mode = False
         
     elif overview_mode == "image_color":
         # Image + Color
-        light_color = conf.get("onigiri_overview_bg_light_color", "#FFFFFF")
-        dark_color = conf.get("onigiri_overview_bg_dark_color", "#2C2C2C")
+        light_color = conf.get("bingsu_overview_bg_light_color", "#FFFFFF")
+        dark_color = conf.get("bingsu_overview_bg_dark_color", "#2C2C2C")
         
-        blur_val = conf.get("onigiri_overview_bg_blur", 0)
-        opacity_val = conf.get("onigiri_overview_bg_opacity", 100)
+        blur_val = conf.get("bingsu_overview_bg_blur", 0)
+        opacity_val = conf.get("bingsu_overview_bg_opacity", 100)
         is_image_mode = True
         
-        dynamic_key = ("onigiri_overview_bg_image_theme_mode", "onigiri_overview_bg_image_mode")
-        light_img_file = config.themed_asset(conf.get, "onigiri_overview_bg_image", False, dynamic_key=dynamic_key)
-        dark_img_file = config.themed_asset(conf.get, "onigiri_overview_bg_image", True, dynamic_key=dynamic_key)
+        dynamic_key = ("bingsu_overview_bg_image_theme_mode", "bingsu_overview_bg_image_mode")
+        light_img_file = config.themed_asset(conf.get, "bingsu_overview_bg_image", False, dynamic_key=dynamic_key)
+        dark_img_file = config.themed_asset(conf.get, "bingsu_overview_bg_image", True, dynamic_key=dynamic_key)
 
     if overview_mode == "main" and mw.col.conf.get("modern_menu_background_mode", "color") == "slideshow":
         addon_name = os.path.basename(addon_path)
         images = config.get_collection_config("modern_menu_slideshow_images", []) or []
         image_urls = [_addon_media_url(addon_name, "main_bg", img) for img in images]
         return _render_body_slideshow_background_css(
-            "onigiri-overview-background-style",
+            "bingsu-overview-background-style",
             image_urls,
             mw.col.conf.get("modern_menu_slideshow_interval", 10),
             light_color,
             dark_color,
             blur_val,
             opacity_val,
-            "#onigiri-background-div { display: none !important; }",
+            "#bingsu-background-div { display: none !important; }",
         )
 
     if not is_image_mode:
-        return f"""<style id="onigiri-overview-background-style">
+        return f"""<style id="bingsu-overview-background-style">
             html,
             body {{
                 background-color: {light_color} !important;
@@ -4107,7 +4107,7 @@ def generate_overview_background_css(addon_path):
     opacity_float = opacity_val / 100.0
 
     return f"""
-    <style id="onigiri-overview-background-style">
+    <style id="bingsu-overview-background-style">
         /* Use body::before pseudo-element for instant background rendering - no JavaScript delay */
         html {{
             background-color: {light_color} !important;
@@ -4174,7 +4174,7 @@ def generate_overview_background_css(addon_path):
         }}
 
         /* Keep JavaScript-created div styling for backwards compatibility */
-        #onigiri-background-div {{
+        #bingsu-background-div {{
             display: none !important;
         }}
 
@@ -4194,7 +4194,7 @@ def generate_overview_background_css(addon_path):
 
 def generate_toolbar_background_css(addon_path):
 	"""Generates background CSS for the top and bottom toolbars based on user settings."""
-	toolbar_mode = mw.col.conf.get("onigiri_toolbar_bg_mode", "main")
+	toolbar_mode = mw.col.conf.get("bingsu_toolbar_bg_mode", "main")
 
 	if toolbar_mode == "main":
 		# Use main background settings
@@ -4214,14 +4214,14 @@ def generate_toolbar_background_css(addon_path):
 	else:
 		# Use toolbar-specific settings
 		mode = toolbar_mode
-		light = mw.col.conf.get("onigiri_toolbar_bg_color_light", "#FFFFFF")
-		dark = mw.col.conf.get("onigiri_toolbar_bg_color_dark", "#2C2C2C")
-		image = mw.col.conf.get("onigiri_toolbar_bg_image", "")
-		blur = mw.col.conf.get("onigiri_toolbar_bg_blur", 0)
+		light = mw.col.conf.get("bingsu_toolbar_bg_color_light", "#FFFFFF")
+		dark = mw.col.conf.get("bingsu_toolbar_bg_color_dark", "#2C2C2C")
+		image = mw.col.conf.get("bingsu_toolbar_bg_image", "")
+		blur = mw.col.conf.get("bingsu_toolbar_bg_blur", 0)
 		opacity = 100 # Opacity not supported for toolbar custom bg yet
 		image_path = f"user_files/toolbar_bg/{image}" if image else ""
 
-	return _render_background_css("body", mode, light, dark, image_path, image_path, blur, addon_path, "onigiri-toolbar-bg-style", opacity)
+	return _render_background_css("body", mode, light, dark, image_path, image_path, blur, addon_path, "bingsu-toolbar-bg-style", opacity)
 
 # ── Reviewer header progress bar ──────────────────────────────────────────────
 #
@@ -4290,34 +4290,34 @@ def _reviewer_progress_settings(conf=None, force=False):
         dark = (overview_colors.get("dark", {}) or {}).get(key) or dark_default
         return str(light), str(dark)
 
-    seg_source = _pick("onigiri_reviewer_progress_segment_source", "counts", ("counts", "custom"))
+    seg_source = _pick("bingsu_reviewer_progress_segment_source", "counts", ("counts", "custom"))
     if seg_source == "counts":
         seg_new = _count_pair("new_bubble", "#1e8cff", "#0a84ff")
         seg_learn = _count_pair("learn_bubble", "#ff5757", "#ff453a")
         seg_review = _count_pair("review_bubble", "#19c96b", "#12b765")
     else:
-        seg_new = _pair("onigiri_reviewer_progress_seg_new", "#1e8cff", "#0a84ff")
-        seg_learn = _pair("onigiri_reviewer_progress_seg_learn", "#ff5757", "#ff453a")
-        seg_review = _pair("onigiri_reviewer_progress_seg_review", "#19c96b", "#12b765")
+        seg_new = _pair("bingsu_reviewer_progress_seg_new", "#1e8cff", "#0a84ff")
+        seg_learn = _pair("bingsu_reviewer_progress_seg_learn", "#ff5757", "#ff453a")
+        seg_review = _pair("bingsu_reviewer_progress_seg_review", "#19c96b", "#12b765")
 
     settings = {
-        "enabled": bool(conf.get("onigiri_reviewer_progress_enabled", True)),
-        "style": _pick("onigiri_reviewer_progress_style", "bar", _PROGRESS_STYLES),
-        "label": _pick("onigiri_reviewer_progress_label", "fraction", _PROGRESS_LABELS),
-        "scope": _pick("onigiri_reviewer_progress_scope", "session", ("session", "today")),
-        "position": _pick("onigiri_reviewer_progress_position", "right", ("right", "left")),
-        "width": _num("onigiri_reviewer_progress_width", 96, 40, 320),
-        "thickness": _num("onigiri_reviewer_progress_thickness", 6, 2, 20),
-        "radius": _num("onigiri_reviewer_progress_radius", 999, 0, 999),
-        "ring_size": _num("onigiri_reviewer_progress_ring_size", 16, 12, 40),
-        "chrome": bool(conf.get("onigiri_reviewer_progress_chrome", True)),
-        "animate": bool(conf.get("onigiri_reviewer_progress_animate", True)),
-        "gradient": bool(conf.get("onigiri_reviewer_progress_gradient", True)),
-        "hide_when_done": bool(conf.get("onigiri_reviewer_progress_hide_when_done", False)),
-        "fill": _pair("onigiri_reviewer_progress_fill", "#19c96b", "#12b765"),
-        "fill_end": _pair("onigiri_reviewer_progress_fill_end", "#5ad6f0", "#4bc4de"),
-        "track": _pair("onigiri_reviewer_progress_track", "rgba(0, 0, 0, 0.12)", "rgba(255, 255, 255, 0.16)"),
-        "text": _pair("onigiri_reviewer_progress_text", "#2c2c2c", "#e8e8e8"),
+        "enabled": bool(conf.get("bingsu_reviewer_progress_enabled", True)),
+        "style": _pick("bingsu_reviewer_progress_style", "bar", _PROGRESS_STYLES),
+        "label": _pick("bingsu_reviewer_progress_label", "fraction", _PROGRESS_LABELS),
+        "scope": _pick("bingsu_reviewer_progress_scope", "session", ("session", "today")),
+        "position": _pick("bingsu_reviewer_progress_position", "right", ("right", "left")),
+        "width": _num("bingsu_reviewer_progress_width", 96, 40, 320),
+        "thickness": _num("bingsu_reviewer_progress_thickness", 6, 2, 20),
+        "radius": _num("bingsu_reviewer_progress_radius", 999, 0, 999),
+        "ring_size": _num("bingsu_reviewer_progress_ring_size", 16, 12, 40),
+        "chrome": bool(conf.get("bingsu_reviewer_progress_chrome", True)),
+        "animate": bool(conf.get("bingsu_reviewer_progress_animate", True)),
+        "gradient": bool(conf.get("bingsu_reviewer_progress_gradient", True)),
+        "hide_when_done": bool(conf.get("bingsu_reviewer_progress_hide_when_done", False)),
+        "fill": _pair("bingsu_reviewer_progress_fill", "#19c96b", "#12b765"),
+        "fill_end": _pair("bingsu_reviewer_progress_fill_end", "#5ad6f0", "#4bc4de"),
+        "track": _pair("bingsu_reviewer_progress_track", "rgba(0, 0, 0, 0.12)", "rgba(255, 255, 255, 0.16)"),
+        "text": _pair("bingsu_reviewer_progress_text", "#2c2c2c", "#e8e8e8"),
         "seg_new": seg_new,
         "seg_learn": seg_learn,
         "seg_review": seg_review,
@@ -4483,7 +4483,7 @@ def _reviewer_progress_inner_html(settings=None, data=None):
 
 
 def _reviewer_progress_classes(settings):
-    classes = ["onigiri-reviewer-progress", f"is-{settings['style']}"]
+    classes = ["bingsu-reviewer-progress", f"is-{settings['style']}"]
     if not settings["chrome"]:
         classes.append("is-bare")
     if settings["animate"]:
@@ -4505,7 +4505,7 @@ def _reviewer_progress_html(settings=None, data=None):
         return ""
 
     return (
-        f'<div id="onigiri-reviewer-progress" class="{_reviewer_progress_classes(settings)}" '
+        f'<div id="bingsu-reviewer-progress" class="{_reviewer_progress_classes(settings)}" '
         f'role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{data["pct"]}" '
         f'title="{html.escape(_reviewer_progress_tooltip(data), quote=True)}">'
         f"{_reviewer_progress_inner_html(settings, data)}"
@@ -4515,7 +4515,7 @@ def _reviewer_progress_html(settings=None, data=None):
 
 def _reviewer_progress_css(settings=None):
     """Colour/size tokens for the chip. Emitted with the same
-    `.night_mode #onigiri-reviewer-header` prefix the rest of this module uses,
+    `.night_mode #bingsu-reviewer-header` prefix the rest of this module uses,
     so __init__.py's shadow-DOM rewrite reaches it too."""
     if settings is None:
         settings = _reviewer_progress_settings()
@@ -4538,8 +4538,8 @@ def _reviewer_progress_css(settings=None):
     )
 
     return f"""
-    <style id="onigiri-reviewer-progress-style">
-        #onigiri-reviewer-header .onigiri-reviewer-progress {{
+    <style id="bingsu-reviewer-progress-style">
+        #bingsu-reviewer-header .bingsu-reviewer-progress {{
             --orp-fill: {fill_light};
             --orp-fill-image: {fill_image_light};
             --orp-track: {track_light};
@@ -4559,11 +4559,11 @@ def _reviewer_progress_css(settings=None):
             box-sizing: border-box !important;
             margin: 0 !important;
             padding: 5px 12px !important;
-            border-radius: var(--onigiri-box-effect-radius, 8px) !important;
-            border: var(--onigiri-box-effect-stroke, 1px) solid var(--onigiri-box-effect-border, rgba(128, 128, 128, 0.2)) !important;
-            background: var(--onigiri-box-effect-bg, var(--canvas-inset, rgba(247, 247, 247, 0.92))) !important;
-            backdrop-filter: blur(var(--onigiri-box-effect-blur, 0px)) !important;
-            -webkit-backdrop-filter: blur(var(--onigiri-box-effect-blur, 0px)) !important;
+            border-radius: var(--bingsu-box-effect-radius, 8px) !important;
+            border: var(--bingsu-box-effect-stroke, 1px) solid var(--bingsu-box-effect-border, rgba(128, 128, 128, 0.2)) !important;
+            background: var(--bingsu-box-effect-bg, var(--canvas-inset, rgba(247, 247, 247, 0.92))) !important;
+            backdrop-filter: blur(var(--bingsu-box-effect-blur, 0px)) !important;
+            -webkit-backdrop-filter: blur(var(--bingsu-box-effect-blur, 0px)) !important;
             color: var(--orp-text) !important;
             font-family: var(--font-main), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
             font-size: var(--font-size-main, 13px) !important;
@@ -4575,10 +4575,10 @@ def _reviewer_progress_css(settings=None):
         }}
 
         /* The unstyled fallback has to flip with the theme exactly like
-           a.onigiri-reviewer-button's does: without it a collection that has
+           a.bingsu-reviewer-button's does: without it a collection that has
            never set the box-effect colours gets a near-white chip in dark mode,
            and the label - which *does* follow the theme - goes invisible on it. */
-        .night_mode #onigiri-reviewer-header .onigiri-reviewer-progress {{
+        .night_mode #bingsu-reviewer-header .bingsu-reviewer-progress {{
             --orp-fill: {fill_dark};
             --orp-fill-image: {fill_image_dark};
             --orp-track: {track_dark};
@@ -4588,11 +4588,11 @@ def _reviewer_progress_css(settings=None):
             --orp-learn: {learn_dark};
             --orp-review: {review_dark};
 
-            background: var(--onigiri-box-effect-bg, var(--canvas-inset, rgba(42, 42, 42, 0.92))) !important;
-            border-color: var(--onigiri-box-effect-border, rgba(128, 128, 128, 0.2)) !important;
+            background: var(--bingsu-box-effect-bg, var(--canvas-inset, rgba(42, 42, 42, 0.92))) !important;
+            border-color: var(--bingsu-box-effect-border, rgba(128, 128, 128, 0.2)) !important;
         }}
 
-        .night_mode #onigiri-reviewer-header .onigiri-reviewer-progress.is-bare {{
+        .night_mode #bingsu-reviewer-header .bingsu-reviewer-progress.is-bare {{
             background: transparent !important;
             border-color: transparent !important;
         }}
@@ -4601,7 +4601,7 @@ def _reviewer_progress_css(settings=None):
            it, and a 6px bar is far shorter than a line of 13px text. This strut
            gives the gauge the text's own line box, so both stay in step at any
            font size or thickness. */
-        #onigiri-reviewer-header .onigiri-reviewer-progress .orp-track {{
+        #bingsu-reviewer-header .bingsu-reviewer-progress .orp-track {{
             display: flex !important;
             align-items: stretch !important;
             overflow: hidden !important;
@@ -4614,7 +4614,7 @@ def _reviewer_progress_css(settings=None):
             align-self: center !important;
         }}
 
-        #onigiri-reviewer-header .onigiri-reviewer-progress .orp-fill {{
+        #bingsu-reviewer-header .bingsu-reviewer-progress .orp-fill {{
             display: block !important;
             height: 100% !important;
             min-width: 0 !important;
@@ -4622,44 +4622,44 @@ def _reviewer_progress_css(settings=None):
             background: var(--orp-fill-image) !important;
         }}
 
-        #onigiri-reviewer-header .onigiri-reviewer-progress .orp-track.is-segmented {{
+        #bingsu-reviewer-header .bingsu-reviewer-progress .orp-track.is-segmented {{
             gap: 2px !important;
         }}
 
-        #onigiri-reviewer-header .onigiri-reviewer-progress .orp-seg {{
+        #bingsu-reviewer-header .bingsu-reviewer-progress .orp-seg {{
             display: block !important;
             height: 100% !important;
             min-width: 0 !important;
             border-radius: var(--orp-radius) !important;
         }}
 
-        #onigiri-reviewer-header .onigiri-reviewer-progress .orp-seg.is-done {{ background: var(--orp-fill-image) !important; }}
-        #onigiri-reviewer-header .onigiri-reviewer-progress .orp-seg.is-new {{ background: var(--orp-new) !important; }}
-        #onigiri-reviewer-header .onigiri-reviewer-progress .orp-seg.is-learn {{ background: var(--orp-learn) !important; }}
-        #onigiri-reviewer-header .onigiri-reviewer-progress .orp-seg.is-review {{ background: var(--orp-review) !important; }}
+        #bingsu-reviewer-header .bingsu-reviewer-progress .orp-seg.is-done {{ background: var(--orp-fill-image) !important; }}
+        #bingsu-reviewer-header .bingsu-reviewer-progress .orp-seg.is-new {{ background: var(--orp-new) !important; }}
+        #bingsu-reviewer-header .bingsu-reviewer-progress .orp-seg.is-learn {{ background: var(--orp-learn) !important; }}
+        #bingsu-reviewer-header .bingsu-reviewer-progress .orp-seg.is-review {{ background: var(--orp-review) !important; }}
 
-        #onigiri-reviewer-header .onigiri-reviewer-progress .orp-ring {{
+        #bingsu-reviewer-header .bingsu-reviewer-progress .orp-ring {{
             display: block !important;
             flex: 0 0 auto !important;
             overflow: visible !important;
         }}
-        #onigiri-reviewer-header .onigiri-reviewer-progress .orp-ring-track {{ stroke: var(--orp-track) !important; }}
-        #onigiri-reviewer-header .onigiri-reviewer-progress .orp-ring-fill {{
+        #bingsu-reviewer-header .bingsu-reviewer-progress .orp-ring-track {{ stroke: var(--orp-track) !important; }}
+        #bingsu-reviewer-header .bingsu-reviewer-progress .orp-ring-fill {{
             stroke: var(--orp-fill) !important;
         }}
 
         /* Only the in-place update animates: update_reviewer_progress moves the
            existing nodes rather than re-writing the chip, precisely so these
            transitions have something to run on. */
-        #onigiri-reviewer-header .onigiri-reviewer-progress.is-animated .orp-fill,
-        #onigiri-reviewer-header .onigiri-reviewer-progress.is-animated .orp-seg {{
+        #bingsu-reviewer-header .bingsu-reviewer-progress.is-animated .orp-fill,
+        #bingsu-reviewer-header .bingsu-reviewer-progress.is-animated .orp-seg {{
             transition: width 0.35s ease !important;
         }}
-        #onigiri-reviewer-header .onigiri-reviewer-progress.is-animated .orp-ring-fill {{
+        #bingsu-reviewer-header .bingsu-reviewer-progress.is-animated .orp-ring-fill {{
             transition: stroke-dasharray 0.35s ease !important;
         }}
 
-        #onigiri-reviewer-header .onigiri-reviewer-progress .orp-text {{
+        #bingsu-reviewer-header .bingsu-reviewer-progress .orp-text {{
             display: block !important;
             color: var(--orp-text) !important;
             font-variant-numeric: tabular-nums !important;
@@ -4667,7 +4667,7 @@ def _reviewer_progress_css(settings=None):
             letter-spacing: 0.01em !important;
         }}
 
-        #onigiri-reviewer-header .onigiri-reviewer-progress.is-bare {{
+        #bingsu-reviewer-header .bingsu-reviewer-progress.is-bare {{
             padding: 5px 2px !important;
             background: transparent !important;
             border-color: transparent !important;
@@ -4677,7 +4677,7 @@ def _reviewer_progress_css(settings=None):
 
         /* No label means no line box to borrow a height from, so the chip needs
            the strut it was getting from the text for free. */
-        #onigiri-reviewer-header .onigiri-reviewer-progress.is-labelless::before {{
+        #bingsu-reviewer-header .bingsu-reviewer-progress.is-labelless::before {{
             content: "\\200b" !important;
             display: inline !important;
             width: 0 !important;
@@ -4741,9 +4741,9 @@ def update_reviewer_progress():
             f"""
         (function() {{
             const p = {payload};
-            const host = document.getElementById('onigiri-reviewer-ui-host');
+            const host = document.getElementById('bingsu-reviewer-ui-host');
             const root = host && host.shadowRoot;
-            const chip = root && root.getElementById('onigiri-reviewer-progress');
+            const chip = root && root.getElementById('bingsu-reviewer-progress');
             if (!chip) return;
             chip.style.display = p.hidden ? 'none' : '';
             if (p.hidden) return;
@@ -4778,7 +4778,7 @@ def update_reviewer_progress():
         """
         )
     except Exception as e:
-        print(f"Onigiri: Error updating reviewer progress bar: {e}")
+        print(f"Bingsu: Error updating reviewer progress bar: {e}")
 
 
 def _reviewer_card_type_info(card):
@@ -4822,15 +4822,15 @@ def update_reviewer_card_type(card):
             f"""
             (function() {{
                 const info = {payload};
-                window.__onigiriPendingReviewerCardType = info;
-                if (typeof window.onigiriSetReviewerCardType === 'function') {{
-                    window.onigiriSetReviewerCardType(info);
+                window.__bingsuPendingReviewerCardType = info;
+                if (typeof window.bingsuSetReviewerCardType === 'function') {{
+                    window.bingsuSetReviewerCardType(info);
                 }}
             }})();
             """
         )
     except Exception as e:
-        print(f"Onigiri: Error updating reviewer card type: {e}")
+        print(f"Bingsu: Error updating reviewer card type: {e}")
 
 
 def _on_reviewer_progress_state_change(new_state, old_state):
@@ -4865,12 +4865,12 @@ def _study_tool_header_buttons(conf):
 
     hashi_notes_button_html = (
         '<a href="#" onclick="pycmd(\'openHashiNotes:reviewer\'); return false;" '
-        f'class="onigiri-reviewer-button onigiri-hashi-notes-button">{tr_at("hashi_notes_title")}</a>'
+        f'class="bingsu-reviewer-button bingsu-hashi-notes-button">{tr_at("hashi_notes_title")}</a>'
         if show_hashi_notes_button else ""
     )
     pomodoro_button_html = (
         '<a href="#" onclick="pycmd(\'togglePomodoro\'); return false;" '
-        f'class="onigiri-reviewer-button onigiri-pomodoro-button">{tr_at("pomodoro_title")}</a>'
+        f'class="bingsu-reviewer-button bingsu-pomodoro-button">{tr_at("pomodoro_title")}</a>'
         if show_pomodoro_button else ""
     )
 
@@ -4884,12 +4884,12 @@ def refresh_study_tool_reviewer_buttons(conf=None):
     buttons_html = "".join(_study_tool_header_buttons(conf))
     script = """
     (() => {
-        document.querySelectorAll('.onigiri-reviewer-header-buttons').forEach(header => {
-            const existing = header.querySelectorAll('.onigiri-hashi-notes-button, .onigiri-pomodoro-button');
+        document.querySelectorAll('.bingsu-reviewer-header-buttons').forEach(header => {
+            const existing = header.querySelectorAll('.bingsu-hashi-notes-button, .bingsu-pomodoro-button');
             const anchor = document.createComment('study-tools');
             if (existing.length) existing[0].before(anchor);
             else {
-                const sync = Array.from(header.querySelectorAll('a.onigiri-reviewer-button'))
+                const sync = Array.from(header.querySelectorAll('a.bingsu-reviewer-button'))
                     .find(button => (button.getAttribute('onclick') || '').includes("pycmd('sync')"));
                 if (sync) sync.after(anchor);
                 else header.append(anchor);
@@ -4942,10 +4942,10 @@ def generate_reviewer_top_bar_html_and_css(include_overview_class=True):
         show_restaurant_chip = bool(restaurant_chip_html.strip())
 
         # Register the hook if not already registered
-        if show_restaurant_chip and not hasattr(mw, '_onigiri_restaurant_hook_registered'):
+        if show_restaurant_chip and not hasattr(mw, '_bingsu_restaurant_hook_registered'):
             from aqt import gui_hooks
             gui_hooks.reviewer_did_answer_card.append(on_reviewer_did_answer_card)
-            mw._onigiri_restaurant_hook_registered = True
+            mw._bingsu_restaurant_hook_registered = True
 
     # Build the HTML with the restaurant chip if enabled
     hashi_notes_button_html, pomodoro_button_html = _study_tool_header_buttons(conf)
@@ -4965,30 +4965,30 @@ def generate_reviewer_top_bar_html_and_css(include_overview_class=True):
         progress_css = _reviewer_progress_css(progress_settings)
 
     header_buttons = f"""
-    <div class="onigiri-reviewer-header-buttons">
+    <div class="bingsu-reviewer-header-buttons">
         {progress_html if progress_settings["position"] == "left" else ""}
-        <a href="#" onclick="pycmd('decks'); return false;" class="onigiri-reviewer-button">{tr_at("decks")}</a>
-        <a href="#" onclick="pycmd('add'); return false;" class="onigiri-reviewer-button">{tr_at("add")}</a>
-        <a href="#" onclick="pycmd('browse'); return false;" class="onigiri-reviewer-button">{tr_at("browse")}</a>
-        <a href="#" onclick="pycmd('stats'); return false;" class="onigiri-reviewer-button">{tr_at("stats")}</a>
-        <a href="#" onclick="pycmd('sync'); return false;" class="onigiri-reviewer-button">{tr_at("sync")}</a>
+        <a href="#" onclick="pycmd('decks'); return false;" class="bingsu-reviewer-button">{tr_at("decks")}</a>
+        <a href="#" onclick="pycmd('add'); return false;" class="bingsu-reviewer-button">{tr_at("add")}</a>
+        <a href="#" onclick="pycmd('browse'); return false;" class="bingsu-reviewer-button">{tr_at("browse")}</a>
+        <a href="#" onclick="pycmd('stats'); return false;" class="bingsu-reviewer-button">{tr_at("stats")}</a>
+        <a href="#" onclick="pycmd('sync'); return false;" class="bingsu-reviewer-button">{tr_at("sync")}</a>
         {hashi_notes_button_html}
         {pomodoro_button_html}
-        <span id="onigiri-reviewer-external-actions" style="display: contents">{external_buttons_html}</span>
+        <span id="bingsu-reviewer-external-actions" style="display: contents">{external_buttons_html}</span>
         {restaurant_chip_html if show_restaurant_chip else ""}
         {progress_html if progress_settings["position"] == "right" else ""}
     </div>
     """
     
     html = f"""
-    <div id="onigiri-reviewer-header" class="header">
+    <div id="bingsu-reviewer-header" class="header">
         {header_buttons}
     </div>
     """
 
     css = """
-    <style id="onigiri-reviewer-top-bar-structure">
-        #onigiri-reviewer-header, .overview-header {
+    <style id="bingsu-reviewer-top-bar-structure">
+        #bingsu-reviewer-header, .overview-header {
             position: fixed;
             top: 0;
             left: 0;
@@ -5032,7 +5032,7 @@ def generate_reviewer_top_bar_html_and_css(include_overview_class=True):
         
 
         
-        .onigiri-reviewer-header-buttons {
+        .bingsu-reviewer-header-buttons {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -5043,14 +5043,14 @@ def generate_reviewer_top_bar_html_and_css(include_overview_class=True):
         }
 
         /* Target A tags specifically to override card template global a {} styles */
-        #onigiri-reviewer-header a.onigiri-reviewer-button,
-        #onigiri-overview-header a.onigiri-reviewer-button,
-        .overview-header a.onigiri-reviewer-button {
-            color: var(--onigiri-box-effect-fg, var(--fg)) !important;
-            background: var(--onigiri-box-effect-bg, var(--canvas-inset, rgba(247, 247, 247, 0.92))) !important;
+        #bingsu-reviewer-header a.bingsu-reviewer-button,
+        #bingsu-overview-header a.bingsu-reviewer-button,
+        .overview-header a.bingsu-reviewer-button {
+            color: var(--bingsu-box-effect-fg, var(--fg)) !important;
+            background: var(--bingsu-box-effect-bg, var(--canvas-inset, rgba(247, 247, 247, 0.92))) !important;
             padding: 5px 12px !important;
-            border-radius: var(--onigiri-box-effect-radius, 8px) !important;
-            border: var(--onigiri-box-effect-stroke, 1px) solid var(--onigiri-box-effect-border, rgba(128, 128, 128, 0.2)) !important;
+            border-radius: var(--bingsu-box-effect-radius, 8px) !important;
+            border: var(--bingsu-box-effect-stroke, 1px) solid var(--bingsu-box-effect-border, rgba(128, 128, 128, 0.2)) !important;
             font-family: var(--font-main), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
             font-size: var(--font-size-main, 13px) !important;
             text-decoration: none !important;
@@ -5061,29 +5061,29 @@ def generate_reviewer_top_bar_html_and_css(include_overview_class=True):
             line-height: normal !important;
             white-space: nowrap !important;
             flex: 0 0 auto !important;
-            backdrop-filter: blur(var(--onigiri-box-effect-blur, 0px)) !important;
-            -webkit-backdrop-filter: blur(var(--onigiri-box-effect-blur, 0px)) !important;
+            backdrop-filter: blur(var(--bingsu-box-effect-blur, 0px)) !important;
+            -webkit-backdrop-filter: blur(var(--bingsu-box-effect-blur, 0px)) !important;
         }
 
-        .night_mode #onigiri-reviewer-header a.onigiri-reviewer-button,
-        .night_mode #onigiri-overview-header a.onigiri-reviewer-button,
-        .night_mode .overview-header a.onigiri-reviewer-button {
-            color: var(--onigiri-box-effect-fg, var(--fg)) !important;
-            background: var(--onigiri-box-effect-bg, var(--canvas-inset, rgba(42, 42, 42, 0.92))) !important;
-            border-color: var(--onigiri-box-effect-border, rgba(128, 128, 128, 0.2)) !important;
+        .night_mode #bingsu-reviewer-header a.bingsu-reviewer-button,
+        .night_mode #bingsu-overview-header a.bingsu-reviewer-button,
+        .night_mode .overview-header a.bingsu-reviewer-button {
+            color: var(--bingsu-box-effect-fg, var(--fg)) !important;
+            background: var(--bingsu-box-effect-bg, var(--canvas-inset, rgba(42, 42, 42, 0.92))) !important;
+            border-color: var(--bingsu-box-effect-border, rgba(128, 128, 128, 0.2)) !important;
         }
 
-        #onigiri-reviewer-header a.onigiri-reviewer-button:hover,
-        #onigiri-overview-header a.onigiri-reviewer-button:hover,
-        .overview-header a.onigiri-reviewer-button:hover {
-            background: var(--onigiri-box-effect-bg, var(--canvas-inset, rgba(128, 128, 128, 0.25))) !important;
-            border-color: var(--onigiri-box-effect-border-hover, var(--onigiri-box-effect-border, rgba(128, 128, 128, 0.3))) !important;
-            color: var(--onigiri-box-effect-fg, var(--fg)) !important;
+        #bingsu-reviewer-header a.bingsu-reviewer-button:hover,
+        #bingsu-overview-header a.bingsu-reviewer-button:hover,
+        .overview-header a.bingsu-reviewer-button:hover {
+            background: var(--bingsu-box-effect-bg, var(--canvas-inset, rgba(128, 128, 128, 0.25))) !important;
+            border-color: var(--bingsu-box-effect-border-hover, var(--bingsu-box-effect-border, rgba(128, 128, 128, 0.3))) !important;
+            color: var(--bingsu-box-effect-fg, var(--fg)) !important;
         }
         
         /* Restaurant level progress bar styles */
-        #onigiri-reviewer-header .restaurant-level-chip,
-        #onigiri-overview-header .restaurant-level-chip,
+        #bingsu-reviewer-header .restaurant-level-chip,
+        #bingsu-overview-header .restaurant-level-chip,
         .overview-header .restaurant-level-chip {
             display: flex;
             align-items: center;
@@ -5091,46 +5091,46 @@ def generate_reviewer_top_bar_html_and_css(include_overview_class=True):
             margin-left: 0;
             padding: 4px 10px;
             border-radius: 999px;
-            /* Same chrome tokens as a.onigiri-reviewer-button and .onigiri-reviewer-progress so the pills share an identical background. */
-            background: var(--onigiri-box-effect-bg, var(--canvas-inset, rgba(247, 247, 247, 0.92))) !important;
-            backdrop-filter: blur(var(--onigiri-box-effect-blur, 0px)) !important;
-            -webkit-backdrop-filter: blur(var(--onigiri-box-effect-blur, 0px)) !important;
-            color: var(--onigiri-box-effect-fg, var(--fg));
+            /* Same chrome tokens as a.bingsu-reviewer-button and .bingsu-reviewer-progress so the pills share an identical background. */
+            background: var(--bingsu-box-effect-bg, var(--canvas-inset, rgba(247, 247, 247, 0.92))) !important;
+            backdrop-filter: blur(var(--bingsu-box-effect-blur, 0px)) !important;
+            -webkit-backdrop-filter: blur(var(--bingsu-box-effect-blur, 0px)) !important;
+            color: var(--bingsu-box-effect-fg, var(--fg));
             font-family: var(--font-main), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             font-size: var(--font-size-main, 13px);
             transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
             position: relative;
             overflow: hidden;
-            border: var(--onigiri-box-effect-stroke, 1px) solid var(--onigiri-box-effect-border, rgba(128, 128, 128, 0.2)) !important;
+            border: var(--bingsu-box-effect-stroke, 1px) solid var(--bingsu-box-effect-border, rgba(128, 128, 128, 0.2)) !important;
             cursor: pointer;
             flex: 0 0 auto;
         }
 
-        .night_mode #onigiri-reviewer-header .restaurant-level-chip,
-        :host(.night-mode) #onigiri-reviewer-header .restaurant-level-chip,
-        .night_mode #onigiri-overview-header .restaurant-level-chip,
+        .night_mode #bingsu-reviewer-header .restaurant-level-chip,
+        :host(.night-mode) #bingsu-reviewer-header .restaurant-level-chip,
+        .night_mode #bingsu-overview-header .restaurant-level-chip,
         .night_mode .overview-header .restaurant-level-chip {
-            background: var(--onigiri-box-effect-bg, var(--canvas-inset, rgba(42, 42, 42, 0.92))) !important;
-            border-color: var(--onigiri-box-effect-border, rgba(128, 128, 128, 0.2)) !important;
+            background: var(--bingsu-box-effect-bg, var(--canvas-inset, rgba(42, 42, 42, 0.92))) !important;
+            border-color: var(--bingsu-box-effect-border, rgba(128, 128, 128, 0.2)) !important;
         }
 
-        #onigiri-reviewer-header:not(.is-island):has(.onigiri-reviewer-progress.is-bare) .restaurant-level-chip {
+        #bingsu-reviewer-header:not(.is-island):has(.bingsu-reviewer-progress.is-bare) .restaurant-level-chip {
             background: transparent !important;
             border-color: transparent !important;
             backdrop-filter: none !important;
             -webkit-backdrop-filter: none !important;
         }
         
-        #onigiri-reviewer-header .restaurant-level-chip .rl-chip-level,
-        #onigiri-overview-header .restaurant-level-chip .rl-chip-level,
+        #bingsu-reviewer-header .restaurant-level-chip .rl-chip-level,
+        #bingsu-overview-header .restaurant-level-chip .rl-chip-level,
         .overview-header .restaurant-level-chip .rl-chip-level {
             font-weight: 600;
             white-space: nowrap;
             color: inherit;
         }
         
-        #onigiri-reviewer-header .restaurant-level-chip .rl-chip-progress,
-        #onigiri-overview-header .restaurant-level-chip .rl-chip-progress,
+        #bingsu-reviewer-header .restaurant-level-chip .rl-chip-progress,
+        #bingsu-overview-header .restaurant-level-chip .rl-chip-progress,
         .overview-header .restaurant-level-chip .rl-chip-progress {
             width: 72px;
             height: 6px;
@@ -5140,14 +5140,14 @@ def generate_reviewer_top_bar_html_and_css(include_overview_class=True):
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.12);
         }
         
-        .night_mode #onigiri-reviewer-header .restaurant-level-chip .rl-chip-progress,
-        .night_mode #onigiri-overview-header .restaurant-level-chip .rl-chip-progress,
+        .night_mode #bingsu-reviewer-header .restaurant-level-chip .rl-chip-progress,
+        .night_mode #bingsu-overview-header .restaurant-level-chip .rl-chip-progress,
         .night_mode .overview-header .restaurant-level-chip .rl-chip-progress {
             background: rgba(255, 255, 255, 0.16);
         }
         
-        #onigiri-reviewer-header .restaurant-level-chip .rl-chip-progress-fill,
-        #onigiri-overview-header .restaurant-level-chip .rl-chip-progress-fill,
+        #bingsu-reviewer-header .restaurant-level-chip .rl-chip-progress-fill,
+        #bingsu-overview-header .restaurant-level-chip .rl-chip-progress-fill,
         .overview-header .restaurant-level-chip .rl-chip-progress-fill {
             height: 100%;
             background: var(--reviewer-level-bar-bg, linear-gradient(90deg, #ffb347, #ff6b6b));
@@ -5156,16 +5156,16 @@ def generate_reviewer_top_bar_html_and_css(include_overview_class=True):
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
         }
         
-        #onigiri-reviewer-header .restaurant-level-chip:hover,
-        #onigiri-overview-header .restaurant-level-chip:hover,
+        #bingsu-reviewer-header .restaurant-level-chip:hover,
+        #bingsu-overview-header .restaurant-level-chip:hover,
         .overview-header .restaurant-level-chip:hover {
-            background: var(--onigiri-box-effect-bg, var(--canvas-inset, rgba(128, 128, 128, 0.25)));
-            border-color: var(--onigiri-box-effect-border-hover, var(--onigiri-box-effect-border, rgba(128, 128, 128, 0.3)));
+            background: var(--bingsu-box-effect-bg, var(--canvas-inset, rgba(128, 128, 128, 0.25)));
+            border-color: var(--bingsu-box-effect-border-hover, var(--bingsu-box-effect-border, rgba(128, 128, 128, 0.3)));
             transform: translateY(-1px);
         }
         
-        #onigiri-reviewer-header .restaurant-level-chip:hover .rl-chip-progress-fill,
-        #onigiri-overview-header .restaurant-level-chip:hover .rl-chip-progress-fill,
+        #bingsu-reviewer-header .restaurant-level-chip:hover .rl-chip-progress-fill,
+        #bingsu-overview-header .restaurant-level-chip:hover .rl-chip-progress-fill,
         .overview-header .restaurant-level-chip:hover .rl-chip-progress-fill {
             background: var(--reviewer-level-bar-hover-bg, linear-gradient(90deg, #ff9a3c, #ff5e62));
             box-shadow: 0 0 15px rgba(255, 107, 107, 0.4);
@@ -5175,10 +5175,10 @@ def generate_reviewer_top_bar_html_and_css(include_overview_class=True):
     """
 
     if not include_overview_class:
-        css = css.replace("#onigiri-reviewer-header, .overview-header", "#onigiri-reviewer-header")
-        css = css.replace(",\n        .overview-header a.onigiri-reviewer-button", "")
-        css = css.replace(",\n        .night_mode .overview-header a.onigiri-reviewer-button", "")
-        css = css.replace(",\n        .overview-header a.onigiri-reviewer-button:hover", "")
+        css = css.replace("#bingsu-reviewer-header, .overview-header", "#bingsu-reviewer-header")
+        css = css.replace(",\n        .overview-header a.bingsu-reviewer-button", "")
+        css = css.replace(",\n        .night_mode .overview-header a.bingsu-reviewer-button", "")
+        css = css.replace(",\n        .overview-header a.bingsu-reviewer-button:hover", "")
         css = css.replace(",\n        .overview-header .restaurant-level-chip", "")
         css = css.replace(",\n        .night_mode .overview-header .restaurant-level-chip", "")
         css = css.replace(",\n        .overview-header .restaurant-level-chip .rl-chip-level", "")
@@ -5201,8 +5201,8 @@ def generate_reviewer_top_bar_html_and_css(include_overview_class=True):
             g = int(theme_color[3:5], 16)
             b = int(theme_color[5:7], 16)
             css += f"""
-    <style id="onigiri-reviewer-theme-colors">
-        .onigiri-reviewer-header-buttons .level-progress-bar {{
+    <style id="bingsu-reviewer-theme-colors">
+        .bingsu-reviewer-header-buttons .level-progress-bar {{
             background: {theme_color} !important;
             box-shadow: 0 0 10px rgba({r}, {g}, {b}, 0.3) !important;
         }}
@@ -5215,9 +5215,9 @@ def generate_reviewer_top_bar_html_and_css(include_overview_class=True):
 
 
 def _reviewer_controls_font_size(conf):
-    base_size = config.get_collection_config("onigiri_font_size_main", conf.get("onigiri_font_size_main", 14))
+    base_size = config.get_collection_config("bingsu_font_size_main", conf.get("bingsu_font_size_main", 14))
     try:
-        return max(8, min(72, int(config.get_collection_config("onigiri_font_size_reviewer_controls", base_size))))
+        return max(8, min(72, int(config.get_collection_config("bingsu_font_size_reviewer_controls", base_size))))
     except (TypeError, ValueError):
         return 14
 
@@ -5230,10 +5230,10 @@ def _reviewer_fixed_button_metrics(conf):
         except (TypeError, ValueError):
             return default
     size = _reviewer_controls_font_size(conf)
-    padding = max(7, number("onigiri_reviewer_btn_padding", 5, 0, 100))
-    border = number("onigiri_reviewer_btn_border_size", 0, 0, 10)
+    padding = max(7, number("bingsu_reviewer_btn_padding", 5, 0, 100))
+    border = number("bingsu_reviewer_btn_border_size", 0, 0, 10)
     count_height = max(30, int(size * .85 + 10 + .999))
-    height = max(48, number("onigiri_reviewer_btn_height", 40, 0, 200),
+    height = max(48, number("bingsu_reviewer_btn_height", 40, 0, 200),
                  max(int(size * 1.25 + .999), count_height) + 2 * (padding + border))
     return padding, count_height, height
 
@@ -5242,17 +5242,17 @@ def _reviewer_bottom_bar_height_px(conf=None):
     if conf is None:
         conf = config.get_config_readonly()
     try:
-        height = int(conf.get("onigiri_reviewer_bar_height", 60))
+        height = int(conf.get("bingsu_reviewer_bar_height", 60))
     except (TypeError, ValueError):
         height = 60
     height = max(20, min(300, height))
-    if conf.get("onigiri_reviewer_btn_custom_enabled", True):
+    if conf.get("bingsu_reviewer_btn_custom_enabled", True):
         try:
-            height = max(height, int(conf.get("onigiri_reviewer_btn_height", 40)) + 24)
+            height = max(height, int(conf.get("bingsu_reviewer_btn_height", 40)) + 24)
         except (TypeError, ValueError):
             pass
-    if (conf.get("onigiri_reviewer_btn_custom_enabled", True)
-            and conf.get("onigiri_reviewer_stattxt_mode", "hover") == "fixed"):
+    if (conf.get("bingsu_reviewer_btn_custom_enabled", True)
+            and conf.get("bingsu_reviewer_stattxt_mode", "hover") == "fixed"):
         height = max(height, _reviewer_fixed_button_metrics(conf)[2] + 24)
     try:
         from ..core.platform import is_phone_device
@@ -5301,9 +5301,9 @@ def _reviewer_background_viewport_height_px(bar_height=None):
 
 
 def _store_bottom_web_default_height(bottom_web):
-    if hasattr(mw, "_onigiri_bottom_web_default_height"):
+    if hasattr(mw, "_bingsu_bottom_web_default_height"):
         return
-    mw._onigiri_bottom_web_default_height = (
+    mw._bingsu_bottom_web_default_height = (
         bottom_web.minimumHeight(),
         bottom_web.maximumHeight(),
     )
@@ -5311,7 +5311,7 @@ def _store_bottom_web_default_height(bottom_web):
 
 def restore_bottom_web_height():
     bottom_web = getattr(mw, "bottomWeb", None)
-    defaults = getattr(mw, "_onigiri_bottom_web_default_height", None)
+    defaults = getattr(mw, "_bingsu_bottom_web_default_height", None)
     if not bottom_web or defaults is None:
         return
     min_height, max_height = defaults
@@ -5328,7 +5328,7 @@ def sync_reviewer_background_viewport_height():
     try:
         bottom_web.eval(
             "document.documentElement.style.setProperty("
-            "'--onigiri-reviewer-background-viewport-height', "
+            "'--bingsu-reviewer-background-viewport-height', "
             f"'{height}px');"
         )
     except Exception:
@@ -5372,21 +5372,21 @@ def _generate_outer_background_css(mode, light_color, dark_color, light_img_path
     document_dark_color = "#000000" if has_image_background else dark_color
     
     # Base styling for #outer
-    base_css = "<style id='onigiri-reviewer-bottom-bar-bg-style'>"
+    base_css = "<style id='bingsu-reviewer-bottom-bar-bg-style'>"
     base_css += f"""
         :root {{
-            --onigiri-reviewer-bottom-bar-height: {bar_height}px;
-            --onigiri-reviewer-background-viewport-height: {viewport_height}px;
-            --onigiri-reviewer-background-blur-bleed: {blur_bleed_px}px;
+            --bingsu-reviewer-bottom-bar-height: {bar_height}px;
+            --bingsu-reviewer-background-viewport-height: {viewport_height}px;
+            --bingsu-reviewer-background-blur-bleed: {blur_bleed_px}px;
         }}
         html, body {{
             margin: 0 !important;
             padding: 0 !important;
             width: 100% !important;
             min-width: 100% !important;
-            height: var(--onigiri-reviewer-bottom-bar-height) !important;
-            min-height: var(--onigiri-reviewer-bottom-bar-height) !important;
-            max-height: var(--onigiri-reviewer-bottom-bar-height) !important;
+            height: var(--bingsu-reviewer-bottom-bar-height) !important;
+            min-height: var(--bingsu-reviewer-bottom-bar-height) !important;
+            max-height: var(--bingsu-reviewer-bottom-bar-height) !important;
             overflow: hidden !important;
             background-color: {document_light_color} !important;
         }}
@@ -5396,9 +5396,9 @@ def _generate_outer_background_css(mode, light_color, dark_color, light_img_path
         #outer {{
             position: relative;
             margin: 0 !important;
-            height: var(--onigiri-reviewer-bottom-bar-height) !important;
-            min-height: var(--onigiri-reviewer-bottom-bar-height) !important;
-            max-height: var(--onigiri-reviewer-bottom-bar-height) !important;
+            height: var(--bingsu-reviewer-bottom-bar-height) !important;
+            min-height: var(--bingsu-reviewer-bottom-bar-height) !important;
+            max-height: var(--bingsu-reviewer-bottom-bar-height) !important;
             width: 100% !important;
             border: none !important;
             border-top: none !important;
@@ -5456,10 +5456,10 @@ def _generate_outer_background_css(mode, light_color, dark_color, light_img_path
                 scale_factor = 1.0 + (blur_px / 50.0) if blur_px > 0 else 1.0
                 position_css = """
                     top: auto;
-                    bottom: calc(-1 * var(--onigiri-reviewer-background-blur-bleed));
+                    bottom: calc(-1 * var(--bingsu-reviewer-background-blur-bleed));
                     left: 50%;
                     width: 100vw;
-                    height: calc(var(--onigiri-reviewer-background-viewport-height) + var(--onigiri-reviewer-background-blur-bleed));
+                    height: calc(var(--bingsu-reviewer-background-viewport-height) + var(--bingsu-reviewer-background-blur-bleed));
                     transform-origin: center bottom;
                     transform: translateX(-50%) scale({scale_factor});
                     background-size: cover;
@@ -5506,7 +5506,7 @@ def _generate_outer_background_css(mode, light_color, dark_color, light_img_path
     if slideshow_images:
         base_css += f"""
             #outer::after {{ opacity: 0; transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1); }}
-            #outer.onigiri-bar-slideshow-transitioning::after {{ opacity: {opacity_float}; }}
+            #outer.bingsu-bar-slideshow-transitioning::after {{ opacity: {opacity_float}; }}
             #outer > * {{ z-index: 2; }}
         """
     base_css += "</style>"
@@ -5528,11 +5528,11 @@ def _generate_outer_background_css(mode, light_color, dark_color, light_img_path
                         }}
                         style.textContent = selector + " {{ background-image: url('" + images[nextIndex] + "') !important; }}";
                     }}
-                    imageStyle('onigiri-bar-slideshow-after', '#outer::after');
-                    setTimeout(function() {{ outer.classList.add('onigiri-bar-slideshow-transitioning'); }}, 50);
+                    imageStyle('bingsu-bar-slideshow-after', '#outer::after');
+                    setTimeout(function() {{ outer.classList.add('bingsu-bar-slideshow-transitioning'); }}, 50);
                     setTimeout(function() {{
-                        imageStyle('onigiri-bar-slideshow-before', '#outer::before');
-                        outer.classList.remove('onigiri-bar-slideshow-transitioning');
+                        imageStyle('bingsu-bar-slideshow-before', '#outer::before');
+                        outer.classList.remove('bingsu-bar-slideshow-transitioning');
                         nextIndex = (nextIndex + 1) % images.length;
                     }}, 1250);
                 }}, {max(1, int(slideshow_interval or 10)) * 1000});
@@ -5544,7 +5544,7 @@ def generate_reviewer_bottom_bar_background_css(addon_path: str) -> str:
     """Generates CSS for the reviewer's bottom bar background."""
     conf = config.get_config_readonly()
     # FIX: Read from conf, not mw.col.conf
-    bar_mode = conf.get("onigiri_reviewer_bottom_bar_bg_mode", "match_reviewer_bg")
+    bar_mode = conf.get("bingsu_reviewer_bottom_bar_bg_mode", "match_reviewer_bg")
 
     bg_position = "center bottom"
 
@@ -5593,17 +5593,17 @@ def generate_reviewer_bottom_bar_background_css(addon_path: str) -> str:
     # Helper to get reviewer settings
     def get_reviewer_bg_settings():
         # Reviewer settings are in conf
-        rev_mode = conf.get("onigiri_reviewer_bg_mode", "main")
+        rev_mode = conf.get("bingsu_reviewer_bg_mode", "main")
         
         if rev_mode == "main":
             return get_main_bg_settings()
             
-        light_c = conf.get("onigiri_reviewer_bg_light_color", "#FFFFFF")
-        dark_c = conf.get("onigiri_reviewer_bg_dark_color", "#2C2C2C")
+        light_c = conf.get("bingsu_reviewer_bg_light_color", "#FFFFFF")
+        dark_c = conf.get("bingsu_reviewer_bg_dark_color", "#2C2C2C")
         
-        dynamic_key = ("onigiri_reviewer_bg_image_theme_mode", "onigiri_reviewer_bg_image_mode")
-        l_img = config.themed_asset(conf.get, "onigiri_reviewer_bg_image", False, dynamic_key=dynamic_key)
-        d_img = config.themed_asset(conf.get, "onigiri_reviewer_bg_image", True, dynamic_key=dynamic_key)
+        dynamic_key = ("bingsu_reviewer_bg_image_theme_mode", "bingsu_reviewer_bg_image_mode")
+        l_img = config.themed_asset(conf.get, "bingsu_reviewer_bg_image", False, dynamic_key=dynamic_key)
+        d_img = config.themed_asset(conf.get, "bingsu_reviewer_bg_image", True, dynamic_key=dynamic_key)
 
         # Reviewer images are in user_files/reviewer_bg/
         l_img_path = f"user_files/reviewer_bg/{l_img}" if l_img else ""
@@ -5623,7 +5623,7 @@ def generate_reviewer_bottom_bar_background_css(addon_path: str) -> str:
         return actual_mode, light_c, dark_c, l_img_path, d_img_path
 
     def get_reviewer_bg_effects():
-        rev_mode = conf.get("onigiri_reviewer_bg_mode", "main")
+        rev_mode = conf.get("bingsu_reviewer_bg_mode", "main")
         if rev_mode == "main":
             return (
                 mw.col.conf.get("modern_menu_background_blur", 0),
@@ -5631,23 +5631,23 @@ def generate_reviewer_bottom_bar_background_css(addon_path: str) -> str:
             )
         if rev_mode in {"image_color", "slideshow"}:
             return (
-                conf.get("onigiri_reviewer_bg_blur", 0),
-                conf.get("onigiri_reviewer_bg_opacity", 100),
+                conf.get("bingsu_reviewer_bg_blur", 0),
+                conf.get("bingsu_reviewer_bg_opacity", 100),
             )
         return 0, 100
 
     def get_overview_bg_settings():
-        overview_mode = conf.get("onigiri_overview_bg_mode", "main")
+        overview_mode = conf.get("bingsu_overview_bg_mode", "main")
         if overview_mode == "slideshow":
             overview_mode = "image_color"
         if overview_mode == "main":
             return get_main_bg_settings()
 
-        light_c = conf.get("onigiri_overview_bg_light_color", "#FFFFFF")
-        dark_c = conf.get("onigiri_overview_bg_dark_color", "#2C2C2C")
-        dynamic_key = ("onigiri_overview_bg_image_theme_mode", "onigiri_overview_bg_image_mode")
-        l_img = config.themed_asset(conf.get, "onigiri_overview_bg_image", False, dynamic_key=dynamic_key)
-        d_img = config.themed_asset(conf.get, "onigiri_overview_bg_image", True, dynamic_key=dynamic_key)
+        light_c = conf.get("bingsu_overview_bg_light_color", "#FFFFFF")
+        dark_c = conf.get("bingsu_overview_bg_dark_color", "#2C2C2C")
+        dynamic_key = ("bingsu_overview_bg_image_theme_mode", "bingsu_overview_bg_image_mode")
+        l_img = config.themed_asset(conf.get, "bingsu_overview_bg_image", False, dynamic_key=dynamic_key)
+        d_img = config.themed_asset(conf.get, "bingsu_overview_bg_image", True, dynamic_key=dynamic_key)
 
         l_img_path = f"user_files/main_bg/{l_img}" if l_img else ""
         d_img_path = f"user_files/main_bg/{d_img}" if d_img else ""
@@ -5657,7 +5657,7 @@ def generate_reviewer_bottom_bar_background_css(addon_path: str) -> str:
         return actual_mode, light_c, dark_c, l_img_path, d_img_path
 
     def get_overview_bg_effects():
-        overview_mode = conf.get("onigiri_overview_bg_mode", "main")
+        overview_mode = conf.get("bingsu_overview_bg_mode", "main")
         if overview_mode == "slideshow":
             overview_mode = "image_color"
         if overview_mode == "main":
@@ -5667,8 +5667,8 @@ def generate_reviewer_bottom_bar_background_css(addon_path: str) -> str:
             )
         if overview_mode == "image_color":
             return (
-                conf.get("onigiri_overview_bg_blur", 0),
-                conf.get("onigiri_overview_bg_opacity", 100),
+                conf.get("bingsu_overview_bg_blur", 0),
+                conf.get("bingsu_overview_bg_opacity", 100),
             )
         return 0, 100
 
@@ -5677,9 +5677,9 @@ def generate_reviewer_bottom_bar_background_css(addon_path: str) -> str:
         images = []
         interval = 10
         if mode == "slideshow":
-            if bar_mode == "match_reviewer_bg" and conf.get("onigiri_reviewer_bg_mode", "main") == "slideshow":
-                images = conf.get("onigiri_reviewer_slideshow_images", []) or []
-                interval = conf.get("onigiri_reviewer_slideshow_interval", 10)
+            if bar_mode == "match_reviewer_bg" and conf.get("bingsu_reviewer_bg_mode", "main") == "slideshow":
+                images = conf.get("bingsu_reviewer_slideshow_images", []) or []
+                interval = conf.get("bingsu_reviewer_slideshow_interval", 10)
                 folder = "reviewer_bg"
             else:
                 images = config.get_collection_config("modern_menu_slideshow_images", []) or []
@@ -5720,14 +5720,14 @@ def generate_reviewer_bottom_bar_background_css(addon_path: str) -> str:
         mode = bar_mode # "color" or "image_color" (mapped from radio buttons)
         
         # FIX: Read from conf, not mw.col.conf
-        light_color = conf.get("onigiri_reviewer_bottom_bar_bg_light_color", "#FFFFFF")
-        dark_color = conf.get("onigiri_reviewer_bottom_bar_bg_dark_color", "#2C2C2C")
+        light_color = conf.get("bingsu_reviewer_bottom_bar_bg_light_color", "#FFFFFF")
+        dark_color = conf.get("bingsu_reviewer_bottom_bar_bg_dark_color", "#2C2C2C")
         
-        img_filename = conf.get("onigiri_reviewer_bottom_bar_bg_image", "")
+        img_filename = conf.get("bingsu_reviewer_bottom_bar_bg_image", "")
         img = f"user_files/reviewer_bar_bg/{img_filename}" if img_filename else ""
         
-        blur_val = conf.get("onigiri_reviewer_bottom_bar_bg_blur", 0)
-        opacity_val = conf.get("onigiri_reviewer_bottom_bar_bg_opacity", 100)
+        blur_val = conf.get("bingsu_reviewer_bottom_bar_bg_blur", 0)
+        opacity_val = conf.get("bingsu_reviewer_bottom_bar_bg_opacity", 100)
 
         # Generate CSS for #outer with ::before pseudo-element for background
         css += _generate_outer_background_css(mode, light_color, dark_color, img, img, blur_val, opacity_val, addon_path, bg_position)
@@ -5738,17 +5738,17 @@ def generate_profile_page_background_css():
     """Generates background CSS for the profile page."""
     try:
         if mw and mw.col and mw.col.conf:
-            mode = mw.col.conf.get("onigiri_profile_page_bg_mode", "color")
+            mode = mw.col.conf.get("bingsu_profile_page_bg_mode", "color")
             if mode == "gradient":
-                light1 = mw.col.conf.get("onigiri_profile_page_bg_light_color1", "#F5F5F5")
-                light2 = mw.col.conf.get("onigiri_profile_page_bg_light_color2", "#E0E0E0")
-                dark1 = mw.col.conf.get("onigiri_profile_page_bg_dark_color1", "#2C2C2C")
-                dark2 = mw.col.conf.get("onigiri_profile_page_bg_dark_color2", "#1A1A1A")
+                light1 = mw.col.conf.get("bingsu_profile_page_bg_light_color1", "#F5F5F5")
+                light2 = mw.col.conf.get("bingsu_profile_page_bg_light_color2", "#E0E0E0")
+                dark1 = mw.col.conf.get("bingsu_profile_page_bg_dark_color1", "#2C2C2C")
+                dark2 = mw.col.conf.get("bingsu_profile_page_bg_dark_color2", "#1A1A1A")
                 light_bg = f"linear-gradient(135deg, {light1}, {light2})"
                 dark_bg = f"linear-gradient(135deg, {dark1}, {dark2})"
             else:
-                light1 = mw.col.conf.get("onigiri_profile_page_bg_light_color1", "#F5F5F5")
-                dark1 = mw.col.conf.get("onigiri_profile_page_bg_dark_color1", "#2C2C2C")
+                light1 = mw.col.conf.get("bingsu_profile_page_bg_light_color1", "#F5F5F5")
+                dark1 = mw.col.conf.get("bingsu_profile_page_bg_dark_color1", "#2C2C2C")
                 light_bg = light1
                 dark_bg = dark1
         else:
@@ -5774,7 +5774,7 @@ def generate_profile_page_background_css():
 def generate_profile_bar_fix_css():
     """Generates compatibility CSS for the current profile bar layout matching preview pill style."""
     return """
-<style id="onigiri-profile-bar-fix">
+<style id="bingsu-profile-bar-fix">
 .profile-bar {
     height: 64px !important;
     border-radius: 32px !important;
@@ -5786,7 +5786,7 @@ def generate_profile_bar_fix_css():
     overflow: hidden !important;
     box-shadow: none !important;
     box-sizing: border-box !important;
-    width: var(--onigiri-deck-header-width, 100%) !important;
+    width: var(--bingsu-deck-header-width, 100%) !important;
     max-width: 100% !important;
 }
 
@@ -5861,7 +5861,7 @@ def generate_icon_size_css():
     # Exposed as a CSS variable so the collapsed sidebar-toolbar mode (which
     # renders Action Buttons as .action-btn/.action-icon via injector.js,
     # separate from the .menu-item markup above) can also size off it.
-    css_rules.append(f":root {{ --onigiri-action-icon-size: {action_button_size}px; }}")
+    css_rules.append(f":root {{ --bingsu-action-icon-size: {action_button_size}px; }}")
 
     # Count badge (deck new/learn/review pill) size. The base rule in menu.css
     # expresses height/min-width/padding in em relative to the badge font-size,
@@ -5885,9 +5885,9 @@ _ICON_CSS_URI_CACHE = {}
 
 def generate_icon_css(addon_package, conf):
     all_icon_selectors = {
-        "options": "td.opts a", "folder": "tr.is-folder a.deck::before, .onigiri-drag-preview.is-folder a.deck::before",
-        "deck": "tr.is-deck a.deck::before, .onigiri-drag-preview.is-deck a.deck::before", "subdeck": "tr.is-subdeck a.deck::before, .onigiri-drag-preview.is-subdeck a.deck::before",
-        "filtered_deck": "tr.is-filtered a.deck::before, .onigiri-drag-preview.is-filtered a.deck::before", "add": ".action-add .icon",
+        "options": "td.opts a", "folder": "tr.is-folder a.deck::before, .bingsu-drag-preview.is-folder a.deck::before",
+        "deck": "tr.is-deck a.deck::before, .bingsu-drag-preview.is-deck a.deck::before", "subdeck": "tr.is-subdeck a.deck::before, .bingsu-drag-preview.is-subdeck a.deck::before",
+        "filtered_deck": "tr.is-filtered a.deck::before, .bingsu-drag-preview.is-filtered a.deck::before", "add": ".action-add .icon",
         "browse": ".action-browse .icon", "stats": ".action-stats .icon", "sync": ".action-sync .icon",
         "settings": ".action-settings .icon", "more": ".action-more .icon",
         "get_shared": ".action-get-shared .icon", "create_deck": ".action-create-deck .icon",
@@ -5941,7 +5941,7 @@ def generate_icon_css(addon_package, conf):
                     # Default to SVG
                     uri = f"url('data:image/svg+xml;base64,{b64}')"
         except Exception as e:
-            print(f"Onigiri: Error loading icon {path}: {e}")
+            print(f"Bingsu: Error loading icon {path}: {e}")
             return ""
         if len(_ICON_CSS_URI_CACHE) > 256:
             _ICON_CSS_URI_CACHE.clear()
@@ -6030,7 +6030,7 @@ def generate_icon_css(addon_package, conf):
             css_rules.append(f"{selector} {{ mask-image: {url}; -webkit-mask-image: {url}; }}")
 
     # --- Custom Deck Icons ---
-    custom_deck_icons = config.get_collection_config("onigiri_custom_deck_icons", {})
+    custom_deck_icons = config.get_collection_config("bingsu_custom_deck_icons", {})
     for did, data in custom_deck_icons.items():
         icon_file = data.get("icon")
         color = data.get("color")
@@ -6049,7 +6049,7 @@ def generate_icon_css(addon_package, conf):
                         emoji_url = json.dumps(f"/_addons/{addon_package}/system_files/emojis/{emoji_asset}")
                         css_rules.append(f"""
                         tr[data-did="{did}"] a.deck::before,
-                        .onigiri-drag-preview[data-did="{did}"] a.deck::before {{
+                        .bingsu-drag-preview[data-did="{did}"] a.deck::before {{
                             content: '' !important;
                             mask-image: none !important;
                             -webkit-mask-image: none !important;
@@ -6069,7 +6069,7 @@ def generate_icon_css(addon_package, conf):
                         emoji_css = json.dumps(emoji_char, ensure_ascii=False)
                         css_rules.append(f"""
                         tr[data-did="{did}"] a.deck::before,
-                        .onigiri-drag-preview[data-did="{did}"] a.deck::before {{
+                        .bingsu-drag-preview[data-did="{did}"] a.deck::before {{
                             content: {emoji_css} !important;
                             mask-image: none !important;
                             -webkit-mask-image: none !important;
@@ -6098,7 +6098,7 @@ def generate_icon_css(addon_package, conf):
                              # PNG rendering style (no mask, original colors)
                             css_rules.append(f"""
                             tr[data-did="{did}"] a.deck::before,
-                            .onigiri-drag-preview[data-did="{did}"] a.deck::before {{
+                            .bingsu-drag-preview[data-did="{did}"] a.deck::before {{
                                 content: '';
                                 background-image: {url} !important;
                                 -webkit-mask-image: none !important;
@@ -6124,7 +6124,7 @@ def generate_icon_css(addon_package, conf):
                             icon_color_dark_css = color_dark if color_dark else "var(--icon-color, #888888)"
                             selectors = (
                                 f'tr[data-did="{did}"] a.deck::before,\n'
-                                f'                            .onigiri-drag-preview[data-did="{did}"] a.deck::before'
+                                f'                            .bingsu-drag-preview[data-did="{did}"] a.deck::before'
                             )
                             css_rules.append(f"""
                             {selectors} {{
@@ -6247,7 +6247,7 @@ def generate_icon_css(addon_package, conf):
 
     /* Filtered Deck Specific Color */
     tr.is-filtered a.deck::before,
-    .onigiri-drag-preview.is-filtered a.deck::before {{
+    .bingsu-drag-preview.is-filtered a.deck::before {{
         background-color: #0a84ff !important; /* Anki Blue */
         mask-size: contain;
         -webkit-mask-size: contain;
@@ -6258,7 +6258,7 @@ def generate_icon_css(addon_package, conf):
         display: inline-block;
     }}
     .night-mode tr.is-filtered a.deck::before,
-    .night-mode .onigiri-drag-preview.is-filtered a.deck::before {{
+    .night-mode .bingsu-drag-preview.is-filtered a.deck::before {{
         background-color: #64d2ff !important; /* Light Blue for Dark Mode */
     }}
 
@@ -6305,8 +6305,8 @@ def generate_icon_css(addon_package, conf):
         text-overflow: clip !important;
         white-space: nowrap !important;
         display: block !important;
-        -webkit-mask-image: var(--onigiri-name-fade) !important;
-        mask-image: var(--onigiri-name-fade) !important;
+        -webkit-mask-image: var(--bingsu-name-fade) !important;
+        mask-image: var(--bingsu-name-fade) !important;
     }}
 
     .deck-table a.deck .deck-mark-dot {{
@@ -6331,7 +6331,7 @@ def generate_icon_css(addon_package, conf):
 def generate_conditional_css(conf):
 	styles = []
 	styles.append("""
-        body.deck-browser .sidebar-left.deck-focus-mode .onigiri-sidebar-decks-section > #deck-list-header {
+        body.deck-browser .sidebar-left.deck-focus-mode .bingsu-sidebar-decks-section > #deck-list-header {
             display: flex !important;
         }
     """)
@@ -6351,22 +6351,22 @@ def generate_font_css(addon_package):
     # Read them through the matching API as well; direct ``col.conf`` reads can
     # remain stale on newer Anki builds until the collection is reloaded.
     col_get = config.get_collection_config
-    main_font_key = col_get("onigiri_font_main", "system")
-    subtle_font_key = col_get("onigiri_font_subtle", "system")
-    small_title_font_key = col_get("onigiri_font_small_title", "system")
+    main_font_key = col_get("bingsu_font_main", "system")
+    subtle_font_key = col_get("bingsu_font_subtle", "system")
+    small_title_font_key = col_get("bingsu_font_small_title", "system")
     advanced_role_specs = {
         "sidebar_small": {
             "fallback": "main",
             "selectors": (
-                ".sidebar-left .onigiri-sidebar-profile-bio",
-                ".sidebar-left .onigiri-sidebar-profile-music-link span",
-                ".sidebar-left .onigiri-sidebar-profile-music-link strong",
-                ".sidebar-left .onigiri-sidebar-profile-birthday-badge",
-                ".sidebar-left .onigiri-sidebar-profile-chart-head span",
-                ".sidebar-left .onigiri-sidebar-profile-chart-labels",
-                ".sidebar-left .onigiri-sidebar-profile-summary-label",
-                ".sidebar-left .onigiri-sidebar-profile-summary-detail",
-                ".sidebar-left .onigiri-sidebar-profile-summary-value",
+                ".sidebar-left .bingsu-sidebar-profile-bio",
+                ".sidebar-left .bingsu-sidebar-profile-music-link span",
+                ".sidebar-left .bingsu-sidebar-profile-music-link strong",
+                ".sidebar-left .bingsu-sidebar-profile-birthday-badge",
+                ".sidebar-left .bingsu-sidebar-profile-chart-head span",
+                ".sidebar-left .bingsu-sidebar-profile-chart-labels",
+                ".sidebar-left .bingsu-sidebar-profile-summary-label",
+                ".sidebar-left .bingsu-sidebar-profile-summary-detail",
+                ".sidebar-left .bingsu-sidebar-profile-summary-value",
             ),
         },
         "deck_title": {
@@ -6382,7 +6382,7 @@ def generate_font_css(addon_package):
             "fallback": "main",
             "selectors": (
                 ".sidebar-left .deck-table a.deck",
-                ".onigiri-widget-container .favorite-deck-link",
+                ".bingsu-widget-container .favorite-deck-link",
             ),
         },
         "action_buttons": {
@@ -6391,55 +6391,55 @@ def generate_font_css(addon_package):
                 ".sidebar-left .menu-item",
                 ".sidebar-left .action-btn",
                 ".sidebar-left .add-button-dashed",
-                ".sidebar-left .onigiri-ready-action",
+                ".sidebar-left .bingsu-ready-action",
             ),
         },
         "dashboard_title": {
             "fallback": "subtle",
             "selectors": (
-                ".onigiri-widget-title",
-                ".injected-stats-block .onigiri-widget-title",
-                ".onigiri-widget-container .onigiri-widget-title",
+                ".bingsu-widget-title",
+                ".injected-stats-block .bingsu-widget-title",
+                ".bingsu-widget-container .bingsu-widget-title",
             ),
         },
         "widget_title": {
             "fallback": "small_title",
             "selectors": (
-                ".onigiri-widget-container h3",
+                ".bingsu-widget-container h3",
                 ".external-widget-container h3",
-                ".onigiri-widget-head h3",
+                ".bingsu-widget-head h3",
                 ".stat-card h3",
             ),
         },
         "widget_small": {
             "fallback": "main",
             "selectors": (
-                ".onigiri-widget-container",
+                ".bingsu-widget-container",
                 ".external-widget-container",
-                ".onigiri-widget-container .stat-unit",
-                ".onigiri-widget-container .favorites-placeholder",
-                ".onigiri-widget-container .favorites-placeholder span",
+                ".bingsu-widget-container .stat-unit",
+                ".bingsu-widget-container .favorites-placeholder",
+                ".bingsu-widget-container .favorites-placeholder span",
                 # Hashi note text has its own size control. These descendants
                 # must retain menu.css's note sizes, rather than receiving this
                 # more-specific, !important dashboard typography rule.
-                ".onigiri-widget-container .learner-stats-deck-trigger",
-                ".onigiri-widget-container .learner-stat-label",
-                ".onigiri-widget-container .learner-stats-compact-total span",
-                ".onigiri-widget-container .learner-stats-mini-ring-cap",
-                ".onigiri-widget-container .learner-stats-mini-row-label",
-                ".onigiri-widget-container .learner-stats-group-title",
-                ".onigiri-widget-container .learner-stats-bar-label",
-                ".onigiri-widget-container .learner-stats-footer-item",
-                ".onigiri-widget-container .learner-stats-donut-num span",
-                ".onigiri-widget-container .learner-stats-donut-legend-item",
-                ".onigiri-widget-container .streak-counter",
-                ".onigiri-widget-container .heatmap-nav .nav-title",
-                ".onigiri-widget-container .heatmap-nav .year-select-btn",
-                ".onigiri-widget-container .year-dropdown-item",
-                ".onigiri-widget-container .heatmap-months",
-                ".onigiri-widget-container .heatmap-weekdays",
-                ".onigiri-widget-container .month-weekdays-header",
-                ".onigiri-widget-container .week-days-header",
+                ".bingsu-widget-container .learner-stats-deck-trigger",
+                ".bingsu-widget-container .learner-stat-label",
+                ".bingsu-widget-container .learner-stats-compact-total span",
+                ".bingsu-widget-container .learner-stats-mini-ring-cap",
+                ".bingsu-widget-container .learner-stats-mini-row-label",
+                ".bingsu-widget-container .learner-stats-group-title",
+                ".bingsu-widget-container .learner-stats-bar-label",
+                ".bingsu-widget-container .learner-stats-footer-item",
+                ".bingsu-widget-container .learner-stats-donut-num span",
+                ".bingsu-widget-container .learner-stats-donut-legend-item",
+                ".bingsu-widget-container .streak-counter",
+                ".bingsu-widget-container .heatmap-nav .nav-title",
+                ".bingsu-widget-container .heatmap-nav .year-select-btn",
+                ".bingsu-widget-container .year-dropdown-item",
+                ".bingsu-widget-container .heatmap-months",
+                ".bingsu-widget-container .heatmap-weekdays",
+                ".bingsu-widget-container .month-weekdays-header",
+                ".bingsu-widget-container .week-days-header",
                 ".external-widget-container .learner-stats-deck-trigger",
                 ".external-widget-container .learner-stat-label",
                 ".external-widget-container .learner-stats-group-title",
@@ -6451,72 +6451,72 @@ def generate_font_css(addon_package):
         "heatmap_title": {
             "fallback": "small_title",
             "selectors": (
-                "#onigiri-heatmap-container .heatmap-title",
+                "#bingsu-heatmap-container .heatmap-title",
             ),
         },
         "heatmap_labels": {
             "fallback": "main",
             "selectors": (
-                "#onigiri-heatmap-container .streak-counter",
-                "#onigiri-heatmap-container .heatmap-nav .nav-title",
-                "#onigiri-heatmap-container .heatmap-nav .year-select-btn",
-                "#onigiri-heatmap-container .year-dropdown-item",
-                "#onigiri-heatmap-container .heatmap-filters .filter-btn",
-                "#onigiri-heatmap-container .heatmap-months",
-                "#onigiri-heatmap-container .heatmap-months .month-label",
-                "#onigiri-heatmap-container .heatmap-weekdays",
-                "#onigiri-heatmap-container .heatmap-weekdays .weekday-label",
-                "#onigiri-heatmap-container .month-weekdays-header",
-                "#onigiri-heatmap-container .month-weekdays-header .weekday-label",
-                "#onigiri-heatmap-container .week-days-header",
-                "#onigiri-heatmap-container .week-days-header .weekday-label",
-                "#onigiri-heatmap-container .week-days-header .day-label",
+                "#bingsu-heatmap-container .streak-counter",
+                "#bingsu-heatmap-container .heatmap-nav .nav-title",
+                "#bingsu-heatmap-container .heatmap-nav .year-select-btn",
+                "#bingsu-heatmap-container .year-dropdown-item",
+                "#bingsu-heatmap-container .heatmap-filters .filter-btn",
+                "#bingsu-heatmap-container .heatmap-months",
+                "#bingsu-heatmap-container .heatmap-months .month-label",
+                "#bingsu-heatmap-container .heatmap-weekdays",
+                "#bingsu-heatmap-container .heatmap-weekdays .weekday-label",
+                "#bingsu-heatmap-container .month-weekdays-header",
+                "#bingsu-heatmap-container .month-weekdays-header .weekday-label",
+                "#bingsu-heatmap-container .week-days-header",
+                "#bingsu-heatmap-container .week-days-header .weekday-label",
+                "#bingsu-heatmap-container .week-days-header .day-label",
             ),
         },
         "stats_title": {
             "fallback": "small_title",
             "selectors": (
                 ".learner-stats-widget .learner-stats-header h3",
-                ".onigiri-widget-container .learner-stats-header h3",
+                ".bingsu-widget-container .learner-stats-header h3",
             ),
         },
         "stats_labels": {
             "fallback": "main",
             "selectors": (
-                ".onigiri-widget-container .learner-stats-widget "
+                ".bingsu-widget-container .learner-stats-widget "
                 ".learner-stats-header-controls "
                 ".learner-stats-deck-trigger.learner-stats-deck-trigger",
-                ".onigiri-widget-container .learner-stat-label",
-                ".onigiri-widget-container .learner-stats-compact-total span",
-                ".onigiri-widget-container .learner-stats-mini-ring-cap",
-                ".onigiri-widget-container .learner-stats-mini-row-label",
-                ".onigiri-widget-container .learner-stats-group-title",
-                ".onigiri-widget-container .learner-stats-bar-label",
-                ".onigiri-widget-container .learner-stats-footer-item",
-                ".onigiri-widget-container .learner-stats-donut-num span",
-                ".onigiri-widget-container .learner-stats-donut-legend-item",
+                ".bingsu-widget-container .learner-stat-label",
+                ".bingsu-widget-container .learner-stats-compact-total span",
+                ".bingsu-widget-container .learner-stats-mini-ring-cap",
+                ".bingsu-widget-container .learner-stats-mini-row-label",
+                ".bingsu-widget-container .learner-stats-group-title",
+                ".bingsu-widget-container .learner-stats-bar-label",
+                ".bingsu-widget-container .learner-stats-footer-item",
+                ".bingsu-widget-container .learner-stats-donut-num span",
+                ".bingsu-widget-container .learner-stats-donut-legend-item",
             ),
         },
         "stats_values": {
             "fallback": "main",
             "selectors": (
-                ".onigiri-widget-container .learner-stat-val",
-                ".onigiri-widget-container .learner-stats-compact-total",
-                ".onigiri-widget-container .learner-stats-mini-ring-num",
-                ".onigiri-widget-container .learner-stats-mini-row-value",
-                ".onigiri-widget-container .learner-stats-bar-value",
-                ".onigiri-widget-container .learner-stats-footer-item b",
-                ".onigiri-widget-container .learner-stats-donut-num",
+                ".bingsu-widget-container .learner-stat-val",
+                ".bingsu-widget-container .learner-stats-compact-total",
+                ".bingsu-widget-container .learner-stats-mini-ring-num",
+                ".bingsu-widget-container .learner-stats-mini-row-value",
+                ".bingsu-widget-container .learner-stats-bar-value",
+                ".bingsu-widget-container .learner-stats-footer-item b",
+                ".bingsu-widget-container .learner-stats-donut-num",
             ),
         },
         "profile_name": {
             "fallback": "main",
             "selectors": (
                 ".profile-bar .profile-name",
-                ".onigiri-sidebar-profile-body h2",
-                ".onigiri-profile .opro-name",
-                ".onigiri-profile .opro-level",
-                ".onigiri-profile .opro-lv",
+                ".bingsu-sidebar-profile-body h2",
+                ".bingsu-profile .opro-name",
+                ".bingsu-profile .opro-level",
+                ".bingsu-profile .opro-lv",
                 ".overview-profile-bar .profile-name",
                 ".congrats-profile-bar .profile-name",
             ),
@@ -6531,9 +6531,9 @@ def generate_font_css(addon_package):
                 ".overview-container",
                 ".overview-container .stats-row",
                 ".overview-container .overview-button",
-                ".overview-container .onigiri-learning-due-notice",
+                ".overview-container .bingsu-learning-due-notice",
                 "#study",
-                "#onigiri-reveal-btn",
+                "#bingsu-reveal-btn",
             ),
         },
         "congrats_title": {
@@ -6543,9 +6543,9 @@ def generate_font_css(addon_package):
         "congrats_text": {
             "fallback": "main",
             "selectors": (
-                ".congrats-card .onigiri-learning-due-notice",
+                ".congrats-card .bingsu-learning-due-notice",
                 ".congrats-card .overview-button",
-                ".congrats-card .onigiri-learning-browse-button",
+                ".congrats-card .bingsu-learning-browse-button",
             ),
         },
         "reviewer_controls": {
@@ -6558,17 +6558,17 @@ def generate_font_css(addon_package):
         "notifications": {
             "fallback": "main",
             "selectors": (
-                ".onigiri-notification-card",
-                ".onigiri-mini-notification",
-                ".onigiri-notification-card button",
-                ".onigiri-mini-notification button",
+                ".bingsu-notification-card",
+                ".bingsu-mini-notification",
+                ".bingsu-notification-card button",
+                ".bingsu-mini-notification button",
             ),
         },
     }
     # Profile bar username font (set on the Profile settings page).
     profile_name_font_key = col_get("modern_menu_profile_name_font", "system") or "system"
-    profile_level_font_key = col_get("onigiri_font_profile_level", "sync") or "sync"
-    profile_level_font_size = col_get("onigiri_font_size_profile_level", 11)
+    profile_level_font_key = col_get("bingsu_font_profile_level", "sync") or "sync"
+    profile_level_font_size = col_get("bingsu_font_size_profile_level", 11)
     profile_colors_dynamic = col_get("modern_menu_profile_name_dynamic_mode", True)
     profile_level_color_light = col_get("modern_menu_profile_level_color_light", config.DEFAULT_PROFILE_LEVEL_COLOR)
     profile_level_color_dark = (
@@ -6580,14 +6580,14 @@ def generate_font_css(addon_package):
     # Menu Title is an Advanced override. In Simple it follows Titles so every
     # visible size belongs to one of the three shared typography scales.
     menu_title_font_key = col_get(
-        "onigiri_font_dashboard_title", "sync"
+        "bingsu_font_dashboard_title", "sync"
     ) or "sync"
     # Today's Stats titles, supporting labels, and numbers choose fonts
     # independently. The older shared `font` key remains a fallback for the
     # two original roles; config.py migrates it once for the newer number role.
     try:
-        from ..core import config as _onigiri_config
-        _sw_style = _onigiri_config.get_config_readonly().get("stats_widgets_style", {})
+        from ..core import config as _bingsu_config
+        _sw_style = _bingsu_config.get_config_readonly().get("stats_widgets_style", {})
         _sw_legacy_font_key = (_sw_style or {}).get("font", "sync") or "sync"
         stats_widget_label_font_key = (
             (_sw_style or {}).get("label_font", _sw_legacy_font_key) or "sync"
@@ -6604,11 +6604,11 @@ def generate_font_css(addon_package):
         stats_widget_number_font_key = "sync"
 
     # --- NEW: Font Sizes ---
-    main_font_size = col_get("onigiri_font_size_main", 14)
-    subtle_font_size = col_get("onigiri_font_size_subtle", 20)
-    small_title_font_size = col_get("onigiri_font_size_small_title", 15)
+    main_font_size = col_get("bingsu_font_size_main", 14)
+    subtle_font_size = col_get("bingsu_font_size_subtle", 20)
+    small_title_font_size = col_get("bingsu_font_size_small_title", 15)
     menu_title_font_size = col_get(
-        "onigiri_font_size_dashboard_title", subtle_font_size
+        "bingsu_font_size_dashboard_title", subtle_font_size
     )
     simple_font_sizes = {
         "main": main_font_size,
@@ -6616,12 +6616,12 @@ def generate_font_css(addon_package):
         "small_title": small_title_font_size,
     }
     role_font_keys = {
-        role: col_get(f"onigiri_font_{role}", "sync") or "sync"
+        role: col_get(f"bingsu_font_{role}", "sync") or "sync"
         for role in advanced_role_specs
     }
     role_font_sizes = {
         role: col_get(
-            f"onigiri_font_size_{role}",
+            f"bingsu_font_size_{role}",
             spec.get("default_size", simple_font_sizes[spec["fallback"]]),
         )
         for role, spec in advanced_role_specs.items()
@@ -6764,7 +6764,7 @@ def generate_font_css(addon_package):
         except (TypeError, ValueError):
             menu_title_size = 20
     menu_title_font_css = (
-        ".onigiri-widget-title {"
+        ".bingsu-widget-title {"
         f" font-family: {menu_title_stack} !important;"
         f" font-size: {menu_title_size}px !important; }}"
     )
@@ -6813,7 +6813,7 @@ def generate_font_css(addon_package):
                 f"'{family}', -apple-system, BlinkMacSystemFont, \"Segoe UI\","
                 " Roboto, Helvetica, Arial, sans-serif"
             )
-        stats_title_font_css = f".onigiri-widget-title {{ font-family: {font_stack} !important; }}"
+        stats_title_font_css = f".bingsu-widget-title {{ font-family: {font_stack} !important; }}"
 
     # Today's Stats local typography deliberately outranks the broader Widget
     # Fonts roles. Emit an explicit effective family even for "sync": the unit
@@ -6839,18 +6839,18 @@ def generate_font_css(addon_package):
     stats_widget_font_css = "\n".join(filter(None, (
         _stats_widget_font_rule(
             stats_widget_label_font_key,
-            ".stat-card.onigiri-stat-card h3",
+            ".stat-card.bingsu-stat-card h3",
             "widget_title",
         ),
         _stats_widget_font_rule(
             stats_widget_value_font_key,
-            ".stat-card.onigiri-stat-card .stat-unit, "
-            ".stat-card.onigiri-stat-card .stat-sub",
+            ".stat-card.bingsu-stat-card .stat-unit, "
+            ".stat-card.bingsu-stat-card .stat-sub",
             "widget_small",
         ),
         _stats_widget_font_rule(
             stats_widget_number_font_key,
-            ".stat-card.onigiri-stat-card .stat-value",
+            ".stat-card.bingsu-stat-card .stat-value",
             "widget_small",
         ),
     )))
@@ -6863,9 +6863,9 @@ def generate_font_css(addon_package):
         and profile_name_font_info.get("family")
     ):
         profile_name_font_css = (
-            ".profile-bar .profile-name, .onigiri-sidebar-profile-body h2, "
-            ".onigiri-profile .opro-name, .onigiri-profile .opro-level, "
-            ".onigiri-profile .opro-lv "
+            ".profile-bar .profile-name, .bingsu-sidebar-profile-body h2, "
+            ".bingsu-profile .opro-name, .bingsu-profile .opro-level, "
+            ".bingsu-profile .opro-lv "
             "{{ font-family: '{family}', "
             "-apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif !important; }}"
         ).format(family=profile_name_font_info["family"])
@@ -6890,7 +6890,7 @@ def generate_font_css(addon_package):
         .profile-bar .restaurant-level-chip .rl-chip-level,
         .overview-profile-bar .restaurant-level-chip .rl-chip-level,
         .congrats-profile-bar .restaurant-level-chip .rl-chip-level,
-        .onigiri-profile .opro-level {{
+        .bingsu-profile .opro-level {{
             font-family: {level_font_stack} !important;
             font-size: {level_font_size}px !important;
         }}
@@ -6899,15 +6899,15 @@ def generate_font_css(addon_package):
         .profile-bar .restaurant-level-chip .rl-chip-level,
         .overview-profile-bar .restaurant-level-chip .rl-chip-level,
         .congrats-profile-bar .restaurant-level-chip .rl-chip-level,
-        .onigiri-profile .opro-level {{ color: {profile_level_color_light} !important; }}
+        .bingsu-profile .opro-level {{ color: {profile_level_color_light} !important; }}
         .night-mode .profile-bar .restaurant-level-chip .rl-chip-level,
         .nightMode .profile-bar .restaurant-level-chip .rl-chip-level,
         .night-mode .overview-profile-bar .restaurant-level-chip .rl-chip-level,
         .nightMode .overview-profile-bar .restaurant-level-chip .rl-chip-level,
         .night-mode .congrats-profile-bar .restaurant-level-chip .rl-chip-level,
         .nightMode .congrats-profile-bar .restaurant-level-chip .rl-chip-level,
-        .night-mode .onigiri-profile .opro-level,
-        .nightMode .onigiri-profile .opro-level {{ color: {profile_level_color_dark} !important; }}
+        .night-mode .bingsu-profile .opro-level,
+        .nightMode .bingsu-profile .opro-level {{ color: {profile_level_color_dark} !important; }}
     """
 
     # A font's ink is a component override, independent of its family sync.
@@ -6943,10 +6943,10 @@ def generate_font_css(addon_package):
 
     ink_descendants = {
         "reviewer_controls": (
-            "#outer button .onigiri-answer-label",
-            "#outer button .onigiri-answer-hover-number",
-            "#outer button .onigiri-count-pill",
-            "#outer button .onigiri-timer-pill",
+            "#outer button .bingsu-answer-label",
+            "#outer button .bingsu-answer-hover-number",
+            "#outer button .bingsu-count-pill",
+            "#outer button .bingsu-timer-pill",
             "#outer button .stattxt", "#outer button .nobold", "#outer button small",
             "#outer #ansbut::before", "#outer #ansbut::after",
             "#outer #middle button::before",
@@ -6958,25 +6958,25 @@ def generate_font_css(addon_package):
         "congrats_text": (".congrats-container .congrats-bottom-actions .overview-button",),
     }
     font_color_css = "\n".join(
-        _font_ink_rules("onigiri_font_" + role,
+        _font_ink_rules("bingsu_font_" + role,
                         spec["selectors"] + ink_descendants.get(role, ()))
         for role, spec in advanced_role_specs.items()
     )
     font_color_css += "\n" + "\n".join(
         _font_ink_rules(font_id, selectors, font_id == "swidget_number_font")
         for font_id, selectors in (
-            ("swidget_label_font", (".stat-card.onigiri-stat-card h3",)),
+            ("swidget_label_font", (".stat-card.bingsu-stat-card h3",)),
             ("swidget_value_font", (
-                ".stat-card.onigiri-stat-card .stat-unit",
-                ".stat-card.onigiri-stat-card .stat-sub",
+                ".stat-card.bingsu-stat-card .stat-unit",
+                ".stat-card.bingsu-stat-card .stat-sub",
             )),
-            ("swidget_number_font", (".stat-card.onigiri-stat-card .stat-value",)),
+            ("swidget_number_font", (".stat-card.bingsu-stat-card .stat-value",)),
         )
     )
 
     # Generate the final CSS block
     font_css = f"""
-    <style id="onigiri-font-styles">
+    <style id="bingsu-font-styles">
         {font_faces}
         :root {{
             --font-main: {main_font_info['family']};
@@ -6988,7 +6988,7 @@ def generate_font_css(addon_package):
         }}
         
         /* Apply fonts to specific elements */
-        #onigiri-reveal-btn {{
+        #bingsu-reveal-btn {{
             font-family: var(--font-main) !important;
             box-shadow: none !important;
         }}
@@ -7034,14 +7034,14 @@ def generate_font_css(addon_package):
         }}
         
         /* Titles (Subtle) - e.g. Today's Stats */
-        .onigiri-widget-title {{
+        .bingsu-widget-title {{
             font-family: var(--font-subtle), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
             font-size: var(--font-size-subtle) !important;
             color: var(--fg-subtle) !important;
         }}
 
         /* Small Titles - Sidebar Headers and Widget Titles */
-        .sidebar-left h2, .stat-card h3, .onigiri-widget-container h3 {{
+        .sidebar-left h2, .stat-card h3, .bingsu-widget-container h3 {{
             font-family: var(--font-small-title), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
             font-size: var(--font-size-small-title) !important;
             color: var(--font-small-title-color, var(--fg)) !important;
@@ -7073,7 +7073,7 @@ def _hex_to_rgba(hex_str: str, alpha: float) -> str:
 		return f"rgba(0,0,0,{alpha})"
 
 
-def _onigiri_int_style_value(value, fallback):
+def _bingsu_int_style_value(value, fallback):
 	if value is None or value == "":
 		return fallback
 	try:
@@ -7082,7 +7082,7 @@ def _onigiri_int_style_value(value, fallback):
 		return fallback
 
 
-def _onigiri_css_color_with_alpha(color, alpha):
+def _bingsu_css_color_with_alpha(color, alpha):
 	color = str(color or "").strip()
 	alpha = max(0.0, min(1.0, alpha))
 	if color.startswith("rgba"):
@@ -7099,12 +7099,12 @@ def _onigiri_css_color_with_alpha(color, alpha):
 
 
 def _box_effect_values():
-	effect_mode = mw.col.conf.get("onigiri_canvas_inset_effect_mode", "none")
-	effect_intensity = mw.col.conf.get("onigiri_canvas_inset_effect_intensity", 50)
-	if "onigiri_canvas_inset_effect_blur" in mw.col.conf or "onigiri_canvas_inset_effect_opacity" in mw.col.conf:
-		blur = int(mw.col.conf.get("onigiri_canvas_inset_effect_blur", 0) or 0)
-		opacity = _onigiri_int_style_value(
-			mw.col.conf.get("onigiri_canvas_inset_effect_opacity", 100), 100
+	effect_mode = mw.col.conf.get("bingsu_canvas_inset_effect_mode", "none")
+	effect_intensity = mw.col.conf.get("bingsu_canvas_inset_effect_intensity", 50)
+	if "bingsu_canvas_inset_effect_blur" in mw.col.conf or "bingsu_canvas_inset_effect_opacity" in mw.col.conf:
+		blur = int(mw.col.conf.get("bingsu_canvas_inset_effect_blur", 0) or 0)
+		opacity = _bingsu_int_style_value(
+			mw.col.conf.get("bingsu_canvas_inset_effect_opacity", 100), 100
 		)
 	else:
 		if effect_mode == "glassmorphism":
@@ -7112,14 +7112,14 @@ def _box_effect_values():
 			opacity = max(0, min(100, 100 - int(effect_intensity or 0)))
 		elif effect_mode == "opacity":
 			blur = 0
-			opacity = _onigiri_int_style_value(effect_intensity, 100)
+			opacity = _bingsu_int_style_value(effect_intensity, 100)
 		else:
 			blur = 0
 			opacity = 100
 	blur = max(0, min(100, blur))
 	opacity = max(0, min(100, opacity))
-	radius = max(0, min(60, _onigiri_int_style_value(mw.col.conf.get("onigiri_canvas_inset_border_radius", 20), 20)))
-	stroke = max(0, min(10, _onigiri_int_style_value(mw.col.conf.get("onigiri_canvas_inset_border_width", 1), 1)))
+	radius = max(0, min(60, _bingsu_int_style_value(mw.col.conf.get("bingsu_canvas_inset_border_radius", 20), 20)))
+	stroke = max(0, min(10, _bingsu_int_style_value(mw.col.conf.get("bingsu_canvas_inset_border_width", 1), 1)))
 	return blur, opacity, radius, stroke
 
 
@@ -7141,34 +7141,34 @@ def generate_box_effect_button_vars_css(conf=None, selector=":root", night_selec
 			alpha = opacity / 100.0
 			if blur > 0:
 				alpha = min(alpha, 0.62)
-			return _onigiri_css_color_with_alpha(color, alpha)
+			return _bingsu_css_color_with_alpha(color, alpha)
 		return color
 
 	blur_px = (blur / 100.0) * 20
 	return f"""
-    <style id="onigiri-box-effect-button-vars">
+    <style id="bingsu-box-effect-button-vars">
         {selector} {{
-            --onigiri-box-effect-bg: {_box_bg("light", "#ffffff")};
-            --onigiri-box-effect-border: {_mode_color("light", "--border", "#d9d9d9")};
-            --onigiri-box-effect-border-hover: {_mode_color("light", "--border-hover", _mode_color("light", "--border", "#bfbfbf"))};
-            --onigiri-box-effect-fg: {_mode_color("light", "--fg", "#333333")};
-            --onigiri-box-effect-radius: {radius}px;
-            --onigiri-box-effect-stroke: {stroke}px;
-            --onigiri-box-effect-blur: {blur_px:.2f}px;
+            --bingsu-box-effect-bg: {_box_bg("light", "#ffffff")};
+            --bingsu-box-effect-border: {_mode_color("light", "--border", "#d9d9d9")};
+            --bingsu-box-effect-border-hover: {_mode_color("light", "--border-hover", _mode_color("light", "--border", "#bfbfbf"))};
+            --bingsu-box-effect-fg: {_mode_color("light", "--fg", "#333333")};
+            --bingsu-box-effect-radius: {radius}px;
+            --bingsu-box-effect-stroke: {stroke}px;
+            --bingsu-box-effect-blur: {blur_px:.2f}px;
         }}
         {night_selector} {{
-            --onigiri-box-effect-bg: {_box_bg("dark", "#2c2c2c")};
-            --onigiri-box-effect-border: {_mode_color("dark", "--border", "#3a3a3a")};
-            --onigiri-box-effect-border-hover: {_mode_color("dark", "--border-hover", _mode_color("dark", "--border", "#4a4a4a"))};
-            --onigiri-box-effect-fg: {_mode_color("dark", "--fg", "#e0e0e0")};
+            --bingsu-box-effect-bg: {_box_bg("dark", "#2c2c2c")};
+            --bingsu-box-effect-border: {_mode_color("dark", "--border", "#3a3a3a")};
+            --bingsu-box-effect-border-hover: {_mode_color("dark", "--border-hover", _mode_color("dark", "--border", "#4a4a4a"))};
+            --bingsu-box-effect-fg: {_mode_color("dark", "--fg", "#e0e0e0")};
         }}
     </style>
     """
 
 
 def generate_scoped_main_font_css(addon_package, selector):
-	main_font_key = config.get_collection_config("onigiri_font_main", "system")
-	main_font_size = config.get_collection_config("onigiri_font_size_main", 14)
+	main_font_key = config.get_collection_config("bingsu_font_main", "system")
+	main_font_size = config.get_collection_config("bingsu_font_size_main", 14)
 	from ..ui_kit.fonts import FONTS, get_all_fonts
 
 	all_fonts = FONTS if main_font_key in FONTS else get_all_fonts(os.path.dirname(os.path.dirname(__file__)))
@@ -7193,7 +7193,7 @@ def generate_scoped_main_font_css(addon_package, selector):
         """
 
 	return f"""
-    <style id="onigiri-scoped-main-font">
+    <style id="bingsu-scoped-main-font">
         {font_face}
         {selector} {{
             --font-main: {main_font_info['family']};
@@ -7300,12 +7300,12 @@ def generate_dynamic_css(conf, include_font_css=True):
 		generate_font_css(addon_package) if include_font_css else ""
 	)
 
-	effect_mode = mw.col.conf.get("onigiri_canvas_inset_effect_mode", "none")
-	effect_intensity = mw.col.conf.get("onigiri_canvas_inset_effect_intensity", 50)
-	if "onigiri_canvas_inset_effect_blur" in mw.col.conf or "onigiri_canvas_inset_effect_opacity" in mw.col.conf:
-		box_effect_blur = int(mw.col.conf.get("onigiri_canvas_inset_effect_blur", 0) or 0)
-		box_effect_opacity = _onigiri_int_style_value(
-			mw.col.conf.get("onigiri_canvas_inset_effect_opacity", 100), 100
+	effect_mode = mw.col.conf.get("bingsu_canvas_inset_effect_mode", "none")
+	effect_intensity = mw.col.conf.get("bingsu_canvas_inset_effect_intensity", 50)
+	if "bingsu_canvas_inset_effect_blur" in mw.col.conf or "bingsu_canvas_inset_effect_opacity" in mw.col.conf:
+		box_effect_blur = int(mw.col.conf.get("bingsu_canvas_inset_effect_blur", 0) or 0)
+		box_effect_opacity = _bingsu_int_style_value(
+			mw.col.conf.get("bingsu_canvas_inset_effect_opacity", 100), 100
 		)
 	else:
 		if effect_mode == "glassmorphism":
@@ -7313,7 +7313,7 @@ def generate_dynamic_css(conf, include_font_css=True):
 			box_effect_opacity = max(0, min(100, 100 - int(effect_intensity or 0)))
 		elif effect_mode == "opacity":
 			box_effect_blur = 0
-			box_effect_opacity = _onigiri_int_style_value(effect_intensity, 100)
+			box_effect_opacity = _bingsu_int_style_value(effect_intensity, 100)
 		else:
 			box_effect_blur = 0
 			box_effect_opacity = 100
@@ -7327,8 +7327,8 @@ def generate_dynamic_css(conf, include_font_css=True):
 		except Exception:
 			return fallback
 
-	box_effect_radius = max(0, min(60, _int_style_value(mw.col.conf.get("onigiri_canvas_inset_border_radius", 20), 20)))
-	box_effect_stroke = max(0, min(10, _int_style_value(mw.col.conf.get("onigiri_canvas_inset_border_width", 1), 1)))
+	box_effect_radius = max(0, min(60, _int_style_value(mw.col.conf.get("bingsu_canvas_inset_border_radius", 20), 20)))
+	box_effect_stroke = max(0, min(10, _int_style_value(mw.col.conf.get("bingsu_canvas_inset_border_width", 1), 1)))
 
 	def _apply_canvas_inset_effect(colors: dict):
 		"""Applies the box opacity setting to --canvas-inset color."""
@@ -7339,7 +7339,7 @@ def generate_dynamic_css(conf, include_font_css=True):
 			alpha = box_effect_opacity / 100.0
 			if box_effect_blur > 0:
 				alpha = min(alpha, 0.62)
-			colors["--canvas-inset"] = _onigiri_css_color_with_alpha(colors["--canvas-inset"], alpha)
+			colors["--canvas-inset"] = _bingsu_css_color_with_alpha(colors["--canvas-inset"], alpha)
 
 	colors = conf.get("colors", {})
 	light_colors = colors.get("light", {}).copy()
@@ -7365,10 +7365,10 @@ def generate_dynamic_css(conf, include_font_css=True):
 	overview_style = conf.get("overview_style", {}) if isinstance(conf.get("overview_style", {}), dict) else {}
 	overview_colors = overview_style.get("colors", {}) if isinstance(overview_style.get("colors", {}), dict) else {}
 	overview_sync = bool(overview_style.get("sync_box_effect", False))
-	overview_blur = box_effect_blur if overview_sync else max(0, min(100, int(overview_style.get("blur", mw.col.conf.get("onigiri_overview_effect_blur", 0)) or 0)))
-	overview_opacity = box_effect_opacity if overview_sync else max(0, min(100, _int_style_value(overview_style.get("opacity", mw.col.conf.get("onigiri_overview_effect_opacity", 100)), 100)))
-	overview_radius = box_effect_radius if overview_sync else max(0, min(60, _int_style_value(overview_style.get("radius", mw.col.conf.get("onigiri_overview_border_radius", 20)), 20)))
-	overview_stroke = box_effect_stroke if overview_sync else max(0, min(10, _int_style_value(overview_style.get("stroke", mw.col.conf.get("onigiri_overview_border_width", 1)), 1)))
+	overview_blur = box_effect_blur if overview_sync else max(0, min(100, int(overview_style.get("blur", mw.col.conf.get("bingsu_overview_effect_blur", 0)) or 0)))
+	overview_opacity = box_effect_opacity if overview_sync else max(0, min(100, _int_style_value(overview_style.get("opacity", mw.col.conf.get("bingsu_overview_effect_opacity", 100)), 100)))
+	overview_radius = box_effect_radius if overview_sync else max(0, min(60, _int_style_value(overview_style.get("radius", mw.col.conf.get("bingsu_overview_border_radius", 20)), 20)))
+	overview_stroke = box_effect_stroke if overview_sync else max(0, min(10, _int_style_value(overview_style.get("stroke", mw.col.conf.get("bingsu_overview_border_width", 1)), 1)))
 
 	def _overview_color(mode: str, key: str, fallback_key: str, fallback: str) -> str:
 		mode_colors = overview_colors.get(mode, {}) if isinstance(overview_colors.get(mode, {}), dict) else {}
@@ -7528,7 +7528,7 @@ def generate_dynamic_css(conf, include_font_css=True):
 		if deck_stats_blur > 0:
 			alpha = min(alpha, 0.62)
 		if alpha < 1.0:
-			return _onigiri_css_color_with_alpha(color, alpha)
+			return _bingsu_css_color_with_alpha(color, alpha)
 		return color
 
 	# patcher's own DEFAULTS is a stub, so the Anki-native palette is repeated
@@ -7590,15 +7590,15 @@ def generate_dynamic_css(conf, include_font_css=True):
 	# customized Widget Fonts title, such as Prep Station's, stays identical.
 	sw_label_base_size = max(8, min(72, _int_style_value(
 		mw.col.conf.get(
-			"onigiri_font_size_widget_title",
-			mw.col.conf.get("onigiri_font_size_small_title", 15),
+			"bingsu_font_size_widget_title",
+			mw.col.conf.get("bingsu_font_size_small_title", 15),
 		),
 		15,
 	)))
 	sw_value_base_size = max(8, min(72, _int_style_value(
 		mw.col.conf.get(
-			"onigiri_font_size_widget_small",
-			mw.col.conf.get("onigiri_font_size_main", 14),
+			"bingsu_font_size_widget_small",
+			mw.col.conf.get("bingsu_font_size_main", 14),
 		),
 		14,
 	)))
@@ -7660,7 +7660,7 @@ def generate_dynamic_css(conf, include_font_css=True):
 			if sw_blur > 0:
 				alpha = min(alpha, 0.62)
 			if alpha < 1.0:
-				box_bg = _onigiri_css_color_with_alpha(box_bg, alpha)
+				box_bg = _bingsu_css_color_with_alpha(box_bg, alpha)
 			box_border = _sw_color(mode, "box_border")
 		rules = [
 			f"    --swidget-box-bg: {box_bg} !important;",
@@ -7680,8 +7680,8 @@ def generate_dynamic_css(conf, include_font_css=True):
 			# Pre-mixed tints. CSS color-mix() is not dependable in the Qt
 			# WebEngine build Anki ships, so the alpha variants are computed
 			# here the same way the heatmap ramp is.
-			rules.append(f"    --swidget-{key}-chip: {_onigiri_css_color_with_alpha(accent, 0.16)} !important;")
-			rules.append(f"    --swidget-{key}-wash: {_onigiri_css_color_with_alpha(accent, 0.10)} !important;")
+			rules.append(f"    --swidget-{key}-chip: {_bingsu_css_color_with_alpha(accent, 0.16)} !important;")
+			rules.append(f"    --swidget-{key}-wash: {_bingsu_css_color_with_alpha(accent, 0.10)} !important;")
 			if key == "retention":
 				# Retention stars have their own palette so the default filled
 				# stars stay yellow instead of inheriting the metric's green accent.
@@ -7742,7 +7742,7 @@ def generate_dynamic_css(conf, include_font_css=True):
 			if pw_blur > 0:
 				alpha = min(alpha, 0.62)
 			if alpha < 1.0:
-				box_bg = _onigiri_css_color_with_alpha(box_bg, alpha)
+				box_bg = _bingsu_css_color_with_alpha(box_bg, alpha)
 			box_border = _pw_color(mode, "box_border")
 		return [
 			f"    --prepw-box-bg: {box_bg} !important;",
@@ -7799,7 +7799,7 @@ def generate_dynamic_css(conf, include_font_css=True):
 			if hw_blur > 0:
 				alpha = min(alpha, 0.62)
 			if alpha < 1.0:
-				box_bg = _onigiri_css_color_with_alpha(box_bg, alpha)
+				box_bg = _bingsu_css_color_with_alpha(box_bg, alpha)
 			box_border = _hw_color(mode, "box_border")
 		return [
 			f"    --hashiw-box-bg: {box_bg} !important;",
@@ -7879,13 +7879,13 @@ def generate_dynamic_css(conf, include_font_css=True):
 		dark mode, lighter in light mode) so they read as a separate surface."""
 		mixed = _mix_colors("#000000" if is_night_mode else "#ffffff", raw_box, 0.20)
 		parts = mixed[mixed.find("(") + 1:mixed.rfind(")")].split(",")
-		colors_dict["--onigiri-tooltip-bg"] = (
+		colors_dict["--bingsu-tooltip-bg"] = (
 			f"rgb({parts[0].strip()}, {parts[1].strip()}, {parts[2].strip()})"
 		)
-		colors_dict["--onigiri-tooltip-fg"] = colors_dict.get(
+		colors_dict["--bingsu-tooltip-fg"] = colors_dict.get(
 			"--fg", "#e0e0e0" if is_night_mode else "#333333"
 		)
-		colors_dict["--onigiri-tooltip-border"] = colors_dict.get(
+		colors_dict["--bingsu-tooltip-border"] = colors_dict.get(
 			"--border", "#3a3a3a" if is_night_mode else "#d9d9d9"
 		)
 
@@ -7914,9 +7914,9 @@ def generate_dynamic_css(conf, include_font_css=True):
 		if key in non_card_related:
 			dark_rules.append(f"    {key}: {value} !important;")
 	
-	# Add scoped styles for Onigiri UI elements
-	onigiri_ui_light = []
-	onigiri_ui_dark = []
+	# Add scoped styles for Bingsu UI elements
+	bingsu_ui_light = []
+	bingsu_ui_dark = []
 	
 	text_related = {
 		"--fg", "--fg-subtle", "--fg-faint", "--fg-on-accent",
@@ -7927,17 +7927,17 @@ def generate_dynamic_css(conf, include_font_css=True):
 	
 	for key, value in light_colors.items():
 		if key in text_related:
-			onigiri_ui_light.append(f"    {key}: {value} !important;")
+			bingsu_ui_light.append(f"    {key}: {value} !important;")
 			
 	for key, value in dark_colors.items():
 		if key in text_related:
-			onigiri_ui_dark.append(f"    {key}: {value} !important;")
+			bingsu_ui_dark.append(f"    {key}: {value} !important;")
 	
 	# Convert lists to strings
 	light_rules = "\n".join(light_rules)
 	dark_rules = "\n".join(dark_rules)
-	onigiri_ui_light = "\n".join(onigiri_ui_light)
-	onigiri_ui_dark = "\n".join(onigiri_ui_dark)
+	bingsu_ui_light = "\n".join(bingsu_ui_light)
+	bingsu_ui_dark = "\n".join(bingsu_ui_dark)
 
 	# Special case: One setting for two CSS variables
 	if "--button-primary-bg" in light_colors:
@@ -7959,9 +7959,9 @@ def generate_dynamic_css(conf, include_font_css=True):
 	if box_effect_blur > 0:
 		blur_px = (box_effect_blur / 100.0) * 20
 		# --- FIX: Added heatmap container IDs to the selectors ---
-		glass_selectors = ".stat-card, #onigiri-heatmap-container, #onigiri-profile-heatmap-container, .onigiri-ready-widget"
+		glass_selectors = ".stat-card, #bingsu-heatmap-container, #bingsu-profile-heatmap-container, .bingsu-ready-widget"
 		glass_style_block = f"""
-        <style id="onigiri-glass-effect">
+        <style id="bingsu-glass-effect">
         {glass_selectors} {{
             backdrop-filter: blur({blur_px}px);
             -webkit-backdrop-filter: blur({blur_px}px);
@@ -7969,9 +7969,9 @@ def generate_dynamic_css(conf, include_font_css=True):
         </style>
         """
 
-	box_selectors = ".stat-card, #onigiri-heatmap-container, #onigiri-profile-heatmap-container, .onigiri-favorites-widget, .onigiri-ready-widget"
+	box_selectors = ".stat-card, #bingsu-heatmap-container, #bingsu-profile-heatmap-container, .bingsu-favorites-widget, .bingsu-ready-widget"
 	box_shape_style_block = f"""
-        <style id="onigiri-box-shape-effect">
+        <style id="bingsu-box-shape-effect">
         {box_selectors} {{
             border: {box_effect_stroke}px solid var(--border, rgba(128, 128, 128, 0.24)) !important;
             border-radius: {box_effect_radius}px !important;
@@ -7979,16 +7979,16 @@ def generate_dynamic_css(conf, include_font_css=True):
         </style>
         """
 
-	# MODIFIED to include scoped Onigiri UI styles and reset card styles
+	# MODIFIED to include scoped Bingsu UI styles and reset card styles
 	return f"""
     {font_css_block}
     <style id="modern-menu-dynamic-styles">
     /* Global styles (non-text related) */
     :root {{
         {light_rules}
-        --onigiri-widget-border-radius: {box_effect_radius}px;
-        --onigiri-widget-border-width: {box_effect_stroke}px;
-        --onigiri-widget-blur: {(box_effect_blur / 100.0) * 20}px;
+        --bingsu-widget-border-radius: {box_effect_radius}px;
+        --bingsu-widget-border-width: {box_effect_stroke}px;
+        --bingsu-widget-blur: {(box_effect_blur / 100.0) * 20}px;
     }}
     .night-mode, .nightMode {{ {dark_rules} }}
 
@@ -7999,27 +7999,27 @@ def generate_dynamic_css(conf, include_font_css=True):
 {chr(10).join(overview_dark_rules)}
     }}
     
-    /* Scoped Onigiri UI styles */
-    .onigiri-ui, 
-    [class*="onigiri-"],
+    /* Scoped Bingsu UI styles */
+    .bingsu-ui, 
+    [class*="bingsu-"],
     .modern-menu,
     .modern-menu *:not(.card, .card *),
-    .onigiri-profile-page,
-    .onigiri-profile-page *:not(.card, .card *),
-    .onigiri-restaurant,
-    .onigiri-restaurant *:not(.card, .card *) {{
-        {onigiri_ui_light}
+    .bingsu-profile-page,
+    .bingsu-profile-page *:not(.card, .card *),
+    .bingsu-restaurant,
+    .bingsu-restaurant *:not(.card, .card *) {{
+        {bingsu_ui_light}
     }}
     
-    .night-mode .onigiri-ui,
-    .night-mode [class*="onigiri-"],
+    .night-mode .bingsu-ui,
+    .night-mode [class*="bingsu-"],
     .night-mode .modern-menu,
     .night-mode .modern-menu *:not(.card, .card *),
-    .night-mode .onigiri-profile-page,
-    .night-mode .onigiri-profile-page *:not(.card, .card *),
-    .night-mode .onigiri-restaurant,
-    .night-mode .onigiri-restaurant *:not(.card, .card *) {{
-        {onigiri_ui_dark}
+    .night-mode .bingsu-profile-page,
+    .night-mode .bingsu-profile-page *:not(.card, .card *),
+    .night-mode .bingsu-restaurant,
+    .night-mode .bingsu-restaurant *:not(.card, .card *) {{
+        {bingsu_ui_dark}
     }}
     </style>
     {glass_style_block}
@@ -8032,7 +8032,7 @@ def _get_hook_name(hook):
     return f"{module_name}.{hook.__name__}"
 
 def _get_external_hooks():
-    """Returns the list of hooks that Onigiri is managing."""
+    """Returns the list of hooks that Bingsu is managing."""
     hooks = []
     seen = set()
     for hook in _managed_hooks:
@@ -8058,7 +8058,7 @@ def _new_MainWebView_eventFilter(self: MainWebView, obj: QObject, evt: QEvent) -
 	# so it must never rebuild the config.
 	conf = config.get_config_readonly()
 	should_hide_setting = conf.get("hideNativeHeaderAndBottomBar", False) or (
-		conf.get("onigiri_ui_theme", "classic") == "shima"
+		conf.get("bingsu_ui_theme", "classic") == "shima"
 		and mw.state == "deckBrowser"
 	)
 
@@ -8107,7 +8107,7 @@ def _update_toolbar_visibility(new_state: str, _old_state: str) -> None:
         QTimer.singleShot(0, lambda: apply_synapsepro_sidebar_visibility(config.get_config_readonly()))
         QTimer.singleShot(250, lambda: apply_synapsepro_sidebar_visibility(config.get_config_readonly()))
     should_hide_setting = conf.get("hideNativeHeaderAndBottomBar", False) or (
-        conf.get("onigiri_ui_theme", "classic") == "shima"
+        conf.get("bingsu_ui_theme", "classic") == "shima"
         and new_state == "deckBrowser"
     )
     pro_hide = conf.get("proHide", False)
@@ -8156,7 +8156,7 @@ _last_reviewer_chip_html = None
 
 
 def update_reviewer_chip():
-    """Update the Restaurant Level chip in Onigiri's reviewer shadow header."""
+    """Update the Restaurant Level chip in Bingsu's reviewer shadow header."""
     global _last_reviewer_chip_html
     try:
         if getattr(mw, "state", None) != "review":
@@ -8177,12 +8177,12 @@ def update_reviewer_chip():
         script = f"""
         (function() {{
             const chipHtml = {json.dumps(chip_html)};
-            const host = document.getElementById('onigiri-reviewer-ui-host');
+            const host = document.getElementById('bingsu-reviewer-ui-host');
             const root = host && host.shadowRoot;
             if (!root) return;
 
-            const header = root.getElementById('onigiri-reviewer-header');
-            const buttons = header && header.querySelector('.onigiri-reviewer-header-buttons');
+            const header = root.getElementById('bingsu-reviewer-header');
+            const buttons = header && header.querySelector('.bingsu-reviewer-header-buttons');
             const existing = header && header.querySelector('.restaurant-level-chip');
             const trimmed = chipHtml.trim();
             let layoutChanged = false;
@@ -8204,14 +8204,14 @@ def update_reviewer_chip():
                 }}
             }}
 
-            if (layoutChanged && typeof window.onigiriRefreshReviewerHeaderOffset === 'function') {{
-                window.onigiriRefreshReviewerHeaderOffset();
+            if (layoutChanged && typeof window.bingsuRefreshReviewerHeaderOffset === 'function') {{
+                window.bingsuRefreshReviewerHeaderOffset();
             }}
         }})();
         """
         reviewer_web.eval(script)
     except Exception as e:
-        print(f"Onigiri: Error updating reviewer restaurant chip: {e}")
+        print(f"Bingsu: Error updating reviewer restaurant chip: {e}")
 
 def on_reviewer_did_answer_card(reviewer, card, ease):
     """Update the level progress container when a card is answered."""
@@ -8219,7 +8219,7 @@ def on_reviewer_did_answer_card(reviewer, card, ease):
 
 
 
-def _onigiri_render_deck_node(self, node, ctx) -> str:
+def _bingsu_render_deck_node(self, node, ctx) -> str:
     """
     A patched version of DeckBrowser._render_deck_node that creates the
     HTML structure Bingsu's CSS and JS expect (e.g., td.collapse-cell).
@@ -8233,35 +8233,35 @@ def _onigiri_render_deck_node(self, node, ctx) -> str:
         prefix = "-"
         state_class = "state-open"
 
-    conf = getattr(ctx, "onigiri_conf", None)
+    conf = getattr(ctx, "bingsu_conf", None)
     if conf is None:
         conf = config.get_config_readonly()
-        setattr(ctx, "onigiri_conf", conf)
+        setattr(ctx, "bingsu_conf", conf)
 
     # --- ADD THIS BLOCK ---
-    # --- Onigiri Favorites ---
+    # --- Bingsu Favorites ---
     # This runs once per deck row, so both collection reads are cached on the
-    # render context alongside onigiri_conf - a tree with 180 decks was paying
+    # render context alongside bingsu_conf - a tree with 180 decks was paying
     # 360 backend round-trips per render for two values that cannot change
     # mid-render.
-    favorites = getattr(ctx, "onigiri_favorites", None)
+    favorites = getattr(ctx, "bingsu_favorites", None)
     if favorites is None:
         try:
-            favorites = mw.col.get_config("onigiri_favorite_decks") or []
+            favorites = mw.col.get_config("bingsu_favorite_decks") or []
         except Exception:
-            favorites = mw.col.conf.get("onigiri_favorite_decks", [])
-        setattr(ctx, "onigiri_favorites", favorites)
+            favorites = mw.col.conf.get("bingsu_favorite_decks", [])
+        setattr(ctx, "bingsu_favorites", favorites)
     did_str = str(node.deck_id)
     is_favorite = did_str in favorites
     fav_attr = ' data-is-fav="1"' if is_favorite else ""
 
-    deck_marks = getattr(ctx, "onigiri_deck_marks", None)
+    deck_marks = getattr(ctx, "bingsu_deck_marks", None)
     if deck_marks is None:
         try:
-            deck_marks = mw.col.get_config("onigiri_deck_marks") or {}
+            deck_marks = mw.col.get_config("bingsu_deck_marks") or {}
         except Exception:
-            deck_marks = mw.col.conf.get("onigiri_deck_marks", {})
-        setattr(ctx, "onigiri_deck_marks", deck_marks)
+            deck_marks = mw.col.conf.get("bingsu_deck_marks", {})
+        setattr(ctx, "bingsu_deck_marks", deck_marks)
     mark_colors = conf.get("markerColors", {}) or {}
     default_mark_colors = {
         "red": "#FF4B4B",
@@ -8273,13 +8273,13 @@ def _onigiri_render_deck_node(self, node, ctx) -> str:
     mark_colors = default_mark_colors
     mark_key = deck_marks.get(did_str)
     mark_attr = f' data-mark="{mark_key}"' if mark_key in mark_colors else ""
-    addon_pkg = getattr(ctx, "onigiri_addon_pkg", None)
+    addon_pkg = getattr(ctx, "bingsu_addon_pkg", None)
     if addon_pkg is None:
         try:
             addon_pkg = mw.addonManager.addonFromModule(__name__)
         except Exception:
             addon_pkg = "1011095603"
-        setattr(ctx, "onigiri_addon_pkg", addon_pkg)
+        setattr(ctx, "bingsu_addon_pkg", addon_pkg)
 
     mark_icons = conf.get("markerIcons", {}) or {}
     mark_dot_html = ""
@@ -8304,7 +8304,7 @@ def _onigiri_render_deck_node(self, node, ctx) -> str:
         else:
             mark_dot_html = f'<span class="deck-mark-dot" style="background-color:{bg_color};"></span>'
     
-    # --- End Onigiri Favorites ---
+    # --- End Bingsu Favorites ---
     # --- END OF BLOCK ---
 
     hide_all_deck_counts = conf.get("hideAllDeckCounts", False)
@@ -8319,7 +8319,7 @@ def _onigiri_render_deck_node(self, node, ctx) -> str:
     # Enhanced Deck Stats Logic
     # Enhanced Deck Stats Logic
     # 1. Try checking the instance directly (set by our new _render_deck_tree patch or deck_tree_updater)
-    enhanced_stats = getattr(self, "_onigiri_enhanced_stats", None)
+    enhanced_stats = getattr(self, "_bingsu_enhanced_stats", None)
     
     # 2. Fallback to _render_data if not found (legacy/redundancy)
     if enhanced_stats is None and hasattr(self, "_render_data"):
@@ -8328,7 +8328,7 @@ def _onigiri_render_deck_node(self, node, ctx) -> str:
     show_enhanced = conf.get("enhancedDeckStats", False)
     
     # Debug Logging
-    # print(f"Onigiri Debug: Deck {node.deck_id} | Show: {show_enhanced} | Has Stats: {enhanced_stats is not None} | In Stats: {node.deck_id in enhanced_stats if enhanced_stats else False}")
+    # print(f"Bingsu Debug: Deck {node.deck_id} | Show: {show_enhanced} | Has Stats: {enhanced_stats is not None} | In Stats: {node.deck_id in enhanced_stats if enhanced_stats else False}")
 
     
     if not hide_all_deck_counts:
@@ -8452,7 +8452,7 @@ def _onigiri_render_deck_node(self, node, ctx) -> str:
     buf.append(f"<tr class='{klass} {deck_type_class}' id='{node.deck_id}' data-did='{node.deck_id}'{fav_attr}{mark_attr}>")
 
     if node.children:
-        collapse_link = f"<a class='collapse {state_class}' href=# onclick='return pycmd(\"onigiri_collapse:{node.deck_id}\")'>{prefix}</a>"
+        collapse_link = f"<a class='collapse {state_class}' href=# onclick='return pycmd(\"bingsu_collapse:{node.deck_id}\")'>{prefix}</a>"
     else:
         collapse_link = "<span class=collapse></span>"
 
@@ -8466,7 +8466,7 @@ def _onigiri_render_deck_node(self, node, ctx) -> str:
     <td class=decktd colspan=7>
         <div class="deck-info">
             {deck_prefix}
-            <a class="deck {extraclass}" href=# onclick="return OnigiriEngine.openDeck(event, '{node.deck_id}');">
+            <a class="deck {extraclass}" href=# onclick="return BingsuEngine.openDeck(event, '{node.deck_id}');">
                 <span class="deck-name" dir="auto">{display_name}</span>{mark_dot_html}
             </a>
         </div>
@@ -8501,7 +8501,7 @@ def _on_sync_did_finish():
         elif mw.state == "overview" and hasattr(mw.overview, 'web') and mw.overview.web:
              mw.overview.web.eval("SyncStatusManager.setSyncing(false);")
     except Exception as e:
-        print(f"Onigiri: Error stopping sync animation: {e}")
+        print(f"Bingsu: Error stopping sync animation: {e}")
 
 def apply_patches():
     """
@@ -8547,24 +8547,24 @@ def apply_patches():
     gui_hooks.reviewer_did_show_question.append(_on_reviewer_progress_show_question)
     
     # Mark the hook as registered and update toolbar state
-    mw._onigiri_restaurant_hook_registered = True
+    mw._bingsu_restaurant_hook_registered = True
     mw.progress.single_shot(0, lambda: _update_toolbar_visibility(mw.state, "startup"))
 
 
 
 def generate_reviewer_font_css(addon_package):
     """Return Reviewer-page typography for Anki's separate bottom webview."""
-    base_key = config.get_collection_config("onigiri_font_main", "system") or "system"
-    base_size = config.get_collection_config("onigiri_font_size_main", 14)
+    base_key = config.get_collection_config("bingsu_font_main", "system") or "system"
+    base_size = config.get_collection_config("bingsu_font_size_main", 14)
     font_key = base_key
     font_size = base_size
     advanced_key = config.get_collection_config(
-        "onigiri_font_reviewer_controls", "sync"
+        "bingsu_font_reviewer_controls", "sync"
     ) or "sync"
     if advanced_key != "sync":
         font_key = advanced_key
     font_size = config.get_collection_config(
-        "onigiri_font_size_reviewer_controls", base_size
+        "bingsu_font_size_reviewer_controls", base_size
     )
 
     from ..ui_kit.fonts import FONTS, get_all_fonts, poppins_font_face_css
@@ -8602,7 +8602,7 @@ def generate_reviewer_font_css(addon_package):
         )
 
     return f"""
-    <style id="onigiri-reviewer-font-style">
+    <style id="bingsu-reviewer-font-style">
         {font_faces}
         #outer {{
             font-family: {stack} !important;
@@ -8620,15 +8620,15 @@ def generate_reviewer_font_css(addon_package):
             font-size: {size}px !important;
         }}
 
-        /* Onigiri and Anki Design both render visible button copy in child
+        /* Bingsu and Anki Design both render visible button copy in child
            spans/pseudo-elements while hiding the native text node. Target the
            visible pieces explicitly so Reviewer Fonts controls what the user
            actually sees, regardless of which bottom-bar skin is active. */
-        #outer button .onigiri-show-answer-label,
-        #outer button .onigiri-answer-label,
-        #outer button .onigiri-answer-hover-number,
-        #outer button .onigiri-count-pill,
-        #outer button .onigiri-timer-pill,
+        #outer button .bingsu-show-answer-label,
+        #outer button .bingsu-answer-label,
+        #outer button .bingsu-answer-hover-number,
+        #outer button .bingsu-count-pill,
+        #outer button .bingsu-timer-pill,
         #outer button .stattxt,
         #outer button .nobold,
         #outer button small,
@@ -8643,25 +8643,25 @@ def generate_reviewer_font_css(addon_package):
 
 
 def generate_reviewer_buttons_css(conf):
-    """Generates CSS/JS for Onigiri reviewer bottom-bar buttons."""
+    """Generates CSS/JS for Bingsu reviewer bottom-bar buttons."""
     css = []
     scripts = []
 
     if conf.get("maxHide", False):
         return "<style>#outer { display: none !important; }</style>"
 
-    custom_enabled = conf.get("onigiri_reviewer_btn_custom_enabled", True)
-    radius = conf.get("onigiri_reviewer_btn_radius", 12)
-    padding = conf.get("onigiri_reviewer_btn_padding", 5)
-    btn_height = conf.get("onigiri_reviewer_btn_height", 40)
+    custom_enabled = conf.get("bingsu_reviewer_btn_custom_enabled", True)
+    radius = conf.get("bingsu_reviewer_btn_radius", 12)
+    padding = conf.get("bingsu_reviewer_btn_padding", 5)
+    btn_height = conf.get("bingsu_reviewer_btn_height", 40)
     bar_height = _reviewer_bottom_bar_height_px(conf)
 
-    stattxt_mode = conf.get("onigiri_reviewer_stattxt_mode", "hover")
+    stattxt_mode = conf.get("bingsu_reviewer_stattxt_mode", "hover")
     if stattxt_mode not in {"hover", "inverted", "fixed", "off"}:
         stattxt_mode = "hover"
     interval_visible = stattxt_mode != "off"
-    interval_color_light = conf.get("onigiri_reviewer_stattxt_color_light", "#666666")
-    interval_color_dark = conf.get("onigiri_reviewer_stattxt_color_dark", "#aaaaaa")
+    interval_color_light = conf.get("bingsu_reviewer_stattxt_color_light", "#666666")
+    interval_color_dark = conf.get("bingsu_reviewer_stattxt_color_dark", "#aaaaaa")
     hover_numbers_display = "inline-flex" if interval_visible else "none"
     # Pre-answer counts (New/Learn/Review pills on the Show Answer button):
     # "fixed"    keeps them permanently visible (stacked under the label).
@@ -8714,7 +8714,7 @@ def generate_reviewer_buttons_css(conf):
     else:
         answer_number_transform = "translateY(1px) scale(0.98)"
         answer_number_hover_transform = "translateY(0) scale(1)"
-    answer_number_font_size = "0.66em" if stattxt_mode == "fixed" else "var(--onigiri-answer-number-font-size, 1em)"
+    answer_number_font_size = "0.66em" if stattxt_mode == "fixed" else "var(--bingsu-answer-number-font-size, 1em)"
     answer_hover_number_color_light = "currentColor" if str(interval_color_light).lower() == "#666666" else interval_color_light
     answer_hover_number_color_dark = "currentColor" if str(interval_color_dark).lower() == "#aaaaaa" else interval_color_dark
     native_number_display = "none" if custom_enabled else ("none" if stattxt_mode == "off" else "inline-block")
@@ -8723,33 +8723,33 @@ def generate_reviewer_buttons_css(conf):
     # "right"/"left" show a neutral pill inside the Show Answer button, alongside the
     # New/Learn/Review counts. "out" moves the timer to the bottom bar itself, styled
     # like the other bottom-bar buttons (Edit/More), just to the left of Edit.
-    timer_position = conf.get("onigiri_reviewer_timer_position", "right")
+    timer_position = conf.get("bingsu_reviewer_timer_position", "right")
     if timer_position not in {"right", "left", "out", "off"}:
         timer_position = "right"
-    timer_bg_light = conf.get("onigiri_reviewer_timer_bg_light", "#e5e5e5")
-    timer_text_light = conf.get("onigiri_reviewer_timer_text_light", "#2c2c2c")
-    timer_bg_dark = conf.get("onigiri_reviewer_timer_bg_dark", "#3a3a3a")
-    timer_text_dark = conf.get("onigiri_reviewer_timer_text_dark", "#e0e0e0")
+    timer_bg_light = conf.get("bingsu_reviewer_timer_bg_light", "#e5e5e5")
+    timer_text_light = conf.get("bingsu_reviewer_timer_text_light", "#2c2c2c")
+    timer_bg_dark = conf.get("bingsu_reviewer_timer_bg_dark", "#3a3a3a")
+    timer_text_dark = conf.get("bingsu_reviewer_timer_text_dark", "#e0e0e0")
 
-    show_answer_bg_light = conf.get("onigiri_reviewer_show_answer_btn_bg_light", "#ffffff")
-    show_answer_text_light = conf.get("onigiri_reviewer_show_answer_btn_text_light", "#2c2c2c")
-    show_answer_bg_dark = conf.get("onigiri_reviewer_show_answer_btn_bg_dark", "#3a3a3a")
-    show_answer_text_dark = conf.get("onigiri_reviewer_show_answer_btn_text_dark", "#e0e0e0")
-    show_answer_hover_bg_light = conf.get("onigiri_reviewer_show_answer_btn_hover_bg_light", "#2c2c2c")
-    show_answer_hover_text_light = conf.get("onigiri_reviewer_show_answer_btn_hover_text_light", "#f0f0f0")
-    show_answer_hover_bg_dark = conf.get("onigiri_reviewer_show_answer_btn_hover_bg_dark", "#e0e0e0")
-    show_answer_hover_text_dark = conf.get("onigiri_reviewer_show_answer_btn_hover_text_dark", "#3a3a3a")
+    show_answer_bg_light = conf.get("bingsu_reviewer_show_answer_btn_bg_light", "#ffffff")
+    show_answer_text_light = conf.get("bingsu_reviewer_show_answer_btn_text_light", "#2c2c2c")
+    show_answer_bg_dark = conf.get("bingsu_reviewer_show_answer_btn_bg_dark", "#3a3a3a")
+    show_answer_text_dark = conf.get("bingsu_reviewer_show_answer_btn_text_dark", "#e0e0e0")
+    show_answer_hover_bg_light = conf.get("bingsu_reviewer_show_answer_btn_hover_bg_light", "#2c2c2c")
+    show_answer_hover_text_light = conf.get("bingsu_reviewer_show_answer_btn_hover_text_light", "#f0f0f0")
+    show_answer_hover_bg_dark = conf.get("bingsu_reviewer_show_answer_btn_hover_bg_dark", "#e0e0e0")
+    show_answer_hover_text_dark = conf.get("bingsu_reviewer_show_answer_btn_hover_text_dark", "#3a3a3a")
 
     # Stats bar background: the Show Answer button's own background while the
     # timer + New/Learn/Review pills panel is visible. Defaults to mirroring the
     # Show Answer active background; it can be
-    # decoupled into its own color via onigiri_reviewer_show_answer_bar_bg_sync.
-    if conf.get("onigiri_reviewer_show_answer_bar_bg_sync", True):
+    # decoupled into its own color via bingsu_reviewer_show_answer_bar_bg_sync.
+    if conf.get("bingsu_reviewer_show_answer_bar_bg_sync", True):
         show_answer_bar_bg_light = show_answer_hover_bg_light
         show_answer_bar_bg_dark = show_answer_hover_bg_dark
     else:
-        show_answer_bar_bg_light = conf.get("onigiri_reviewer_show_answer_bar_bg_light", "#2c2c2c")
-        show_answer_bar_bg_dark = conf.get("onigiri_reviewer_show_answer_bar_bg_dark", "#e0e0e0")
+        show_answer_bar_bg_light = conf.get("bingsu_reviewer_show_answer_bar_bg_light", "#2c2c2c")
+        show_answer_bar_bg_dark = conf.get("bingsu_reviewer_show_answer_bar_bg_dark", "#e0e0e0")
     # Text must ride along with the stats bar background (not the button's idle
     # text color) so the "Show Answer" label stays legible against it in "fixed"
     # mode, where the button is never actually in its native :hover state.
@@ -8767,28 +8767,28 @@ def generate_reviewer_buttons_css(conf):
 
     css.append(f"""
         :root {{
-            --onigiri-reviewer-new-count-bg: {_overview_count_color("light", "new_bubble", "--new-count-bubble-bg", "#1e8cff")};
-            --onigiri-reviewer-new-count-fg: {_overview_count_color("light", "new_text", "--new-count-bubble-fg", "#ffffff")};
-            --onigiri-reviewer-learn-count-bg: {_overview_count_color("light", "learn_bubble", "--learn-count-bubble-bg", "#ff5757")};
-            --onigiri-reviewer-learn-count-fg: {_overview_count_color("light", "learn_text", "--learn-count-bubble-fg", "#ffffff")};
-            --onigiri-reviewer-review-count-bg: {_overview_count_color("light", "review_bubble", "--review-count-bubble-bg", "#19c96b")};
-            --onigiri-reviewer-review-count-fg: {_overview_count_color("light", "review_text", "--review-count-bubble-fg", "#ffffff")};
-            --onigiri-answer-hover-number-color: {answer_hover_number_color_light};
+            --bingsu-reviewer-new-count-bg: {_overview_count_color("light", "new_bubble", "--new-count-bubble-bg", "#1e8cff")};
+            --bingsu-reviewer-new-count-fg: {_overview_count_color("light", "new_text", "--new-count-bubble-fg", "#ffffff")};
+            --bingsu-reviewer-learn-count-bg: {_overview_count_color("light", "learn_bubble", "--learn-count-bubble-bg", "#ff5757")};
+            --bingsu-reviewer-learn-count-fg: {_overview_count_color("light", "learn_text", "--learn-count-bubble-fg", "#ffffff")};
+            --bingsu-reviewer-review-count-bg: {_overview_count_color("light", "review_bubble", "--review-count-bubble-bg", "#19c96b")};
+            --bingsu-reviewer-review-count-fg: {_overview_count_color("light", "review_text", "--review-count-bubble-fg", "#ffffff")};
+            --bingsu-answer-hover-number-color: {answer_hover_number_color_light};
         }}
 
         .nightMode,
         .night-mode {{
-            --onigiri-reviewer-new-count-bg: {_overview_count_color("dark", "new_bubble", "--new-count-bubble-bg", "#0a84ff")};
-            --onigiri-reviewer-new-count-fg: {_overview_count_color("dark", "new_text", "--new-count-bubble-fg", "#f7fbff")};
-            --onigiri-reviewer-learn-count-bg: {_overview_count_color("dark", "learn_bubble", "--learn-count-bubble-bg", "#ff453a")};
-            --onigiri-reviewer-learn-count-fg: {_overview_count_color("dark", "learn_text", "--learn-count-bubble-fg", "#fff5f5")};
-            --onigiri-reviewer-review-count-bg: {_overview_count_color("dark", "review_bubble", "--review-count-bubble-bg", "#12b765")};
-            --onigiri-reviewer-review-count-fg: {_overview_count_color("dark", "review_text", "--review-count-bubble-fg", "#f4fff8")};
-            --onigiri-answer-hover-number-color: {answer_hover_number_color_dark};
+            --bingsu-reviewer-new-count-bg: {_overview_count_color("dark", "new_bubble", "--new-count-bubble-bg", "#0a84ff")};
+            --bingsu-reviewer-new-count-fg: {_overview_count_color("dark", "new_text", "--new-count-bubble-fg", "#f7fbff")};
+            --bingsu-reviewer-learn-count-bg: {_overview_count_color("dark", "learn_bubble", "--learn-count-bubble-bg", "#ff453a")};
+            --bingsu-reviewer-learn-count-fg: {_overview_count_color("dark", "learn_text", "--learn-count-bubble-fg", "#fff5f5")};
+            --bingsu-reviewer-review-count-bg: {_overview_count_color("dark", "review_bubble", "--review-count-bubble-bg", "#12b765")};
+            --bingsu-reviewer-review-count-fg: {_overview_count_color("dark", "review_text", "--review-count-bubble-fg", "#f4fff8")};
+            --bingsu-answer-hover-number-color: {answer_hover_number_color_dark};
         }}
 
-        body .stattxt:not(.onigiri-count-pill):not(#spdfTime),
-        body .nobold:not(.onigiri-answer-hover-number) {{
+        body .stattxt:not(.bingsu-count-pill):not(#spdfTime),
+        body .nobold:not(.bingsu-answer-hover-number) {{
             color: {interval_color_light} !important;
             opacity: 0.9 !important;
             font-weight: normal !important;
@@ -8796,23 +8796,23 @@ def generate_reviewer_buttons_css(conf):
             display: {native_number_display} !important;
         }}
 
-        .nightMode body .stattxt:not(.onigiri-count-pill):not(#spdfTime),
-        .nightMode body .nobold:not(.onigiri-answer-hover-number),
-        .night-mode body .stattxt:not(.onigiri-count-pill):not(#spdfTime),
-        .night-mode body .nobold:not(.onigiri-answer-hover-number) {{
+        .nightMode body .stattxt:not(.bingsu-count-pill):not(#spdfTime),
+        .nightMode body .nobold:not(.bingsu-answer-hover-number),
+        .night-mode body .stattxt:not(.bingsu-count-pill):not(#spdfTime),
+        .night-mode body .nobold:not(.bingsu-answer-hover-number) {{
             color: {interval_color_dark} !important;
         }}
 
-        #outer .onigiri-stattxt-source,
-        .onigiri-stattxt-source,
-        #outer .onigiri-native-number-source,
-        .onigiri-native-number-source,
-        #outer .onigiri-native-number-host,
-        .onigiri-native-number-host,
-        #outer .onigiri-native-number-empty-cell,
-        .onigiri-native-number-empty-cell,
-        #outer tr.onigiri-native-number-empty-row,
-        tr.onigiri-native-number-empty-row {{
+        #outer .bingsu-stattxt-source,
+        .bingsu-stattxt-source,
+        #outer .bingsu-native-number-source,
+        .bingsu-native-number-source,
+        #outer .bingsu-native-number-host,
+        .bingsu-native-number-host,
+        #outer .bingsu-native-number-empty-cell,
+        .bingsu-native-number-empty-cell,
+        #outer tr.bingsu-native-number-empty-row,
+        tr.bingsu-native-number-empty-row {{
             display: none !important;
             width: 0 !important;
             height: 0 !important;
@@ -8826,7 +8826,7 @@ def generate_reviewer_buttons_css(conf):
             pointer-events: none !important;
         }}
 
-        #outer button.onigiri-show-answer-btn {{
+        #outer button.bingsu-show-answer-btn {{
             position: relative !important;
             overflow: visible !important;
             display: flex !important;
@@ -8835,11 +8835,11 @@ def generate_reviewer_buttons_css(conf):
             justify-content: center !important;
         }}
 
-        #outer button.onigiri-show-answer-btn.onigiri-has-pre-answer-counts {{
+        #outer button.bingsu-show-answer-btn.bingsu-has-pre-answer-counts {{
             min-width: min(74vw, 360px) !important;
         }}
 
-        #outer .onigiri-show-answer-label {{
+        #outer .bingsu-show-answer-label {{
             display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
@@ -8847,8 +8847,8 @@ def generate_reviewer_buttons_css(conf):
             transition: opacity 0.16s ease !important;
         }}
 
-        button[data-onigiri-ease] .onigiri-answer-label,
-        #outer button[data-onigiri-ease] .onigiri-answer-label {{
+        button[data-bingsu-ease] .bingsu-answer-label,
+        #outer button[data-bingsu-ease] .bingsu-answer-label {{
             display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
@@ -8858,7 +8858,7 @@ def generate_reviewer_buttons_css(conf):
             animation: none !important;
         }}
 
-        #outer .onigiri-pre-answer-counts {{
+        #outer .bingsu-pre-answer-counts {{
             position: absolute !important;
             inset: 6px !important;
             display: {hover_numbers_display} !important;
@@ -8874,22 +8874,22 @@ def generate_reviewer_buttons_css(conf):
             z-index: 2 !important;
         }}
 
-        #outer button.onigiri-show-answer-btn.onigiri-has-pre-answer-counts .onigiri-show-answer-label {{
+        #outer button.bingsu-show-answer-btn.bingsu-has-pre-answer-counts .bingsu-show-answer-label {{
             opacity: {show_answer_label_base_opacity} !important;
         }}
 
-        #outer button.onigiri-show-answer-btn.onigiri-has-pre-answer-counts:hover .onigiri-show-answer-label {{
+        #outer button.bingsu-show-answer-btn.bingsu-has-pre-answer-counts:hover .bingsu-show-answer-label {{
             opacity: {show_answer_label_hover_opacity} !important;
         }}
 
-        #outer button.onigiri-show-answer-btn.onigiri-has-pre-answer-counts:hover .onigiri-pre-answer-counts {{
+        #outer button.bingsu-show-answer-btn.bingsu-has-pre-answer-counts:hover .bingsu-pre-answer-counts {{
             opacity: {pre_answer_counts_hover_opacity} !important;
             visibility: {pre_answer_counts_hover_visibility} !important;
             transform: {pre_answer_counts_hover_transform} !important;
             transition-delay: 0s !important;
         }}
 
-        #outer .onigiri-count-pill {{
+        #outer .bingsu-count-pill {{
             flex: 1 1 0 !important;
             min-width: 54px !important;
             height: 100% !important;
@@ -8905,34 +8905,34 @@ def generate_reviewer_buttons_css(conf):
             white-space: nowrap !important;
         }}
 
-        #outer .onigiri-count-pill-new {{
-            background: var(--onigiri-reviewer-new-count-bg) !important;
-            color: var(--onigiri-reviewer-new-count-fg) !important;
+        #outer .bingsu-count-pill-new {{
+            background: var(--bingsu-reviewer-new-count-bg) !important;
+            color: var(--bingsu-reviewer-new-count-fg) !important;
         }}
 
-        #outer .onigiri-count-pill-learn {{
-            background: var(--onigiri-reviewer-learn-count-bg) !important;
-            color: var(--onigiri-reviewer-learn-count-fg) !important;
+        #outer .bingsu-count-pill-learn {{
+            background: var(--bingsu-reviewer-learn-count-bg) !important;
+            color: var(--bingsu-reviewer-learn-count-fg) !important;
         }}
 
-        #outer .onigiri-count-pill-review {{
-            background: var(--onigiri-reviewer-review-count-bg) !important;
-            color: var(--onigiri-reviewer-review-count-fg) !important;
+        #outer .bingsu-count-pill-review {{
+            background: var(--bingsu-reviewer-review-count-bg) !important;
+            color: var(--bingsu-reviewer-review-count-fg) !important;
         }}
 
         /* Timer adaptation: neutral pill shown inside the Show Answer button
            (position "right"/"left"), grouped alongside the New/Learn/Review pills. */
         :root {{
-            --onigiri-reviewer-timer-bg: {timer_bg_light};
-            --onigiri-reviewer-timer-fg: {timer_text_light};
+            --bingsu-reviewer-timer-bg: {timer_bg_light};
+            --bingsu-reviewer-timer-fg: {timer_text_light};
         }}
 
         .nightMode, .night-mode {{
-            --onigiri-reviewer-timer-bg: {timer_bg_dark};
-            --onigiri-reviewer-timer-fg: {timer_text_dark};
+            --bingsu-reviewer-timer-bg: {timer_bg_dark};
+            --bingsu-reviewer-timer-fg: {timer_text_dark};
         }}
 
-        #outer .onigiri-timer-pill {{
+        #outer .bingsu-timer-pill {{
             flex: 1 1 0 !important;
             min-width: 54px !important;
             height: 100% !important;
@@ -8946,39 +8946,39 @@ def generate_reviewer_buttons_css(conf):
             line-height: 1 !important;
             box-sizing: border-box !important;
             white-space: nowrap !important;
-            background: var(--onigiri-reviewer-timer-bg) !important;
-            color: var(--onigiri-reviewer-timer-fg) !important;
+            background: var(--bingsu-reviewer-timer-bg) !important;
+            color: var(--bingsu-reviewer-timer-fg) !important;
         }}
 
         /* Timer adaptation: position "out" moves the timer into the bottom bar,
            to the left of Edit, styled exactly like the other bottom-bar buttons. */
-        #outer .onigiri-timer-out-btn {{
+        #outer .bingsu-timer-out-btn {{
             pointer-events: none !important;
             cursor: default !important;
         }}
 
-        button[data-onigiri-ease],
-        #outer button[data-onigiri-ease] {{
+        button[data-bingsu-ease],
+        #outer button[data-bingsu-ease] {{
             position: relative !important;
             overflow: hidden !important;
-            width: var(--onigiri-answer-button-width, auto) !important;
-            min-width: var(--onigiri-answer-button-width, 0px) !important;
-            max-width: var(--onigiri-answer-button-width, none) !important;
-            flex: 0 0 var(--onigiri-answer-button-width, auto) !important;
+            width: var(--bingsu-answer-button-width, auto) !important;
+            min-width: var(--bingsu-answer-button-width, 0px) !important;
+            max-width: var(--bingsu-answer-button-width, none) !important;
+            flex: 0 0 var(--bingsu-answer-button-width, auto) !important;
             transform: none !important;
             transition: none !important;
             animation: none !important;
             box-shadow: none !important;
         }}
 
-        button[data-onigiri-ease] *:not(.onigiri-answer-label):not(.onigiri-answer-hover-number),
-        #outer button[data-onigiri-ease] *:not(.onigiri-answer-label):not(.onigiri-answer-hover-number) {{
+        button[data-bingsu-ease] *:not(.bingsu-answer-label):not(.bingsu-answer-hover-number),
+        #outer button[data-bingsu-ease] *:not(.bingsu-answer-label):not(.bingsu-answer-hover-number) {{
             transition: none !important;
             animation: none !important;
         }}
 
-        button[data-onigiri-ease] .onigiri-answer-hover-number,
-        #outer button[data-onigiri-ease] .onigiri-answer-hover-number {{
+        button[data-bingsu-ease] .bingsu-answer-hover-number,
+        #outer button[data-bingsu-ease] .bingsu-answer-hover-number {{
             position: {answer_number_position} !important;
             inset: {answer_number_inset} !important;
             display: inline-flex !important;
@@ -8992,7 +8992,7 @@ def generate_reviewer_buttons_css(conf):
             opacity: {answer_number_base_opacity} !important;
             visibility: {answer_number_base_visibility} !important;
             transform: {answer_number_transform} !important;
-            color: var(--onigiri-answer-hover-number-color, currentColor) !important;
+            color: var(--bingsu-answer-hover-number-color, currentColor) !important;
             font-weight: 800 !important;
             font-size: {answer_number_font_size} !important;
             line-height: 1 !important;
@@ -9001,13 +9001,13 @@ def generate_reviewer_buttons_css(conf):
             animation: none !important;
         }}
 
-        button[data-onigiri-ease]:hover .onigiri-answer-label,
-        #outer button[data-onigiri-ease]:hover .onigiri-answer-label {{
+        button[data-bingsu-ease]:hover .bingsu-answer-label,
+        #outer button[data-bingsu-ease]:hover .bingsu-answer-label {{
             opacity: {answer_label_hover_opacity} !important;
         }}
 
-        button[data-onigiri-ease]:hover .onigiri-answer-hover-number,
-        #outer button[data-onigiri-ease]:hover .onigiri-answer-hover-number {{
+        button[data-bingsu-ease]:hover .bingsu-answer-hover-number,
+        #outer button[data-bingsu-ease]:hover .bingsu-answer-hover-number {{
             opacity: {answer_number_hover_opacity} !important;
             visibility: {answer_number_hover_visibility} !important;
             transform: {answer_number_hover_transform} !important;
@@ -9021,13 +9021,13 @@ def generate_reviewer_buttons_css(conf):
         # just on :hover. ("inverted" swaps counts for the label on hover but
         # keeps the same background so the transition stays seamless.)
         css.append(f"""
-        #outer button.onigiri-show-answer-btn.onigiri-has-pre-answer-counts:not([onclick*="ease"]):not([data-cmd*="ease"]):not([data-onigiri-ease]) {{
+        #outer button.bingsu-show-answer-btn.bingsu-has-pre-answer-counts:not([onclick*="ease"]):not([data-cmd*="ease"]):not([data-bingsu-ease]) {{
             background: {show_answer_bar_bg_light} !important;
             background-color: {show_answer_bar_bg_light} !important;
             color: {show_answer_bar_text_light} !important;
         }}
 
-        .nightMode #outer button.onigiri-show-answer-btn.onigiri-has-pre-answer-counts:not([onclick*="ease"]):not([data-cmd*="ease"]):not([data-onigiri-ease]) {{
+        .nightMode #outer button.bingsu-show-answer-btn.bingsu-has-pre-answer-counts:not([onclick*="ease"]):not([data-cmd*="ease"]):not([data-bingsu-ease]) {{
             background: {show_answer_bar_bg_dark} !important;
             background-color: {show_answer_bar_bg_dark} !important;
             color: {show_answer_bar_text_dark} !important;
@@ -9037,20 +9037,20 @@ def generate_reviewer_buttons_css(conf):
     if custom_enabled:
         css.append(f"""
         :root {{
-            --onigiri-reviewer-bottom-bar-height: {bar_height}px;
+            --bingsu-reviewer-bottom-bar-height: {bar_height}px;
         }}
 
         html, body {{
-             height: var(--onigiri-reviewer-bottom-bar-height) !important;
-             min-height: var(--onigiri-reviewer-bottom-bar-height) !important;
-             max-height: var(--onigiri-reviewer-bottom-bar-height) !important;
+             height: var(--bingsu-reviewer-bottom-bar-height) !important;
+             min-height: var(--bingsu-reviewer-bottom-bar-height) !important;
+             max-height: var(--bingsu-reviewer-bottom-bar-height) !important;
              margin: 0 !important;
              padding: 0 !important;
              overflow: hidden !important;
         }}
 
         #outer {{
-             height: var(--onigiri-reviewer-bottom-bar-height) !important;
+             height: var(--bingsu-reviewer-bottom-bar-height) !important;
              min-height: {bar_height}px !important;
              max-height: {bar_height}px !important;
              display: block !important;
@@ -9165,7 +9165,7 @@ def generate_reviewer_buttons_css(conf):
             min-height: {btn_height}px !important;
         }}
 
-        #outer button[data-onigiri-ease],
+        #outer button[data-bingsu-ease],
         #outer button[onclick*="ease"],
         #outer button[data-cmd*="ease"],
         #outer button[id^="ease"] {{
@@ -9175,15 +9175,15 @@ def generate_reviewer_buttons_css(conf):
             box-shadow: none !important;
         }}
 
-        #outer button[data-onigiri-ease] *:not(.onigiri-answer-label):not(.onigiri-answer-hover-number),
-        #outer button[onclick*="ease"] *:not(.onigiri-answer-label):not(.onigiri-answer-hover-number),
-        #outer button[data-cmd*="ease"] *:not(.onigiri-answer-label):not(.onigiri-answer-hover-number),
-        #outer button[id^="ease"] *:not(.onigiri-answer-label):not(.onigiri-answer-hover-number) {{
+        #outer button[data-bingsu-ease] *:not(.bingsu-answer-label):not(.bingsu-answer-hover-number),
+        #outer button[onclick*="ease"] *:not(.bingsu-answer-label):not(.bingsu-answer-hover-number),
+        #outer button[data-cmd*="ease"] *:not(.bingsu-answer-label):not(.bingsu-answer-hover-number),
+        #outer button[id^="ease"] *:not(.bingsu-answer-label):not(.bingsu-answer-hover-number) {{
             transition: none !important;
             animation: none !important;
         }}
 
-        #outer button[data-onigiri-ease]:hover,
+        #outer button[data-bingsu-ease]:hover,
         #outer button[onclick*="ease"]:hover,
         #outer button[data-cmd*="ease"]:hover,
         #outer button[id^="ease"]:hover {{
@@ -9193,75 +9193,75 @@ def generate_reviewer_buttons_css(conf):
             box-shadow: none !important;
         }}
 
-        #outer button:not([onclick*="ease"]):not([data-cmd*="ease"]):not([data-onigiri-ease]) {{
-            background: {conf.get("onigiri_reviewer_other_btn_bg_light", "#f0f0f0")} !important;
-            background-color: {conf.get("onigiri_reviewer_other_btn_bg_light", "#f0f0f0")} !important;
+        #outer button:not([onclick*="ease"]):not([data-cmd*="ease"]):not([data-bingsu-ease]) {{
+            background: {conf.get("bingsu_reviewer_other_btn_bg_light", "#f0f0f0")} !important;
+            background-color: {conf.get("bingsu_reviewer_other_btn_bg_light", "#f0f0f0")} !important;
             background-image: none !important;
-            color: {conf.get("onigiri_reviewer_other_btn_text_light", "#2c2c2c")} !important;
+            color: {conf.get("bingsu_reviewer_other_btn_text_light", "#2c2c2c")} !important;
         }}
 
-        #outer button:not([onclick*="ease"]):not([data-cmd*="ease"]):not([data-onigiri-ease]):hover {{
-            background: {conf.get("onigiri_reviewer_other_btn_hover_bg_light", "#2c2c2c")} !important;
-            background-color: {conf.get("onigiri_reviewer_other_btn_hover_bg_light", "#2c2c2c")} !important;
+        #outer button:not([onclick*="ease"]):not([data-cmd*="ease"]):not([data-bingsu-ease]):hover {{
+            background: {conf.get("bingsu_reviewer_other_btn_hover_bg_light", "#2c2c2c")} !important;
+            background-color: {conf.get("bingsu_reviewer_other_btn_hover_bg_light", "#2c2c2c")} !important;
             background-image: none !important;
-            color: {conf.get("onigiri_reviewer_other_btn_hover_text_light", "#f0f0f0")} !important;
+            color: {conf.get("bingsu_reviewer_other_btn_hover_text_light", "#f0f0f0")} !important;
             transform: translateY(-2px) !important;
             box-shadow: none !important;
         }}
 
-        .nightMode #outer button:not([onclick*="ease"]):not([data-cmd*="ease"]):not([data-onigiri-ease]) {{
-            background: {conf.get("onigiri_reviewer_other_btn_bg_dark", "#3a3a3a")} !important;
-            background-color: {conf.get("onigiri_reviewer_other_btn_bg_dark", "#3a3a3a")} !important;
+        .nightMode #outer button:not([onclick*="ease"]):not([data-cmd*="ease"]):not([data-bingsu-ease]) {{
+            background: {conf.get("bingsu_reviewer_other_btn_bg_dark", "#3a3a3a")} !important;
+            background-color: {conf.get("bingsu_reviewer_other_btn_bg_dark", "#3a3a3a")} !important;
             background-image: none !important;
-            color: {conf.get("onigiri_reviewer_other_btn_text_dark", "#e0e0e0")} !important;
+            color: {conf.get("bingsu_reviewer_other_btn_text_dark", "#e0e0e0")} !important;
         }}
 
-        .nightMode #outer button:not([onclick*="ease"]):not([data-cmd*="ease"]):not([data-onigiri-ease]):hover {{
-            background: {conf.get("onigiri_reviewer_other_btn_hover_bg_dark", "#e0e0e0")} !important;
-            background-color: {conf.get("onigiri_reviewer_other_btn_hover_bg_dark", "#e0e0e0")} !important;
+        .nightMode #outer button:not([onclick*="ease"]):not([data-cmd*="ease"]):not([data-bingsu-ease]):hover {{
+            background: {conf.get("bingsu_reviewer_other_btn_hover_bg_dark", "#e0e0e0")} !important;
+            background-color: {conf.get("bingsu_reviewer_other_btn_hover_bg_dark", "#e0e0e0")} !important;
             background-image: none !important;
-            color: {conf.get("onigiri_reviewer_other_btn_hover_text_dark", "#3a3a3a")} !important;
+            color: {conf.get("bingsu_reviewer_other_btn_hover_text_dark", "#3a3a3a")} !important;
             transform: translateY(-2px) !important;
             box-shadow: none !important;
         }}
 
         /* Show Answer owns a separate palette from utility actions such as
            More and Edit. The class is attached by the bottom-bar adapter. */
-        #outer button.onigiri-show-answer-btn:not([onclick*="ease"]):not([data-cmd*="ease"]):not([data-onigiri-ease]) {{
+        #outer button.bingsu-show-answer-btn:not([onclick*="ease"]):not([data-cmd*="ease"]):not([data-bingsu-ease]) {{
             background: {show_answer_bg_light} !important;
             background-color: {show_answer_bg_light} !important;
             color: {show_answer_text_light} !important;
         }}
 
-        #outer button.onigiri-show-answer-btn:not([onclick*="ease"]):not([data-cmd*="ease"]):not([data-onigiri-ease]):hover {{
+        #outer button.bingsu-show-answer-btn:not([onclick*="ease"]):not([data-cmd*="ease"]):not([data-bingsu-ease]):hover {{
             background: {show_answer_hover_bg_light} !important;
             background-color: {show_answer_hover_bg_light} !important;
             color: {show_answer_hover_text_light} !important;
         }}
 
-        .nightMode #outer button.onigiri-show-answer-btn:not([onclick*="ease"]):not([data-cmd*="ease"]):not([data-onigiri-ease]) {{
+        .nightMode #outer button.bingsu-show-answer-btn:not([onclick*="ease"]):not([data-cmd*="ease"]):not([data-bingsu-ease]) {{
             background: {show_answer_bg_dark} !important;
             background-color: {show_answer_bg_dark} !important;
             color: {show_answer_text_dark} !important;
         }}
 
-        .nightMode #outer button.onigiri-show-answer-btn:not([onclick*="ease"]):not([data-cmd*="ease"]):not([data-onigiri-ease]):hover {{
+        .nightMode #outer button.bingsu-show-answer-btn:not([onclick*="ease"]):not([data-cmd*="ease"]):not([data-bingsu-ease]):hover {{
             background: {show_answer_hover_bg_dark} !important;
             background-color: {show_answer_hover_bg_dark} !important;
             color: {show_answer_hover_text_dark} !important;
         }}
 
         /* A standalone active timer is still a timer, not a More/Edit action. */
-        #outer button.onigiri-timer-out-btn,
-        #outer button.onigiri-timer-out-btn:hover {{
+        #outer button.bingsu-timer-out-btn,
+        #outer button.bingsu-timer-out-btn:hover {{
             background: {timer_bg_light} !important;
             background-color: {timer_bg_light} !important;
             color: {timer_text_light} !important;
             transform: none !important;
         }}
 
-        .nightMode #outer button.onigiri-timer-out-btn,
-        .nightMode #outer button.onigiri-timer-out-btn:hover {{
+        .nightMode #outer button.bingsu-timer-out-btn,
+        .nightMode #outer button.bingsu-timer-out-btn:hover {{
             background: {timer_bg_dark} !important;
             background-color: {timer_bg_dark} !important;
             color: {timer_text_dark} !important;
@@ -9270,13 +9270,13 @@ def generate_reviewer_buttons_css(conf):
 
         /* Stats-panel background overrides the Show Answer active background
            specifically while its pre-answer counts panel is present. */
-        #outer button.onigiri-show-answer-btn.onigiri-has-pre-answer-counts:not([onclick*="ease"]):not([data-cmd*="ease"]):not([data-onigiri-ease]):hover {{
+        #outer button.bingsu-show-answer-btn.bingsu-has-pre-answer-counts:not([onclick*="ease"]):not([data-cmd*="ease"]):not([data-bingsu-ease]):hover {{
             background: {show_answer_bar_bg_light} !important;
             background-color: {show_answer_bar_bg_light} !important;
             color: {show_answer_bar_text_light} !important;
         }}
 
-        .nightMode #outer button.onigiri-show-answer-btn.onigiri-has-pre-answer-counts:not([onclick*="ease"]):not([data-cmd*="ease"]):not([data-onigiri-ease]):hover {{
+        .nightMode #outer button.bingsu-show-answer-btn.bingsu-has-pre-answer-counts:not([onclick*="ease"]):not([data-cmd*="ease"]):not([data-bingsu-ease]):hover {{
             background: {show_answer_bar_bg_dark} !important;
             background-color: {show_answer_bar_bg_dark} !important;
             color: {show_answer_bar_text_dark} !important;
@@ -9287,13 +9287,13 @@ def generate_reviewer_buttons_css(conf):
             box-shadow: none !important;
         }}
 
-        button[onclick*="ease"], button[data-cmd*="ease"], button[data-onigiri-ease] {{
+        button[onclick*="ease"], button[data-cmd*="ease"], button[data-bingsu-ease] {{
             overflow: hidden !important;
             position: relative !important;
-            width: var(--onigiri-answer-button-width, auto) !important;
-            min-width: var(--onigiri-answer-button-width, 0px) !important;
-            max-width: var(--onigiri-answer-button-width, none) !important;
-            flex: 0 0 var(--onigiri-answer-button-width, auto) !important;
+            width: var(--bingsu-answer-button-width, auto) !important;
+            min-width: var(--bingsu-answer-button-width, 0px) !important;
+            max-width: var(--bingsu-answer-button-width, none) !important;
+            flex: 0 0 var(--bingsu-answer-button-width, auto) !important;
             display: inline-flex !important;
             flex-direction: column !important;
             justify-content: center !important;
@@ -9306,7 +9306,7 @@ def generate_reviewer_buttons_css(conf):
 
         button[onclick*="ease"] table, button[onclick*="ease"] tr, button[onclick*="ease"] td,
         button[data-cmd*="ease"] table, button[data-cmd*="ease"] tr, button[data-cmd*="ease"] td,
-        button[data-onigiri-ease] table, button[data-onigiri-ease] tr, button[data-onigiri-ease] td {{
+        button[data-bingsu-ease] table, button[data-bingsu-ease] tr, button[data-bingsu-ease] td {{
             background: transparent !important;
             border: none !important;
             margin: 0 !important;
@@ -9323,12 +9323,12 @@ def generate_reviewer_buttons_css(conf):
         }
         for ease, key in {"1": "again", "2": "hard", "3": "good", "4": "easy"}.items():
             def_bg_l, def_txt_l, def_bg_d, def_txt_d = defaults[key]
-            bg_light = conf.get(f"onigiri_reviewer_btn_{key}_bg_light", def_bg_l)
-            text_light = conf.get(f"onigiri_reviewer_btn_{key}_text_light", def_txt_l)
-            bg_dark = conf.get(f"onigiri_reviewer_btn_{key}_bg_dark", def_bg_d)
-            text_dark = conf.get(f"onigiri_reviewer_btn_{key}_text_dark", def_txt_d)
+            bg_light = conf.get(f"bingsu_reviewer_btn_{key}_bg_light", def_bg_l)
+            text_light = conf.get(f"bingsu_reviewer_btn_{key}_text_light", def_txt_l)
+            bg_dark = conf.get(f"bingsu_reviewer_btn_{key}_bg_dark", def_bg_d)
+            text_dark = conf.get(f"bingsu_reviewer_btn_{key}_text_dark", def_txt_d)
             css.append(f"""
-            #outer button[data-onigiri-ease="{ease}"],
+            #outer button[data-bingsu-ease="{ease}"],
             #outer button[onclick*="ease{ease}"],
             #outer button[data-cmd="ease{ease}"],
             #outer #ease{ease} {{
@@ -9337,7 +9337,7 @@ def generate_reviewer_buttons_css(conf):
                 background-image: none !important;
                 color: {text_light} !important;
             }}
-            #outer button[data-onigiri-ease="{ease}"]:hover,
+            #outer button[data-bingsu-ease="{ease}"]:hover,
             #outer button[onclick*="ease{ease}"]:hover,
             #outer button[data-cmd="ease{ease}"]:hover,
             #outer #ease{ease}:hover {{
@@ -9352,7 +9352,7 @@ def generate_reviewer_buttons_css(conf):
                 box-shadow: none !important;
             }}
 
-            .nightMode #outer button[data-onigiri-ease="{ease}"],
+            .nightMode #outer button[data-bingsu-ease="{ease}"],
             .nightMode #outer button[onclick*="ease{ease}"],
             .nightMode #outer button[data-cmd="ease{ease}"],
             .nightMode #outer #ease{ease} {{
@@ -9361,7 +9361,7 @@ def generate_reviewer_buttons_css(conf):
                 background-image: none !important;
                 color: {text_dark} !important;
             }}
-            .nightMode #outer button[data-onigiri-ease="{ease}"]:hover,
+            .nightMode #outer button[data-bingsu-ease="{ease}"]:hover,
             .nightMode #outer button[onclick*="ease{ease}"]:hover,
             .nightMode #outer button[data-cmd="ease{ease}"]:hover,
             .nightMode #outer #ease{ease}:hover {{
@@ -9379,23 +9379,23 @@ def generate_reviewer_buttons_css(conf):
         _pre_answer_counts_script = """
         <script>
         (function() {
-            const ANSWER_LABELS = __ONIGIRI_ANSWER_LABELS__;
-            const ONIGIRI_TIMER_POSITION = "__ONIGIRI_TIMER_POSITION__";
-            const ONIGIRI_SHOW_ANSWER_LABEL = __ONIGIRI_SHOW_ANSWER_LABEL__;
+            const ANSWER_LABELS = __BINGSU_ANSWER_LABELS__;
+            const BINGSU_TIMER_POSITION = "__BINGSU_TIMER_POSITION__";
+            const BINGSU_SHOW_ANSWER_LABEL = __BINGSU_SHOW_ANSWER_LABEL__;
             // Anki's native New/Learn/Review counts node lives inside the Show
             // Answer button and is only scraped successfully once per card (any
             // rebuild of the button wipes it for good). Cache the last real read so
             // a later empty scrape - caused by our own rebuild, not a real change -
             // doesn't blank the pills out.
-            let onigiriLastKnownStats = null;
+            let bingsuLastKnownStats = null;
 
             function cleanText(value) {
                 return (value || '').replace(/\\s+/g, ' ').trim();
             }
 
-            function buttonTextWithoutOnigiri(btn) {
+            function buttonTextWithoutBingsu(btn) {
                 const clone = btn.cloneNode(true);
-                clone.querySelectorAll('.stattxt, .nobold, .onigiri-pre-answer-counts, .onigiri-answer-hover-number, .onigiri-answer-label, .onigiri-show-answer-label').forEach(node => node.remove());
+                clone.querySelectorAll('.stattxt, .nobold, .bingsu-pre-answer-counts, .bingsu-answer-hover-number, .bingsu-answer-label, .bingsu-show-answer-label').forEach(node => node.remove());
                 return cleanText(clone.textContent);
             }
 
@@ -9412,7 +9412,7 @@ def generate_reviewer_buttons_css(conf):
                 const id = btn.id || '';
                 // Ignore nested stats: Speed Focus can show "Again 0:01"
                 // inside More time!, which is still a utility button.
-                const text = buttonTextWithoutOnigiri(btn).toLowerCase();
+                const text = buttonTextWithoutBingsu(btn).toLowerCase();
                 if (onclick.includes('ease1') || cmd === 'ease1' || id === 'ease1') return "1";
                 if (onclick.includes('ease2') || cmd === 'ease2' || id === 'ease2') return "2";
                 if (onclick.includes('ease3') || cmd === 'ease3' || id === 'ease3') return "3";
@@ -9426,8 +9426,8 @@ def generate_reviewer_buttons_css(conf):
 
             function nativeAnswerNumberNodes() {
                 return Array.from(document.querySelectorAll('#outer .nobold, .nobold'))
-                    .filter(node => !node.classList.contains('onigiri-answer-hover-number'))
-                    .filter(node => !node.closest('.onigiri-answer-hover-number'))
+                    .filter(node => !node.classList.contains('bingsu-answer-hover-number'))
+                    .filter(node => !node.closest('.bingsu-answer-hover-number'))
                     .filter(node => cleanText(node.textContent));
             }
 
@@ -9444,15 +9444,15 @@ def generate_reviewer_buttons_css(conf):
             function markNativeNumberSource(node) {
                 if (!node) return;
                 const text = cleanText(node.textContent);
-                forceHideNativeNumberElement(node, 'onigiri-native-number-source');
+                forceHideNativeNumberElement(node, 'bingsu-native-number-source');
                 let parent = node.parentElement;
                 while (parent && parent !== document.body && parent.id !== 'outer' && !parent.matches('button') && !parent.querySelector('button') && cleanText(parent.textContent) === text) {
-                    forceHideNativeNumberElement(parent, 'onigiri-native-number-host');
+                    forceHideNativeNumberElement(parent, 'bingsu-native-number-host');
                     parent = parent.parentElement;
                 }
                 const cell = node.closest('td, th');
                 if (cell && !cell.querySelector('button') && cleanText(cell.textContent) === text) {
-                    forceHideNativeNumberElement(cell, 'onigiri-native-number-empty-cell');
+                    forceHideNativeNumberElement(cell, 'bingsu-native-number-empty-cell');
                 }
             }
 
@@ -9461,19 +9461,19 @@ def generate_reviewer_buttons_css(conf):
                     if (row.querySelector('button')) return;
                     const cells = Array.from(row.querySelectorAll('td, th'));
                     if (!cells.length) return;
-                    row.classList.toggle('onigiri-native-number-empty-row', cells.every(cell => cell.classList.contains('onigiri-native-number-empty-cell') || !cleanText(cell.textContent)));
+                    row.classList.toggle('bingsu-native-number-empty-row', cells.every(cell => cell.classList.contains('bingsu-native-number-empty-cell') || !cleanText(cell.textContent)));
                 });
             }
 
-            let onigiriCardTypeInfo = window.__onigiriPendingReviewerCardType || null;
+            let bingsuCardTypeInfo = window.__bingsuPendingReviewerCardType || null;
 
-            function renderOnigiriCardTypeIndicator() {
+            function renderBingsuCardTypeIndicator() {
                 const outer = document.getElementById('outer');
                 if (!outer) return;
 
-                const info = onigiriCardTypeInfo;
+                const info = bingsuCardTypeInfo;
                 const activeIndex = { new: 0, learn: 1, review: 2 }[info && info.key];
-                outer.querySelectorAll('.onigiri-count-pill').forEach((pill, index) => {
+                outer.querySelectorAll('.bingsu-count-pill').forEach((pill, index) => {
                     const active = Number.isInteger(activeIndex) && index === activeIndex;
                     pill.classList.toggle('is-current-card', active);
                     if (active) pill.setAttribute('aria-label', info.label || 'Current card type');
@@ -9482,15 +9482,15 @@ def generate_reviewer_buttons_css(conf):
 
             }
 
-            window.onigiriSetReviewerCardType = function(info) {
-                onigiriCardTypeInfo = info && info.key ? info : null;
-                window.__onigiriPendingReviewerCardType = onigiriCardTypeInfo;
-                renderOnigiriCardTypeIndicator();
+            window.bingsuSetReviewerCardType = function(info) {
+                bingsuCardTypeInfo = info && info.key ? info : null;
+                window.__bingsuPendingReviewerCardType = bingsuCardTypeInfo;
+                renderBingsuCardTypeIndicator();
             };
-            if (onigiriCardTypeInfo) renderOnigiriCardTypeIndicator();
+            if (bingsuCardTypeInfo) renderBingsuCardTypeIndicator();
 
             function findNativeNumberInsideButton(btn) {
-                return Array.from(btn.querySelectorAll('.nobold')).find(node => !node.classList.contains('onigiri-answer-hover-number'));
+                return Array.from(btn.querySelectorAll('.nobold')).find(node => !node.classList.contains('bingsu-answer-hover-number'));
             }
 
             // Anki's own "Show answer timer" (deck options > Timers) renders a
@@ -9498,18 +9498,18 @@ def generate_reviewer_buttons_css(conf):
             // on a fixed id/class (it has changed across Anki versions) - instead we
             // look for a leaf element whose own text matches the mm:ss shape, which
             // intervals/counts never do. Scoped to #outer so we never touch card text.
-            function isOnigiriTimerText(text) {
+            function isBingsuTimerText(text) {
                 return /^\\d{1,2}:\\d{2}$/.test(text);
             }
 
-            function findOnigiriNativeTimerNode() {
+            function findBingsuNativeTimerNode() {
                 const outer = document.getElementById('outer');
                 if (!outer) return null;
                 const nodes = outer.querySelectorAll('*');
                 for (const el of nodes) {
-                    if (el.closest('.onigiri-timer-pill, .onigiri-timer-out-btn')) continue;
+                    if (el.closest('.bingsu-timer-pill, .bingsu-timer-out-btn')) continue;
                     if (el.children.length > 0) continue;
-                    if (isOnigiriTimerText(cleanText(el.textContent))) return el;
+                    if (isBingsuTimerText(cleanText(el.textContent))) return el;
                 }
                 return null;
             }
@@ -9521,7 +9521,7 @@ def generate_reviewer_buttons_css(conf):
             //   'right-of-edit' -> last child of the first cell (after the Edit
             //                      button). Used by "left" mode after the flip.
             // The timer is NEVER placed among the answer buttons (middle cell).
-            function ensureOnigiriTimerButton(where, text) {
+            function ensureBingsuTimerButton(where, text) {
                 const outer = document.getElementById('outer');
                 if (!outer) return;
                 // Resolve the OUTER bottom-bar row's own cells only. A plain
@@ -9535,11 +9535,11 @@ def generate_reviewer_buttons_css(conf):
                 if (!cells.length) return;
                 const cell = where === 'right-of-edit' ? cells[0] : cells[cells.length - 1];
                 if (!cell) return;
-                let btn = document.querySelector('.onigiri-timer-out-btn');
+                let btn = document.querySelector('.bingsu-timer-out-btn');
                 if (!btn) {
                     btn = document.createElement('button');
                     btn.type = 'button';
-                    btn.className = 'onigiri-timer-out-btn onigiri-other-btn';
+                    btn.className = 'bingsu-timer-out-btn bingsu-other-btn';
                     btn.setAttribute('tabindex', '-1');
                     btn.setAttribute('aria-hidden', 'true');
                 }
@@ -9553,24 +9553,24 @@ def generate_reviewer_buttons_css(conf):
                 if (btn.textContent !== text) btn.textContent = text;
             }
 
-            function removeOnigiriTimerOutButton() {
-                document.querySelectorAll('.onigiri-timer-out-btn').forEach(el => el.remove());
+            function removeBingsuTimerOutButton() {
+                document.querySelectorAll('.bingsu-timer-out-btn').forEach(el => el.remove());
             }
 
             function findAnswerNumber(btn, sourceNode) {
                 if (sourceNode) return cleanText(sourceNode.textContent);
                 const nativeInside = findNativeNumberInsideButton(btn);
                 if (nativeInside) return cleanText(nativeInside.textContent);
-                return cleanText(btn.getAttribute('data-onigiri-answer-number') || '');
+                return cleanText(btn.getAttribute('data-bingsu-answer-number') || '');
             }
 
             function lockAnswerButtonWidth(btn) {
                 if (!btn) return 0;
-                const existing = parseFloat(btn.style.getPropertyValue('--onigiri-answer-button-width'));
+                const existing = parseFloat(btn.style.getPropertyValue('--bingsu-answer-button-width'));
                 if (existing > 0) return existing;
                 const rect = btn.getBoundingClientRect();
                 const width = Math.ceil(rect.width || btn.offsetWidth || 0);
-                if (width > 0) btn.style.setProperty('--onigiri-answer-button-width', width + 'px');
+                if (width > 0) btn.style.setProperty('--bingsu-answer-button-width', width + 'px');
                 return width;
             }
 
@@ -9583,8 +9583,8 @@ def generate_reviewer_buttons_css(conf):
                 const labelFontSize = parseFloat(computed.fontSize) || 14;
                 const maxSize = Math.max(8, Math.min(labelFontSize, height * 0.46));
                 const minSize = 8;
-                const canvas = window.__onigiriAnswerNumberCanvas || document.createElement('canvas');
-                window.__onigiriAnswerNumberCanvas = canvas;
+                const canvas = window.__bingsuAnswerNumberCanvas || document.createElement('canvas');
+                window.__bingsuAnswerNumberCanvas = canvas;
                 const context = canvas.getContext && canvas.getContext('2d');
                 if (!context) return Math.max(minSize, Math.min(maxSize, availableWidth / Math.max(1, cleanText(text).length * 0.58)));
                 for (let size = maxSize; size >= minSize; size -= 0.5) {
@@ -9595,18 +9595,18 @@ def generate_reviewer_buttons_css(conf):
             }
 
             function updateAnswerNumberFontSize(btn, answerNumber) {
-                btn.style.setProperty('--onigiri-answer-number-font-size', fitAnswerNumberFontSize(btn, answerNumber).toFixed(1) + 'px');
+                btn.style.setProperty('--bingsu-answer-number-font-size', fitAnswerNumberFontSize(btn, answerNumber).toFixed(1) + 'px');
             }
 
             // Mirror bbarFitFixedAnswerLabel(): translated labels keep their
             // selected size unless the equal-width choice would clip them.
             function fitFixedAnswerLabel(btn, label) {
-                if ('__ONIGIRI_STATS_MODE__' !== 'fixed') return;
+                if ('__BINGSU_STATS_MODE__' !== 'fixed') return;
                 const style = window.getComputedStyle(btn);
                 const available = Math.max(1, btn.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight));
                 let size = parseFloat(style.fontSize) || 14;
-                const canvas = window.__onigiriAnswerNumberCanvas || document.createElement('canvas');
-                window.__onigiriAnswerNumberCanvas = canvas;
+                const canvas = window.__bingsuAnswerNumberCanvas || document.createElement('canvas');
+                window.__bingsuAnswerNumberCanvas = canvas;
                 const context = canvas.getContext('2d');
                 if (!context) return;
                 while (size > 8) {
@@ -9614,7 +9614,7 @@ def generate_reviewer_buttons_css(conf):
                     if (context.measureText(label).width <= available) break;
                     size = Math.max(8, size - .5);
                 }
-                btn.style.setProperty('--onigiri-fixed-answer-label-size', size + 'px');
+                btn.style.setProperty('--bingsu-fixed-answer-label-size', size + 'px');
             }
 
             function prepareAnswerButton(btn, ease, sourceNode) {
@@ -9624,23 +9624,23 @@ def generate_reviewer_buttons_css(conf):
                 if (!answerNumber) return;
                 updateAnswerNumberFontSize(btn, answerNumber);
                 markNativeNumberSource(sourceNode || findNativeNumberInsideButton(btn));
-                const currentLabel = buttonTextWithoutOnigiri(btn);
-                const label = cleanText(btn.getAttribute('data-onigiri-answer-label') || currentLabel || ANSWER_LABELS[ease] || '');
+                const currentLabel = buttonTextWithoutBingsu(btn);
+                const label = cleanText(btn.getAttribute('data-bingsu-answer-label') || currentLabel || ANSWER_LABELS[ease] || '');
                 if (!label) return;
                 fitFixedAnswerLabel(btn, label);
-                if (btn.getAttribute('data-onigiri-answer-hover-ready') === '1' && btn.getAttribute('data-onigiri-answer-number') === answerNumber && btn.getAttribute('data-onigiri-answer-label') === label) {
+                if (btn.getAttribute('data-bingsu-answer-hover-ready') === '1' && btn.getAttribute('data-bingsu-answer-number') === answerNumber && btn.getAttribute('data-bingsu-answer-label') === label) {
                     updateAnswerNumberFontSize(btn, answerNumber);
                     return;
                 }
-                btn.setAttribute('data-onigiri-answer-hover-ready', '1');
-                btn.setAttribute('data-onigiri-answer-number', answerNumber);
-                btn.setAttribute('data-onigiri-answer-label', label);
+                btn.setAttribute('data-bingsu-answer-hover-ready', '1');
+                btn.setAttribute('data-bingsu-answer-number', answerNumber);
+                btn.setAttribute('data-bingsu-answer-label', label);
                 btn.textContent = '';
                 const labelSpan = document.createElement('span');
-                labelSpan.className = 'onigiri-answer-label';
+                labelSpan.className = 'bingsu-answer-label';
                 labelSpan.textContent = label;
                 const numberSpan = document.createElement('span');
-                numberSpan.className = 'onigiri-answer-hover-number';
+                numberSpan.className = 'bingsu-answer-hover-number';
                 numberSpan.textContent = answerNumber;
                 btn.append(labelSpan, numberSpan);
             }
@@ -9654,22 +9654,22 @@ def generate_reviewer_buttons_css(conf):
                 // state, which flickers as Anki re-renders the bottom bar on
                 // every answer-timer tick. The pre-answer panel is a
                 // question-state-only feature.
-                if (all.some(btn => btn.getAttribute('data-onigiri-ease') || easeFromButton(btn))) return null;
-                const candidates = all.filter(btn => !btn.getAttribute('data-onigiri-ease'));
+                if (all.some(btn => btn.getAttribute('data-bingsu-ease') || easeFromButton(btn))) return null;
+                const candidates = all.filter(btn => !btn.getAttribute('data-bingsu-ease'));
                 const direct = candidates.find(btn => {
                     const onclick = (btn.getAttribute('onclick') || '').toLowerCase();
                     const cmd = (btn.getAttribute('data-cmd') || '').toLowerCase();
                     const id = (btn.id || '').toLowerCase();
-                    const text = buttonTextWithoutOnigiri(btn).toLowerCase();
+                    const text = buttonTextWithoutBingsu(btn).toLowerCase();
                     return cmd === 'ans' || id.includes('ans') || onclick.includes('ans') || text.includes('show answer') || text.includes('mostrar resposta') || text.includes('mostrar respuesta') || text.includes('afficher la réponse');
                 });
                 if (direct) return direct;
                 const nonUtility = candidates.filter(btn => {
-                    const text = buttonTextWithoutOnigiri(btn).toLowerCase();
+                    const text = buttonTextWithoutBingsu(btn).toLowerCase();
                     return text && !text.includes('edit') && !text.includes('more');
                 });
                 if (nonUtility.length === 1) return nonUtility[0];
-                return nonUtility.sort((a, b) => buttonTextWithoutOnigiri(b).length - buttonTextWithoutOnigiri(a).length)[0] || null;
+                return nonUtility.sort((a, b) => buttonTextWithoutBingsu(b).length - buttonTextWithoutBingsu(a).length)[0] || null;
             }
 
             function collectPreAnswerCounts(timerNode, timerText) {
@@ -9686,35 +9686,35 @@ def generate_reviewer_buttons_css(conf):
                 // must stay visible without overwriting our cached queue counts.
                 // Anki's remaining-counts HTML belongs to the middle cell.
                 const nodes = Array.from(document.querySelectorAll('#outer #middle .stattxt'))
-                    .filter(node => !node.closest('.onigiri-pre-answer-counts'));
+                    .filter(node => !node.closest('.bingsu-pre-answer-counts'));
                 let combined = nodes.map(node => cleanText(node.textContent)).filter(Boolean).join(' ');
                 if (timerNode && timerText) {
                     combined = combined.split(timerText).map(part => cleanText(part)).filter(Boolean).join(' ');
                 }
                 const scraped = combined.split('+').map(part => cleanText(part));
                 if (scraped.length === 3 && scraped.every(part => /^\\d+$/.test(part))) {
-                    nodes.forEach(node => forceHideNativeNumberElement(node, 'onigiri-stattxt-source'));
-                    onigiriLastKnownStats = scraped;
+                    nodes.forEach(node => forceHideNativeNumberElement(node, 'bingsu-stattxt-source'));
+                    bingsuLastKnownStats = scraped;
                     return scraped;
                 }
                 // Empty/invalid scrape: usually our own earlier rebuild already
                 // wiped the native counts node for this card, not that the counts
                 // themselves vanished. Fall back to the last real read instead of
                 // reporting "no counts" (which would blank the pills every tick).
-                return onigiriLastKnownStats || [];
+                return bingsuLastKnownStats || [];
             }
 
             function prepareShowAnswerCounts(buttons) {
                 stripBottomBarTooltips(document);
                 const showButton = findShowAnswerButton(buttons);
                 const outer = document.getElementById('outer');
-                if (outer) outer.classList.toggle('onigiri-bbar-fixed', '__ONIGIRI_STATS_MODE__' === 'fixed');
-                if (outer) outer.classList.toggle('onigiri-bbar-fixed-question',
-                    !!showButton && '__ONIGIRI_STATS_MODE__' === 'fixed');
-                document.querySelectorAll('#outer button.onigiri-show-answer-btn').forEach(btn => {
+                if (outer) outer.classList.toggle('bingsu-bbar-fixed', '__BINGSU_STATS_MODE__' === 'fixed');
+                if (outer) outer.classList.toggle('bingsu-bbar-fixed-question',
+                    !!showButton && '__BINGSU_STATS_MODE__' === 'fixed');
+                document.querySelectorAll('#outer button.bingsu-show-answer-btn').forEach(btn => {
                     if (btn !== showButton) {
-                        btn.classList.remove('onigiri-show-answer-btn', 'onigiri-has-pre-answer-counts');
-                        const counts = btn.querySelector('.onigiri-pre-answer-counts');
+                        btn.classList.remove('bingsu-show-answer-btn', 'bingsu-has-pre-answer-counts');
+                        const counts = btn.querySelector('.bingsu-pre-answer-counts');
                         if (counts) counts.remove();
                     }
                 });
@@ -9722,16 +9722,16 @@ def generate_reviewer_buttons_css(conf):
                 // Answer revealed once the ease buttons (Again/Hard/Good/Easy)
                 // are on screen.
                 const answerButtonsPresent = Array.from(buttons)
-                    .some(b => b.getAttribute('data-onigiri-ease') || easeFromButton(b));
+                    .some(b => b.getAttribute('data-bingsu-ease') || easeFromButton(b));
 
-                const timerNode = findOnigiriNativeTimerNode();
+                const timerNode = findBingsuNativeTimerNode();
                 const timerText = timerNode ? cleanText(timerNode.textContent) : '';
                 const stats = collectPreAnswerCounts(timerNode, timerText);
 
                 // "off" hides the timer entirely: no pill inside the Show Answer
                 // button and no standalone button in the bottom bar. The native
                 // timer element is still hidden below so it can't leak through.
-                const timerEnabled = ONIGIRI_TIMER_POSITION !== 'off';
+                const timerEnabled = BINGSU_TIMER_POSITION !== 'off';
 
                 // Decide where the ticking timer lives:
                 //   - "out": standalone button left of More, in BOTH states.
@@ -9742,37 +9742,37 @@ def generate_reviewer_buttons_css(conf):
                 //     to the left of More. Never among the answer buttons.
                 let standaloneTimerSlot = null;
                 if (timerNode && timerEnabled) {
-                    if (ONIGIRI_TIMER_POSITION === 'out') {
+                    if (BINGSU_TIMER_POSITION === 'out') {
                         standaloneTimerSlot = 'left-of-more';
                     } else if (answerButtonsPresent) {
-                        standaloneTimerSlot = ONIGIRI_TIMER_POSITION === 'right' ? 'left-of-more' : 'right-of-edit';
+                        standaloneTimerSlot = BINGSU_TIMER_POSITION === 'right' ? 'left-of-more' : 'right-of-edit';
                     }
                 }
 
-                if (timerNode) forceHideNativeNumberElement(timerNode, 'onigiri-native-timer-source');
+                if (timerNode) forceHideNativeNumberElement(timerNode, 'bingsu-native-timer-source');
                 if (standaloneTimerSlot) {
-                    ensureOnigiriTimerButton(standaloneTimerSlot, timerText);
+                    ensureBingsuTimerButton(standaloneTimerSlot, timerText);
                 } else {
-                    removeOnigiriTimerOutButton();
+                    removeBingsuTimerOutButton();
                 }
 
                 // The inside-the-button timer pill only applies to the pre-flip
                 // Show Answer button (right/left mode, question state).
-                const hasInsideTimer = !!timerNode && timerEnabled && ONIGIRI_TIMER_POSITION !== 'out' && !answerButtonsPresent;
+                const hasInsideTimer = !!timerNode && timerEnabled && BINGSU_TIMER_POSITION !== 'out' && !answerButtonsPresent;
 
                 // Mark Show Answer independently of whether its optional
                 // counts/timer panel exists, so its dedicated palette also
                 // applies when Stats Numbers and Timer are both off.
                 if (showButton) {
-                    showButton.classList.add('onigiri-show-answer-btn');
-                    showButton.classList.toggle('is-fixed', '__ONIGIRI_STATS_MODE__' === 'fixed');
+                    showButton.classList.add('bingsu-show-answer-btn');
+                    showButton.classList.toggle('is-fixed', '__BINGSU_STATS_MODE__' === 'fixed');
                 }
 
                 if (!showButton || (stats.length === 0 && !hasInsideTimer)) {
                     if (showButton) {
-                        showButton.classList.remove('onigiri-has-pre-answer-counts');
-                        const counts = showButton.querySelector('.onigiri-pre-answer-counts');
-                        if (counts && !showButton.querySelector('.onigiri-count-pill')) counts.remove();
+                        showButton.classList.remove('bingsu-has-pre-answer-counts');
+                        const counts = showButton.querySelector('.bingsu-pre-answer-counts');
+                        if (counts && !showButton.querySelector('.bingsu-count-pill')) counts.remove();
                     }
                     return;
                 }
@@ -9787,32 +9787,32 @@ def generate_reviewer_buttons_css(conf):
                 // very first tick. The timer text itself is still updated live,
                 // in place, below, without triggering a rebuild.
                 const structureKey = stats.join('|') + '::' + (hasInsideTimer ? '1' : '0');
-                const nativeLabel = cleanText(showButton.getAttribute('data-onigiri-show-answer-label') || buttonTextWithoutOnigiri(showButton));
-                const label = nativeLabel === 'Show Answer' ? ONIGIRI_SHOW_ANSWER_LABEL : nativeLabel;
-                showButton.classList.add('onigiri-has-pre-answer-counts');
-                showButton.setAttribute('data-onigiri-show-answer-label', label || ONIGIRI_SHOW_ANSWER_LABEL);
-                if (showButton.getAttribute('data-onigiri-pre-answer-counts') === structureKey && showButton.querySelector('.onigiri-pre-answer-counts')) {
+                const nativeLabel = cleanText(showButton.getAttribute('data-bingsu-show-answer-label') || buttonTextWithoutBingsu(showButton));
+                const label = nativeLabel === 'Show Answer' ? BINGSU_SHOW_ANSWER_LABEL : nativeLabel;
+                showButton.classList.add('bingsu-has-pre-answer-counts');
+                showButton.setAttribute('data-bingsu-show-answer-label', label || BINGSU_SHOW_ANSWER_LABEL);
+                if (showButton.getAttribute('data-bingsu-pre-answer-counts') === structureKey && showButton.querySelector('.bingsu-pre-answer-counts')) {
                     if (hasInsideTimer) {
-                        const timerPill = showButton.querySelector('.onigiri-timer-pill');
+                        const timerPill = showButton.querySelector('.bingsu-timer-pill');
                         if (timerPill && timerPill.textContent !== timerText) timerPill.textContent = timerText;
                     }
                     return;
                 }
-                showButton.setAttribute('data-onigiri-pre-answer-counts', structureKey);
+                showButton.setAttribute('data-bingsu-pre-answer-counts', structureKey);
                 showButton.textContent = '';
                 const labelSpan = document.createElement('span');
-                labelSpan.className = 'onigiri-show-answer-label';
-                labelSpan.textContent = label || ONIGIRI_SHOW_ANSWER_LABEL;
+                labelSpan.className = 'bingsu-show-answer-label';
+                labelSpan.textContent = label || BINGSU_SHOW_ANSWER_LABEL;
                 showButton.appendChild(labelSpan);
 
                 const panel = document.createElement('span');
-                panel.className = 'onigiri-pre-answer-counts';
+                panel.className = 'bingsu-pre-answer-counts';
                 panel.setAttribute('aria-hidden', 'true');
 
                 function appendCountPills(container) {
                     ['new', 'learn', 'review'].forEach((kind, index) => {
                         const pill = document.createElement('span');
-                        pill.className = 'onigiri-count-pill onigiri-count-pill-' + kind;
+                        pill.className = 'bingsu-count-pill bingsu-count-pill-' + kind;
                         pill.textContent = stats[index] || '0';
                         container.appendChild(pill);
                     });
@@ -9820,15 +9820,15 @@ def generate_reviewer_buttons_css(conf):
 
                 function makeTimerPill() {
                     const timerPill = document.createElement('span');
-                    timerPill.className = 'onigiri-timer-pill';
+                    timerPill.className = 'bingsu-timer-pill';
                     timerPill.textContent = timerText;
                     return timerPill;
                 }
 
                 if (hasInsideTimer && stats.length > 0) {
-                    if (ONIGIRI_TIMER_POSITION === 'left') panel.appendChild(makeTimerPill());
+                    if (BINGSU_TIMER_POSITION === 'left') panel.appendChild(makeTimerPill());
                     appendCountPills(panel);
-                    if (ONIGIRI_TIMER_POSITION === 'right') panel.appendChild(makeTimerPill());
+                    if (BINGSU_TIMER_POSITION === 'right') panel.appendChild(makeTimerPill());
                 } else if (hasInsideTimer) {
                     panel.appendChild(makeTimerPill());
                 } else {
@@ -9842,26 +9842,26 @@ def generate_reviewer_buttons_css(conf):
 
             function classifyButtons() {
                 stripBottomBarTooltips(document);
-                renderOnigiriCardTypeIndicator();
+                renderBingsuCardTypeIndicator();
                 const buttons = document.querySelectorAll('#outer button, button');
                 const answerButtons = [];
                 buttons.forEach(btn => {
                     const ease = easeFromButton(btn);
                     if (ease) {
-                        btn.setAttribute('data-onigiri-ease', ease);
-                        btn.classList.toggle('is-fixed', '__ONIGIRI_STATS_MODE__' === 'fixed');
+                        btn.setAttribute('data-bingsu-ease', ease);
+                        btn.classList.toggle('is-fixed', '__BINGSU_STATS_MODE__' === 'fixed');
                         lockAnswerButtonWidth(btn);
                         answerButtons.push({ btn, ease });
                     } else {
-                        btn.classList.add('onigiri-other-btn');
+                        btn.classList.add('bingsu-other-btn');
                     }
                 });
-                if ('__ONIGIRI_STATS_MODE__' === 'fixed' && answerButtons.length) {
+                if ('__BINGSU_STATS_MODE__' === 'fixed' && answerButtons.length) {
                     const row = answerButtons[0].btn.closest('tr');
                     if (row && row.closest('#middle')) {
-                        row.classList.add('onigiri-fixed-answer-row');
+                        row.classList.add('bingsu-fixed-answer-row');
                         const table = row.closest('table');
-                        if (table) table.classList.add('onigiri-fixed-answer-table');
+                        if (table) table.classList.add('bingsu-fixed-answer-table');
                     }
                 }
                 const nativeNumbers = nativeAnswerNumberNodes();
@@ -9869,12 +9869,12 @@ def generate_reviewer_buttons_css(conf):
                 answerButtons.forEach((item, index) => prepareAnswerButton(item.btn, item.ease, nativeNumbers[index] || null));
                 collapseNativeNumberHosts();
                 prepareShowAnswerCounts(buttons);
-                renderOnigiriCardTypeIndicator();
+                renderBingsuCardTypeIndicator();
                 const primary = answerButtons.length
-                    ? answerButtons[0].btn.closest('.onigiri-fixed-answer-row')
-                    : document.querySelector('#outer button.onigiri-show-answer-btn');
-                if (primary && primary !== lastPrimary && '__ONIGIRI_STATS_MODE__' === 'fixed') {
-                    primary.classList.add('onigiri-bbar-enter');
+                    ? answerButtons[0].btn.closest('.bingsu-fixed-answer-row')
+                    : document.querySelector('#outer button.bingsu-show-answer-btn');
+                if (primary && primary !== lastPrimary && '__BINGSU_STATS_MODE__' === 'fixed') {
+                    primary.classList.add('bingsu-bbar-enter');
                 }
                 lastPrimary = primary;
             }
@@ -9886,7 +9886,7 @@ def generate_reviewer_buttons_css(conf):
             function installRenderHooks() {
                 ['showQuestion', 'showAnswer'].forEach(name => {
                     const original = window[name];
-                    if (typeof original !== 'function' || original.__onigiriBottomBarRender) return;
+                    if (typeof original !== 'function' || original.__bingsuBottomBarRender) return;
                     const render = function() {
                         renderDepth++;
                         try {
@@ -9896,13 +9896,13 @@ def generate_reviewer_buttons_css(conf):
                             if (!renderDepth) classifyButtons();
                         }
                     };
-                    render.__onigiriBottomBarRender = true;
+                    render.__bingsuBottomBarRender = true;
                     window[name] = render;
                 });
             }
             function hooksInstalled() {
                 return ['showQuestion', 'showAnswer'].every(name =>
-                    window[name] && window[name].__onigiriBottomBarRender);
+                    window[name] && window[name].__bingsuBottomBarRender);
             }
             function refresh() {
                 installRenderHooks();
@@ -9943,7 +9943,7 @@ def generate_reviewer_buttons_css(conf):
                 resizeTimer = setTimeout(() => {
                     // the first measured width is cached per button: forget it
                     document.querySelectorAll('#outer button').forEach(b =>
-                        b.style.removeProperty('--onigiri-answer-button-width'));
+                        b.style.removeProperty('--bingsu-answer-button-width'));
                     classifyButtons();
                 }, 120);
             }, { passive: true });
@@ -9952,17 +9952,17 @@ def generate_reviewer_buttons_css(conf):
         """
         scripts.append(
             _pre_answer_counts_script
-            .replace("__ONIGIRI_TIMER_POSITION__", timer_position)
-            .replace("__ONIGIRI_STATS_MODE__", stattxt_mode)
-            .replace("__ONIGIRI_ANSWER_LABELS__", json.dumps({str(index): tr_at(key) for index, key in enumerate(("again_label", "hard_label", "good_label", "easy_label"), 1)}))
-            .replace("__ONIGIRI_SHOW_ANSWER_LABEL__", json.dumps(tr_at("show_answer_label")))
+            .replace("__BINGSU_TIMER_POSITION__", timer_position)
+            .replace("__BINGSU_STATS_MODE__", stattxt_mode)
+            .replace("__BINGSU_ANSWER_LABELS__", json.dumps({str(index): tr_at(key) for index, key in enumerate(("again_label", "hard_label", "good_label", "easy_label"), 1)}))
+            .replace("__BINGSU_SHOW_ANSWER_LABEL__", json.dumps(tr_at("show_answer_label")))
         )
 
     scripts.append("""
     <script>
     (function() {
-        if (window.__onigiriBottomBarTooltipsDisabled) return;
-        window.__onigiriBottomBarTooltipsDisabled = true;
+        if (window.__bingsuBottomBarTooltipsDisabled) return;
+        window.__bingsuBottomBarTooltipsDisabled = true;
         function stripBottomBarTitles() {
             document.querySelectorAll('#outer [title], #outer button[title], button[title]').forEach(node => node.removeAttribute('title'));
         }
@@ -9982,14 +9982,14 @@ def generate_reviewer_buttons_css(conf):
 
     if custom_enabled:
         fixed_padding, count_height, fixed_height = _reviewer_fixed_button_metrics(conf)
-        border_size = max(0, min(10, _onigiri_int_style_value(conf.get("onigiri_reviewer_btn_border_size", 0), 0)))
+        border_size = max(0, min(10, _bingsu_int_style_value(conf.get("bingsu_reviewer_btn_border_size", 0), 0)))
         css.append(f"""
         #outer {{
             container-type: inline-size;
-            --onigiri-bbar-font-size: {_reviewer_controls_font_size(conf)}px;
-            --onigiri-bbar-fixed-padding: {fixed_padding}px;
-            --onigiri-bbar-count-height: {count_height}px;
-            --onigiri-bbar-fixed-height: {fixed_height}px;
+            --bingsu-bbar-font-size: {_reviewer_controls_font_size(conf)}px;
+            --bingsu-bbar-fixed-padding: {fixed_padding}px;
+            --bingsu-bbar-count-height: {count_height}px;
+            --bingsu-bbar-fixed-height: {fixed_height}px;
         }}
         #outer > table > tbody > tr {{
             box-sizing: border-box !important;
@@ -10000,15 +10000,15 @@ def generate_reviewer_buttons_css(conf):
             padding-bottom: 0 !important;
         }}
         #outer button {{
-            border: {border_size}px solid var(--onigiri-bbar-border, {conf.get('onigiri_reviewer_btn_border_color_light', '#DBDBDB')}) !important;
+            border: {border_size}px solid var(--bingsu-bbar-border, {conf.get('bingsu_reviewer_btn_border_color_light', '#DBDBDB')}) !important;
         }}
-        #outer button.onigiri-show-answer-btn:hover {{ transform: none !important; }}
+        #outer button.bingsu-show-answer-btn:hover {{ transform: none !important; }}
         """)
         border_selectors = {
-            "show_answer": "#outer button.onigiri-show-answer-btn",
-            "other": "#outer button.onigiri-other-btn",
-            "timer": "#outer button.onigiri-timer-out-btn",
-            **{key: f'#outer button[data-onigiri-ease="{ease}"]' for ease, key in
+            "show_answer": "#outer button.bingsu-show-answer-btn",
+            "other": "#outer button.bingsu-other-btn",
+            "timer": "#outer button.bingsu-timer-out-btn",
+            **{key: f'#outer button[data-bingsu-ease="{ease}"]' for ease, key in
                ((1, "again"), (2, "hard"), (3, "good"), (4, "easy"))},
         }
         # Show Answer and timers are also classified as utility buttons, so
@@ -10016,8 +10016,8 @@ def generate_reviewer_buttons_css(conf):
         for family in ("other", "show_answer", "again", "hard", "good", "easy", "timer"):
             selector = border_selectors[family]
             for mode, prefix, fallback in (("light", "", "#DBDBDB"), ("dark", ".nightMode ", "#444444")):
-                color = conf.get(f"onigiri_reviewer_{family}_border_{mode}") or conf.get(f"onigiri_reviewer_btn_border_color_{mode}", fallback)
-                css.append(f"{prefix}{selector} {{ --onigiri-bbar-border: {color}; }}")
+                color = conf.get(f"bingsu_reviewer_{family}_border_{mode}") or conf.get(f"bingsu_reviewer_btn_border_color_{mode}", fallback)
+                css.append(f"{prefix}{selector} {{ --bingsu-bbar-border: {color}; }}")
         shared_css_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "web", "reviewer_buttons_shared.css")
         css.append(_read_cached_text_file(shared_css_path))
     return "<style>" + "\n".join(css) + "</style>" + "\n".join(scripts)
@@ -10038,7 +10038,7 @@ def _read_cached_text_file(path: str) -> str:
         text = handle.read()
     _CACHED_TEXT_FILES[path] = (mtime, text)
     return text
-def _onigiri_render_deck_tree(self, *args, **kwargs):
+def _bingsu_render_deck_tree(self, *args, **kwargs):
     """
     Patched version of DeckBrowser._render_deck_tree to pre-fetch enhanced stats.
     """
@@ -10066,26 +10066,26 @@ def _onigiri_render_deck_tree(self, *args, **kwargs):
                     elif queue == 2: stats["review"] += count
                 
                 # Attach to instance
-                self._onigiri_enhanced_stats = enhanced_stats
-                # print(f"Onigiri: Pre-fetched enhanced stats for {len(enhanced_stats)} decks")
+                self._bingsu_enhanced_stats = enhanced_stats
+                # print(f"Bingsu: Pre-fetched enhanced stats for {len(enhanced_stats)} decks")
             except Exception as e:
-                print(f"Onigiri: Error pre-fetching enhanced stats: {e}")
-                self._onigiri_enhanced_stats = None
+                print(f"Bingsu: Error pre-fetching enhanced stats: {e}")
+                self._bingsu_enhanced_stats = None
         else:
-             self._onigiri_enhanced_stats = None
+             self._bingsu_enhanced_stats = None
 
     except Exception as e:
-        print(f"Onigiri: Error in _onigiri_render_deck_tree wrapper: {e}")
+        print(f"Bingsu: Error in _bingsu_render_deck_tree wrapper: {e}")
 
     # Call original
     return _old_render_deck_tree(self, *args, **kwargs)
 
 # Store original method
 from aqt.deckbrowser import DeckBrowser
-if not hasattr(DeckBrowser, '_onigiri_patched_render_tree'):
+if not hasattr(DeckBrowser, '_bingsu_patched_render_tree'):
     if hasattr(DeckBrowser, '_render_deck_tree'):
         _old_render_deck_tree = DeckBrowser._render_deck_tree
-        DeckBrowser._render_deck_tree = _onigiri_render_deck_tree
-        DeckBrowser._onigiri_patched_render_tree = True
+        DeckBrowser._render_deck_tree = _bingsu_render_deck_tree
+        DeckBrowser._bingsu_patched_render_tree = True
     else:
-        print("Onigiri: Warning - DeckBrowser._render_deck_tree not found, enhanced stats patch optional skipped.")
+        print("Bingsu: Warning - DeckBrowser._render_deck_tree not found, enhanced stats patch optional skipped.")

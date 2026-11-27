@@ -138,16 +138,16 @@ custom_body_template = """
         min-height: 0; 
     }
 
-    .onigiri-tag-table {
+    .bingsu-tag-table {
         width: 100%;
         border-collapse: collapse;
     }
 
-    .onigiri-tag-row .decktd {
+    .bingsu-tag-row .decktd {
         padding: 0 !important;
     }
 
-    .onigiri-tag-entry {
+    .bingsu-tag-entry {
         display: flex;
         align-items: center;
         width: 100%;
@@ -159,18 +159,18 @@ custom_body_template = """
         box-sizing: border-box;
     }
 
-    .onigiri-tag-entry:hover {
+    .bingsu-tag-entry:hover {
         background-color: rgba(128, 128, 128, 0.1);
     }
 
-    .onigiri-tag-toggle,
-    .onigiri-tag-toggle-placeholder {
+    .bingsu-tag-toggle,
+    .bingsu-tag-toggle-placeholder {
         flex: 0 0 20px;
         width: 20px;
         height: 24px;
     }
 
-    .onigiri-tag-toggle {
+    .bingsu-tag-toggle {
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -184,21 +184,21 @@ custom_body_template = """
         cursor: pointer;
     }
 
-    .onigiri-tag-toggle:hover {
+    .bingsu-tag-toggle:hover {
         color: var(--accent-color);
     }
 
-    .onigiri-tag-toggle svg {
+    .bingsu-tag-toggle svg {
         width: 12px;
         height: 12px;
         transition: transform 120ms ease;
     }
 
-    .onigiri-tag-toggle[aria-expanded="true"] svg {
+    .bingsu-tag-toggle[aria-expanded="true"] svg {
         transform: rotate(90deg);
     }
 
-    .onigiri-tag-link {
+    .bingsu-tag-link {
         display: flex;
         align-items: center;
         gap: 8px;
@@ -216,31 +216,31 @@ custom_body_template = """
         text-align: start;
     }
 
-    .onigiri-tag-icon {
+    .bingsu-tag-icon {
         flex: 0 0 16px;
         width: 16px;
         height: 16px;
         color: var(--icon-color, var(--fg-subtle));
     }
 
-    .onigiri-tag-icon-mask {
+    .bingsu-tag-icon-mask {
         display: inline-block;
-        background-color: var(--onigiri-tag-icon-light, var(--icon-color));
-        -webkit-mask: var(--onigiri-tag-icon) center / contain no-repeat;
-        mask: var(--onigiri-tag-icon) center / contain no-repeat;
+        background-color: var(--bingsu-tag-icon-light, var(--icon-color));
+        -webkit-mask: var(--bingsu-tag-icon) center / contain no-repeat;
+        mask: var(--bingsu-tag-icon) center / contain no-repeat;
     }
 
-    .night-mode .onigiri-tag-icon-mask,
-    .nightMode .onigiri-tag-icon-mask {
-        background-color: var(--onigiri-tag-icon-dark, var(--icon-color));
+    .night-mode .bingsu-tag-icon-mask,
+    .nightMode .bingsu-tag-icon-mask {
+        background-color: var(--bingsu-tag-icon-dark, var(--icon-color));
     }
 
-    .onigiri-tag-icon-image {
+    .bingsu-tag-icon-image {
         display: block;
         object-fit: contain;
     }
 
-    .onigiri-tag-icon-emoji {
+    .bingsu-tag-icon-emoji {
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -248,7 +248,7 @@ custom_body_template = """
         line-height: 1;
     }
 
-    .onigiri-tag-name {
+    .bingsu-tag-name {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -256,14 +256,14 @@ custom_body_template = """
         text-align: start;
     }
 
-    .onigiri-tag-empty {
+    .bingsu-tag-empty {
         padding: 12px 10px;
         color: var(--fg-subtle);
         font-size: 12px;
         text-align: center;
     }
 
-    .onigiri-sidebar-decks-section.is-tags-mode #onigiri-sort-toolbar-btn {
+    .bingsu-sidebar-decks-section.is-tags-mode #bingsu-sort-toolbar-btn {
         display: none;
     }
 </style>
@@ -271,30 +271,30 @@ custom_body_template = """
     <div class="sidebar-left skeleton-loading {sidebar_initial_class}" style="{sidebar_style}">
         
         <div class="sidebar-expanded-content">
-            <section class="onigiri-sidebar-section onigiri-sidebar-profile-section">
+            <section class="bingsu-sidebar-section bingsu-sidebar-profile-section">
                 {profile_bar}
             </section>
-            <section class="onigiri-sidebar-section onigiri-sidebar-actions-section">
+            <section class="bingsu-sidebar-section bingsu-sidebar-actions-section">
                 {sidebar_buttons}
             </section>
             {ready_to_go}
             {profile_sidebar}
-            <section class="onigiri-sidebar-section onigiri-sidebar-decks-section
+            <section class="bingsu-sidebar-section bingsu-sidebar-decks-section
                             {sidebar_list_class}">
                 <div id="deck-list-header">
                     <h2>{sidebar_content_title}</h2>
-                    <div id="onigiri-deck-search-bar">
-                        <span class="onigiri-search-icon" aria-hidden="true"></span>
-                        <input type="text" id="onigiri-deck-search-input" placeholder="{sidebar_search_placeholder}" autocomplete="off" spellcheck="false" />
-                        <button id="onigiri-deck-search-close" aria-label="Close" type="button">
+                    <div id="bingsu-deck-search-bar">
+                        <span class="bingsu-search-icon" aria-hidden="true"></span>
+                        <input type="text" id="bingsu-deck-search-input" placeholder="{sidebar_search_placeholder}" autocomplete="off" spellcheck="false" />
+                        <button id="bingsu-deck-search-close" aria-label="Close" type="button">
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
                         </button>
                     </div>
                     <div class="deck-header-actions">
-                        <button id="onigiri-search-toolbar-btn" class="deck-header-btn" onclick="OnigiriEngine.toggleDeckSearch()" title="{sidebar_search_title}" type="button">
+                        <button id="bingsu-search-toolbar-btn" class="deck-header-btn" onclick="BingsuEngine.toggleDeckSearch()" title="{sidebar_search_title}" type="button">
                             {search_header_icon}
                         </button>
-                        <button id="onigiri-sort-toolbar-btn" class="deck-header-btn" type="button" title="Sort decks" onclick="OnigiriEngine.showSortMenu(this, event)">
+                        <button id="bingsu-sort-toolbar-btn" class="deck-header-btn" type="button" title="Sort decks" onclick="BingsuEngine.showSortMenu(this, event)">
                             {sort_header_icon}
                         </button>
                         {ready_marker}
@@ -314,7 +314,7 @@ custom_body_template = """
         <div class="collapsed-content-wrapper">
             <div class="sidebar-collapsed-content">
                 <div class="collapsed-placeholder welcome-placeholder"></div>
-                <div class="collapsed-profile-item" onclick="window.OnigiriProfileSidebar && OnigiriProfileSidebar.open(event)">
+                <div class="collapsed-profile-item" onclick="window.BingsuProfileSidebar && BingsuProfileSidebar.open(event)">
                     {profile_pic_html_collapsed}
                 </div>
                 <div class="collapsed-actions-placeholder">
@@ -330,8 +330,8 @@ custom_body_template = """
         </div>
     </div>
     <div class="sidebar-edge-toggle-zone" aria-hidden="true"></div>
-    <div id="onigiri-sidebar-edge-pill" aria-hidden="false">
-        <button id="onigiri-sidebar-edge-toggle" title="Collapse sidebar" aria-label="Collapse sidebar" type="button">
+    <div id="bingsu-sidebar-edge-pill" aria-hidden="false">
+        <button id="bingsu-sidebar-edge-toggle" title="Collapse sidebar" aria-label="Collapse sidebar" type="button">
             <span class="sidebar-edge-toggle-icon" aria-hidden="true"></span>
         </button>
         <div class="resize-handle" aria-label="Select resize mode" role="button" tabindex="0">
@@ -346,7 +346,7 @@ custom_body_template = """
 </div>
 
 <script>
-// Disable Anki's default jQuery sortable on the deck tree. Onigiri owns deck
+// Disable Anki's default jQuery sortable on the deck tree. Bingsu owns deck
 // sorting/reparenting through its lightweight pointer-drag handles.
 (function() {
     if (typeof $ !== 'undefined' && $.ui) {
@@ -365,8 +365,8 @@ custom_body_template = """
     }
 })();
 
-// Compatibility shim for older Onigiri hooks.
-const OnigiriEditor = {
+// Compatibility shim for older Bingsu hooks.
+const BingsuEditor = {
     init: function() {},
     enterEditMode: function() {},
     exitEditMode: function() {},
@@ -404,7 +404,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (typeof anki !== 'undefined' && anki.setupDeckBrowser) {
         anki.setupDeckBrowser();
     }
-    OnigiriEditor.init();
+    BingsuEditor.init();
 });
 </script>
 """

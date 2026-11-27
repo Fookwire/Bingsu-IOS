@@ -5,7 +5,7 @@ const assert = require('assert/strict');
 const {execFileSync} = require('child_process');
 const {chromium} = require('playwright');
 const root = path.resolve(__dirname, '..');
-const source = fs.readFileSync(process.env.ONIGIRI_SETTINGS_JS || path.join(root, 'web/settings.js'), 'utf8');
+const source = fs.readFileSync(process.env.BINGSU_SETTINGS_JS || path.join(root, 'web/settings.js'), 'utf8');
 
 // Use the production Reviewer schema and field serializer, with an in-memory
 // default-value store. Images and font roles are outside this regression.
@@ -41,9 +41,9 @@ async function mount(page, dark, previewKind = 'reviewer_bottom_bar') {
   const context = {dark, initialPage: 'reviewer', settingsComplexity: 'advanced',
     pages: [{id: 'reviewer', title: 'Reviewer', sections: [fixture]}], nav: [], strings: {}};
   let html = fs.readFileSync(path.join(root, 'web/settings.html'), 'utf8');
-  html = html.replace('/*__ONIGIRI_BOOT_BACKGROUND__*/', dark ? '#202020' : '#ffffff')
-    .replace('/*__ONIGIRI_SETTINGS_CSS__*/', fs.readFileSync(path.join(root, 'web/settings.css'), 'utf8'))
-    .replace('/*__ONIGIRI_SETTINGS_CONTEXT__*/null', JSON.stringify(context));
+  html = html.replace('/*__BINGSU_BOOT_BACKGROUND__*/', dark ? '#202020' : '#ffffff')
+    .replace('/*__BINGSU_SETTINGS_CSS__*/', fs.readFileSync(path.join(root, 'web/settings.css'), 'utf8'))
+    .replace('/*__BINGSU_SETTINGS_CONTEXT__*/null', JSON.stringify(context));
   await page.setContent(html);
   await page.addScriptTag({content: `window.savedPatches=[];window.pycmd=(command,callback)=>{
     if(command.startsWith('osw:patch:')) savedPatches.push(JSON.parse(command.slice('osw:patch:'.length)));

@@ -46,15 +46,15 @@
 
   // Each entry: { cmd, label, icon, danger?, filteredOnly?, sep_before? }
   var ITEMS = [
-    { cmd: "rename",  label: window.onigiriText("Rename"),           icon: "rename" },
-    { cmd: "change-icon", label: window.onigiriText("Change icon…"), icon: "icon" },
-    { cmd: "move",    label: window.onigiriText("Move to…"),         icon: "move" },
-    { cmd: "options", label: window.onigiriText("Options…"),         icon: "options" },
-    { cmd: "addon-actions", label: window.onigiriText("Add-on actions") + "…", icon: "options" },
-    { cmd: "export",  label: window.onigiriText("Export deck…"),     icon: "export" },
-    { cmd: "rebuild", label: window.onigiriText("Rebuild"),           icon: "rebuild", filteredOnly: true },
-    { cmd: "empty",   label: window.onigiriText("Empty"),             icon: "empty", filteredOnly: true },
-    { cmd: "delete",  label: window.onigiriText("Delete deck"),      icon: "delete", danger: true, sep_before: true },
+    { cmd: "rename",  label: window.bingsuText("Rename"),           icon: "rename" },
+    { cmd: "change-icon", label: window.bingsuText("Change icon…"), icon: "icon" },
+    { cmd: "move",    label: window.bingsuText("Move to…"),         icon: "move" },
+    { cmd: "options", label: window.bingsuText("Options…"),         icon: "options" },
+    { cmd: "addon-actions", label: window.bingsuText("Add-on actions") + "…", icon: "options" },
+    { cmd: "export",  label: window.bingsuText("Export deck…"),     icon: "export" },
+    { cmd: "rebuild", label: window.bingsuText("Rebuild"),           icon: "rebuild", filteredOnly: true },
+    { cmd: "empty",   label: window.bingsuText("Empty"),             icon: "empty", filteredOnly: true },
+    { cmd: "delete",  label: window.bingsuText("Delete deck"),      icon: "delete", danger: true, sep_before: true },
   ];
 
   function send(cmd) {
@@ -136,7 +136,7 @@
         if (cmd === "change-icon") {
           try {
             if (typeof pycmd === "function") {
-              pycmd("onigiri_ctx_change_icon:" + did);
+              pycmd("bingsu_ctx_change_icon:" + did);
             }
           } catch (_) {}
           return;
@@ -193,7 +193,7 @@
     }
     if (anchor.classList.contains("filtered")) input.classList.add("filtered");
     input.spellcheck = false;
-    input.setAttribute("aria-label", window.onigiriText("Rename deck"));
+    input.setAttribute("aria-label", window.bingsuText("Rename deck"));
     input.value = original;
     // Auto-size to the current text so the field hugs the name like the
     // anchor did. `size` is in `ch`; bump by a couple so the caret has
@@ -279,7 +279,7 @@
         if ((tree[i].depth || 0) < selfDepth) { blocked[String(tree[i].did)] = 1; break; }
       }
     }
-    if (selfDepth > 0) out.push({ did: 0, path: window.onigiriText("Top level"), top: true });
+    if (selfDepth > 0) out.push({ did: 0, path: window.bingsuText("Top level"), top: true });
     for (i = 0; i < tree.length; i++) {
       var d = tree[i];
       if (blocked[String(d.did)]) continue;
@@ -303,9 +303,9 @@
     menu.classList.add("ad-menu--picker");
     menu.innerHTML = ''
       + '<div class="ad-menu-picker">'
-      +   window.onigiriTemplate('<div class="ad-menu-picker-h">Move <b>') + escapeHTML(name) + window.onigiriTemplate('</b> to</div>')
+      +   window.bingsuTemplate('<div class="ad-menu-picker-h">Move <b>') + escapeHTML(name) + window.bingsuTemplate('</b> to</div>')
       +   '<input class="ad-menu-picker-q" type="text" autocomplete="off" '
-      +          window.onigiriTemplate('spellcheck="false" placeholder="Search decks…" aria-label="Search decks">')
+      +          window.bingsuTemplate('spellcheck="false" placeholder="Search decks…" aria-label="Search decks">')
       +   '<div class="ad-menu-picker-list" role="listbox"></div>'
       + '</div>';
     var input = menu.querySelector(".ad-menu-picker-q");
@@ -325,7 +325,7 @@
               + '<span class="ad-menu-l">' + escapeHTML(it.path) + '</span>'
               + '</button>';
       });
-      if (!shown) html = window.onigiriTemplate('<div class="ad-menu-picker-empty">No matching deck</div>');
+      if (!shown) html = window.bingsuTemplate('<div class="ad-menu-picker-empty">No matching deck</div>');
       list.innerHTML = html;
     }
     function active() { return list.querySelector(".ad-menu-pick.is-active"); }

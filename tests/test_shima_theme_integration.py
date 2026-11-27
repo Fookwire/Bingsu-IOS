@@ -7,7 +7,7 @@ ROOT = Path(__file__).resolve().parents[1]
 INIT = (ROOT / "__init__.py").read_text(encoding="utf-8")
 CONFIG = (ROOT / "core/config.py").read_text(encoding="utf-8")
 PATCHER = (ROOT / "rendering/patcher.py").read_text(encoding="utf-8")
-RENDERER = (ROOT / "rendering/onigiri_renderer.py").read_text(encoding="utf-8")
+RENDERER = (ROOT / "rendering/bingsu_renderer.py").read_text(encoding="utf-8")
 SCHEMA = (ROOT / "settings_web" / "schema.py").read_text(encoding="utf-8")
 SETTINGS_JS = (ROOT / "web" / "settings.js").read_text(encoding="utf-8")
 SETTINGS_CSS = (ROOT / "web" / "settings.css").read_text(encoding="utf-8")
@@ -52,7 +52,7 @@ class ShimaThemeIntegrationTests(unittest.TestCase):
         self.assertIn("_render_deck_tree_html_only", SHIMA)
         self.assertIn('"deckSortMode"', SHIMA)
         self.assertNotIn("_get_external_hooks", SHIMA)
-        self.assertNotIn("onigiriWidgetLayout", SHIMA)
+        self.assertNotIn("bingsuWidgetLayout", SHIMA)
         self.assertNotIn("profile-bar", SHIMA)
         self.assertNotIn("injected-stats-block", SHIMA)
 
@@ -60,10 +60,10 @@ class ShimaThemeIntegrationTests(unittest.TestCase):
         self.assertIn("_build_archived_home_button", SHIMA)
         self.assertIn("def _build_archived_home_button", RENDERER)
         self.assertIn("{home_button}", TEMPLATES)
-        self.assertIn('id="onigiri-home-toolbar-btn"', RENDERER)
+        self.assertIn('id="bingsu-home-toolbar-btn"', RENDERER)
         self.assertIn("display: inline-flex", MENU_CSS)
         self.assertIn('headerIcons.push("home.svg")', SETTINGS_JS)
-        self.assertNotIn("onigiri-sidebar-actions-section", SHIMA)
+        self.assertNotIn("bingsu-sidebar-actions-section", SHIMA)
         self.assertIn('"_shima_actions_hidden_migrated"', CONFIG)
         self.assertIn(
             'clean_config["sidebarActionsMode"] = "archived"', CONFIG
@@ -71,7 +71,7 @@ class ShimaThemeIntegrationTests(unittest.TestCase):
 
     def test_shima_is_centered_and_uses_a_bounded_island(self):
         self.assertIn(
-            ".container.modern-main-menu.onigiri-shima > .sidebar-left.shima-island",
+            ".container.modern-main-menu.bingsu-shima > .sidebar-left.shima-island",
             SHIMA_CSS,
         )
         self.assertIn("align-items: center", SHIMA_CSS)
@@ -103,7 +103,7 @@ class ShimaThemeIntegrationTests(unittest.TestCase):
         self.assertIn('"g_notification_mode": "mini"', selector)
         self.assertIn("function paintShimaDeckIsland", SETTINGS_JS)
         self.assertIn('PREVIEW_PAINTERS.sidebar_background = paintThemeSidebar', SETTINGS_JS)
-        self.assertIn('vals.onigiri_ui_theme === "shima"', SETTINGS_JS)
+        self.assertIn('vals.bingsu_ui_theme === "shima"', SETTINGS_JS)
         self.assertIn(".osw-sbprev-frame.is-shima", SETTINGS_CSS)
 
     def test_shima_hides_native_chrome_on_the_main_menu(self):

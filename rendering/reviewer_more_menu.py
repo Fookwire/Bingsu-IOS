@@ -141,59 +141,59 @@ def reviewer_head_assets(addon_package: str, conf: dict[str, Any]) -> str:
     css_text = _read_menu_css_text()
     try:
         font_css = patcher.generate_scoped_main_font_css(
-            addon_package, "#onigiri-more-menu-root"
+            addon_package, "#bingsu-more-menu-root"
         )
         font_css = re.sub(r"@font-face\s*\{[^{}]*\}", "", font_css)
         font_css = re.sub(r"</?style[^>]*>", "", font_css)
         css_text = font_css + "\n" + css_text
     except Exception:
         pass
-    return f"<script>window.onigiriMoreMenuCssText = {json.dumps(css_text)};</script>"
+    return f"<script>window.bingsuMoreMenuCssText = {json.dumps(css_text)};</script>"
 
 
 def bottom_bar_assets() -> str:
     """Return lightweight styling & click/state sync injected into ReviewerBottomBar."""
     return r"""
-    <style id="onigiri-more-menu-bottom-bar-style">
-        #outer button[onclick*="more"].onigiri-more-btn,
-        button[onclick*="more"].onigiri-more-btn {
+    <style id="bingsu-more-menu-bottom-bar-style">
+        #outer button[onclick*="more"].bingsu-more-btn,
+        button[onclick*="more"].bingsu-more-btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 4px;
         }
-        #outer button[onclick*="more"] .onigiri-more-chevron,
-        button[onclick*="more"] .onigiri-more-chevron {
+        #outer button[onclick*="more"] .bingsu-more-chevron,
+        button[onclick*="more"] .bingsu-more-chevron {
             width: 0.95em;
             height: 0.95em;
             flex: 0 0 auto;
             opacity: 0.72;
             transition: transform 180ms cubic-bezier(0.2, 0.9, 0.3, 1), opacity 140ms ease;
         }
-        #outer button[onclick*="more"].onigiri-more-menu-open .onigiri-more-chevron,
-        button[onclick*="more"].onigiri-more-menu-open .onigiri-more-chevron {
+        #outer button[onclick*="more"].bingsu-more-menu-open .bingsu-more-chevron,
+        button[onclick*="more"].bingsu-more-menu-open .bingsu-more-chevron {
             transform: rotate(180deg);
             opacity: 1;
         }
-        #outer button[onclick*="more"].onigiri-more-menu-open {
+        #outer button[onclick*="more"].bingsu-more-menu-open {
             box-shadow: inset 0 0 0 1.5px rgba(128, 128, 128, 0.42) !important;
             filter: brightness(0.95);
         }
-        .nightMode #outer button[onclick*="more"].onigiri-more-menu-open {
+        .nightMode #outer button[onclick*="more"].bingsu-more-menu-open {
             box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.35) !important;
             filter: brightness(1.12);
         }
         @media (prefers-reduced-motion: reduce) {
-            #outer button[onclick*="more"] .onigiri-more-chevron,
-            button[onclick*="more"] .onigiri-more-chevron {
+            #outer button[onclick*="more"] .bingsu-more-chevron,
+            button[onclick*="more"] .bingsu-more-chevron {
                 transition: none;
             }
         }
     </style>
     <script>
     (function () {
-        if (window.__onigiriMoreMenuBottomBridge) return;
-        window.__onigiriMoreMenuBottomBridge = true;
+        if (window.__bingsuMoreMenuBottomBridge) return;
+        window.__bingsuMoreMenuBottomBridge = true;
         let isOpen = false;
         const ARROW_RE = /[▾▼▴▲]/g;
         const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -211,7 +211,7 @@ def bottom_bar_assets() -> str:
             svg.setAttribute('stroke-linecap', 'round');
             svg.setAttribute('stroke-linejoin', 'round');
             svg.setAttribute('aria-hidden', 'true');
-            svg.setAttribute('class', 'lucide lucide-chevron-down onigiri-more-chevron');
+            svg.setAttribute('class', 'lucide lucide-chevron-down bingsu-more-chevron');
             const path = document.createElementNS(SVG_NS, 'path');
             path.setAttribute('d', 'm6 9 6 6 6-6');
             svg.appendChild(path);
@@ -221,7 +221,7 @@ def bottom_bar_assets() -> str:
         function upgradeMoreButtonArrow() {
             const btn = findMoreButton();
             if (!btn) return;
-            btn.classList.add('onigiri-more-btn');
+            btn.classList.add('bingsu-more-btn');
             const walker = document.createTreeWalker(btn, NodeFilter.SHOW_TEXT);
             const matchedNodes = [];
             let node;
@@ -247,10 +247,10 @@ def bottom_bar_assets() -> str:
                     tn.nodeValue = '';
                 }
             });
-            if (!btn.querySelector('.onigiri-more-chevron')) {
+            if (!btn.querySelector('.bingsu-more-chevron')) {
                 btn.appendChild(createMoreChevron());
             }
-            btn.classList.toggle('onigiri-more-menu-open', isOpen);
+            btn.classList.toggle('bingsu-more-menu-open', isOpen);
         }
 
         function startObserver() {
@@ -267,12 +267,12 @@ def bottom_bar_assets() -> str:
             startObserver();
         }
 
-        window.onigiriSetMoreMenuOpen = function (open) {
+        window.bingsuSetMoreMenuOpen = function (open) {
             isOpen = Boolean(open);
             const btn = findMoreButton();
             if (btn) {
                 upgradeMoreButtonArrow();
-                btn.classList.toggle('onigiri-more-menu-open', isOpen);
+                btn.classList.toggle('bingsu-more-menu-open', isOpen);
                 btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
             }
         };
@@ -284,7 +284,7 @@ def bottom_bar_assets() -> str:
                 return;
             }
             if (typeof window.pycmd === 'function') {
-                window.pycmd('onigiri_more_menu:close');
+                window.pycmd('bingsu_more_menu:close');
             }
         }, true);
     })();
@@ -352,7 +352,7 @@ def _extract_custom_items(
 
 
 def _resolve_flag_icon_urls(mw_ref: Any) -> dict[str, str]:
-    """Resolve user-selected Onigiri flag icon URLs for flags 1..7."""
+    """Resolve user-selected Bingsu flag icon URLs for flags 1..7."""
     try:
         addon_mgr = getattr(mw_ref, "addonManager", None)
         if addon_mgr is None or not callable(getattr(addon_mgr, "addonFromModule", None)):
@@ -585,7 +585,7 @@ def _sync_bottom_button_state(open_state: bool) -> None:
     if b_web is not None:
         try:
             b_web.eval(
-                f"window.onigiriSetMoreMenuOpen && window.onigiriSetMoreMenuOpen({json.dumps(bool(open_state))});"
+                f"window.bingsuSetMoreMenuOpen && window.bingsuSetMoreMenuOpen({json.dumps(bool(open_state))});"
             )
         except Exception:
             pass
@@ -610,7 +610,7 @@ def close_menu(from_js: bool = False, immediate: bool = False) -> None:
             fn = "closeImmediate" if immediate else "close"
             try:
                 r_web.eval(
-                    f"window.OnigiriReviewerMoreMenu && window.OnigiriReviewerMoreMenu.{fn}();"
+                    f"window.BingsuReviewerMoreMenu && window.BingsuReviewerMoreMenu.{fn}();"
                 )
             except Exception:
                 pass
@@ -641,7 +641,7 @@ def open_menu(reviewer: Any) -> None:
             _active_qmenu = temp_menu
             _custom_action_map = action_map
         except Exception as exc:
-            print(f"[Onigiri] Could not inspect reviewer context hooks: {exc}")
+            print(f"[Bingsu] Could not inspect reviewer context hooks: {exc}")
 
     payload = build_menu_payload(reviewer, mw_ref=mw_ref, custom_items=custom_items)
     focus_keyboard = False
@@ -673,7 +673,7 @@ def open_menu(reviewer: Any) -> None:
             except Exception:
                 pass
         r_web.eval(
-            f"window.OnigiriReviewerMoreMenu && window.OnigiriReviewerMoreMenu.open({json.dumps(payload)}, {json.dumps(focus_keyboard)});"
+            f"window.BingsuReviewerMoreMenu && window.BingsuReviewerMoreMenu.open({json.dumps(payload)}, {json.dumps(focus_keyboard)});"
         )
 
 
@@ -725,10 +725,10 @@ def _run_reviewer_action(reviewer: Any, action_id: str) -> bool:
 def handle_command(cmd: str) -> bool:
     """Handle pycmd messages emitted by the Reviewer More menu UI."""
     global _is_open
-    if not isinstance(cmd, str) or not cmd.startswith("onigiri_more_menu:"):
+    if not isinstance(cmd, str) or not cmd.startswith("bingsu_more_menu:"):
         return False
 
-    sub = cmd[len("onigiri_more_menu:"):]
+    sub = cmd[len("bingsu_more_menu:"):]
     if sub == "closed":
         close_menu(from_js=True)
         return True
@@ -774,14 +774,14 @@ def handle_command(cmd: str) -> bool:
 def install_reviewer_more_menu_override() -> None:
     """Override Reviewer.showContextMenu and bind lifecycle close hooks."""
     global _hooks_installed
-    if Reviewer is not None and not getattr(Reviewer, "_onigiri_more_menu_patched", False):
-        Reviewer._onigiri_orig_showContextMenu = Reviewer.showContextMenu
+    if Reviewer is not None and not getattr(Reviewer, "_bingsu_more_menu_patched", False):
+        Reviewer._bingsu_orig_showContextMenu = Reviewer.showContextMenu
 
-        def _onigiri_show_context_menu(self: Any) -> None:
+        def _bingsu_show_context_menu(self: Any) -> None:
             open_menu(self)
 
-        Reviewer.showContextMenu = _onigiri_show_context_menu
-        Reviewer._onigiri_more_menu_patched = True
+        Reviewer.showContextMenu = _bingsu_show_context_menu
+        Reviewer._bingsu_more_menu_patched = True
 
     if not _hooks_installed and gui_hooks is not None:
         gui_hooks.reviewer_did_show_question.append(lambda *_: close_menu(immediate=True))

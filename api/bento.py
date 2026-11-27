@@ -5,7 +5,7 @@ from typing import Callable, Dict, Optional
 from aqt import mw
 from aqt.qt import QAction, QMenu
 
-ONIGIRI_ADDON_ID = "1011095603"
+BINGSU_ADDON_ID = "1011095603"
 BENTO_MENU_OBJECT = "bentoWidgetsMenu"
 GAME_ADDONS = {
     "516325516": "Focumon",
@@ -30,7 +30,7 @@ def open_settings(page_index: int = 0) -> None:
 
 
 def open_gamification_settings(page_name: Optional[str] = None) -> None:
-    """The Games pages of Onigiri Settings.
+    """The Games pages of Bingsu Settings.
 
     Kept under its old name because other add-ons call it: the standalone
     Gamification window is gone, but "open the gamification settings" still
@@ -43,7 +43,7 @@ def open_gamification_settings(page_name: Optional[str] = None) -> None:
 
 def get_widget_radius(default: int = 20) -> int:
     try:
-        value = mw.col.conf.get("onigiri_canvas_inset_border_radius", default)
+        value = mw.col.conf.get("bingsu_canvas_inset_border_radius", default)
         return max(0, min(60, int(value if value not in (None, "") else default)))
     except Exception:
         return default
@@ -73,7 +73,7 @@ def get_widget_effect(theme: str = "light") -> dict:
     """Resolved shared widget chrome for Bento-connected add-ons.
 
     This is deliberately a small, stable bridge: consumers receive the same
-    background alpha, blur conversion, radius and stroke that Onigiri applies
+    background alpha, blur conversion, radius and stroke that Bingsu applies
     to its own deck-screen widgets, without importing its renderer internals.
     """
     try:
@@ -88,8 +88,8 @@ def get_widget_effect(theme: str = "light") -> dict:
 
         background = palette.get("--canvas-inset", "#2c2c2c" if mode == "dark" else "#ffffff")
         border_color = palette.get("--border", "#424242" if mode == "dark" else "#e0e0e0")
-        blur = max(0, min(100, int(mw.col.conf.get("onigiri_canvas_inset_effect_blur", 0) or 0)))
-        opacity_value = mw.col.conf.get("onigiri_canvas_inset_effect_opacity", 100)
+        blur = max(0, min(100, int(mw.col.conf.get("bingsu_canvas_inset_effect_blur", 0) or 0)))
+        opacity_value = mw.col.conf.get("bingsu_canvas_inset_effect_opacity", 100)
         opacity = max(
             0,
             min(
@@ -97,10 +97,10 @@ def get_widget_effect(theme: str = "light") -> dict:
                 int(100 if opacity_value is None else opacity_value),
             ),
         )
-        radius = max(0, min(60, int(mw.col.conf.get("onigiri_canvas_inset_border_radius", 20) or 20)))
-        stroke = max(0, min(10, int(mw.col.conf.get("onigiri_canvas_inset_border_width", 1) or 1)))
+        radius = max(0, min(60, int(mw.col.conf.get("bingsu_canvas_inset_border_radius", 20) or 20)))
+        stroke = max(0, min(10, int(mw.col.conf.get("bingsu_canvas_inset_border_width", 1) or 1)))
         alpha = opacity / 100.0
-        # Onigiri caps a glass card's fill so the wallpaper remains visible.
+        # Bingsu caps a glass card's fill so the wallpaper remains visible.
         if blur > 0:
             alpha = min(alpha, 0.62)
         return {
@@ -170,7 +170,7 @@ def ensure_bento_shortcut() -> Optional[QAction]:
         existing = _find_bento_menu()
         if existing:
             for existing_action in list(existing.actions()):
-                if existing_action.property("bento_marker") == "onigiri-settings":
+                if existing_action.property("bento_marker") == "bingsu-settings":
                     existing.removeAction(existing_action)
             while existing.actions() and existing.actions()[-1].isSeparator():
                 existing.removeAction(existing.actions()[-1])
@@ -178,7 +178,7 @@ def ensure_bento_shortcut() -> Optional[QAction]:
                 mw.form.menubar.removeAction(existing.menuAction())
         return None
     menu = get_bento_menu()
-    marker = "onigiri-settings"
+    marker = "bingsu-settings"
     if _has_marker(menu, marker):
         for action in menu.actions():
             if action.property("bento_marker") == marker:
@@ -194,8 +194,8 @@ def ensure_bento_shortcut() -> Optional[QAction]:
 
 def register_api() -> dict:
     api = {
-        "id": ONIGIRI_ADDON_ID,
-        "name": "Onigiri",
+        "id": BINGSU_ADDON_ID,
+        "name": "Bingsu",
         "version": get_version(),
         "open_settings": open_settings,
         "open_gamification_settings": open_gamification_settings,
@@ -205,6 +205,10 @@ def register_api() -> dict:
         "get_widget_effect": get_widget_effect,
         "get_notification_style": get_notification_style,
     }
+    mw.bingsu_api = api
+    mw.bingsu_present = True
+    mw.bingsu_version = api["version"]
+    # Third-party add-ons (e.g. Bento) look the integration up by its old name.
     mw.onigiri_api = api
     mw.onigiri_present = True
     mw.onigiri_version = api["version"]
@@ -224,7 +228,7 @@ def _fallback_widget(addon_id: str, name: str) -> Optional[dict]:
         "kind": "game" if addon_id in GAME_ADDONS else "widget",
         "settings_callback": None,
         "open_callback": None,
-        "onigiri_detected": True,
+        "bingsu_detected": True,
     }
 
 
@@ -232,7 +236,7 @@ def get_bento_widgets() -> Dict[str, dict]:
     widgets = getattr(mw, "bento_widgets", {})
     if not isinstance(widgets, dict):
         widgets = {}
-    # Byte still publishes its bridge; Onigiri no longer discovers it.
+    # Byte still publishes its bridge; Bingsu no longer discovers it.
     return {
         addon_id: widget
         for addon_id, widget in widgets.items()
@@ -254,4 +258,4 @@ def get_game_widgets() -> Dict[str, dict]:
     return games
 
 
-ONIGIRI_API = register_api()
+BINGSU_API = register_api()

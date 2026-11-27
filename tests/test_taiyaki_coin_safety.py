@@ -121,7 +121,7 @@ class TaiyakiCoinSafetyTests(unittest.TestCase):
                     "level": 18,
                     "total_xp": 16200,
                     "_security_token": hashlib.sha256(
-                        b"0:onigiri_secret_salt_2024"
+                        b"0:bingsu_secret_salt_2024"
                     ).hexdigest(),
                 }
             },
@@ -149,7 +149,7 @@ class TaiyakiCoinSafetyTests(unittest.TestCase):
         self.assertEqual(saved["total_xp"], 16205)
         self.assertEqual(
             saved["_security_token"],
-            hashlib.sha256(b"5000:onigiri_secret_salt_2024").hexdigest(),
+            hashlib.sha256(b"5000:bingsu_secret_salt_2024").hexdigest(),
         )
         # External mirror must also have the redeemed balance.
         mirror = Path(self.storage._mirror_path_for(str(path)))

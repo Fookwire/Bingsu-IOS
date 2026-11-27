@@ -14,7 +14,7 @@
 
   function mount(root) {
     const stage = root.parentElement;
-    const buttons = Array.from(root.querySelectorAll(".onigiri-ready-action"));
+    const buttons = Array.from(root.querySelectorAll(".bingsu-ready-action"));
     if (buttons.length !== 4) return;
     const widget = stage.parentElement;
     const labels = buttons.map(button => {
@@ -96,7 +96,7 @@
       const disc = discs[active], text = label.getBoundingClientRect(), gap = 3;
       const bounds = {left: box.left + 8, right: box.right - 8,
         top: box.top + 8, bottom: box.bottom - 8};
-      const head = widget.querySelector(".onigiri-widget-head");
+      const head = widget.querySelector(".bingsu-widget-head");
       const obstacles = head ? [...discs, head.getBoundingClientRect()] : discs;
       const cx = (disc.left + disc.right) / 2, cy = (disc.top + disc.bottom) / 2;
       const above = !inRow && active < 2;
@@ -198,7 +198,7 @@
   }
   function scan() {
     mounted.forEach((dispose, root) => { if (!root.isConnected) { dispose(); mounted.delete(root); } });
-    document.querySelectorAll(".onigiri-ready-widget.is-circles .mag").forEach(root => {
+    document.querySelectorAll(".bingsu-ready-widget.is-circles .mag").forEach(root => {
       if (!mounted.has(root)) mount(root);
     });
   }

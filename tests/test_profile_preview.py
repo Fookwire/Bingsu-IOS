@@ -22,13 +22,13 @@ class ProfilePreviewTests(unittest.TestCase):
     def test_context_uses_live_renderer_and_selected_source(self):
         context = load_context()
         root = types.ModuleType("profile_fixture")
-        renderer = types.ModuleType("profile_fixture.rendering.onigiri_renderer")
+        renderer = types.ModuleType("profile_fixture.rendering.bingsu_renderer")
         rendering = types.ModuleType("profile_fixture.rendering")
-        rendering.onigiri_renderer = renderer
+        rendering.bingsu_renderer = renderer
         root.rendering = rendering
         with patch.dict(sys.modules, {"profile_fixture": root,
                                       "profile_fixture.rendering": rendering,
-                                      "profile_fixture.rendering.onigiri_renderer": renderer}):
+                                      "profile_fixture.rendering.bingsu_renderer": renderer}):
             for game, name in (("nook", "Nook"), ("onigimon", "Onigimon XP"),
                                ("hexagon", "Hexagon Land")):
                 with self.subTest(game=game):

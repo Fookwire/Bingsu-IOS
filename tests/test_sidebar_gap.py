@@ -35,13 +35,13 @@ class SidebarGapTests(unittest.TestCase):
         self.assertIn("margin-right: 0 !important;", css)
         self.assertIn("align-items: safe center;", css)
         self.assertIn(
-            ":not(.onigiri-sidebar-right):not(.onigiri-cycle-stacked):not(.onigiri-sidebar-center) "
+            ":not(.bingsu-sidebar-right):not(.bingsu-cycle-stacked):not(.bingsu-sidebar-center) "
             ".sidebar-left:not(.sidebar-collapsed) ~ .main-content",
             css,
         )
         self.assertIn("padding-right: calc(15px + 10px) !important;", css)
         self.assertIn(
-            ".onigiri-sidebar-right:not(.onigiri-cycle-stacked):not(.onigiri-sidebar-center) "
+            ".bingsu-sidebar-right:not(.bingsu-cycle-stacked):not(.bingsu-sidebar-center) "
             ".sidebar-left:not(.sidebar-collapsed) ~ .main-content",
             css,
         )
@@ -106,7 +106,7 @@ class SidebarGapTests(unittest.TestCase):
         aqt_stub = types.ModuleType("aqt")
         aqt_stub.mw = None
         sys.modules.setdefault("aqt", aqt_stub)
-        spec = importlib.util.spec_from_file_location("_onigiri_tr_test", ROOT / "core" / "translations.py")
+        spec = importlib.util.spec_from_file_location("_bingsu_tr_test", ROOT / "core" / "translations.py")
         tr_mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(tr_mod)
 

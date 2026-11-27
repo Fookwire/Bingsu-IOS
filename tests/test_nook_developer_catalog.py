@@ -26,7 +26,7 @@ def _loaded_translations():
     original_aqt = sys.modules.get("aqt")
     aqt = types.ModuleType("aqt")
     aqt.mw = types.SimpleNamespace(
-        pm=types.SimpleNamespace(profile={"onigiri_language": "en"})
+        pm=types.SimpleNamespace(profile={"bingsu_language": "en"})
     )
     sys.modules["aqt"] = aqt
     try:

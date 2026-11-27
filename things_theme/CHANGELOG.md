@@ -110,7 +110,7 @@ Initial AnkiWeb release.
 - Config: `accent`, `show_heatmap`, `show_progress`, `heatmap_weeks`,
   `theme`, `density`, `sidebar_nav`, `heatmap_palette`,
   `reviewer_card_width`, `reviewer_font_size`, `font_serif`, `font_sans`.
-- Declares conflicts with Onigiri, Review Heatmap, and the Progress Bar
+- Declares conflicts with Bingsu, Review Heatmap, and the Progress Bar
   add-on so Anki warns users instead of silently fighting them.
 
 ### Known issues

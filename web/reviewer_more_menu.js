@@ -1,9 +1,9 @@
 (function () {
   "use strict";
 
-  if (window.OnigiriReviewerMoreMenu) return;
+  if (window.BingsuReviewerMoreMenu) return;
 
-  const HOST_ID = "onigiri-reviewer-more-menu-host";
+  const HOST_ID = "bingsu-reviewer-more-menu-host";
   const FLAG_FALLBACK_COLORS = {
     1: "#ff5a5f",
     2: "#ff9f0a",
@@ -25,7 +25,7 @@
   let currentData = null;
 
   function cssText() {
-    return window.onigiriMoreMenuCssText || "";
+    return window.bingsuMoreMenuCssText || "";
   }
 
   function isNightMode(fallbackDark) {
@@ -313,11 +313,11 @@
     if (!shadow) {
       shadow = host.shadowRoot || host.attachShadow({ mode: "open" });
       const style = document.createElement("style");
-      style.id = "onigiri-more-menu-style";
+      style.id = "bingsu-more-menu-style";
       style.textContent = cssText() + touchCssText();
 
       root = document.createElement("div");
-      root.id = "onigiri-more-menu-root";
+      root.id = "bingsu-more-menu-root";
 
       backdrop = document.createElement("div");
       backdrop.className = "rm-backdrop";
@@ -344,14 +344,14 @@
   // The panel lives in a shadow root, which the page's mobile.css cannot
   // reach: on touch screens (iPhone/iPad) it gets its own touch rules. No
   // keyboard-shortcut hints, full-size rows, clear of the home indicator.
-  // --onigiri-safe-bottom is inherited from <html> through the shadow boundary.
+  // --bingsu-safe-bottom is inherited from <html> through the shadow boundary.
   function touchCssText() {
-    if (!document.documentElement.classList.contains("onigiri-touch")) return "";
+    if (!document.documentElement.classList.contains("bingsu-touch")) return "";
     return `
       .rm-kbd { display: none !important; }
       .rm-panel {
-        bottom: calc(10px + var(--onigiri-safe-bottom, 0px));
-        max-height: calc(100dvh - 20px - var(--onigiri-safe-bottom, 0px));
+        bottom: calc(10px + var(--bingsu-safe-bottom, 0px));
+        max-height: calc(100dvh - 20px - var(--bingsu-safe-bottom, 0px));
         overscroll-behavior: contain;
       }
       .rm-item-btn, .rm-quick-btn, .rm-split-row, .rm-media-btn { min-height: 44px; }
@@ -397,7 +397,7 @@
       actionTimer = null;
     }
     if (o.keepOpen) {
-      sendCmd("onigiri_more_menu:act:" + actionId);
+      sendCmd("bingsu_more_menu:act:" + actionId);
       if (o.pulseEl) {
         o.pulseEl.classList.remove("is-pulsing");
         void o.pulseEl.offsetWidth;
@@ -407,7 +407,7 @@
       return;
     }
     if (o.delayMs && o.delayMs > 0) {
-      sendCmd("onigiri_more_menu:act:" + actionId);
+      sendCmd("bingsu_more_menu:act:" + actionId);
       actionTimer = setTimeout(() => {
         actionTimer = null;
         requestClose();
@@ -415,7 +415,7 @@
       return;
     }
     closeImmediate(true);
-    sendCmd("onigiri_more_menu:act:" + actionId);
+    sendCmd("bingsu_more_menu:act:" + actionId);
   }
 
   function renderPanel(data) {
@@ -498,8 +498,8 @@
     }
 
     const liveFlagIcons =
-      (window.onigiriReviewerFlagIcons && typeof window.onigiriReviewerFlagIcons === "object")
-        ? window.onigiriReviewerFlagIcons
+      (window.bingsuReviewerFlagIcons && typeof window.bingsuReviewerFlagIcons === "object")
+        ? window.bingsuReviewerFlagIcons
         : {};
     const flagButtons = [];
     flags.forEach((f) => {
@@ -917,7 +917,7 @@
         }
         btn.addEventListener("click", () => {
           closeImmediate(true);
-          sendCmd("onigiri_more_menu:custom:" + String(item.id));
+          sendCmd("bingsu_more_menu:custom:" + String(item.id));
         });
         container.appendChild(btn);
       }
@@ -982,7 +982,7 @@
     backdrop.classList.remove("is-active");
     state = "closed";
     if (!skipNotify) {
-      sendCmd("onigiri_more_menu:closed");
+      sendCmd("bingsu_more_menu:closed");
     }
   }
 
@@ -1009,7 +1009,7 @@
   function requestClose() {
     if (state === "closed" || state === "closing") return;
     close();
-    sendCmd("onigiri_more_menu:closed");
+    sendCmd("bingsu_more_menu:closed");
   }
 
   function observeTheme() {
@@ -1034,7 +1034,7 @@
     observeTheme();
   }
 
-  window.OnigiriReviewerMoreMenu = {
+  window.BingsuReviewerMoreMenu = {
     open,
     close,
     closeImmediate,

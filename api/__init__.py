@@ -1,1 +1,1 @@
-"""Public integration APIs exposed by the Onigiri add-on."""
+"""Public integration APIs exposed by the Bingsu add-on."""

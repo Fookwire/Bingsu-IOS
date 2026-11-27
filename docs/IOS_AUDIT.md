@@ -1,4 +1,4 @@
-# iPhone audit of Bingsu (formerly Onigiri) on Kioku (builds 2.0.3-Bento-ios.15 to .21)
+# iPhone audit of Bingsu (formerly Bingsu) on Kioku (builds 2.0.3-Bento-ios.15 to .21)
 
 Method: a read of the add-on's Python and web code, Kioku's sources, and the
 history of earlier builds, then fixes, each checked in headless Anki with
@@ -15,7 +15,7 @@ iPhone or in WebKit.**
 | .15 | Deck icon colour | Qt colour popup opened behind the web view and waited for a mouse press that never came (looked frozen) | iOS system colour picker from the page; the Qt picker refuses to open on mobile |
 | .15 | File pickers | `QFileDialog` returned paths the app can't read (icon images, gallery, theme import/export, Pomodoro sound, Prep Station photo) | `core/platform.pick_files/save_file` over Anki's getFile/getSaveFile, which Kioku turns into the iOS document picker |
 | .15 | Add-on actions, FSRS Helper | Desktop QMenu at a stale cursor position | Any QMenu opens as the list page (`show_menu_page`) |
-| .15 | Back / edge swipe | Also appeared in card previewers and ended the review behind them; skipped Focus Dango | Only Onigiri's own overview/study screens, only for the main window's screens, through `onOverview` |
+| .15 | Back / edge swipe | Also appeared in card previewers and ended the review behind them; skipped Focus Dango | Only Bingsu's own overview/study screens, only for the main window's screens, through `onOverview` |
 | .15 | Game progress | Write queue (1.5 s) lost when iOS kills the backgrounded app | Flushed when the app leaves the foreground |
 | .16 | Study bottom bar | 100 ms and 500 ms timers ran all session | Event-driven refresh, short start-up poll, re-measure on rotation |
 | .16 | Per-card work | 4 evals per card from the More menu; 2 DB queries + eval per operation for a sync indicator that is off screen | Skipped when nothing to do |

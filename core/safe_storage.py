@@ -1,5 +1,5 @@
 """
-Crash-safe persistence for everything Onigiri keeps in ``user_files``.
+Crash-safe persistence for everything Bingsu keeps in ``user_files``.
 
 Anki preserves ``user_files`` across add-on updates (it renames the folder
 aside, deletes the add-on, then renames it back), so a normal AnkiWeb update
@@ -46,14 +46,14 @@ def dataclass_from_dict(cls, data):
     """Load known fields without throwing away older or extension fields."""
     names = {item.name for item in fields(cls)}
     state = cls(**{key: value for key, value in data.items() if key in names})
-    state._onigiri_extra_fields = copy.deepcopy(
+    state._bingsu_extra_fields = copy.deepcopy(
         {key: value for key, value in data.items() if key not in names}
     )
     return state
 
 
 def dataclass_payload(state):
-    payload = copy.deepcopy(getattr(state, "_onigiri_extra_fields", {}))
+    payload = copy.deepcopy(getattr(state, "_bingsu_extra_fields", {}))
     payload.update(asdict(state))
     return payload
 
@@ -126,7 +126,7 @@ def backup_before_upgrade(shared_config=None):
                     archive.write(source, "user_files/" + os.path.relpath(source, root))
             if isinstance(shared_config, dict):
                 archive.writestr("legacy_addon_config.json", json.dumps(shared_config))
-            for name in (".onigiri_sync_state.json", "onigiri_layout.json"):
+            for name in (".bingsu_sync_state.json", "bingsu_layout.json"):
                 source = os.path.join(addon_root(), name)
                 if os.path.isfile(source):
                     archive.write(source, name)
@@ -176,7 +176,7 @@ def anki_base_dir():
 
 def external_backup_dir():
     """Mirror location outside addons21 - a manual reinstall cannot touch it."""
-    path = os.path.join(anki_base_dir(), "onigiri_backups")
+    path = os.path.join(anki_base_dir(), "bingsu_backups")
     try:
         os.makedirs(path, exist_ok=True)
     except OSError:
@@ -210,7 +210,7 @@ def _notice_copy(key, fallback, values):
 
 
 def _note(message, *, key="", **values):
-    print(f"Onigiri storage: {message}")
+    print(f"Bingsu storage: {message}")
     if key:
         _notice_localization[message] = (key, message, values)
     if message not in _pending_notices:
@@ -245,7 +245,7 @@ def _rotate_backup(path):
     try:
         shutil.copy2(path, path + ".bak")
     except OSError as exc:
-        print(f"Onigiri storage: could not rotate backup for {path}: {exc}")
+        print(f"Bingsu storage: could not rotate backup for {path}: {exc}")
 
 
 def atomic_write_json(path, data, mirror=True):
@@ -269,7 +269,7 @@ def atomic_write_json(path, data, mirror=True):
             handle.flush()
             os.fsync(handle.fileno())
     except Exception as exc:
-        print(f"Onigiri storage: failed writing {path}: {exc}")
+        print(f"Bingsu storage: failed writing {path}: {exc}")
         _cleanup(tmp)
         return False
 
@@ -278,7 +278,7 @@ def atomic_write_json(path, data, mirror=True):
     try:
         os.replace(tmp, path)
     except OSError as exc:
-        print(f"Onigiri storage: failed replacing {path}: {exc}")
+        print(f"Bingsu storage: failed replacing {path}: {exc}")
         _cleanup(tmp)
         return False
 
@@ -384,6 +384,12 @@ def _try_load(path):
 
 
 def read_json(path, default=None, label=None, validator=None):
+    """``_read_json`` plus the carry-over from the old Onigiri key names."""
+    from . import legacy_names
+    return legacy_names.normalize(_read_json(path, default=default, label=label, validator=validator))
+
+
+def _read_json(path, default=None, label=None, validator=None):
     """
     Load ``path``, falling back through ``.bak``, dated snapshots and the
     external mirror before giving up.
@@ -458,7 +464,7 @@ def _repair(path, source):
             shutil.copy2(path, path + ".corrupt")
         shutil.copy2(source, path)
     except OSError as exc:
-        print(f"Onigiri storage: could not repair {path}: {exc}")
+        print(f"Bingsu storage: could not repair {path}: {exc}")
 
 
 def _quarantine(path):
@@ -538,7 +544,7 @@ def _snapshot(path):
         shutil.copy2(path, target)
         os.utime(target, None)
     except OSError as exc:
-        print(f"Onigiri storage: could not snapshot {path}: {exc}")
+        print(f"Bingsu storage: could not snapshot {path}: {exc}")
         return
 
     for stale in _snapshots_for(path)[_MAX_SNAPSHOTS:]:
@@ -567,7 +573,7 @@ def mirror_file(path):
         shutil.copy2(path, temporary)
         os.replace(temporary, target)
     except OSError as exc:
-        print(f"Onigiri storage: could not mirror {path}: {exc}")
+        print(f"Bingsu storage: could not mirror {path}: {exc}")
 
 
 def mirror_all():
@@ -708,7 +714,7 @@ def adopt_orphaned_profile_files(current_profile):
             shutil.copy2(os.path.join(root, orphan), target)
             adopted.append(orphan)
         except OSError as exc:
-            print(f"Onigiri storage: could not adopt {orphan}: {exc}")
+            print(f"Bingsu storage: could not adopt {orphan}: {exc}")
 
     return adopted
 

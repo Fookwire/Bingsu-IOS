@@ -163,7 +163,7 @@ class SettingsWebDialog(QDialog):
         self._load_watchdog.setSingleShot(True)
         self._load_watchdog.timeout.connect(self._show_load_error)
         self._load_watchdog.start(5000)
-        # context=self: Onigiri's own window, so it gets the iPhone treatment
+        # context=self: Bingsu's own window, so it gets the iPhone treatment
         # (no sticky hover, press feedback, no text selection on labels)
         self.web.stdHtml(page_html, context=self)
 
@@ -249,7 +249,7 @@ class SettingsWebDialog(QDialog):
         except Exception:  # noqa: BLE001 - a bad command must not kill the dialog
             import traceback
 
-            print(f"[Onigiri] settings_web bridge error ({body[:60]}):\n{traceback.format_exc()}")
+            print(f"[Bingsu] settings_web bridge error ({body[:60]}):\n{traceback.format_exc()}")
             return None
 
     def _on_load_finished(self, ok):
@@ -263,7 +263,7 @@ class SettingsWebDialog(QDialog):
         # is available during startup and cannot lose a one-shot ready message.
         self.web.page().runJavaScript(
             "Boolean(document.documentElement.classList.contains('osw-ready') "
-            "&& window.onigiriSettings)",
+            "&& window.bingsuSettings)",
             self._on_boot_checked,
         )
 
@@ -288,9 +288,9 @@ class SettingsWebDialog(QDialog):
         # Measurements made while a WebView is hidden can be stale on some Qt
         # builds. Re-run only the cheap layout measurements after the first show.
         self._eval_js(
-            "window.onigiriSettings && "
-            "window.onigiriSettings.afterNativeShow && "
-            "window.onigiriSettings.afterNativeShow();"
+            "window.bingsuSettings && "
+            "window.bingsuSettings.afterNativeShow && "
+            "window.bingsuSettings.afterNativeShow();"
         )
 
     def bring_to_front(self, initial_page=None):
@@ -301,7 +301,7 @@ class SettingsWebDialog(QDialog):
             target = self._resolve_initial_page(initial_page)
             if target:
                 self._eval_js(
-                    "window.onigiriSettings && window.onigiriSettings.showPage(%s);"
+                    "window.bingsuSettings && window.bingsuSettings.showPage(%s);"
                     % json.dumps(target)
                 )
             self._reveal()
@@ -381,7 +381,7 @@ class SettingsWebDialog(QDialog):
             self._page_by_id = {page["id"]: page for page in self.pages}
             self.setWindowTitle(tr("settings_title"))
             result["localization"] = render.build_context(self.store, self.pages)
-        if "onigiri_theme_mode" in touched:
+        if "bingsu_theme_mode" in touched:
             dark = render.is_dark()
             palette = render.palette(dark)
             self.web.page().setBackgroundColor(QColor(palette["outer"]))
@@ -404,8 +404,8 @@ class SettingsWebDialog(QDialog):
             if self._closed:
                 return
             self._eval_js(
-                "window.onigiriSettings && "
-                "window.onigiriSettings.setGridBackground(%s);"
+                "window.bingsuSettings && "
+                "window.bingsuSettings.setGridBackground(%s);"
                 % json.dumps(background)
             )
 
@@ -452,7 +452,7 @@ class SettingsWebDialog(QDialog):
         rides the same auto-save path so it is remembered next open."""
         _touched, failures = self.store.apply_now({"settings_sidebar_collapsed": arg == "1"})
         for name, error in failures:
-            print(f"[Onigiri] settings_web: could not persist rail state ({name}): {error}")
+            print(f"[Bingsu] settings_web: could not persist rail state ({name}): {error}")
         return {"ok": not failures}
 
     def _cmd_complexity(self, arg):
@@ -460,7 +460,7 @@ class SettingsWebDialog(QDialog):
         mode = "advanced" if arg == "advanced" else "simple"
         _touched, failures = self.store.apply_now({"settings_complexity": mode})
         for name, error in failures:
-            print(f"[Onigiri] settings_web: could not persist complexity ({name}): {error}")
+            print(f"[Bingsu] settings_web: could not persist complexity ({name}): {error}")
         if not failures:
             self._schedule_refresh()
         return {"ok": not failures}
@@ -504,7 +504,7 @@ class SettingsWebDialog(QDialog):
             self._push_value("pomodoro_end_sound", "custom")
             pomodoro.play_test_sound("end", filename)
         except Exception as exc:  # noqa: BLE001
-            print(f"[Onigiri] settings_web: Pomodoro sound import failed: {exc}")
+            print(f"[Bingsu] settings_web: Pomodoro sound import failed: {exc}")
         return "ok"
 
     def _pomodoro_preview_settings(self, arg):
@@ -596,7 +596,7 @@ class SettingsWebDialog(QDialog):
         try:
             from ..ui_kit.font_picker import FontPickerDialog
         except Exception as exc:  # noqa: BLE001
-            print(f"[Onigiri] settings_web: font picker unavailable: {exc}")
+            print(f"[Bingsu] settings_web: font picker unavailable: {exc}")
             return None
         host = self._picker_host()
         try:
@@ -665,7 +665,7 @@ class SettingsWebDialog(QDialog):
 
             DonationsDialog(self).exec()
         except Exception as exc:  # noqa: BLE001
-            print(f"[Onigiri] settings_web: donations dialog failed: {exc}")
+            print(f"[Bingsu] settings_web: donations dialog failed: {exc}")
         return "ok"
 
     def _cmd_bugs(self, _arg):
@@ -754,7 +754,7 @@ class SettingsWebDialog(QDialog):
             try:
                 self.store.write_config()
             except Exception as exc:  # noqa: BLE001
-                print(f"[Onigiri] settings_web gallery: config write failed: {exc}")
+                print(f"[Bingsu] settings_web gallery: config write failed: {exc}")
             self._schedule_refresh()
 
         return self._gallery_reply(
@@ -923,11 +923,11 @@ class SettingsWebDialog(QDialog):
         self.activateWindow()
 
     def _run_color_picker(self, current):
-        from ..ui_kit.onigiri_color_picker import OnigiriColorDialog
+        from ..ui_kit.bingsu_color_picker import BingsuColorDialog
 
         host = self._picker_host()
         try:
-            return OnigiriColorDialog.getColor(current, host)
+            return BingsuColorDialog.getColor(current, host)
         finally:
             self._release_picker_host(host)
 
@@ -942,13 +942,13 @@ class SettingsWebDialog(QDialog):
     def _push_value(self, field_id, value):
         """Writes a value chosen in a native picker back into the page."""
         self._eval_js(
-            "window.onigiriSettings && window.onigiriSettings.setFieldValue(%s, %s);"
+            "window.bingsuSettings && window.bingsuSettings.setFieldValue(%s, %s);"
             % (json.dumps(field_id), json.dumps(value))
         )
 
     def _toast(self, message):
         self._eval_js(
-            "window.onigiriSettings && window.onigiriSettings.toast(%s);" % json.dumps(message)
+            "window.bingsuSettings && window.bingsuSettings.toast(%s);" % json.dumps(message)
         )
 
     # ─── saving ────────────────────────────────────────────────────────────────
@@ -983,7 +983,7 @@ class SettingsWebDialog(QDialog):
         try:
             self._load_watchdog.stop()
         except Exception as exc:  # noqa: BLE001
-            print(f"[Onigiri] settings_web: could not stop load watchdog: {exc}")
+            print(f"[Bingsu] settings_web: could not stop load watchdog: {exc}")
         # A pending coalesced refresh must still land once the window is gone.
         if self._refresh_timer is not None and self._refresh_timer.isActive():
             self._refresh_timer.stop()

@@ -8,7 +8,7 @@ from aqt.deckbrowser import DeckBrowser
 from ..decks import tree_updater as deck_tree_updater
 from ..decks import drag_drop as deck_drag_drop
 from ..decks import move as move_deck
-from ..ui_kit.onigiri_notifications import notify as tooltip
+from ..ui_kit.bingsu_notifications import notify as tooltip
 from ..ui_kit.system_icons import pickable_system_icons
 from aqt import mw
 from aqt.qt import QApplication, QFileDialog, QInputDialog, QWidget, Qt
@@ -19,10 +19,10 @@ from ..core.translations import tr
 
 
 # Every user-facing string the injected deck-browser scripts can show. The JS
-# reads them off window.ONIGIRI_STRINGS through OnigiriI18n.t(key, fallback), so
+# reads them off window.BINGSU_STRINGS through BingsuI18n.t(key, fallback), so
 # the dialogs follow the add-on language instead of being stuck in English.
 _WEBVIEW_STRING_KEYS = (
-    "add", "browse", "stats", "sync", "settings", "onigiri_games", "more",
+    "add", "browse", "stats", "sync", "settings", "bingsu_games", "more",
     "home", "expand_sidebar", "collapse_sidebar", "drag_to_reorder_or_move",
     "cancel", "close", "save", "remove", "create_action", "move_action",
     "create_deck_title", "create_deck_subtitle", "deck_name_label",
@@ -49,9 +49,9 @@ def webview_strings_script() -> str:
     """Head script that publishes the translated strings to the page."""
     strings = {key: tr(key) for key in _WEBVIEW_STRING_KEYS}
     return (
-        "<script>window.ONIGIRI_STRINGS=%s;"
-        "window.OnigiriI18n={t:function(key,fallback){"
-        "var table=window.ONIGIRI_STRINGS||{};"
+        "<script>window.BINGSU_STRINGS=%s;"
+        "window.BingsuI18n={t:function(key,fallback){"
+        "var table=window.BINGSU_STRINGS||{};"
         "return (table[key]||fallback||key);}};</script>"
         % json.dumps(strings, ensure_ascii=False)
     )
@@ -104,7 +104,7 @@ def _open_delete_deck_dialog(context, deck_ids: List[int]) -> bool:
         ensure_ascii=False,
     )
     context.web.eval(
-        f"if(window.OnigiriDeleteDeckDialog)OnigiriDeleteDeckDialog.open({payload});"
+        f"if(window.BingsuDeleteDeckDialog)BingsuDeleteDeckDialog.open({payload});"
     )
     return True
 
@@ -154,7 +154,7 @@ def _delete_decks_with_undo(context, deck_ids: List[int]) -> None:
             ensure_ascii=False,
         )
         context.web.eval(
-            f"if(window.OnigiriDeleteDeckDialog)OnigiriDeleteDeckDialog.showUndoToast({toast});"
+            f"if(window.BingsuDeleteDeckDialog)BingsuDeleteDeckDialog.showUndoToast({toast});"
         )
 
 
@@ -170,7 +170,7 @@ def _undo_deck_delete(context) -> None:
             return
         mw.col.undo()
     except Exception as e:
-        print(f"Onigiri: Error undoing deck deletion: {e}")
+        print(f"Bingsu: Error undoing deck deletion: {e}")
         tooltip(tr("del_deck_restore_failed"))
         return
     try:
@@ -194,7 +194,7 @@ def _undo_deck_delete(context) -> None:
             ensure_ascii=False,
         )
         context.web.eval(
-            f"if(window.OnigiriDeleteDeckDialog)OnigiriDeleteDeckDialog.showUndoToast({toast});"
+            f"if(window.BingsuDeleteDeckDialog)BingsuDeleteDeckDialog.showUndoToast({toast});"
         )
 
 
@@ -263,8 +263,8 @@ def _tag_icon_token(tag: str) -> str:
 def _icon_store_target(target_id: str) -> tuple[str, str]:
     """Map an icon-picker target to its collection key and item key."""
     if str(target_id).startswith("tag~"):
-        return "onigiri_custom_tag_icons", unquote(str(target_id)[4:])
-    return "onigiri_custom_deck_icons", str(target_id)
+        return "bingsu_custom_tag_icons", unquote(str(target_id)[4:])
+    return "bingsu_custom_deck_icons", str(target_id)
 
 
 def _icon_payload(deck_id: str) -> dict:
@@ -345,7 +345,7 @@ def _icon_payload(deck_id: str) -> dict:
 
 def _open_icon_modal(context, deck_id: str) -> None:
     payload = json.dumps(_icon_payload(deck_id))
-    context.web.eval(f"if(window.OnigiriIconChooser){{OnigiriIconChooser.open({payload});}}")
+    context.web.eval(f"if(window.BingsuIconChooser){{BingsuIconChooser.open({payload});}}")
 
 
 def _open_tag_icon_modal(context, tag: str) -> None:
@@ -353,11 +353,11 @@ def _open_tag_icon_modal(context, tag: str) -> None:
 
 
 def _run_deck_icon_color_picker(context, current: str):
-    """Onigiri's native colour picker, floated in its own always-on-top
+    """Bingsu's native colour picker, floated in its own always-on-top
     translucent top-level window. Mirrors hashi_notes._open_color_dialog: the
     webview's native surface would otherwise paint over a picker parented to
     it directly."""
-    from ..ui_kit.onigiri_color_picker import OnigiriColorDialog
+    from ..ui_kit.bingsu_color_picker import BingsuColorDialog
     from ..core.platform import IS_MOBILE
 
     if IS_MOBILE:
@@ -377,7 +377,7 @@ def _run_deck_icon_color_picker(context, current: str):
     host.raise_()
     host.activateWindow()
     try:
-        return OnigiriColorDialog.getColor(current, host)
+        return BingsuColorDialog.getColor(current, host)
     finally:
         host.close()
         host.deleteLater()
@@ -396,14 +396,14 @@ def _open_rename_modal(context, deck_id: str) -> None:
         "parentPrefix": parent_prefix,
     })
     context.web.eval(
-        f"if(window.OnigiriRenameDialog){{OnigiriRenameDialog.open({payload});}}"
-        f"else if(window.OnigiriRenameDeckModal){{OnigiriRenameDeckModal.open({payload});}}"
+        f"if(window.BingsuRenameDialog){{BingsuRenameDialog.open({payload});}}"
+        f"else if(window.BingsuRenameDeckModal){{BingsuRenameDeckModal.open({payload});}}"
     )
 
 
 def _refresh_icon_modal(context, deck_id: str) -> None:
     payload = json.dumps(_icon_payload(deck_id))
-    context.web.eval(f"if(window.OnigiriIconChooser){{OnigiriIconChooser.refreshData({payload});}}")
+    context.web.eval(f"if(window.BingsuIconChooser){{BingsuIconChooser.refreshData({payload});}}")
 
 
 def _unique_dest_path(directory: str, filename: str) -> str:
@@ -438,7 +438,7 @@ def _add_icon_files(context, deck_id: str, file_type: str) -> None:
         try:
             shutil.copy2(path, dest)
         except Exception as e:
-            print(f"Onigiri: Error importing icon {path}: {e}")
+            print(f"Bingsu: Error importing icon {path}: {e}")
             tooltip(tr("err_import_icon").format(e))
 
     _refresh_icon_modal(context, deck_id)
@@ -456,7 +456,7 @@ def _delete_icon_file(context, deck_id: str, filename: str) -> None:
             os.remove(path)
         _refresh_icon_modal(context, deck_id)
     except Exception as e:
-        print(f"Onigiri: Error deleting icon {safe_name}: {e}")
+        print(f"Bingsu: Error deleting icon {safe_name}: {e}")
         tooltip(tr("err_delete_icon").format(e))
 
 
@@ -572,17 +572,17 @@ def show_menu_page(menu, title: str = "", context=None, keep=None) -> bool:
     try:
         payload = json.dumps({"title": title, "items": tree})
         web.eval(
-            "(function(){if(window.OnigiriMobile&&OnigiriMobile.showAppMenu){OnigiriMobile.showAppMenu(%s);}"
-            "else{pycmd('onigiri_app_menu_popup');}})();" % payload
+            "(function(){if(window.BingsuMobile&&BingsuMobile.showAppMenu){BingsuMobile.showAppMenu(%s);}"
+            "else{pycmd('bingsu_app_menu_popup');}})();" % payload
         )
         return True
     except Exception as exc:
-        print(f"Onigiri: menu page failed: {exc}")
+        print(f"Bingsu: menu page failed: {exc}")
         return False
 
 
 def show_app_menu(context=None) -> None:
-    """Anki's menus (File, Edit, View, Tools, Help, Onigiri) as a full-screen
+    """Anki's menus (File, Edit, View, Tools, Help, Bingsu) as a full-screen
     page: on iPhone/iPad the desktop menu row is hidden."""
     menubar = getattr(getattr(mw, "form", None), "menubar", None) or mw.menuBar()
     if menubar is None:
@@ -662,53 +662,53 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
     if parent and callable(parent) and type(parent()).__name__ == "OnigimonWebDialog":
         return handled
 
-    if cmd == "onigiri_app_menu":
+    if cmd == "bingsu_app_menu":
         show_app_menu(context)
         return (True, None)
 
-    if cmd == "onigiri_app_menu_popup":
+    if cmd == "bingsu_app_menu_popup":
         _show_app_menu_popup()
         return (True, None)
 
-    if cmd.startswith("onigiri_app_menu_run:"):
+    if cmd.startswith("bingsu_app_menu_run:"):
         _run_app_menu_action(cmd.split(":", 1)[1])
         return (True, None)
 
-    if cmd.startswith("onigiri_more_menu:"):
+    if cmd.startswith("bingsu_more_menu:"):
         from . import reviewer_more_menu
 
         if reviewer_more_menu.handle_command(cmd):
             return (True, None)
 
-    if cmd.startswith("onigiri_ready:"):
+    if cmd.startswith("bingsu_ready:"):
         from ..study_tools import ready_to_go
 
         action = cmd.split(":", 1)[1]
         if ready_to_go.handle_command(action):
             return (True, None)
 
-    if cmd == "onigiri_welcome_dismissed":
+    if cmd == "bingsu_welcome_dismissed":
         try:
             conf = config.get_config()
             conf["showWelcomePopup"] = False
             config.write_config(conf)
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error dismissing welcome: {e}")
+            print(f"Bingsu: Error dismissing welcome: {e}")
             return (True, None)
 
-    if cmd.startswith("onigiri_heatmap_browse:"):
+    if cmd.startswith("bingsu_heatmap_browse:"):
         try:
             from aqt import dialogs
             from . import heatmap
 
-            date_key = cmd[len("onigiri_heatmap_browse:"):]
+            date_key = cmd[len("bingsu_heatmap_browse:"):]
             today_start = mw.col.sched.day_cutoff - 86400
             today_date_key = datetime.fromtimestamp(today_start).strftime("%Y-%m-%d")
             search = heatmap.browser_search_for_date(date_key, today_date_key)
             dialogs.open("Browser", mw, search=(search,))
         except Exception as e:
-            print(f"Onigiri: Error browsing heatmap date: {e}")
+            print(f"Bingsu: Error browsing heatmap date: {e}")
             tooltip(tr("err_open_browser").format(e))
         return (True, None)
 
@@ -718,7 +718,7 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
             settings_web.open_settings("gamification")
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error opening gamification settings: {e}")
+            print(f"Bingsu: Error opening gamification settings: {e}")
             return (True, None)
 
     if cmd == "openOnigimonSettings":
@@ -727,7 +727,7 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
             settings_web.open_settings("onigimon")
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error opening Onigimon settings: {e}")
+            print(f"Bingsu: Error opening Onigimon settings: {e}")
             return (True, None)
 
     if cmd == "openHashiGallery":
@@ -736,7 +736,7 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
             hashi_notes.open_hashi_gallery(mw)
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error opening Hashi Notes gallery: {e}")
+            print(f"Bingsu: Error opening Hashi Notes gallery: {e}")
             return (True, None)
 
     if cmd.startswith("hashiWidget:open:"):
@@ -751,7 +751,7 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
                 hashi_notes.open_hashi_gallery(mw)
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error opening Hashi note from widget: {e}")
+            print(f"Bingsu: Error opening Hashi note from widget: {e}")
             return (True, None)
 
     if cmd.startswith("hashiWidget:save:"):
@@ -772,7 +772,7 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
                 hashi_notes.save_note(note)
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error saving Hashi note from widget: {e}")
+            print(f"Bingsu: Error saving Hashi note from widget: {e}")
             return (True, None)
 
     if cmd == "openPrepStation":
@@ -781,7 +781,7 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
             prep_station.open_prep_station()
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error opening Prep Station: {e}")
+            print(f"Bingsu: Error opening Prep Station: {e}")
             return (True, None)
 
     if cmd == "openHexagonLand":
@@ -790,7 +790,7 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
             hexagon_land.open_hexagon_land_dialog()
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error opening Hexagon Land: {e}")
+            print(f"Bingsu: Error opening Hexagon Land: {e}")
             return (True, None)
 
     if cmd == "buyHexCoins":
@@ -799,7 +799,7 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
             hexagon_land.open_buy_hex_coins()
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error opening Hex Coin link: {e}")
+            print(f"Bingsu: Error opening Hex Coin link: {e}")
             return (True, None)
 
     if cmd.startswith("onigimon_feed:"):
@@ -814,7 +814,7 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
                 tooltip(tr("no_onigimon_item"), context=context, title="", variant="onigimon", hide_icon=True, hide_title=True, centered=True)
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error feeding Onigimon: {e}")
+            print(f"Bingsu: Error feeding Onigimon: {e}")
             return (True, None)
 
     if cmd.startswith("onigimon_category:"):
@@ -826,7 +826,7 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
                 tooltip(message, context=context, title="", variant="onigimon", hide_icon=True, hide_title=True, centered=True)
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error reading Onigimon category: {e}")
+            print(f"Bingsu: Error reading Onigimon category: {e}")
             return (True, None)
 
     if cmd == "onigimon_play":
@@ -838,7 +838,7 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
                 tooltip(message, context=context, title="", variant="onigimon", hide_icon=True, hide_title=True, centered=True)
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error playing with Onigimon: {e}")
+            print(f"Bingsu: Error playing with Onigimon: {e}")
             return (True, None)
 
     if cmd == "onigimon_daily_gift":
@@ -849,7 +849,7 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
             tooltip(message or tr("onigimon_gift_opened"), context=context, title="", variant="onigimon", hide_icon=True, hide_title=True, centered=True)
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error claiming Onigimon gift: {e}")
+            print(f"Bingsu: Error claiming Onigimon gift: {e}")
             return (True, None)
 
     if cmd.startswith("onigimon_hud:"):
@@ -870,7 +870,7 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
                 onigimon_hud.trigger_action(payload)
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error handling Onigimon HUD action: {e}")
+            print(f"Bingsu: Error handling Onigimon HUD action: {e}")
             return (True, None)
 
     if cmd.startswith("onigimon_rename:"):
@@ -886,35 +886,35 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
                 tooltip(tr("onigimon_choose_companion_first"), context=context, title="", variant="onigimon", hide_icon=True, hide_title=True, centered=True)
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error renaming Onigimon: {e}")
+            print(f"Bingsu: Error renaming Onigimon: {e}")
             return (True, None)
 
-    if cmd == "onigiri_create_deck":
+    if cmd == "bingsu_create_deck":
         try:
             payload = _build_create_deck_payload()
             if isinstance(context, DeckBrowser):
                 context.web.eval(
-                    "if(window.OnigiriCreateDeckDialog)OnigiriCreateDeckDialog.open(%s);"
+                    "if(window.BingsuCreateDeckDialog)BingsuCreateDeckDialog.open(%s);"
                     % json.dumps(payload, ensure_ascii=True)
                 )
         except Exception as e:
-            print(f"Onigiri: Error opening Create Deck dialog: {e}")
+            print(f"Bingsu: Error opening Create Deck dialog: {e}")
             tooltip(tr("err_create_deck_dialog").format(e))
             if isinstance(context, DeckBrowser):
-                context.web.eval("if(window.OnigiriEngine)OnigiriEngine.clearDialogFocus();")
+                context.web.eval("if(window.BingsuEngine)BingsuEngine.clearDialogFocus();")
         return (True, None)
 
-    if cmd == "onigiri_toggle_sidebar":
+    if cmd == "bingsu_toggle_sidebar":
         if isinstance(context, DeckBrowser):
             context.web.eval(
                 "var s=document.querySelector('.sidebar-left');"
                 "if(s){"
-                "  if(typeof onigiriToggleSidebar==='function'){onigiriToggleSidebar();}"
+                "  if(typeof bingsuToggleSidebar==='function'){bingsuToggleSidebar();}"
                 "  else if(s.classList.contains('sidebar-collapsed')){"
-                "    if(typeof onigiriExpandSidebar==='function')onigiriExpandSidebar();"
+                "    if(typeof bingsuExpandSidebar==='function')bingsuExpandSidebar();"
                 "    else{s.classList.remove('sidebar-collapsed');pycmd('saveSidebarState:false');}"
                 "  }else{"
-                "    if(typeof onigiriCollapseSidebar==='function')onigiriCollapseSidebar();"
+                "    if(typeof bingsuCollapseSidebar==='function')bingsuCollapseSidebar();"
                 "    else{s.classList.add('sidebar-collapsed');pycmd('saveSidebarState:true');}"
                 "  }"
                 "}"
@@ -924,31 +924,31 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
     if cmd.startswith("saveSidebarState:"):
         try:
             value = cmd.split(":", 1)[1].lower() == "true"
-            mw.col.conf["onigiri_sidebar_collapsed"] = value
+            mw.col.conf["bingsu_sidebar_collapsed"] = value
             mw.col.setMod()
         except Exception as e:
-            print(f"Onigiri: Error saving sidebar state: {e}")
+            print(f"Bingsu: Error saving sidebar state: {e}")
         return (True, None)
 
     if cmd.startswith("saveDeckFocusState:"):
         try:
             value = cmd.split(":", 1)[1].lower() == "true"
-            mw.col.conf["onigiri_deck_focus_mode"] = value
-            mw.col.conf["onigiri_deck_cycle_state"] = 1 if value else 0
+            mw.col.conf["bingsu_deck_focus_mode"] = value
+            mw.col.conf["bingsu_deck_cycle_state"] = 1 if value else 0
             mw.col.setMod()
         except Exception as e:
-            print(f"Onigiri: Error saving deck focus state: {e}")
+            print(f"Bingsu: Error saving deck focus state: {e}")
         return (True, None)
 
     if cmd.startswith("saveDeckCycleState:"):
         try:
             value = int(cmd.split(":", 1)[1])
             value = max(0, min(4, value))
-            mw.col.conf["onigiri_deck_cycle_state"] = value
-            mw.col.conf["onigiri_deck_focus_mode"] = value in (1, 2)
+            mw.col.conf["bingsu_deck_cycle_state"] = value
+            mw.col.conf["bingsu_deck_focus_mode"] = value in (1, 2)
             mw.col.setMod()
         except Exception as e:
-            print(f"Onigiri: Error saving deck cycle state: {e}")
+            print(f"Bingsu: Error saving deck cycle state: {e}")
         return (True, None)
 
     if cmd.startswith("saveSidebarWidth:"):
@@ -958,7 +958,7 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
                 mw.col.conf["modern_menu_sidebar_width"] = value
                 mw.col.setMod()
         except Exception as e:
-            print(f"Onigiri: Error saving sidebar width: {e}")
+            print(f"Bingsu: Error saving sidebar width: {e}")
         return (True, None)
 
     if cmd.startswith("saveSidebarSize:"):
@@ -972,114 +972,114 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
                 mw.col.conf["modern_menu_sidebar_height"] = height
             mw.col.setMod()
         except Exception as e:
-            print(f"Onigiri: Error saving sidebar size: {e}")
+            print(f"Bingsu: Error saving sidebar size: {e}")
         return (True, None)
 
-    if cmd in ("onigiri_filter_favourites", "onigiri_filter_favorites"):
+    if cmd in ("bingsu_filter_favourites", "bingsu_filter_favorites"):
         try:
             current = bool(
-                mw.col.conf.get("onigiri_show_favourites", False)
-                or mw.col.conf.get("onigiri_show_favorites", False)
+                mw.col.conf.get("bingsu_show_favourites", False)
+                or mw.col.conf.get("bingsu_show_favorites", False)
             )
             next_value = not current
-            mw.col.conf["onigiri_show_favourites"] = next_value
-            mw.col.conf["onigiri_show_favorites"] = next_value
+            mw.col.conf["bingsu_show_favourites"] = next_value
+            mw.col.conf["bingsu_show_favorites"] = next_value
             mw.col.setMod()
             if isinstance(context, DeckBrowser):
                 context._render_data = None
                 context._renderPage()
         except Exception as e:
-            print(f"Onigiri: Error toggling favorites filter: {e}")
+            print(f"Bingsu: Error toggling favorites filter: {e}")
             tooltip(tr("err_filter_failed").format(e))
         return (True, None)
 
-    if cmd == "onigiri_filter_marked":
+    if cmd == "bingsu_filter_marked":
         try:
-            current = bool(mw.col.conf.get("onigiri_show_marked", False))
-            mw.col.conf["onigiri_show_marked"] = not current
+            current = bool(mw.col.conf.get("bingsu_show_marked", False))
+            mw.col.conf["bingsu_show_marked"] = not current
             mw.col.setMod()
             if isinstance(context, DeckBrowser):
                 context._render_data = None
                 context._renderPage()
         except Exception as e:
-            print(f"Onigiri: Error toggling marked filter: {e}")
+            print(f"Bingsu: Error toggling marked filter: {e}")
             tooltip(tr("err_filter_failed").format(e))
         return (True, None)
 
-    if cmd.startswith("onigiri_deck_search:"):
+    if cmd.startswith("bingsu_deck_search:"):
         try:
             query = cmd.split(":", 1)[1]
             if isinstance(context, DeckBrowser):
                 new_html = deck_tree_updater._render_deck_search_html(context, query)
                 context.web.eval(
-                    "OnigiriEngine.updateDeckTree({});".format(json.dumps(new_html))
+                    "BingsuEngine.updateDeckTree({});".format(json.dumps(new_html))
                 )
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error searching decks: {e}")
+            print(f"Bingsu: Error searching decks: {e}")
             return (True, None)
 
-    if cmd.startswith("onigiri_tag_search:"):
+    if cmd.startswith("bingsu_tag_search:"):
         try:
             query = cmd.split(":", 1)[1]
             if isinstance(context, DeckBrowser):
                 new_html = deck_tree_updater._render_tag_tree_html(context, query)
                 context.web.eval(
-                    "OnigiriEngine.updateDeckTree({});".format(json.dumps(new_html))
+                    "BingsuEngine.updateDeckTree({});".format(json.dumps(new_html))
                 )
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error searching tags: {e}")
+            print(f"Bingsu: Error searching tags: {e}")
             return (True, None)
 
-    if cmd.startswith("onigiri_tag_collapse:"):
+    if cmd.startswith("bingsu_tag_collapse:"):
         try:
-            payload = cmd[len("onigiri_tag_collapse:"):]
+            payload = cmd[len("bingsu_tag_collapse:"):]
             encoded_tag, collapsed_raw = payload.rsplit(":", 1)
             tag = unquote(encoded_tag)
             mw.col.tags.set_collapsed(tag, collapsed_raw == "1")
             if isinstance(context, DeckBrowser):
                 new_html = deck_tree_updater._render_tag_tree_html(context)
                 context.web.eval(
-                    "OnigiriEngine.updateDeckTree({});".format(json.dumps(new_html))
+                    "BingsuEngine.updateDeckTree({});".format(json.dumps(new_html))
                 )
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error toggling tag branch: {e}")
+            print(f"Bingsu: Error toggling tag branch: {e}")
             return (True, None)
 
-    if cmd.startswith("onigiri_study_tag:"):
+    if cmd.startswith("bingsu_study_tag:"):
         try:
             from ..study_tools import ready_to_go
 
-            tag = unquote(cmd[len("onigiri_study_tag:"):])
+            tag = unquote(cmd[len("bingsu_study_tag:"):])
             ready_to_go.study_tag(tag)
         except Exception as e:
-            print(f"Onigiri: Error starting tag study: {e}")
+            print(f"Bingsu: Error starting tag study: {e}")
             tooltip(tr("err_tag_study").format(e))
         return (True, None)
 
-    if cmd.startswith("onigiri_tag_change_icon:"):
+    if cmd.startswith("bingsu_tag_change_icon:"):
         try:
-            tag = unquote(cmd[len("onigiri_tag_change_icon:"):])
+            tag = unquote(cmd[len("bingsu_tag_change_icon:"):])
             if isinstance(context, DeckBrowser) and tag:
                 _open_tag_icon_modal(context, tag)
         except Exception as e:
-            print(f"Onigiri: Error opening tag icon chooser: {e}")
+            print(f"Bingsu: Error opening tag icon chooser: {e}")
             tooltip(tr("err_open_icon_chooser").format(e))
         return (True, None)
 
-    if cmd.startswith("onigiri_collapse:"):
+    if cmd.startswith("bingsu_collapse:"):
         try:
             deck_id = cmd.split(":", 1)[1]
             if isinstance(context, DeckBrowser):
                 deck_tree_updater.on_deck_collapse(context, deck_id)
                 return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error handling deck collapse: {e}")
+            print(f"Bingsu: Error handling deck collapse: {e}")
         return (True, None)
 
-    if cmd.startswith("onigiri_toggle_favorite:"):
+    if cmd.startswith("bingsu_toggle_favorite:"):
         try:
             deck_id = cmd.split(":", 1)[1] # Keep as string for consistency
             
@@ -1092,7 +1092,7 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
                 tooltip(tr("err_favorite_deck_missing"))
                 return (True, None)
             
-            favorites = _conf_list("onigiri_favorite_decks")
+            favorites = _conf_list("bingsu_favorite_decks")
             
             if deck_id in favorites:
                 favorites = [did for did in favorites if did != deck_id]
@@ -1103,7 +1103,7 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
                 favorites.append(deck_id)
             
             # Save the change to Anki's configuration
-            mw.col.conf["onigiri_favorite_decks"] = favorites
+            mw.col.conf["bingsu_favorite_decks"] = favorites
             mw.col.setMod() # This line is CRITICAL
             
             # Re-render the page so both the deck tree and Favorites widget
@@ -1113,12 +1113,12 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
             
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error handling favorite toggle: {e}")
+            print(f"Bingsu: Error handling favorite toggle: {e}")
             import traceback
             traceback.print_exc()
             return (True, None) # Still handle the command
 
-    if cmd.startswith("onigiri_sort:"):
+    if cmd.startswith("bingsu_sort:"):
         try:
             sort_mode = cmd.split(":", 1)[1] or "default"
             valid_modes = {
@@ -1127,8 +1127,8 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
             }
             if sort_mode not in valid_modes:
                 sort_mode = "default"
-            mw.col.conf["onigiri_sort_mode"] = sort_mode
-            mw.col.conf["onigiri_deck_sort"] = sort_mode
+            mw.col.conf["bingsu_sort_mode"] = sort_mode
+            mw.col.conf["bingsu_deck_sort"] = sort_mode
             mw.col.setMod()
             _refresh_deck_browser(context)
             labels = {
@@ -1144,21 +1144,21 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
             tooltip(tr("deck_sort_toast").format(labels.get(sort_mode, sort_mode)))
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error handling sort command: {e}")
+            print(f"Bingsu: Error handling sort command: {e}")
             return (True, None)
 
-    if cmd.startswith("onigiri_ctx_rename:"):
+    if cmd.startswith("bingsu_ctx_rename:"):
         try:
             deck_id = cmd.split(":", 1)[1]
             if isinstance(context, DeckBrowser):
                 _open_rename_modal(context, deck_id)
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error renaming deck: {e}")
+            print(f"Bingsu: Error renaming deck: {e}")
             tooltip(tr("err_rename_deck").format(e))
             return (True, None)
 
-    if cmd.startswith("onigiri_rename_deck:"):
+    if cmd.startswith("bingsu_rename_deck:"):
         try:
             rest = cmd.split(":", 1)[1]
             if ":" in rest and not rest.lstrip().startswith("%7B") and not rest.lstrip().startswith("{"):
@@ -1181,34 +1181,34 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
             _rename_deck(deck_id, new_name)
             _refresh_deck_browser(context)
             if isinstance(context, DeckBrowser):
-                context.web.eval("if(window.OnigiriRenameDialog)OnigiriRenameDialog.close();")
+                context.web.eval("if(window.BingsuRenameDialog)BingsuRenameDialog.close();")
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error saving renamed deck: {e}")
+            print(f"Bingsu: Error saving renamed deck: {e}")
             tooltip(tr("err_rename_deck").format(e))
             if isinstance(context, DeckBrowser):
                 context.web.eval(
-                    "if(window.OnigiriRenameDialog)OnigiriRenameDialog.showError(%s);"
+                    "if(window.BingsuRenameDialog)BingsuRenameDialog.showError(%s);"
                     % json.dumps(f"Rename failed: {e}")
                 )
             return (True, None)
 
-    if cmd.startswith("onigiri_ctx_subdeck:"):
+    if cmd.startswith("bingsu_ctx_subdeck:"):
         try:
             deck_id = cmd.split(":", 1)[1]
             payload = {"deckId": str(deck_id), "parentName": _deck_name(deck_id)}
             if isinstance(context, DeckBrowser):
                 context.web.eval(
-                    "if(window.OnigiriAddSubdeckDialog)OnigiriAddSubdeckDialog.open(%s);"
+                    "if(window.BingsuAddSubdeckDialog)BingsuAddSubdeckDialog.open(%s);"
                     % json.dumps(payload, ensure_ascii=True)
                 )
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error adding subdeck: {e}")
+            print(f"Bingsu: Error adding subdeck: {e}")
             tooltip(tr("err_add_subdeck").format(e))
             return (True, None)
 
-    if cmd.startswith("onigiri_create_subdeck:"):
+    if cmd.startswith("bingsu_create_subdeck:"):
         try:
             payload = json.loads(unquote(cmd.split(":", 1)[1]))
             deck_id = str(payload.get("deckId") or "")
@@ -1224,20 +1224,20 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
             mw.col.setMod()
             _refresh_deck_browser(context)
             if isinstance(context, DeckBrowser):
-                context.web.eval("if(window.OnigiriAddSubdeckDialog)OnigiriAddSubdeckDialog.close();")
+                context.web.eval("if(window.BingsuAddSubdeckDialog)BingsuAddSubdeckDialog.close();")
             tooltip(tr("deck_created_toast").format(full_name))
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error creating subdeck: {e}")
+            print(f"Bingsu: Error creating subdeck: {e}")
             tooltip(tr("err_add_subdeck").format(e))
             if isinstance(context, DeckBrowser):
                 context.web.eval(
-                    "if(window.OnigiriAddSubdeckDialog)OnigiriAddSubdeckDialog.showError(%s);"
+                    "if(window.BingsuAddSubdeckDialog)BingsuAddSubdeckDialog.showError(%s);"
                     % json.dumps(f"Create subdeck failed: {e}")
                 )
             return (True, None)
 
-    if cmd.startswith("onigiri_create_deck_submit:"):
+    if cmd.startswith("bingsu_create_deck_submit:"):
         try:
             payload = json.loads(unquote(cmd.split(":", 1)[1]))
             name = str(payload.get("name") or "").strip()
@@ -1256,20 +1256,20 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
             mw.col.setMod()
             _refresh_deck_browser(context)
             if isinstance(context, DeckBrowser):
-                context.web.eval("if(window.OnigiriCreateDeckDialog)OnigiriCreateDeckDialog.close();")
+                context.web.eval("if(window.BingsuCreateDeckDialog)BingsuCreateDeckDialog.close();")
             tooltip(tr("deck_created_toast").format(full_name))
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error creating deck: {e}")
+            print(f"Bingsu: Error creating deck: {e}")
             tooltip(tr("err_create_deck").format(e))
             if isinstance(context, DeckBrowser):
                 context.web.eval(
-                    "if(window.OnigiriCreateDeckDialog)OnigiriCreateDeckDialog.showError(%s);"
+                    "if(window.BingsuCreateDeckDialog)BingsuCreateDeckDialog.showError(%s);"
                     % json.dumps(f"Create deck failed: {e}")
                 )
             return (True, None)
 
-    if cmd.startswith("onigiri_ctx_addon_actions:"):
+    if cmd.startswith("bingsu_ctx_addon_actions:"):
         try:
             deck_id = int(cmd.split(":", 1)[1])
             db = context if isinstance(context, DeckBrowser) else mw.deckBrowser
@@ -1285,10 +1285,10 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
             else:
                 db._showOptions(str(deck_id))
         except Exception as e:
-            print(f"Onigiri: Error opening add-on deck actions: {e}")
+            print(f"Bingsu: Error opening add-on deck actions: {e}")
         return (True, None)
 
-    if cmd.startswith("onigiri_ctx_options:"):
+    if cmd.startswith("bingsu_ctx_options:"):
         try:
             deck_id = int(cmd.split(":", 1)[1])
             try:
@@ -1299,10 +1299,10 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
                     mw.deckBrowser._show_options_for_deck_id(deck_id)
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error opening deck options: {e}")
+            print(f"Bingsu: Error opening deck options: {e}")
             return (True, None)
 
-    if cmd.startswith("onigiri_ctx_rebuild:"):
+    if cmd.startswith("bingsu_ctx_rebuild:"):
         try:
             deck_id = int(cmd.split(":", 1)[1])
             if not _is_filtered_deck(deck_id):
@@ -1315,10 +1315,10 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
                 deck_browser._rebuild(deck_id)  # type: ignore[attr-defined]
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error rebuilding filtered deck: {e}")
+            print(f"Bingsu: Error rebuilding filtered deck: {e}")
             return (True, None)
 
-    if cmd.startswith("onigiri_ctx_export:"):
+    if cmd.startswith("bingsu_ctx_export:"):
         try:
             deck_id = int(cmd.split(":", 1)[1])
             try:
@@ -1331,70 +1331,70 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
                     tooltip(tr("err_export_unavailable"))
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error exporting deck: {e}")
+            print(f"Bingsu: Error exporting deck: {e}")
             tooltip(tr("err_export_deck").format(e))
             return (True, None)
 
-    if cmd.startswith("onigiri_ctx_copy_id:"):
+    if cmd.startswith("bingsu_ctx_copy_id:"):
         deck_id = cmd.split(":", 1)[1]
         QApplication.clipboard().setText(deck_id)
         tooltip(tr("deck_id_copied"))
         return (True, None)
 
-    if cmd.startswith("onigiri_ctx_delete:"):
+    if cmd.startswith("bingsu_ctx_delete:"):
         try:
             deck_id = int(cmd.split(":", 1)[1])
             if _open_delete_deck_dialog(context, [deck_id]):
                 return (True, None)
-            # Fallback for contexts without the Onigiri dialog (non deck browser).
+            # Fallback for contexts without the Bingsu dialog (non deck browser).
             deck_name = _deck_name(str(deck_id))
             if not askUser(tr("del_deck_message").format(f"'{deck_name}'")):
                 return (True, None)
             _delete_decks_with_undo(context, [deck_id])
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error deleting deck: {e}")
+            print(f"Bingsu: Error deleting deck: {e}")
             tooltip(tr("err_delete_deck").format(e))
             return (True, None)
 
-    if cmd.startswith("onigiri_delete_deck_confirmed:"):
+    if cmd.startswith("bingsu_delete_deck_confirmed:"):
         try:
             payload = json.loads(unquote(cmd.split(":", 1)[1]))
             deck_ids = [int(did) for did in payload.get("deckIds", [])]
             if deck_ids:
                 _delete_decks_with_undo(context, deck_ids)
         except Exception as e:
-            print(f"Onigiri: Error deleting deck: {e}")
+            print(f"Bingsu: Error deleting deck: {e}")
             tooltip(tr("err_delete_deck").format(e))
         return (True, None)
 
-    if cmd == "onigiri_undo_delete_deck":
+    if cmd == "bingsu_undo_delete_deck":
         try:
             _undo_deck_delete(context)
         except Exception as e:
-            print(f"Onigiri: Error restoring deck: {e}")
+            print(f"Bingsu: Error restoring deck: {e}")
             tooltip(tr("err_restore_deck").format(e))
         return (True, None)
 
-    if cmd.startswith("onigiri_ctx_mark:"):
+    if cmd.startswith("bingsu_ctx_mark:"):
         try:
             _, deck_id, mark_key = cmd.split(":", 2)
             valid_marks = {"red", "blue", "green", "yellow"}
-            marks = mw.col.conf.get("onigiri_deck_marks", {})
+            marks = mw.col.conf.get("bingsu_deck_marks", {})
             if mark_key in valid_marks:
                 marks[str(deck_id)] = mark_key
             else:
                 marks.pop(str(deck_id), None)
-            mw.col.conf["onigiri_deck_marks"] = marks
+            mw.col.conf["bingsu_deck_marks"] = marks
             mw.col.setMod()
             _refresh_deck_browser(context)
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error marking deck: {e}")
+            print(f"Bingsu: Error marking deck: {e}")
             tooltip(tr("err_mark_deck").format(e))
             return (True, None)
 
-    if cmd.startswith("onigiri_drag_drop:"):
+    if cmd.startswith("bingsu_drag_drop:"):
         try:
             payload = json.loads(cmd.split(":", 1)[1])
             changed = deck_drag_drop.apply_drag_drop(payload)
@@ -1402,13 +1402,13 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
                 _refresh_deck_browser(context)
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error moving deck: {e}")
+            print(f"Bingsu: Error moving deck: {e}")
             import traceback
             traceback.print_exc()
             tooltip(tr("err_move_deck").format(e))
             return (True, None)
 
-    if cmd.startswith("onigiri_ctx_move_to:"):
+    if cmd.startswith("bingsu_ctx_move_to:"):
         try:
             raw = unquote(cmd.split(":", 1)[1])
             try:
@@ -1418,49 +1418,49 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
             payload = move_deck.build_move_to_payload(source_dids)
             if isinstance(context, DeckBrowser):
                 context.web.eval(
-                    "if(window.OnigiriMoveToDialog)OnigiriMoveToDialog.open(%s);"
+                    "if(window.BingsuMoveToDialog)BingsuMoveToDialog.open(%s);"
                     % json.dumps(payload, ensure_ascii=True)
                 )
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error opening Move To dialog: {e}")
+            print(f"Bingsu: Error opening Move To dialog: {e}")
             tooltip(tr("err_open_move_to").format(e))
             if isinstance(context, DeckBrowser):
-                context.web.eval("if(window.OnigiriEngine)OnigiriEngine.clearDialogFocus();")
+                context.web.eval("if(window.BingsuEngine)BingsuEngine.clearDialogFocus();")
             return (True, None)
 
-    if cmd.startswith("onigiri_move_deck:"):
+    if cmd.startswith("bingsu_move_deck:"):
         try:
             payload = unquote(cmd.split(":", 1)[1])
             changed, message = move_deck.move_deck_from_payload(payload)
             if changed:
                 _refresh_deck_browser(context)
                 if isinstance(context, DeckBrowser):
-                    context.web.eval("if(window.OnigiriMoveToDialog)OnigiriMoveToDialog.close();")
+                    context.web.eval("if(window.BingsuMoveToDialog)BingsuMoveToDialog.close();")
             if message:
                 tooltip(message)
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error moving deck: {e}")
+            print(f"Bingsu: Error moving deck: {e}")
             tooltip(tr("err_move_deck").format(e))
             if isinstance(context, DeckBrowser):
                 context.web.eval(
-                    "if(window.OnigiriMoveToDialog)OnigiriMoveToDialog.showError(%s);"
+                    "if(window.BingsuMoveToDialog)BingsuMoveToDialog.showError(%s);"
                     % json.dumps(f"Move failed: {e}")
                 )
             return (True, None)
 
-    if cmd.startswith("onigiri_ctx_change_icon:"):
+    if cmd.startswith("bingsu_ctx_change_icon:"):
         try:
             deck_id = cmd.split(":", 1)[1]
             _open_icon_modal(context, deck_id)
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error opening icon chooser: {e}")
+            print(f"Bingsu: Error opening icon chooser: {e}")
             tooltip(tr("err_open_icon_chooser").format(e))
             return (True, None)
 
-    if cmd.startswith("onigiri_icon_chooser_save:"):
+    if cmd.startswith("bingsu_icon_chooser_save:"):
         try:
             _, deck_id, payload = cmd.split(":", 2)
             data = json.loads(payload)
@@ -1487,26 +1487,26 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
                 _refresh_deck_browser(context)
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error saving deck icon: {e}")
+            print(f"Bingsu: Error saving deck icon: {e}")
             tooltip(tr("err_save_icon").format(e))
             return (True, None)
 
-    if cmd.startswith("onigiri_icon_chooser_color:"):
+    if cmd.startswith("bingsu_icon_chooser_color:"):
         try:
             _, deck_id, role, current = cmd.split(":", 3)
             chosen, ok = _run_deck_icon_color_picker(context, current or "#00A982")
             if ok and chosen:
                 context.web.eval(
-                    "if(window.OnigiriIconChooser)OnigiriIconChooser.applyColor(%s, %s);"
+                    "if(window.BingsuIconChooser)BingsuIconChooser.applyColor(%s, %s);"
                     % (json.dumps(role), json.dumps(chosen))
                 )
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error picking icon color: {e}")
+            print(f"Bingsu: Error picking icon color: {e}")
             tooltip(tr("err_open_color_picker").format(e))
             return (True, None)
 
-    if cmd.startswith("onigiri_icon_chooser_reset:"):
+    if cmd.startswith("bingsu_icon_chooser_reset:"):
         try:
             deck_id = cmd.split(":", 1)[1]
             store_key, target_key = _icon_store_target(deck_id)
@@ -1520,41 +1520,41 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
                 _refresh_deck_browser(context)
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error resetting deck icon: {e}")
+            print(f"Bingsu: Error resetting deck icon: {e}")
             tooltip(tr("err_reset_icon").format(e))
             return (True, None)
 
-    if cmd.startswith("onigiri_icon_chooser_add_icon:"):
+    if cmd.startswith("bingsu_icon_chooser_add_icon:"):
         try:
             deck_id = cmd.split(":", 1)[1]
             _add_icon_files(context, deck_id, "icon")
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error adding icon: {e}")
+            print(f"Bingsu: Error adding icon: {e}")
             tooltip(tr("err_add_icon").format(e))
             return (True, None)
 
-    if cmd.startswith("onigiri_icon_chooser_add_image:"):
+    if cmd.startswith("bingsu_icon_chooser_add_image:"):
         try:
             deck_id = cmd.split(":", 1)[1]
             _add_icon_files(context, deck_id, "image")
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error adding image: {e}")
+            print(f"Bingsu: Error adding image: {e}")
             tooltip(tr("err_add_image").format(e))
             return (True, None)
 
-    if cmd.startswith("onigiri_icon_chooser_delete_icon:"):
+    if cmd.startswith("bingsu_icon_chooser_delete_icon:"):
         try:
             _, deck_id, filename = cmd.split(":", 2)
             _delete_icon_file(context, deck_id, filename)
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error deleting icon: {e}")
+            print(f"Bingsu: Error deleting icon: {e}")
             tooltip(tr("err_delete_icon").format(e))
             return (True, None)
         
-    if cmd.startswith("onigiri_show_transfer_window:"):
+    if cmd.startswith("bingsu_show_transfer_window:"):
         try:
             from ..gamification import mod_transfer_window
 
@@ -1564,7 +1564,7 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
         except Exception as e:
             return (True, None)
 
-    if cmd.startswith("onigiri_move_decks:"):
+    if cmd.startswith("bingsu_move_decks:"):
         try:
             json_payload = cmd.split(":", 1)[1]
             deck_tree_updater.on_decks_move(json_payload)
@@ -1572,15 +1572,15 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
         except Exception as e:
             return (True, None)
 
-    if cmd == "onigiri_ui_open":
+    if cmd == "bingsu_ui_open":
         return (True, None)
 
-    if cmd == "onigiri_ui_close":
+    if cmd == "bingsu_ui_close":
         if isinstance(context, DeckBrowser):
-            context.web.eval("if(window.OnigiriEngine)OnigiriEngine.clearDialogFocus();")
+            context.web.eval("if(window.BingsuEngine)BingsuEngine.clearDialogFocus();")
         return (True, None)
 
-    if cmd.startswith("onigiri_ctx_bulk_delete:"):
+    if cmd.startswith("bingsu_ctx_bulk_delete:"):
         try:
             payload = json.loads(unquote(cmd.split(":", 1)[1]))
             deck_ids = [int(did) for did in payload.get("dids", [])]
@@ -1592,61 +1592,61 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
                 return (True, None)
             _delete_decks_with_undo(context, deck_ids)
         except Exception as e:
-            print(f"Onigiri: Error bulk deleting decks: {e}")
+            print(f"Bingsu: Error bulk deleting decks: {e}")
             tooltip(tr("err_bulk_delete").format(e))
         return (True, None)
 
-    if cmd.startswith("onigiri_ctx_bulk_favorite:"):
+    if cmd.startswith("bingsu_ctx_bulk_favorite:"):
         try:
             payload = json.loads(unquote(cmd.split(":", 1)[1]))
             dids = [str(did) for did in payload.get("dids", [])]
-            favorites = _conf_list("onigiri_favorite_decks")
+            favorites = _conf_list("bingsu_favorite_decks")
             for did in dids:
                 if did not in favorites and len(favorites) < 10:
                     favorites.append(did)
-            mw.col.conf["onigiri_favorite_decks"] = favorites
+            mw.col.conf["bingsu_favorite_decks"] = favorites
             mw.col.setMod()
             _refresh_deck_browser(context)
         except Exception as e:
-            print(f"Onigiri: Error bulk favoriting decks: {e}")
+            print(f"Bingsu: Error bulk favoriting decks: {e}")
             tooltip(tr("err_bulk_favorite").format(e))
         return (True, None)
 
-    if cmd.startswith("onigiri_ctx_bulk_unfavorite:"):
+    if cmd.startswith("bingsu_ctx_bulk_unfavorite:"):
         try:
             payload = json.loads(unquote(cmd.split(":", 1)[1]))
             dids = {str(did) for did in payload.get("dids", [])}
-            mw.col.conf["onigiri_favorite_decks"] = [
-                did for did in _conf_list("onigiri_favorite_decks") if did not in dids
+            mw.col.conf["bingsu_favorite_decks"] = [
+                did for did in _conf_list("bingsu_favorite_decks") if did not in dids
             ]
             mw.col.setMod()
             _refresh_deck_browser(context)
         except Exception as e:
-            print(f"Onigiri: Error bulk unfavoriting decks: {e}")
+            print(f"Bingsu: Error bulk unfavoriting decks: {e}")
             tooltip(tr("err_bulk_unfavorite").format(e))
         return (True, None)
 
-    if cmd.startswith("onigiri_ctx_bulk_mark:"):
+    if cmd.startswith("bingsu_ctx_bulk_mark:"):
         try:
             payload = json.loads(unquote(cmd.split(":", 1)[1]))
             dids = [str(did) for did in payload.get("dids", [])]
             mark_key = str(payload.get("mark", "none"))
             valid_marks = {"red", "blue", "green", "yellow"}
-            marks = mw.col.conf.get("onigiri_deck_marks", {})
+            marks = mw.col.conf.get("bingsu_deck_marks", {})
             for did in dids:
                 if mark_key in valid_marks:
                     marks[did] = mark_key
                 else:
                     marks.pop(did, None)
-            mw.col.conf["onigiri_deck_marks"] = marks
+            mw.col.conf["bingsu_deck_marks"] = marks
             mw.col.setMod()
             _refresh_deck_browser(context)
         except Exception as e:
-            print(f"Onigiri: Error bulk marking decks: {e}")
+            print(f"Bingsu: Error bulk marking decks: {e}")
             tooltip(tr("err_bulk_mark").format(e))
         return (True, None)
 
-    if cmd.startswith("onigiri_learner_stats_select_deck:"):
+    if cmd.startswith("bingsu_learner_stats_select_deck:"):
         try:
             raw_payload = cmd.split(":", 1)[1]
             try:
@@ -1656,31 +1656,31 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
             except Exception:
                 _prefix, widget_id, deck_id = cmd.split(":", 2)
 
-            saved_decks = mw.col.conf.get("onigiri_learner_stats_decks", {})
+            saved_decks = mw.col.conf.get("bingsu_learner_stats_decks", {})
             if not isinstance(saved_decks, dict):
                 saved_decks = {}
             saved_decks[widget_id] = deck_id
 
-            mw.col.conf["onigiri_learner_stats_decks"] = saved_decks
+            mw.col.conf["bingsu_learner_stats_decks"] = saved_decks
             mw.col.setMod()
 
             try:
                 from . import learner_stats_widget
                 updated_html = learner_stats_widget._render_widget(context, widget_id)
                 context.web.eval(
-                    "if(window.OnigiriLearnerStatsDialog&&typeof OnigiriLearnerStatsDialog.finish==='function')"
-                    f"{{OnigiriLearnerStatsDialog.finish({json.dumps(widget_id)}, {json.dumps(updated_html)});}}"
-                    "else{pycmd('onigiri_learner_stats_refresh_fallback');}"
+                    "if(window.BingsuLearnerStatsDialog&&typeof BingsuLearnerStatsDialog.finish==='function')"
+                    f"{{BingsuLearnerStatsDialog.finish({json.dumps(widget_id)}, {json.dumps(updated_html)});}}"
+                    "else{pycmd('bingsu_learner_stats_refresh_fallback');}"
                 )
             except Exception as render_error:
-                print(f"Onigiri: Error updating learner stats widget in place: {render_error}")
+                print(f"Bingsu: Error updating learner stats widget in place: {render_error}")
                 _refresh_deck_browser(context)
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error saving learner stats deck: {e}")
+            print(f"Bingsu: Error saving learner stats deck: {e}")
             return (True, None)
 
-    if cmd.startswith("onigiri_learner_stats_select_view:"):
+    if cmd.startswith("bingsu_learner_stats_select_view:"):
         try:
             raw_payload = cmd.split(":", 1)[1]
             data = json.loads(unquote(raw_payload))
@@ -1689,23 +1689,23 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
             if view not in ("grouped", "bars", "donut"):
                 view = "grouped"
 
-            saved_views = mw.col.conf.get("onigiri_learner_stats_view", {})
+            saved_views = mw.col.conf.get("bingsu_learner_stats_view", {})
             if not isinstance(saved_views, dict):
                 saved_views = {}
             saved_views[widget_id] = view
 
-            mw.col.conf["onigiri_learner_stats_view"] = saved_views
+            mw.col.conf["bingsu_learner_stats_view"] = saved_views
             mw.col.setMod()
             return (True, None)
         except Exception as e:
-            print(f"Onigiri: Error saving learner stats view: {e}")
+            print(f"Bingsu: Error saving learner stats view: {e}")
             return (True, None)
 
-    if cmd == "onigiri_learner_stats_refresh_fallback":
+    if cmd == "bingsu_learner_stats_refresh_fallback":
         try:
             _refresh_deck_browser(context)
         except Exception as e:
-            print(f"Onigiri: Error refreshing learner stats fallback: {e}")
+            print(f"Bingsu: Error refreshing learner stats fallback: {e}")
         return (True, None)
 
     return handled

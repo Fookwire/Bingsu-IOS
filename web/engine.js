@@ -1,12 +1,12 @@
-// Onigiri Performance Engine
-function ONIGIRI_T(key, fallback) {
-    if (window.OnigiriI18n && typeof OnigiriI18n.t === 'function') {
-        return OnigiriI18n.t(key, fallback);
+// Bingsu Performance Engine
+function BINGSU_T(key, fallback) {
+    if (window.BingsuI18n && typeof BingsuI18n.t === 'function') {
+        return BingsuI18n.t(key, fallback);
     }
     return fallback;
 }
 
-const ONIGIRI_EMOJI_SPRITE_ASSETS = {
+const BINGSU_EMOJI_SPRITE_ASSETS = {
     "🤍": "heart_white.svg",
     "🧼": "soap.svg",
     "💀": "skull.svg",
@@ -63,13 +63,13 @@ const ONIGIRI_EMOJI_SPRITE_ASSETS = {
     "🗺️": "world_map.svg",
 };
 
-function onigiriEmojiSpriteUrl(iconVal) {
+function bingsuEmojiSpriteUrl(iconVal) {
     if (!iconVal || !iconVal.startsWith('emoji:')) return '';
     const emoji = iconVal.replace('emoji:', '');
     const normalizedEmoji = emoji.replace(/[\ufe0e\ufe0f]/g, '');
-    let asset = ONIGIRI_EMOJI_SPRITE_ASSETS[emoji] || ONIGIRI_EMOJI_SPRITE_ASSETS[normalizedEmoji];
+    let asset = BINGSU_EMOJI_SPRITE_ASSETS[emoji] || BINGSU_EMOJI_SPRITE_ASSETS[normalizedEmoji];
     if (!asset) {
-        for (const [key, value] of Object.entries(ONIGIRI_EMOJI_SPRITE_ASSETS)) {
+        for (const [key, value] of Object.entries(BINGSU_EMOJI_SPRITE_ASSETS)) {
             if (key.replace(/[\ufe0e\ufe0f]/g, '') === normalizedEmoji) {
                 asset = value;
                 break;
@@ -77,11 +77,11 @@ function onigiriEmojiSpriteUrl(iconVal) {
         }
     }
     if (!asset) return '';
-    const pkg = (window.ONIGIRI_CONFIG && window.ONIGIRI_CONFIG.addonPackage) || '1011095603';
+    const pkg = (window.BINGSU_CONFIG && window.BINGSU_CONFIG.addonPackage) || '1011095603';
     return `/_addons/${pkg}/system_files/emojis/${asset}`;
 }
 
-window.OnigiriEngine = {
+window.BingsuEngine = {
     currentHoveredRow: null,
     controllerFocusedRow: null,
     _deckNavigationPending: false,
@@ -111,12 +111,12 @@ window.OnigiriEngine = {
 
     initResponsiveWidgets: function () {
         document.querySelectorAll('.unified-grid[data-grid-columns]').forEach(grid => {
-            if (grid._onigiriResizeObserver) return;
+            if (grid._bingsuResizeObserver) return;
             const reflow = () => this.reflowWidgetGrid(grid);
             reflow();
             if (window.ResizeObserver) {
-                grid._onigiriResizeObserver = new ResizeObserver(reflow);
-                grid._onigiriResizeObserver.observe(grid);
+                grid._bingsuResizeObserver = new ResizeObserver(reflow);
+                grid._bingsuResizeObserver.observe(grid);
             } else {
                 window.addEventListener('resize', reflow, { passive: true });
             }
@@ -128,7 +128,7 @@ window.OnigiriEngine = {
         // Permit a little compression, then reflow instead of reducing a card
         // to a sliver. Measure the panel, so sidebar resizing works as well.
         // Phones fit two compact columns rather than one stretched one.
-        const phone = !!(window.OnigiriMobile && OnigiriMobile.isPhone());
+        const phone = !!(window.BingsuMobile && BingsuMobile.isPhone());
         const minColumn = phone
             ? 140
             : Math.max(200, (Number(grid.dataset.gridColumnWidth) || 250) * 0.8);
@@ -136,8 +136,8 @@ window.OnigiriEngine = {
             Math.floor((grid.clientWidth + 15) / (minColumn + 15))));
         if (!grid.clientWidth || grid.dataset.activeColumns === String(columns)) return;
         grid.dataset.activeColumns = String(columns);
-        if (!grid._onigiriSavedTiles) {
-            grid._onigiriSavedTiles = Array.from(grid.children)
+        if (!grid._bingsuSavedTiles) {
+            grid._bingsuSavedTiles = Array.from(grid.children)
                 .filter(element => element.style.gridArea)
                 .map(element => {
                     const area = element.style.gridArea;
@@ -146,7 +146,7 @@ window.OnigiriEngine = {
                         element, area,
                         row: Number(parts[0]) || 1, col: Number(parts[1]) || 1,
                         rows: Number(parts[2]) || 1, cols: Number(parts[3]) || 1,
-                        title: !!element.querySelector?.('.onigiri-widget-title'),
+                        title: !!element.querySelector?.('.bingsu-widget-title'),
                     };
                 }).sort((a, b) => a.row - b.row || a.col - b.col);
         }
@@ -154,7 +154,7 @@ window.OnigiriEngine = {
             grid.style.gridTemplateColumns = '';
             grid.style.gridTemplateRows = '';
             grid.style.gridAutoRows = '';
-            grid._onigiriSavedTiles.forEach(tile => { tile.element.style.gridArea = tile.area; });
+            grid._bingsuSavedTiles.forEach(tile => { tile.element.style.gridArea = tile.area; });
             return;
         }
         grid.style.gridTemplateColumns = `repeat(${columns}, minmax(0, 1fr))`;
@@ -168,7 +168,7 @@ window.OnigiriEngine = {
         const occupied = new Set();
         const titleRows = new Set();
         let cursor = 0;
-        grid._onigiriSavedTiles.forEach(tile => {
+        grid._bingsuSavedTiles.forEach(tile => {
             const span = Math.min(columns, tile.cols);
             const tileRows = rowsOf(tile);
             let row, col;
@@ -214,9 +214,9 @@ window.OnigiriEngine = {
         // not need a timer that could fire against a destroyed webview.
         if (this._deckNavigationPending) return false;
         this._deckNavigationPending = true;
-        document.documentElement.classList.add('onigiri-deck-navigation-pending');
-        if (typeof window.__onigiriReleasePageGraphics === 'function') {
-            window.__onigiriReleasePageGraphics();
+        document.documentElement.classList.add('bingsu-deck-navigation-pending');
+        if (typeof window.__bingsuReleasePageGraphics === 'function') {
+            window.__bingsuReleasePageGraphics();
         }
         // Give Chromium one task boundary to release GPU resources before the
         // shared main webview is replaced by the Overview page.
@@ -225,7 +225,7 @@ window.OnigiriEngine = {
     },
 
     systemIconUrl: function (filename) {
-        const pkg = (window.ONIGIRI_CONFIG && window.ONIGIRI_CONFIG.addonPackage) || '';
+        const pkg = (window.BINGSU_CONFIG && window.BINGSU_CONFIG.addonPackage) || '';
         if (!pkg || !filename) return '';
         const aliases = {
             'add_subdeck.svg': 'add-subdeck.svg',
@@ -351,7 +351,7 @@ window.OnigiriEngine = {
     },
 
     getSidebarProfileBar: function () {
-        return document.querySelector('.sidebar-expanded-content > .profile-bar, .sidebar-expanded-content .profile-bar, .sidebar-expanded-content > .onigiri-profile, .sidebar-expanded-content .onigiri-profile');
+        return document.querySelector('.sidebar-expanded-content > .profile-bar, .sidebar-expanded-content .profile-bar, .sidebar-expanded-content > .bingsu-profile, .sidebar-expanded-content .bingsu-profile');
     },
 
     updateSidebarProfileMetrics: function () {
@@ -362,7 +362,7 @@ window.OnigiriEngine = {
         const fallbackWidth = profileBar.parentElement ? profileBar.parentElement.clientWidth : profileBar.offsetWidth;
         const headerWidth = header ? Math.floor(header.getBoundingClientRect().width) : fallbackWidth;
         const width = Math.max(0, headerWidth || fallbackWidth || 0);
-        profileBar.style.setProperty('--onigiri-deck-header-width', `${width}px`);
+        profileBar.style.setProperty('--bingsu-deck-header-width', `${width}px`);
         if (width) profileBar.style.width = `${width}px`;
     },
 
@@ -398,7 +398,7 @@ window.OnigiriEngine = {
         const list = this.deckListContainer;
         if (!list) return null;
         const root = document.documentElement;
-        if (root.classList.contains('onigiri-phone')) {
+        if (root.classList.contains('bingsu-phone')) {
             const column = document.querySelector('.container.modern-main-menu');
             if (column && column.scrollHeight > column.clientHeight) return column;
         }
@@ -414,7 +414,7 @@ window.OnigiriEngine = {
     },
 
     bindDeckSearchControls: function () {
-        const searchInput = document.getElementById('onigiri-deck-search-input');
+        const searchInput = document.getElementById('bingsu-deck-search-input');
         if (searchInput && !searchInput.dataset.searchBound) {
             searchInput.dataset.searchBound = 'true';
             searchInput.addEventListener('input', (event) => this._filterDecks(event.target.value));
@@ -425,7 +425,7 @@ window.OnigiriEngine = {
             });
         }
 
-        const searchClose = document.getElementById('onigiri-deck-search-close');
+        const searchClose = document.getElementById('bingsu-deck-search-close');
         if (searchClose && !searchClose.dataset.searchBound) {
             searchClose.dataset.searchBound = 'true';
             searchClose.addEventListener('click', () => this._closeDeckSearch());
@@ -433,8 +433,8 @@ window.OnigiriEngine = {
     },
 
     toggleDeckSearch: function () {
-        const bar = document.getElementById('onigiri-deck-search-bar');
-        const input = document.getElementById('onigiri-deck-search-input');
+        const bar = document.getElementById('bingsu-deck-search-bar');
+        const input = document.getElementById('bingsu-deck-search-input');
         if (!bar || !input) return;
 
         if (bar.classList.contains('is-visible')) {
@@ -455,8 +455,8 @@ window.OnigiriEngine = {
     },
 
     _closeDeckSearch: function () {
-        const bar = document.getElementById('onigiri-deck-search-bar');
-        const input = document.getElementById('onigiri-deck-search-input');
+        const bar = document.getElementById('bingsu-deck-search-bar');
+        const input = document.getElementById('bingsu-deck-search-input');
         if (!bar || !input) return;
 
         window.clearTimeout(this._searchDebounceTimer);
@@ -474,10 +474,10 @@ window.OnigiriEngine = {
         const nextQuery = (query || '').trim();
         window.clearTimeout(this._searchDebounceTimer);
         this._searchDebounceTimer = window.setTimeout(() => {
-            const mode = window.ONIGIRI_CONFIG && window.ONIGIRI_CONFIG.sidebarContentMode;
+            const mode = window.BINGSU_CONFIG && window.BINGSU_CONFIG.sidebarContentMode;
             const command = mode === 'tags'
-                ? 'onigiri_tag_search:'
-                : 'onigiri_deck_search:';
+                ? 'bingsu_tag_search:'
+                : 'bingsu_deck_search:';
             pycmd(command + nextQuery);
         }, 150);
     },
@@ -493,8 +493,8 @@ window.OnigiriEngine = {
     },
 
     bindGlobalSelectionKeys: function () {
-        if (document.body.dataset.onigiriMultiSelectKeysBound) return;
-        document.body.dataset.onigiriMultiSelectKeysBound = 'true';
+        if (document.body.dataset.bingsuMultiSelectKeysBound) return;
+        document.body.dataset.bingsuMultiSelectKeysBound = 'true';
         document.addEventListener('keydown', (event) => {
             const target = event.target;
             const isTyping = target && (
@@ -528,16 +528,16 @@ window.OnigiriEngine = {
         const row = rows[index];
 
         if (this.controllerFocusedRow) {
-            this.controllerFocusedRow.classList.remove('onigiri-controller-focused');
+            this.controllerFocusedRow.classList.remove('bingsu-controller-focused');
         }
-        if (!document.getElementById('onigiri-controller-focus-style')) {
+        if (!document.getElementById('bingsu-controller-focus-style')) {
             const style = document.createElement('style');
-            style.id = 'onigiri-controller-focus-style';
-            style.textContent = '.onigiri-controller-focused { outline: 2px solid #86E76E !important; outline-offset: -2px !important; }';
+            style.id = 'bingsu-controller-focus-style';
+            style.textContent = '.bingsu-controller-focused { outline: 2px solid #86E76E !important; outline-offset: -2px !important; }';
             document.head.appendChild(style);
         }
         this.controllerFocusedRow = row;
-        row.classList.add('onigiri-controller-focused');
+        row.classList.add('bingsu-controller-focused');
         row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
         return true;
     },
@@ -549,7 +549,7 @@ window.OnigiriEngine = {
             : rows[0];
         const link = row && row.querySelector('a.deck');
         if (!link) return false;
-        // The normal anchor click is intercepted by Onigiri's delayed
+        // The normal anchor click is intercepted by Bingsu's delayed
         // single/double-click handler.  Controller selection is explicit,
         // so invoke Anki's deck command directly and open on the first press.
         if (typeof pycmd === 'function' && row.dataset.did) {
@@ -561,15 +561,15 @@ window.OnigiriEngine = {
     },
 
     toggleProfile: function () {
-        if (window.OnigiriProfileSidebar && typeof window.OnigiriProfileSidebar.toggle === 'function') {
-            window.OnigiriProfileSidebar.toggle();
+        if (window.BingsuProfileSidebar && typeof window.BingsuProfileSidebar.toggle === 'function') {
+            window.BingsuProfileSidebar.toggle();
             return true;
         }
         const profileBar = document.querySelector(
             '.sidebar-expanded-content > .profile-bar, '
             + '.sidebar-expanded-content .profile-bar, '
-            + '.sidebar-expanded-content > .onigiri-profile, '
-            + '.sidebar-expanded-content .onigiri-profile'
+            + '.sidebar-expanded-content > .bingsu-profile, '
+            + '.sidebar-expanded-content .bingsu-profile'
         );
         if (profileBar) {
             profileBar.click();
@@ -579,8 +579,8 @@ window.OnigiriEngine = {
     },
 
     closeProfile: function () {
-        if (window.OnigiriProfileSidebar && typeof window.OnigiriProfileSidebar.close === 'function') {
-            window.OnigiriProfileSidebar.close();
+        if (window.BingsuProfileSidebar && typeof window.BingsuProfileSidebar.close === 'function') {
+            window.BingsuProfileSidebar.close();
             return true;
         }
         return false;
@@ -637,14 +637,14 @@ window.OnigiriEngine = {
     },
 
     updateMultiSelectBadge: function () {
-        let badge = document.getElementById('onigiri-multiselect-badge');
+        let badge = document.getElementById('bingsu-multiselect-badge');
         if (this._multiSelectedDecks.size === 0) {
             if (badge) badge.remove();
             return;
         }
         if (!badge) {
             badge = document.createElement('span');
-            badge.id = 'onigiri-multiselect-badge';
+            badge.id = 'bingsu-multiselect-badge';
             badge.setAttribute('role', 'button');
         badge.tabIndex = 0;
         // Set tabindex for accessibility
@@ -656,7 +656,7 @@ window.OnigiriEngine = {
             });
         }
         const actions = document.querySelector('#deck-list-header .deck-header-actions');
-        const searchBtn = document.getElementById('onigiri-search-toolbar-btn');
+        const searchBtn = document.getElementById('bingsu-search-toolbar-btn');
         if (actions && badge.parentElement !== actions) {
             actions.insertBefore(badge, searchBtn && searchBtn.parentElement === actions ? searchBtn : actions.firstChild);
         } else if (!actions && badge.parentElement !== document.body) {
@@ -701,7 +701,7 @@ window.OnigiriEngine = {
         // iOS sends mouseenter/mousemove for every tap; the row then kept
         // its hover highlight after the finger lifted. Only a real pointer
         // (mouse, trackpad) highlights rows.
-        const hasHover = () => !document.documentElement.classList.contains('onigiri-touch') ||
+        const hasHover = () => !document.documentElement.classList.contains('bingsu-touch') ||
             (window.matchMedia && window.matchMedia('(any-hover: hover)').matches);
         this.deckListContainer.addEventListener('mouseenter', (event) => {
             if (!hasHover()) return;
@@ -803,7 +803,7 @@ window.OnigiriEngine = {
 
         document.addEventListener('click', (event) => {
             if (this._multiSelectedDecks.size === 0) return;
-            if (event.target.closest('#deck-list-container, .onigiri-quick-menu, #onigiri-multiselect-badge, #onigiri-edit-toolbar, #onigiri-select-toggle, #onigiri-sheet-backdrop')) return;
+            if (event.target.closest('#deck-list-container, .bingsu-quick-menu, #bingsu-multiselect-badge, #bingsu-edit-toolbar, #bingsu-select-toggle, #bingsu-sheet-backdrop')) return;
             this.clearMultiSelection();
         });
 
@@ -820,21 +820,21 @@ window.OnigiriEngine = {
             this.showDeckContextMenu(event.clientX, event.clientY, deckRow.dataset.did);
         });
 
-        if (!document.body.dataset.onigiriFilterStateBound) {
-            document.body.dataset.onigiriFilterStateBound = 'true';
+        if (!document.body.dataset.bingsuFilterStateBound) {
+            document.body.dataset.bingsuFilterStateBound = 'true';
             document.addEventListener('click', (event) => {
                 const clickable = event.target.closest('[onclick]');
                 if (!clickable) return;
                 const onclick = clickable.getAttribute('onclick') || '';
-                if (onclick.includes('onigiri_filter_favourites') || onclick.includes('onigiri_filter_favorites')) {
-                    window.ONIGIRI_CONFIG = window.ONIGIRI_CONFIG || {};
-                    window.ONIGIRI_CONFIG.filters = window.ONIGIRI_CONFIG.filters || {};
-                    window.ONIGIRI_CONFIG.filters.favorites = !window.ONIGIRI_CONFIG.filters.favorites;
+                if (onclick.includes('bingsu_filter_favourites') || onclick.includes('bingsu_filter_favorites')) {
+                    window.BINGSU_CONFIG = window.BINGSU_CONFIG || {};
+                    window.BINGSU_CONFIG.filters = window.BINGSU_CONFIG.filters || {};
+                    window.BINGSU_CONFIG.filters.favorites = !window.BINGSU_CONFIG.filters.favorites;
                     this.applyFilterButtonStates();
-                } else if (onclick.includes('onigiri_filter_marked')) {
-                    window.ONIGIRI_CONFIG = window.ONIGIRI_CONFIG || {};
-                    window.ONIGIRI_CONFIG.filters = window.ONIGIRI_CONFIG.filters || {};
-                    window.ONIGIRI_CONFIG.filters.marked = !window.ONIGIRI_CONFIG.filters.marked;
+                } else if (onclick.includes('bingsu_filter_marked')) {
+                    window.BINGSU_CONFIG = window.BINGSU_CONFIG || {};
+                    window.BINGSU_CONFIG.filters = window.BINGSU_CONFIG.filters || {};
+                    window.BINGSU_CONFIG.filters.marked = !window.BINGSU_CONFIG.filters.marked;
                     this.applyFilterButtonStates();
                 }
             }, true);
@@ -845,10 +845,10 @@ window.OnigiriEngine = {
     },
 
     applyFilterButtonStates: function () {
-        const filters = (window.ONIGIRI_CONFIG && window.ONIGIRI_CONFIG.filters) || {};
+        const filters = (window.BINGSU_CONFIG && window.BINGSU_CONFIG.filters) || {};
         [
-            { key: 'favorites', commands: ['onigiri_filter_favourites', 'onigiri_filter_favorites'] },
-            { key: 'marked', commands: ['onigiri_filter_marked'] },
+            { key: 'favorites', commands: ['bingsu_filter_favourites', 'bingsu_filter_favorites'] },
+            { key: 'marked', commands: ['bingsu_filter_marked'] },
         ].forEach(filter => {
             const active = !!filters[filter.key];
             filter.commands.forEach(command => {
@@ -891,16 +891,16 @@ window.OnigiriEngine = {
         const dragBorder = (sidebarStyle.getPropertyValue('--border') || '').trim()
             || (isDarkPreview ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.1)');
 
-        preview.className = ['onigiri-drag-preview', isDarkPreview ? 'is-dark' : 'is-light', ...typeClasses].join(' ');
+        preview.className = ['bingsu-drag-preview', isDarkPreview ? 'is-dark' : 'is-light', ...typeClasses].join(' ');
         if (row.dataset.did) preview.dataset.did = row.dataset.did;
         preview.style.cssText = [
             'position:fixed',
             'z-index:9998',
             'pointer-events:none',
-            `--onigiri-drag-bg:${dragBg}`,
-            `--onigiri-drag-fg:${dragFg}`,
-            `--onigiri-drag-subtle:${dragSubtle}`,
-            `--onigiri-drag-border:${dragBorder}`,
+            `--bingsu-drag-bg:${dragBg}`,
+            `--bingsu-drag-fg:${dragFg}`,
+            `--bingsu-drag-subtle:${dragSubtle}`,
+            `--bingsu-drag-border:${dragBorder}`,
             `width:${Math.min(Math.max(rect.width, 260), 520)}px`,
             `top:${rect.top}px`,
             `left:${rect.left}px`,
@@ -933,12 +933,12 @@ window.OnigiriEngine = {
             : [row];
         const sourceIds = sourceRows.map(item => item.dataset.did);
         sourceRows.forEach(item => item.classList.add('is-dragging'));
-        document.body.classList.add('onigiri-is-dragging');
+        document.body.classList.add('bingsu-is-dragging');
         const ghost = this._dndCreateGhost(row);
         if (sourceIds.length > 1) {
             ghost.classList.add('is-multi-drag');
             const count = document.createElement('span');
-            count.className = 'onigiri-drag-count';
+            count.className = 'bingsu-drag-count';
             count.textContent = `${sourceIds.length} decks`;
             ghost.appendChild(count);
         }
@@ -976,7 +976,7 @@ window.OnigiriEngine = {
         // the bottom bar (tab bar / edit toolbar)
         let top = Math.max(rect.top, 0);
         let bottom = Math.min(rect.bottom, window.innerHeight);
-        const bar = document.getElementById('onigiri-edit-toolbar');
+        const bar = document.getElementById('bingsu-edit-toolbar');
         if (bar && bar.offsetHeight) bottom = Math.min(bottom, bar.getBoundingClientRect().top);
         const y = this._dnd.lastClientY;
         const zone = 48;
@@ -1076,7 +1076,7 @@ window.OnigiriEngine = {
         }
 
         state.ghostEl.remove();
-        document.body.classList.remove('onigiri-is-dragging');
+        document.body.classList.remove('bingsu-is-dragging');
         (state.sourceRows || [state.sourceRow]).forEach(row => row.classList.remove('is-dragging'));
         if (state.placeholder) state.placeholder.remove();
         this.deckListContainer.querySelectorAll('.drag-over-target, .drop-before, .drop-after')
@@ -1105,7 +1105,7 @@ window.OnigiriEngine = {
         if (!sourceDid || !targetDid) return;
 
         if (state.lastInsertType === 'nest') {
-            pycmd('onigiri_drag_drop:' + JSON.stringify({
+            pycmd('bingsu_drag_drop:' + JSON.stringify({
                 source_did: sourceDid,
                 source_dids: sourceDids,
                 target_did: targetDid,
@@ -1121,7 +1121,7 @@ window.OnigiriEngine = {
         const targetIndex = newOrder.indexOf(targetDid);
         if (targetIndex === -1) return;
         newOrder.splice(state.lastInsertType === 'before' ? targetIndex : targetIndex + 1, 0, ...sourceDids);
-        pycmd('onigiri_drag_drop:' + JSON.stringify({
+        pycmd('bingsu_drag_drop:' + JSON.stringify({
             source_did: sourceDid,
             source_dids: sourceDids,
             target_did: targetDid,
@@ -1186,7 +1186,7 @@ window.OnigiriEngine = {
                     if (clickableCell && !el.querySelector('.drag-handle')) {
                         const handle = document.createElement('span');
                         handle.className = 'drag-handle';
-                        handle.title = ONIGIRI_T('drag_to_reorder_or_move', 'Drag to reorder or move');
+                        handle.title = BINGSU_T('drag_to_reorder_or_move', 'Drag to reorder or move');
                         handle.innerHTML = '<svg viewBox="0 0 48 48" width="12" height="12" fill="currentColor" aria-hidden="true"><circle cx="16" cy="12" r="4"/><circle cx="32" cy="12" r="4"/><circle cx="16" cy="24" r="4"/><circle cx="32" cy="24" r="4"/><circle cx="16" cy="36" r="4"/><circle cx="32" cy="36" r="4"/></svg>';
                         handle.style.touchAction = 'none';
                         handle.addEventListener('pointerdown', (event) => {
@@ -1203,12 +1203,12 @@ window.OnigiriEngine = {
     },
 
     iconUrl: function (name) {
-        const pkg = (window.ONIGIRI_CONFIG && window.ONIGIRI_CONFIG.addonPackage) || '';
+        const pkg = (window.BINGSU_CONFIG && window.BINGSU_CONFIG.addonPackage) || '';
         return pkg ? `/_addons/${pkg}/system_files/system_icons/unavailable_for_users/${name}.svg` : '';
     },
 
     closeQuickMenus: function () {
-        document.querySelectorAll('.onigiri-quick-menu').forEach(menu => menu.remove());
+        document.querySelectorAll('.bingsu-quick-menu').forEach(menu => menu.remove());
         document.querySelectorAll('tr.deck.ctx-row-active').forEach(row => row.classList.remove('ctx-row-active'));
         document.body.classList.remove('ctx-menu-open');
     },
@@ -1218,7 +1218,7 @@ window.OnigiriEngine = {
         icon.className = 'quick-menu-icon';
         const available = String(name || '').startsWith('available:');
         const iconName = available ? String(name).slice('available:'.length) : name;
-        const pkg = (window.ONIGIRI_CONFIG && window.ONIGIRI_CONFIG.addonPackage) || '';
+        const pkg = (window.BINGSU_CONFIG && window.BINGSU_CONFIG.addonPackage) || '';
         const url = available && pkg
             ? `/_addons/${pkg}/system_files/system_icons/available_for_users/${iconName}.svg`
             : this.iconUrl(iconName);
@@ -1261,8 +1261,8 @@ window.OnigiriEngine = {
         row.addEventListener('click', () => {
             this.closeQuickMenus();
             if (item.sortMode) {
-                window.ONIGIRI_CONFIG = window.ONIGIRI_CONFIG || {};
-                window.ONIGIRI_CONFIG.deckSortMode = item.sortMode;
+                window.BINGSU_CONFIG = window.BINGSU_CONFIG || {};
+                window.BINGSU_CONFIG.deckSortMode = item.sortMode;
             }
             if (item.command) pycmd(item.command);
         });
@@ -1284,14 +1284,14 @@ window.OnigiriEngine = {
         row.appendChild(arrow);
 
         const submenu = document.createElement('div');
-        submenu.className = 'onigiri-quick-menu quick-menu-submenu';
+        submenu.className = 'bingsu-quick-menu quick-menu-submenu';
         group.items.forEach(item => this.appendMenuItem(submenu, item));
         row.appendChild(submenu);
         // Touch has no hover: a tap on the group opens its submenu instead of
         // reaching the document listener that closes the whole menu.
         row.addEventListener('click', (event) => {
             if (event.target.closest('.quick-menu-submenu')) return;
-            if (!(window.OnigiriMobile && OnigiriMobile.isTouch())) return;
+            if (!(window.BingsuMobile && BingsuMobile.isTouch())) return;
             event.stopPropagation();
             const wasOpen = row.classList.contains('is-open');
             menu.querySelectorAll('.quick-menu-group.is-open').forEach(g => g.classList.remove('is-open'));
@@ -1301,7 +1301,7 @@ window.OnigiriEngine = {
     },
 
     positionMenu: function (menu, x, y) {
-        if (window.OnigiriMobile && OnigiriMobile.isPhone()) {
+        if (window.BingsuMobile && BingsuMobile.isPhone()) {
             // Phones: a bottom sheet within thumb reach, not a cursor popup.
             menu.classList.add('is-sheet');
             document.body.appendChild(menu);
@@ -1344,27 +1344,27 @@ window.OnigiriEngine = {
         const currentMark = row ? row.dataset.mark : '';
 
         const menu = document.createElement('div');
-        menu.className = 'onigiri-quick-menu';
+        menu.className = 'bingsu-quick-menu';
 
         [
-            { label: ONIGIRI_T('ctx_rename', 'Rename'), icon: 'rename', command: `onigiri_ctx_rename:${did}` },
-            { label: ONIGIRI_T('add_subdeck_title', 'Add Subdeck'), icon: 'add-subdeck', command: `onigiri_ctx_subdeck:${did}` },
-            { label: ONIGIRI_T('ctx_move_to', 'Move To'), icon: 'move_deck', command: `onigiri_ctx_move_to:${did}` },
-            { label: ONIGIRI_T('ctx_change_icon', 'Change Icon'), icon: 'edit_icon', command: `onigiri_ctx_change_icon:${did}` },
+            { label: BINGSU_T('ctx_rename', 'Rename'), icon: 'rename', command: `bingsu_ctx_rename:${did}` },
+            { label: BINGSU_T('add_subdeck_title', 'Add Subdeck'), icon: 'add-subdeck', command: `bingsu_ctx_subdeck:${did}` },
+            { label: BINGSU_T('ctx_move_to', 'Move To'), icon: 'move_deck', command: `bingsu_ctx_move_to:${did}` },
+            { label: BINGSU_T('ctx_change_icon', 'Change Icon'), icon: 'edit_icon', command: `bingsu_ctx_change_icon:${did}` },
             {
                 label: isFavorite ? 'Remove Favorite' : 'Favorite',
                 icon: isFavorite ? 'star_cancel' : 'star_outline',
-                command: `onigiri_toggle_favorite:${did}`,
+                command: `bingsu_toggle_favorite:${did}`,
             },
         ].forEach(item => this.appendMenuItem(menu, item));
 
         menu.appendChild(document.createElement('hr'));
 
-        const markerColors = (window.ONIGIRI_CONFIG && window.ONIGIRI_CONFIG.markerColors) || {};
-        const markerIcons = (window.ONIGIRI_CONFIG && window.ONIGIRI_CONFIG.markerIcons) || {};
-        const markerNames = (window.ONIGIRI_CONFIG && window.ONIGIRI_CONFIG.markerNames) || {};
+        const markerColors = (window.BINGSU_CONFIG && window.BINGSU_CONFIG.markerColors) || {};
+        const markerIcons = (window.BINGSU_CONFIG && window.BINGSU_CONFIG.markerIcons) || {};
+        const markerNames = (window.BINGSU_CONFIG && window.BINGSU_CONFIG.markerNames) || {};
         const markerDefaults = { red: '#ff4d4f', blue: '#4f95ff', green: '#45c878', yellow: '#ffc629' };
-        const nameDefaults = { red: ONIGIRI_T('marker_red', 'Red'), blue: ONIGIRI_T('marker_blue', 'Blue'), green: ONIGIRI_T('marker_green', 'Green'), yellow: ONIGIRI_T('marker_yellow', 'Yellow') };
+        const nameDefaults = { red: BINGSU_T('marker_red', 'Red'), blue: BINGSU_T('marker_blue', 'Blue'), green: BINGSU_T('marker_green', 'Green'), yellow: BINGSU_T('marker_yellow', 'Yellow') };
         
         const makeMarkerCustomNode = (key, color) => {
             const iconVal = markerIcons[key] || 'default';
@@ -1372,7 +1372,7 @@ window.OnigiriEngine = {
                 const el = document.createElement('span');
                 el.className = 'quick-menu-color-dot';
                 if (iconVal.startsWith('emoji:')) {
-                    const spriteUrl = onigiriEmojiSpriteUrl(iconVal);
+                    const spriteUrl = bingsuEmojiSpriteUrl(iconVal);
                     if (spriteUrl) {
                         el.style.backgroundColor = 'transparent';
                         el.style.backgroundImage = `url("${spriteUrl}")`;
@@ -1397,7 +1397,7 @@ window.OnigiriEngine = {
                         el.textContent = iconVal.replace('emoji:', '');
                     }
                 } else {
-                    const pkg = (window.ONIGIRI_CONFIG && window.ONIGIRI_CONFIG.addonPackage) || '1011095603';
+                    const pkg = (window.BINGSU_CONFIG && window.BINGSU_CONFIG.addonPackage) || '1011095603';
                     const iconUrl = iconVal.startsWith('system:') 
                         ? `/_addons/${pkg}/system_files/system_icons/unavailable_for_users/${iconVal.replace('system:', '')}`
                         : `/_addons/${pkg}/user_files/icons/${iconVal}`;
@@ -1418,7 +1418,7 @@ window.OnigiriEngine = {
         };
 
         this.appendMenuGroup(menu, {
-            label: ONIGIRI_T('markers', 'Markers'),
+            label: BINGSU_T('markers', 'Markers'),
             icon: 'mark_circle',
             items: ['red', 'blue', 'green', 'yellow'].map(key => {
                 const color = markerColors[key] || markerDefaults[key];
@@ -1427,37 +1427,37 @@ window.OnigiriEngine = {
                     color: color,
                     customNode: makeMarkerCustomNode(key, color),
                     selected: currentMark === key,
-                    command: `onigiri_ctx_mark:${did}:${key}`
+                    command: `bingsu_ctx_mark:${did}:${key}`
                 };
             }),
         });
 
         if (currentMark) {
-            this.appendMenuItem(menu, { label: ONIGIRI_T('ctx_remove_marker', 'Remove Marker'), icon: 'remove_mark', command: `onigiri_ctx_mark:${did}:none` });
+            this.appendMenuItem(menu, { label: BINGSU_T('ctx_remove_marker', 'Remove Marker'), icon: 'remove_mark', command: `bingsu_ctx_mark:${did}:none` });
         }
 
         menu.appendChild(document.createElement('hr'));
 
         const deckActions = [];
-        if (window.ONIGIRI_CONFIG && window.ONIGIRI_CONFIG.decklineAvailable) {
-            deckActions.push({ label: ONIGIRI_T('ctx_deadline', 'Deadline'), icon: 'bolt', command: `deadlineSettings:${did}` });
+        if (window.BINGSU_CONFIG && window.BINGSU_CONFIG.decklineAvailable) {
+            deckActions.push({ label: BINGSU_T('ctx_deadline', 'Deadline'), icon: 'bolt', command: `deadlineSettings:${did}` });
         }
-        if (window.ONIGIRI_CONFIG && window.ONIGIRI_CONFIG.fsrsHelperAvailable) {
-            deckActions.push({ label: 'FSRS4Anki Helper', icon: 'fsrs_helper', command: 'onigiri_open_fsrs_helper_menu' });
+        if (window.BINGSU_CONFIG && window.BINGSU_CONFIG.fsrsHelperAvailable) {
+            deckActions.push({ label: 'FSRS4Anki Helper', icon: 'fsrs_helper', command: 'bingsu_open_fsrs_helper_menu' });
         }
         if (isFiltered) {
             deckActions.push({
-                label: ONIGIRI_T('rebuild', 'Rebuild'),
+                label: BINGSU_T('rebuild', 'Rebuild'),
                 icon: 'sync',
-                command: `onigiri_ctx_rebuild:${did}`,
+                command: `bingsu_ctx_rebuild:${did}`,
             });
         }
         deckActions.push(
-            { label: ONIGIRI_T('ctx_addon_actions', 'Add-on actions') + '…', icon: 'options', command: `onigiri_ctx_addon_actions:${did}` },
-            { label: ONIGIRI_T('ctx_deck_options', 'Deck Options'), icon: 'options', command: `onigiri_ctx_options:${did}` },
-            { label: ONIGIRI_T('ctx_export_deck', 'Export Deck'), icon: 'export-deck', command: `onigiri_ctx_export:${did}` },
-            { label: ONIGIRI_T('ctx_copy_deck_id', 'Copy Deck ID'), icon: 'copy_id', command: `onigiri_ctx_copy_id:${did}` },
-            { label: ONIGIRI_T('ctx_delete_deck', 'Delete Deck'), icon: 'delete', danger: true, command: `onigiri_ctx_delete:${did}` },
+            { label: BINGSU_T('ctx_addon_actions', 'Add-on actions') + '…', icon: 'options', command: `bingsu_ctx_addon_actions:${did}` },
+            { label: BINGSU_T('ctx_deck_options', 'Deck Options'), icon: 'options', command: `bingsu_ctx_options:${did}` },
+            { label: BINGSU_T('ctx_export_deck', 'Export Deck'), icon: 'export-deck', command: `bingsu_ctx_export:${did}` },
+            { label: BINGSU_T('ctx_copy_deck_id', 'Copy Deck ID'), icon: 'copy_id', command: `bingsu_ctx_copy_id:${did}` },
+            { label: BINGSU_T('ctx_delete_deck', 'Delete Deck'), icon: 'delete', danger: true, command: `bingsu_ctx_delete:${did}` },
         );
         deckActions.forEach(item => this.appendMenuItem(menu, item));
 
@@ -1473,11 +1473,11 @@ window.OnigiriEngine = {
         document.body.classList.add('ctx-menu-open');
 
         const menu = document.createElement('div');
-        menu.className = 'onigiri-quick-menu';
+        menu.className = 'bingsu-quick-menu';
         this.appendMenuItem(menu, {
-            label: ONIGIRI_T('ctx_change_icon', 'Change Icon'),
+            label: BINGSU_T('ctx_change_icon', 'Change Icon'),
             icon: 'edit_icon',
-            command: `onigiri_tag_change_icon:${encodedTag}`,
+            command: `bingsu_tag_change_icon:${encodedTag}`,
         });
         const x = event ? event.clientX : 0;
         const y = event ? event.clientY : 0;
@@ -1492,11 +1492,11 @@ window.OnigiriEngine = {
         document.body.classList.add('ctx-menu-open');
 
         const menu = document.createElement('div');
-        menu.className = 'onigiri-quick-menu';
+        menu.className = 'bingsu-quick-menu';
         this.appendMenuItem(menu, {
-            label: ONIGIRI_T('ctx_remove_favorite', 'Remove Favorite'),
+            label: BINGSU_T('ctx_remove_favorite', 'Remove Favorite'),
             icon: 'star_cancel',
-            command: `onigiri_toggle_favorite:${did}`,
+            command: `bingsu_toggle_favorite:${did}`,
         });
         this.positionMenu(menu, event.clientX, event.clientY);
         return false;
@@ -1511,20 +1511,20 @@ window.OnigiriEngine = {
         const bulkPayload = encodeURIComponent(JSON.stringify({ dids }));
 
         const menu = document.createElement('div');
-        menu.className = 'onigiri-quick-menu';
+        menu.className = 'bingsu-quick-menu';
 
         [
-            { label: `Move ${dids.length} Decks`, icon: 'move_deck', command: `onigiri_ctx_move_to:${encodedDids}` },
-            { label: ONIGIRI_T('ctx_favorite_selected', 'Favorite Selected'), icon: 'star_filled', command: `onigiri_ctx_bulk_favorite:${bulkPayload}` },
-            { label: ONIGIRI_T('ctx_remove_favorites', 'Remove Favorites'), icon: 'star_cancel', command: `onigiri_ctx_bulk_unfavorite:${bulkPayload}` },
+            { label: `Move ${dids.length} Decks`, icon: 'move_deck', command: `bingsu_ctx_move_to:${encodedDids}` },
+            { label: BINGSU_T('ctx_favorite_selected', 'Favorite Selected'), icon: 'star_filled', command: `bingsu_ctx_bulk_favorite:${bulkPayload}` },
+            { label: BINGSU_T('ctx_remove_favorites', 'Remove Favorites'), icon: 'star_cancel', command: `bingsu_ctx_bulk_unfavorite:${bulkPayload}` },
         ].forEach(item => this.appendMenuItem(menu, item));
 
         menu.appendChild(document.createElement('hr'));
-        const markerColors = (window.ONIGIRI_CONFIG && window.ONIGIRI_CONFIG.markerColors) || {};
-        const markerIcons = (window.ONIGIRI_CONFIG && window.ONIGIRI_CONFIG.markerIcons) || {};
-        const markerNames = (window.ONIGIRI_CONFIG && window.ONIGIRI_CONFIG.markerNames) || {};
+        const markerColors = (window.BINGSU_CONFIG && window.BINGSU_CONFIG.markerColors) || {};
+        const markerIcons = (window.BINGSU_CONFIG && window.BINGSU_CONFIG.markerIcons) || {};
+        const markerNames = (window.BINGSU_CONFIG && window.BINGSU_CONFIG.markerNames) || {};
         const markerDefaults = { red: '#ff4d4f', blue: '#4f95ff', green: '#45c878', yellow: '#ffc629' };
-        const nameDefaults = { red: ONIGIRI_T('marker_red', 'Red'), blue: ONIGIRI_T('marker_blue', 'Blue'), green: ONIGIRI_T('marker_green', 'Green'), yellow: ONIGIRI_T('marker_yellow', 'Yellow') };
+        const nameDefaults = { red: BINGSU_T('marker_red', 'Red'), blue: BINGSU_T('marker_blue', 'Blue'), green: BINGSU_T('marker_green', 'Green'), yellow: BINGSU_T('marker_yellow', 'Yellow') };
         
         const makeMarkerCustomNodeBulk = (key, color) => {
             const iconVal = markerIcons[key] || 'default';
@@ -1532,7 +1532,7 @@ window.OnigiriEngine = {
                 const el = document.createElement('span');
                 el.className = 'quick-menu-color-dot';
                 if (iconVal.startsWith('emoji:')) {
-                    const spriteUrl = onigiriEmojiSpriteUrl(iconVal);
+                    const spriteUrl = bingsuEmojiSpriteUrl(iconVal);
                     if (spriteUrl) {
                         el.style.backgroundColor = 'transparent';
                         el.style.backgroundImage = `url("${spriteUrl}")`;
@@ -1557,7 +1557,7 @@ window.OnigiriEngine = {
                         el.textContent = iconVal.replace('emoji:', '');
                     }
                 } else {
-                    const pkg = (window.ONIGIRI_CONFIG && window.ONIGIRI_CONFIG.addonPackage) || '1011095603';
+                    const pkg = (window.BINGSU_CONFIG && window.BINGSU_CONFIG.addonPackage) || '1011095603';
                     const iconUrl = iconVal.startsWith('system:') 
                         ? `/_addons/${pkg}/system_files/system_icons/unavailable_for_users/${iconVal.replace('system:', '')}`
                         : `/_addons/${pkg}/user_files/icons/${iconVal}`;
@@ -1578,7 +1578,7 @@ window.OnigiriEngine = {
         };
 
         this.appendMenuGroup(menu, {
-            label: ONIGIRI_T('markers', 'Markers'),
+            label: BINGSU_T('markers', 'Markers'),
             icon: 'mark_circle',
             items: ['red', 'blue', 'green', 'yellow'].map(key => {
                 const color = markerColors[key] || markerDefaults[key];
@@ -1586,14 +1586,14 @@ window.OnigiriEngine = {
                     label: markerNames[key] || nameDefaults[key],
                     color: color,
                     customNode: makeMarkerCustomNodeBulk(key, color),
-                    command: `onigiri_ctx_bulk_mark:${encodeURIComponent(JSON.stringify({ dids, mark: key }))}`
+                    command: `bingsu_ctx_bulk_mark:${encodeURIComponent(JSON.stringify({ dids, mark: key }))}`
                 };
             }),
         });
-        this.appendMenuItem(menu, { label: ONIGIRI_T('ctx_remove_marker', 'Remove Marker'), icon: 'remove_mark', command: `onigiri_ctx_bulk_mark:${encodeURIComponent(JSON.stringify({ dids, mark: 'none' }))}` });
+        this.appendMenuItem(menu, { label: BINGSU_T('ctx_remove_marker', 'Remove Marker'), icon: 'remove_mark', command: `bingsu_ctx_bulk_mark:${encodeURIComponent(JSON.stringify({ dids, mark: 'none' }))}` });
 
         menu.appendChild(document.createElement('hr'));
-        this.appendMenuItem(menu, { label: ONIGIRI_T('delete_selected', 'Delete Selected'), icon: 'delete', danger: true, command: `onigiri_ctx_bulk_delete:${bulkPayload}` });
+        this.appendMenuItem(menu, { label: BINGSU_T('delete_selected', 'Delete Selected'), icon: 'delete', danger: true, command: `bingsu_ctx_bulk_delete:${bulkPayload}` });
         this.positionMenu(menu, x, y);
     },
 
@@ -1605,20 +1605,20 @@ window.OnigiriEngine = {
         this.closeQuickMenus();
 
         const menu = document.createElement('div');
-        menu.className = 'onigiri-quick-menu';
+        menu.className = 'bingsu-quick-menu';
         [
-            { label: ONIGIRI_T('add', 'Add'), icon: 'add-card', command: 'add' },
-            { label: ONIGIRI_T('browse', 'Browse'), icon: 'browse', command: 'browse' },
-            { label: ONIGIRI_T('stats', 'Stats'), icon: 'stats', command: 'stats' },
-            { label: ONIGIRI_T('sync', 'Sync'), icon: 'sync', command: 'sync' },
-            { label: ONIGIRI_T('settings', 'Settings'), icon: 'settings', command: 'openOnigiriSettings' },
-            ...(window.ONIGIRI_CONFIG?.studyToolsVisibility?.hashi_notes === false ? [] : [
-                { label: ONIGIRI_T('hashi_notes_title', 'Hashi Notes'), icon: 'hashi_notes', command: 'openHashiNotes:planner' },
+            { label: BINGSU_T('add', 'Add'), icon: 'add-card', command: 'add' },
+            { label: BINGSU_T('browse', 'Browse'), icon: 'browse', command: 'browse' },
+            { label: BINGSU_T('stats', 'Stats'), icon: 'stats', command: 'stats' },
+            { label: BINGSU_T('sync', 'Sync'), icon: 'sync', command: 'sync' },
+            { label: BINGSU_T('settings', 'Settings'), icon: 'settings', command: 'openBingsuSettings' },
+            ...(window.BINGSU_CONFIG?.studyToolsVisibility?.hashi_notes === false ? [] : [
+                { label: BINGSU_T('hashi_notes_title', 'Hashi Notes'), icon: 'hashi_notes', command: 'openHashiNotes:planner' },
             ]),
-            { label: ONIGIRI_T('onigiri_games', 'Bingsu Games'), icon: 'gamepad', command: 'openGamificationSettings' },
-            { label: ONIGIRI_T('get_shared', 'Get Shared'), icon: 'get_shared', command: 'shared' },
-            { label: ONIGIRI_T('create_deck', 'Create Deck'), icon: 'add-deck', command: 'onigiri_create_deck' },
-            { label: ONIGIRI_T('import_file', 'Import File'), icon: 'import_file', command: 'import' },
+            { label: BINGSU_T('bingsu_games', 'Bingsu Games'), icon: 'gamepad', command: 'openGamificationSettings' },
+            { label: BINGSU_T('get_shared', 'Get Shared'), icon: 'get_shared', command: 'shared' },
+            { label: BINGSU_T('create_deck', 'Create Deck'), icon: 'add-deck', command: 'bingsu_create_deck' },
+            { label: BINGSU_T('import_file', 'Import File'), icon: 'import_file', command: 'import' },
         ].forEach(item => this.appendMenuItem(menu, item));
 
         const rect = button.getBoundingClientRect();
@@ -1633,12 +1633,12 @@ window.OnigiriEngine = {
         this.closeQuickMenus();
 
         const menu = document.createElement('div');
-        menu.className = 'onigiri-quick-menu onigiri-ready-quick-menu';
+        menu.className = 'bingsu-quick-menu bingsu-ready-quick-menu';
         [
-            { label: ONIGIRI_T('ready_inbox', 'Inbox'), icon: 'available:lucide-inbox', command: 'onigiri_ready:inbox' },
-            { label: ONIGIRI_T('ready_warm_up', 'Warm up'), icon: 'available:lucide-flame', command: 'onigiri_ready:warm_up' },
-            { label: ONIGIRI_T('ready_today', 'Today'), icon: 'available:lucide-calendar-check', command: 'onigiri_ready:today' },
-            { label: ONIGIRI_T('ready_cool_down', 'Cool-Down'), icon: 'available:lucide-droplet', command: 'onigiri_ready:cool_down' },
+            { label: BINGSU_T('ready_inbox', 'Inbox'), icon: 'available:lucide-inbox', command: 'bingsu_ready:inbox' },
+            { label: BINGSU_T('ready_warm_up', 'Warm up'), icon: 'available:lucide-flame', command: 'bingsu_ready:warm_up' },
+            { label: BINGSU_T('ready_today', 'Today'), icon: 'available:lucide-calendar-check', command: 'bingsu_ready:today' },
+            { label: BINGSU_T('ready_cool_down', 'Cool-Down'), icon: 'available:lucide-droplet', command: 'bingsu_ready:cool_down' },
         ].forEach(item => this.appendMenuItem(menu, item));
 
         const rect = button.getBoundingClientRect();
@@ -1652,25 +1652,25 @@ window.OnigiriEngine = {
         }
         this.closeQuickMenus();
 
-        const current = (window.ONIGIRI_CONFIG && window.ONIGIRI_CONFIG.deckSortMode) || 'default';
+        const current = (window.BINGSU_CONFIG && window.BINGSU_CONFIG.deckSortMode) || 'default';
         const menu = document.createElement('div');
-        menu.className = 'onigiri-quick-menu';
+        menu.className = 'bingsu-quick-menu';
 
         [
-            { label: ONIGIRI_T('sort_default_order', 'Default order'), icon: 'sort_default', mode: 'default' },
-            { label: ONIGIRI_T('sort_a_to_z', 'A to Z'), icon: 'sort_custom', mode: 'alphabetical_az' },
-            { label: ONIGIRI_T('sort_z_to_a', 'Z to A'), icon: 'sort_custom', mode: 'alphabetical_za' },
-            { label: ONIGIRI_T('sort_most_due', 'Most due'), icon: 'sort_most_reviews', mode: 'most_due' },
-            { label: ONIGIRI_T('sort_most_new', 'Most new'), icon: 'sort_most_new', mode: 'most_new' },
-            { label: ONIGIRI_T('sort_most_reviews', 'Most reviews'), icon: 'stats', mode: 'most_reviews' },
-            { label: ONIGIRI_T('sort_favorites_first', 'Favorites first'), icon: 'star_outline', mode: 'favorites_first' },
-            { label: ONIGIRI_T('sort_custom_order', 'Custom order'), icon: 'sort_custom', mode: 'custom' },
+            { label: BINGSU_T('sort_default_order', 'Default order'), icon: 'sort_default', mode: 'default' },
+            { label: BINGSU_T('sort_a_to_z', 'A to Z'), icon: 'sort_custom', mode: 'alphabetical_az' },
+            { label: BINGSU_T('sort_z_to_a', 'Z to A'), icon: 'sort_custom', mode: 'alphabetical_za' },
+            { label: BINGSU_T('sort_most_due', 'Most due'), icon: 'sort_most_reviews', mode: 'most_due' },
+            { label: BINGSU_T('sort_most_new', 'Most new'), icon: 'sort_most_new', mode: 'most_new' },
+            { label: BINGSU_T('sort_most_reviews', 'Most reviews'), icon: 'stats', mode: 'most_reviews' },
+            { label: BINGSU_T('sort_favorites_first', 'Favorites first'), icon: 'star_outline', mode: 'favorites_first' },
+            { label: BINGSU_T('sort_custom_order', 'Custom order'), icon: 'sort_custom', mode: 'custom' },
         ].forEach(item => this.appendMenuItem(menu, {
             label: item.label,
             icon: item.icon,
             selected: item.mode === current,
             sortMode: item.mode,
-            command: `onigiri_sort:${item.mode}`,
+            command: `bingsu_sort:${item.mode}`,
         }));
 
         const rect = button.getBoundingClientRect();
@@ -1679,8 +1679,8 @@ window.OnigiriEngine = {
 
     /** Applies open/closed state classes to a collapse icon. */
     classifyCollapseIcon: function (el) {
-        if (el.dataset.onigiriClassified) return;
-        el.dataset.onigiriClassified = 'true';
+        if (el.dataset.bingsuClassified) return;
+        el.dataset.bingsuClassified = 'true';
         el.classList.remove('state-open', 'state-closed');
 
         if (el.textContent.trim() === '-') {
@@ -1694,16 +1694,16 @@ window.OnigiriEngine = {
 
 // Small stable bridge used by controller integrations. Keeping this separate
 // from the larger engine object avoids coupling callers to internal methods.
-window.OnigiriController = {
-    moveDeck: (delta) => window.OnigiriEngine.moveDeck(delta),
-    selectDeck: () => window.OnigiriEngine.selectDeck(),
-    toggleProfile: () => window.OnigiriEngine.toggleProfile(),
-    closeProfile: () => window.OnigiriEngine.closeProfile(),
+window.BingsuController = {
+    moveDeck: (delta) => window.BingsuEngine.moveDeck(delta),
+    selectDeck: () => window.BingsuEngine.selectDeck(),
+    toggleProfile: () => window.BingsuEngine.toggleProfile(),
+    closeProfile: () => window.BingsuEngine.closeProfile(),
 };
 
 // Initialize the engine once the DOM is ready.
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => OnigiriEngine.init());
+    document.addEventListener('DOMContentLoaded', () => BingsuEngine.init());
 } else {
-    OnigiriEngine.init();
+    BingsuEngine.init();
 }

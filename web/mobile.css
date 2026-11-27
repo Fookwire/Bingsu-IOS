@@ -1,19 +1,19 @@
-/* Onigiri on iPhone/iPad (Kioku). Loaded last on every Onigiri page.
+/* Bingsu on iPhone/iPad (Kioku). Loaded last on every Bingsu page.
  *
  * Classes on <html>, set by mobile.js before the body is parsed:
- *   .onigiri-touch   coarse pointer / no hover (iPhone, iPad without mouse)
- *   .onigiri-phone   viewport <= 600px (iPhone, iPad slide-over/split)
- *   .onigiri-tablet  touch and wider than a phone (iPad)
+ *   .bingsu-touch   coarse pointer / no hover (iPhone, iPad without mouse)
+ *   .bingsu-phone   viewport <= 600px (iPhone, iPad slide-over/split)
+ *   .bingsu-tablet  touch and wider than a phone (iPad)
  *
  * Kioku pads <html> by the safe area (notch, home indicator) through
  * --kioku-safe-left/right/bottom; position:fixed elements add it themselves.
  */
 
 :root {
-    --onigiri-safe-bottom: var(--kioku-safe-bottom, 0px);
-    --onigiri-safe-left: var(--kioku-safe-left, 0px);
-    --onigiri-safe-right: var(--kioku-safe-right, 0px);
-    --onigiri-phone-tabs-h: 60px;
+    --bingsu-safe-bottom: var(--kioku-safe-bottom, 0px);
+    --bingsu-safe-left: var(--kioku-safe-left, 0px);
+    --bingsu-safe-right: var(--kioku-safe-right, 0px);
+    --bingsu-phone-tabs-h: 60px;
 }
 
 /* ------------------------------------------------------------------------- */
@@ -56,32 +56,32 @@ html body:has(.modern-main-menu) {
 /* Touch basics                                                               */
 /* ------------------------------------------------------------------------- */
 
-html.onigiri-touch {
+html.bingsu-touch {
     -webkit-tap-highlight-color: transparent;
 }
 
 /* iOS shows its own link preview / copy callout on long-press, which would
    fight the long-press menus. Text inside cards keeps its callout. */
-html.onigiri-touch .modern-main-menu,
-html.onigiri-touch .onigiri-quick-menu,
-html.onigiri-touch #onigiri-phone-tabs,
-html.onigiri-touch #onigiri-reviewer-header {
+html.bingsu-touch .modern-main-menu,
+html.bingsu-touch .bingsu-quick-menu,
+html.bingsu-touch #bingsu-phone-tabs,
+html.bingsu-touch #bingsu-reviewer-header {
     -webkit-touch-callout: none;
 }
 
-html.onigiri-touch #deck-list-container tr.deck,
-html.onigiri-touch .onigiri-quick-menu {
+html.bingsu-touch #deck-list-container tr.deck,
+html.bingsu-touch .bingsu-quick-menu {
     -webkit-user-select: none;
     user-select: none;
 }
 
 /* ------------------------------------------------------------------------- */
-/* App feel on Onigiri's own screens (html.onigiri-app)                       */
+/* App feel on Bingsu's own screens (html.bingsu-app)                       */
 /* ------------------------------------------------------------------------- */
 
 /* No double-tap zoom or 300 ms tap delay; pinch-zoom on cards still works. */
-html.onigiri-touch.onigiri-app,
-html.onigiri-touch.onigiri-app body {
+html.bingsu-touch.bingsu-app,
+html.bingsu-touch.bingsu-app body {
     touch-action: manipulation;
     overflow-x: hidden;
     overflow-x: clip;
@@ -91,61 +91,61 @@ html.onigiri-touch.onigiri-app body {
 /* A drag inside a scrolling area ends at its edge instead of pulling the
    page (and with it the whole interface) along. Named scrollers only: a
    universal selector put this on every element of the page. */
-html.onigiri-touch.onigiri-app :is(.container.modern-main-menu, .osw-page-scroll, .osw-rail,
-    .onigiri-quick-menu, #onigiri-app-menu .oam-body, .onigiri-sidebar-profile) {
+html.bingsu-touch.bingsu-app :is(.container.modern-main-menu, .osw-page-scroll, .osw-rail,
+    .bingsu-quick-menu, #bingsu-app-menu .oam-body, .bingsu-sidebar-profile) {
     overscroll-behavior: contain;
 }
 
 /* Labels, buttons and lists are not text: no selection handles, no
    Copy/Look Up callout on long-press. Text fields and card content are. */
-html.onigiri-touch.onigiri-app body {
+html.bingsu-touch.bingsu-app body {
     -webkit-user-select: none;
     user-select: none;
     -webkit-touch-callout: none;
 }
 
-html.onigiri-touch.onigiri-app :is(input, textarea, select, [contenteditable]:not([contenteditable="false"]),
+html.bingsu-touch.bingsu-app :is(input, textarea, select, [contenteditable]:not([contenteditable="false"]),
     #qa, .selectable) {
     -webkit-user-select: text;
     user-select: text;
 }
 
-html.onigiri-touch.onigiri-app :is(#qa, #qa *, [contenteditable]:not([contenteditable="false"]) *) {
+html.bingsu-touch.bingsu-app :is(#qa, #qa *, [contenteditable]:not([contenteditable="false"]) *) {
     -webkit-user-select: text;
     user-select: text;
     -webkit-touch-callout: default;
 }
 
 /* A tapped control shows no focus ring (a keyboard still gets one). */
-html.onigiri-touch.onigiri-app :focus:not(:focus-visible) {
+html.bingsu-touch.bingsu-app :focus:not(:focus-visible) {
     outline: none !important;
 }
 
 /* Pressed: native controls dim the moment the finger lands (mobile.js
-   sets .onigiri-pressed on pointerdown) and fade back on release. */
-html.onigiri-touch.onigiri-app .onigiri-pressed {
+   sets .bingsu-pressed on pointerdown) and fade back on release. */
+html.bingsu-touch.bingsu-app .bingsu-pressed {
     opacity: 0.55 !important;
     transition: none !important;
 }
 
 /* List rows highlight instead of fading (like a table cell). */
-html.onigiri-touch.onigiri-app :is(tr.deck, .quick-menu-item, .osw-nav-item).onigiri-pressed {
+html.bingsu-touch.bingsu-app :is(tr.deck, .quick-menu-item, .osw-nav-item).bingsu-pressed {
     opacity: 1 !important;
     background-color: var(--highlight-bg, rgba(127, 127, 127, 0.16)) !important;
 }
 
-html.onigiri-touch tr.deck.onigiri-pressing {
+html.bingsu-touch tr.deck.bingsu-pressing {
     background-color: var(--highlight-bg) !important;
     transition: background-color 0.4s ease;
 }
 
 /* Reorder handles only in Edit mode (as in iOS lists): outside it a drag
    on a row always scrolls. In Edit mode they sit at the row's end. */
-html.onigiri-touch #deck-list-container tr.deck .drag-handle {
+html.bingsu-touch #deck-list-container tr.deck .drag-handle {
     display: none !important;
 }
 
-html.onigiri-touch.onigiri-select-mode #deck-list-container tr.deck .drag-handle {
+html.bingsu-touch.bingsu-select-mode #deck-list-container tr.deck .drag-handle {
     display: inline-flex !important;
     align-items: center;
     justify-content: center;
@@ -159,24 +159,24 @@ html.onigiri-touch.onigiri-select-mode #deck-list-container tr.deck .drag-handle
     visibility: visible;
 }
 
-html.onigiri-touch.onigiri-select-mode #deck-list-container tr.deck .drag-handle svg {
+html.bingsu-touch.bingsu-select-mode #deck-list-container tr.deck .drag-handle svg {
     width: 16px;
     height: 16px;
 }
 
 /* A tap leaves :hover on the element until the next tap elsewhere. */
 @media (hover: none) {
-    html.onigiri-touch tr.deck:hover:not(.ctx-row-active):not(.is-selected) {
+    html.bingsu-touch tr.deck:hover:not(.ctx-row-active):not(.is-selected) {
         background-color: transparent;
     }
 }
 
 /* Per-row "more" button replacing right-click on touch. */
-.onigiri-row-more-cell {
+.bingsu-row-more-cell {
     display: none;
 }
 
-html.onigiri-touch .onigiri-row-more-cell {
+html.bingsu-touch .bingsu-row-more-cell {
     display: flex;
     align-items: center;
     flex: 0 0 auto;
@@ -184,7 +184,7 @@ html.onigiri-touch .onigiri-row-more-cell {
     border: 0;
 }
 
-.onigiri-row-more {
+.bingsu-row-more {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -199,20 +199,20 @@ html.onigiri-touch .onigiri-row-more-cell {
     cursor: pointer;
 }
 
-.onigiri-row-more,
-.onigiri-row-more:focus,
-.onigiri-row-more:active {
+.bingsu-row-more,
+.bingsu-row-more:focus,
+.bingsu-row-more:active {
     background: transparent !important;
     box-shadow: none !important;
     outline: none !important;
 }
 
-html.onigiri-select-mode .onigiri-row-more-cell {
+html.bingsu-select-mode .bingsu-row-more-cell {
     display: none !important;
 }
 
 /* Edit mode: a selection circle leads each row. */
-html.onigiri-touch.onigiri-select-mode #deck-list-container tr.deck td.decktd::before {
+html.bingsu-touch.bingsu-select-mode #deck-list-container tr.deck td.decktd::before {
     content: "";
     flex: 0 0 auto;
     width: 22px;
@@ -223,22 +223,22 @@ html.onigiri-touch.onigiri-select-mode #deck-list-container tr.deck td.decktd::b
     border: 2px solid var(--fg-subtle, rgba(127, 127, 127, 0.6));
 }
 
-html.onigiri-touch.onigiri-select-mode #deck-list-container tr.deck.is-multi-selected td.decktd::before {
+html.bingsu-touch.bingsu-select-mode #deck-list-container tr.deck.is-multi-selected td.decktd::before {
     border-color: var(--accent-color, #0a84ff);
     background: var(--accent-color, #0a84ff) center / 14px 14px no-repeat
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4 4L19 7' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 
-html.onigiri-touch.onigiri-select-mode #deck-list-container tr.deck.is-multi-selected {
+html.bingsu-touch.bingsu-select-mode #deck-list-container tr.deck.is-multi-selected {
     background-color: transparent !important;
 }
 
 /* The desktop "N selected" chip: the Edit toolbar shows the count. */
-html.onigiri-touch #onigiri-multiselect-badge {
+html.bingsu-touch #bingsu-multiselect-badge {
     display: none !important;
 }
 
-.onigiri-select-toggle {
+.bingsu-select-toggle {
     width: auto !important;
     min-width: 44px;
     padding: 0 8px !important;
@@ -247,16 +247,16 @@ html.onigiri-touch #onigiri-multiselect-badge {
     color: var(--accent-color, var(--fg));
 }
 
-.onigiri-select-toggle[aria-pressed="true"] {
+.bingsu-select-toggle[aria-pressed="true"] {
     font-weight: 600;
 }
 
 /* Edit toolbar: replaces the tab bar while editing. */
-#onigiri-edit-toolbar {
+#bingsu-edit-toolbar {
     display: none;
 }
 
-html.onigiri-touch.onigiri-select-mode #onigiri-edit-toolbar {
+html.bingsu-touch.bingsu-select-mode #bingsu-edit-toolbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -266,15 +266,15 @@ html.onigiri-touch.onigiri-select-mode #onigiri-edit-toolbar {
     right: 0;
     bottom: 0;
     min-height: 52px;
-    padding: 4px calc(12px + var(--onigiri-safe-right)) calc(4px + var(--onigiri-safe-bottom)) calc(12px + var(--onigiri-safe-left));
+    padding: 4px calc(12px + var(--bingsu-safe-right)) calc(4px + var(--bingsu-safe-bottom)) calc(12px + var(--bingsu-safe-left));
     box-sizing: border-box;
-    background: var(--onigiri-surface, var(--canvas, #fff));
-    border-top: 0.5px solid var(--onigiri-surface-line, var(--border, rgba(127, 127, 127, 0.3)));
+    background: var(--bingsu-surface, var(--canvas, #fff));
+    border-top: 0.5px solid var(--bingsu-surface-line, var(--border, rgba(127, 127, 127, 0.3)));
     -webkit-backdrop-filter: saturate(180%) blur(20px);
     backdrop-filter: saturate(180%) blur(20px);
 }
 
-html #onigiri-edit-toolbar button {
+html #bingsu-edit-toolbar button {
     -webkit-appearance: none;
     appearance: none;
     min-width: 64px;
@@ -288,41 +288,41 @@ html #onigiri-edit-toolbar button {
     font-size: 17px;
 }
 
-html #onigiri-edit-toolbar button[data-act="done"] {
+html #bingsu-edit-toolbar button[data-act="done"] {
     font-weight: 600;
     text-align: right;
 }
 
-html #onigiri-edit-toolbar button:disabled {
+html #bingsu-edit-toolbar button:disabled {
     opacity: 0.35;
 }
 
-.onigiri-edit-count {
+.bingsu-edit-count {
     color: var(--fg-subtle, #888);
     font-size: 13px;
 }
 
-html.onigiri-select-mode #onigiri-phone-tabs {
+html.bingsu-select-mode #bingsu-phone-tabs {
     display: none !important;
 }
 
 /* Touch-sized deck rows and header buttons. */
-html.onigiri-touch #deck-list-container tr.deck {
+html.bingsu-touch #deck-list-container tr.deck {
     min-height: 48px;
 }
 
-html.onigiri-touch #deck-list-header .deck-header-btn {
+html.bingsu-touch #deck-list-header .deck-header-btn {
     min-width: 44px;
     min-height: 44px;
 }
 
 /* Names end in "…" before the count pills; the desktop runs the name under
    the first pill and fades it, which on a phone read as overlapping text. */
-html.onigiri-touch #deck-list-container {
-    --onigiri-name-overlap: 0px;
+html.bingsu-touch #deck-list-container {
+    --bingsu-name-overlap: 0px;
 }
 
-html.onigiri-touch #deck-list-container a.deck .deck-name {
+html.bingsu-touch #deck-list-container a.deck .deck-name {
     -webkit-mask-image: none !important;
     mask-image: none !important;
     overflow: hidden;
@@ -330,34 +330,34 @@ html.onigiri-touch #deck-list-container a.deck .deck-name {
     white-space: nowrap;
 }
 
-html.onigiri-touch #deck-list-container tr.deck .deck-counts {
+html.bingsu-touch #deck-list-container tr.deck .deck-counts {
     flex: 0 0 auto !important;
     max-width: none !important;
     margin-left: 8px !important;
 }
 
-html.onigiri-touch #deck-list-container tr.deck .deck-counts .zero {
+html.bingsu-touch #deck-list-container tr.deck .deck-counts .zero {
     display: none !important;
 }
 
 /* Collapse chevrons: a 44pt target around the 16px glyph. */
-html.onigiri-touch #deck-list-container tr.deck .collapse {
+html.bingsu-touch #deck-list-container tr.deck .collapse {
     position: relative;
 }
 
-html.onigiri-touch #deck-list-container tr.deck a.collapse::after {
+html.bingsu-touch #deck-list-container tr.deck a.collapse::after {
     content: "";
     position: absolute;
     inset: -14px -10px;
 }
 
 /* "Decks" as an iOS large title over the list. */
-html.onigiri-phone #deck-list-header {
+html.bingsu-phone #deck-list-header {
     min-height: 52px;
     align-items: center;
 }
 
-html.onigiri-phone #deck-list-header h2 {
+html.bingsu-phone #deck-list-header h2 {
     font-size: 28px !important;
     font-weight: 700 !important;
     letter-spacing: 0.01em !important;
@@ -370,40 +370,40 @@ html.onigiri-phone #deck-list-header h2 {
 /* Quick menus (deck / tag / sort): tap-to-open submenus, bottom sheet        */
 /* ------------------------------------------------------------------------- */
 
-html.onigiri-touch .onigiri-quick-menu .quick-menu-item {
+html.bingsu-touch .bingsu-quick-menu .quick-menu-item {
     min-height: 40px;
     font-size: 15px;
 }
 
 /* Submenus open on tap (engine.js toggles .is-open), not hover. */
-html.onigiri-touch .onigiri-quick-menu .quick-menu-group:hover > .quick-menu-submenu,
-html.onigiri-touch .onigiri-quick-menu .quick-menu-group:focus-within > .quick-menu-submenu {
+html.bingsu-touch .bingsu-quick-menu .quick-menu-group:hover > .quick-menu-submenu,
+html.bingsu-touch .bingsu-quick-menu .quick-menu-group:focus-within > .quick-menu-submenu {
     display: none;
 }
 
-html.onigiri-touch .onigiri-quick-menu .quick-menu-group.is-open > .quick-menu-submenu {
+html.bingsu-touch .bingsu-quick-menu .quick-menu-group.is-open > .quick-menu-submenu {
     display: block;
 }
 
-html.onigiri-touch .onigiri-quick-menu .quick-menu-group.is-open > .quick-menu-arrow {
+html.bingsu-touch .bingsu-quick-menu .quick-menu-group.is-open > .quick-menu-arrow {
     transform: rotate(90deg);
 }
 
-.onigiri-quick-menu.is-sheet .quick-menu-item {
+.bingsu-quick-menu.is-sheet .quick-menu-item {
     display: flex;
     align-items: center;
     cursor: pointer;
     line-height: 1.2;
 }
 
-.onigiri-quick-menu.is-sheet .onigiri-action-icon-host svg,
-.onigiri-quick-menu.is-sheet .onigiri-action-icon-host img {
+.bingsu-quick-menu.is-sheet .bingsu-action-icon-host svg,
+.bingsu-quick-menu.is-sheet .bingsu-action-icon-host img {
     width: 20px;
     height: 20px;
 }
 
 /* Mask-drawn glyphs (the reviewer dock's icons) take the row's colour. */
-.onigiri-quick-menu.is-sheet .onigiri-action-icon-host > [style*="mask-image"] {
+.bingsu-quick-menu.is-sheet .bingsu-action-icon-host > [style*="mask-image"] {
     display: block;
     width: 20px;
     height: 20px;
@@ -417,7 +417,7 @@ html.onigiri-touch .onigiri-quick-menu .quick-menu-group.is-open > .quick-menu-a
 }
 
 /* Rows without an icon (Menu) line up with the others. */
-.onigiri-quick-menu.onigiri-action-sheet .quick-menu-item > span:only-child {
+.bingsu-quick-menu.bingsu-action-sheet .quick-menu-item > span:only-child {
     padding-left: 34px;
 }
 
@@ -425,14 +425,14 @@ html.onigiri-touch .onigiri-quick-menu .quick-menu-group.is-open > .quick-menu-a
    handle, Cancel. mobile.js adds the backdrop, handle, Cancel and swipe.
    Colours are shades of the page's own background (mobile.js setSurfaces);
    this also covers pages without menu.css (overview, reviewer). */
-.onigiri-quick-menu.is-sheet {
+.bingsu-quick-menu.is-sheet {
     position: fixed;
     border-style: solid;
-    background: var(--onigiri-surface-raised, var(--onigiri-quick-menu-bg, var(--canvas-overlay, var(--canvas, #fff)))) !important;
-    border-color: var(--onigiri-surface-line, var(--border, rgba(127, 127, 127, 0.3))) !important;
-    color: var(--onigiri-surface-ink, var(--fg, inherit)) !important;
-    left: var(--onigiri-safe-left) !important;
-    right: var(--onigiri-safe-right) !important;
+    background: var(--bingsu-surface-raised, var(--bingsu-quick-menu-bg, var(--canvas-overlay, var(--canvas, #fff)))) !important;
+    border-color: var(--bingsu-surface-line, var(--border, rgba(127, 127, 127, 0.3))) !important;
+    color: var(--bingsu-surface-ink, var(--fg, inherit)) !important;
+    left: var(--bingsu-safe-left) !important;
+    right: var(--bingsu-safe-right) !important;
     top: auto !important;
     bottom: 0 !important;
     z-index: 100001 !important;
@@ -445,31 +445,31 @@ html.onigiri-touch .onigiri-quick-menu .quick-menu-group.is-open > .quick-menu-a
     box-sizing: border-box;
     border-radius: 14px 14px 0 0 !important;
     border-width: 0.5px 0 0 !important;
-    padding: 6px 10px calc(10px + var(--onigiri-safe-bottom)) !important;
+    padding: 6px 10px calc(10px + var(--bingsu-safe-bottom)) !important;
     box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3) !important;
-    animation: onigiri-sheet-in 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+    animation: bingsu-sheet-in 0.28s cubic-bezier(0.32, 0.72, 0, 1);
     transition: transform 0.2s ease;
 }
 
 
-.onigiri-quick-menu.is-sheet .onigiri-sheet-grabber {
+.bingsu-quick-menu.is-sheet .bingsu-sheet-grabber {
     touch-action: none;
     width: 36px;
     height: 5px;
     margin: 2px auto 10px;
     border-radius: 3px;
-    background: var(--onigiri-surface-line, rgba(127, 127, 127, 0.5));
+    background: var(--bingsu-surface-line, rgba(127, 127, 127, 0.5));
 }
 
 /* Grab handle area also starts the swipe. */
-.onigiri-quick-menu.is-sheet .onigiri-sheet-grabber::before {
+.bingsu-quick-menu.is-sheet .bingsu-sheet-grabber::before {
     content: "";
     display: block;
     height: 24px;
     margin: -10px -60px 0;
 }
 
-html.onigiri-touch .onigiri-quick-menu.is-sheet .quick-menu-item {
+html.bingsu-touch .bingsu-quick-menu.is-sheet .quick-menu-item {
     min-height: 50px;
     padding-left: 12px;
     padding-right: 12px;
@@ -478,25 +478,25 @@ html.onigiri-touch .onigiri-quick-menu.is-sheet .quick-menu-item {
     gap: 14px;
 }
 
-html.onigiri-touch .onigiri-quick-menu.is-sheet .quick-menu-icon,
-html.onigiri-touch .onigiri-quick-menu.is-sheet .onigiri-action-icon-host .icon {
+html.bingsu-touch .bingsu-quick-menu.is-sheet .quick-menu-icon,
+html.bingsu-touch .bingsu-quick-menu.is-sheet .bingsu-action-icon-host .icon {
     width: 20px;
     height: 20px;
     flex: 0 0 20px;
 }
 
-.onigiri-quick-menu.is-sheet hr {
+.bingsu-quick-menu.is-sheet hr {
     margin: 6px 12px;
     opacity: 0.6;
     border: 0;
-    border-top: 0.5px solid var(--onigiri-surface-line, rgba(127, 127, 127, 0.3));
+    border-top: 0.5px solid var(--bingsu-surface-line, rgba(127, 127, 127, 0.3));
 }
 
-.onigiri-sheet-cancel {
+.bingsu-sheet-cancel {
     display: none;
 }
 
-html .onigiri-quick-menu.is-sheet .onigiri-sheet-cancel {
+html .bingsu-quick-menu.is-sheet .bingsu-sheet-cancel {
     display: block;
     box-sizing: border-box;
     width: 100%;
@@ -505,9 +505,9 @@ html .onigiri-quick-menu.is-sheet .onigiri-sheet-cancel {
     margin: 10px 0 0;
     border: 0 !important;
     border-radius: 12px;
-    background: var(--onigiri-surface-fill, var(--highlight-bg, rgba(127, 127, 127, 0.14))) !important;
+    background: var(--bingsu-surface-fill, var(--highlight-bg, rgba(127, 127, 127, 0.14))) !important;
     box-shadow: none !important;
-    color: var(--onigiri-surface-ink, var(--fg, inherit)) !important;
+    color: var(--bingsu-surface-ink, var(--fg, inherit)) !important;
     font: inherit;
     font-size: 17px;
     font-weight: 600;
@@ -515,39 +515,39 @@ html .onigiri-quick-menu.is-sheet .onigiri-sheet-cancel {
 
 /* Group rows (Markers ›) push their items inside the sheet: the other rows
    go and the group row becomes the back row ‹ Markers. */
-.onigiri-quick-menu.is-sheet:has(> .quick-menu-group.is-open) > :is(.quick-menu-item:not(.is-open), hr) {
+.bingsu-quick-menu.is-sheet:has(> .quick-menu-group.is-open) > :is(.quick-menu-item:not(.is-open), hr) {
     display: none !important;
 }
 
-.onigiri-quick-menu.is-sheet .quick-menu-group {
+.bingsu-quick-menu.is-sheet .quick-menu-group {
     flex-wrap: wrap;
 }
 
-.onigiri-quick-menu.is-sheet .quick-menu-group.is-open {
+.bingsu-quick-menu.is-sheet .quick-menu-group.is-open {
     justify-content: flex-start !important;
     gap: 6px !important;
     background: transparent !important;
     font-weight: 600;
 }
 
-.onigiri-quick-menu.is-sheet .quick-menu-group.is-open > span:not(.quick-menu-arrow):not(.quick-menu-icon) {
+.bingsu-quick-menu.is-sheet .quick-menu-group.is-open > span:not(.quick-menu-arrow):not(.quick-menu-icon) {
     flex: 0 1 auto !important;
     margin: 0 !important;
     order: 0;
 }
 
-.onigiri-quick-menu.is-sheet .quick-menu-group.is-open > .quick-menu-arrow {
+.bingsu-quick-menu.is-sheet .quick-menu-group.is-open > .quick-menu-arrow {
     order: -1;
     margin: 0 !important;
     transform: rotate(180deg) !important;
     color: var(--accent-color, currentColor);
 }
 
-.onigiri-quick-menu.is-sheet .quick-menu-group.is-open > .quick-menu-icon {
+.bingsu-quick-menu.is-sheet .quick-menu-group.is-open > .quick-menu-icon {
     display: none;
 }
 
-.onigiri-quick-menu.is-sheet .quick-menu-submenu {
+.bingsu-quick-menu.is-sheet .quick-menu-submenu {
     position: static !important;
     flex-basis: 100%;
     margin: 8px -12px 0;
@@ -555,11 +555,11 @@ html .onigiri-quick-menu.is-sheet .onigiri-sheet-cancel {
     box-shadow: none !important;
     border: 0 !important;
     background: transparent !important;
-    animation: onigiri-push-in 0.22s ease-out;
+    animation: bingsu-push-in 0.22s ease-out;
     font-weight: 400;
 }
 
-#onigiri-sheet-backdrop {
+#bingsu-sheet-backdrop {
     position: fixed;
     inset: 0;
     z-index: 100000;
@@ -569,28 +569,28 @@ html .onigiri-quick-menu.is-sheet .onigiri-sheet-cancel {
     transition: opacity 0.22s ease;
 }
 
-#onigiri-sheet-backdrop.is-visible {
+#bingsu-sheet-backdrop.is-visible {
     opacity: 1;
     pointer-events: auto;
 }
 
 /* The row whose menu is open stays lit under the backdrop, not above it. */
-html.onigiri-sheet-open tr.deck.ctx-row-active {
+html.bingsu-sheet-open tr.deck.ctx-row-active {
     z-index: auto !important;
 }
 
-@keyframes onigiri-sheet-in {
+@keyframes bingsu-sheet-in {
     from { transform: translateY(100%); }
     to { transform: none; }
 }
 
-@keyframes onigiri-push-in {
+@keyframes bingsu-push-in {
     from { transform: translateX(24px); opacity: 0; }
     to { transform: none; opacity: 1; }
 }
 
 /* More actions sheet: icons drawn by their action-* class. */
-.onigiri-action-icon-host {
+.bingsu-action-icon-host {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -599,7 +599,7 @@ html.onigiri-sheet-open tr.deck.ctx-row-active {
     height: 20px;
 }
 
-.onigiri-action-icon-host .icon {
+.bingsu-action-icon-host .icon {
     display: block;
     margin: 0 !important;
 }
@@ -611,29 +611,29 @@ html.onigiri-sheet-open tr.deck.ctx-row-active {
 /* Kioku pads <html> by the bottom safe area (home indicator) and the side
    ones in landscape. Bingsu's home is 100vh tall, so its bottom ran under
    the home indicator and the screen's rounded corners: subtract the pad. */
-html.onigiri-touch body:has(.modern-main-menu),
-html.onigiri-touch body:has(.modern-main-menu) .container.modern-main-menu {
-    height: calc(100vh - var(--onigiri-safe-bottom));
-    height: calc(100dvh - var(--onigiri-safe-bottom));
+html.bingsu-touch body:has(.modern-main-menu),
+html.bingsu-touch body:has(.modern-main-menu) .container.modern-main-menu {
+    height: calc(100vh - var(--bingsu-safe-bottom));
+    height: calc(100dvh - var(--bingsu-safe-bottom));
 }
 
-html.onigiri-phone .container.modern-main-menu.modern-main-menu {
+html.bingsu-phone .container.modern-main-menu.modern-main-menu {
     flex-direction: column !important;
     justify-content: flex-start !important;
     align-items: stretch !important;
-    height: calc(100vh - var(--onigiri-safe-bottom));
-    height: calc(100dvh - var(--onigiri-safe-bottom));
+    height: calc(100vh - var(--bingsu-safe-bottom));
+    height: calc(100dvh - var(--bingsu-safe-bottom));
     overflow-x: hidden !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
-    padding-bottom: calc(var(--onigiri-phone-tabs-h) + var(--onigiri-safe-bottom) + 24px);
+    padding-bottom: calc(var(--bingsu-phone-tabs-h) + var(--bingsu-safe-bottom) + 24px);
     box-sizing: border-box;
 }
 
 /* The sidebar takes the full width; desktop widths, resize and collapse do
    not apply. Selectors repeat the classes to outrank the cycle states. */
-html.onigiri-phone .container.modern-main-menu .sidebar-left.sidebar-left,
-html.onigiri-phone .container.modern-main-menu.onigiri-cycle-stacked .sidebar-left.sidebar-left {
+html.bingsu-phone .container.modern-main-menu .sidebar-left.sidebar-left,
+html.bingsu-phone .container.modern-main-menu.bingsu-cycle-stacked .sidebar-left.sidebar-left {
     width: auto !important;
     min-width: 0 !important;
     max-width: none !important;
@@ -646,21 +646,21 @@ html.onigiri-phone .container.modern-main-menu.onigiri-cycle-stacked .sidebar-le
     border-radius: 18px;
 }
 
-html.onigiri-phone .container.modern-main-menu .sidebar-left.sidebar-collapsed .sidebar-expanded-content {
+html.bingsu-phone .container.modern-main-menu .sidebar-left.sidebar-collapsed .sidebar-expanded-content {
     display: flex !important;
 }
 
-html.onigiri-phone .container.modern-main-menu .collapsed-content-wrapper,
-html.onigiri-phone .container.modern-main-menu .sidebar-edge-toggle-zone,
-html.onigiri-phone #onigiri-sidebar-edge-pill,
-html.onigiri-phone .container.modern-main-menu .resize-handle {
+html.bingsu-phone .container.modern-main-menu .collapsed-content-wrapper,
+html.bingsu-phone .container.modern-main-menu .sidebar-edge-toggle-zone,
+html.bingsu-phone #bingsu-sidebar-edge-pill,
+html.bingsu-phone .container.modern-main-menu .resize-handle {
     display: none !important;
 }
 
-html.onigiri-phone .container.modern-main-menu .sidebar-expanded-content,
-html.onigiri-phone .container.modern-main-menu.onigiri-cycle-stacked .sidebar-expanded-content,
-html.onigiri-phone .container.modern-main-menu #deck-list-container,
-html.onigiri-phone .container.modern-main-menu.onigiri-cycle-stacked #deck-list-container {
+html.bingsu-phone .container.modern-main-menu .sidebar-expanded-content,
+html.bingsu-phone .container.modern-main-menu.bingsu-cycle-stacked .sidebar-expanded-content,
+html.bingsu-phone .container.modern-main-menu #deck-list-container,
+html.bingsu-phone .container.modern-main-menu.bingsu-cycle-stacked #deck-list-container {
     height: auto !important;
     max-height: none !important;
     overflow: visible !important;
@@ -669,12 +669,12 @@ html.onigiri-phone .container.modern-main-menu.onigiri-cycle-stacked #deck-list-
 }
 
 /* Repeated classes outrank patcher.py's sidebar gutter rules (0,8,0). */
-html.onigiri-phone .container.modern-main-menu.modern-main-menu.modern-main-menu .main-content.main-content.main-content.main-content {
+html.bingsu-phone .container.modern-main-menu.modern-main-menu.modern-main-menu .main-content.main-content.main-content.main-content {
     padding: 16px 10px !important;
     margin: 0 !important;
 }
 
-html.onigiri-phone .container.modern-main-menu .main-content.main-content {
+html.bingsu-phone .container.modern-main-menu .main-content.main-content {
     display: flex !important;
     flex: 0 0 auto !important;
     padding: 16px 10px !important;
@@ -684,34 +684,34 @@ html.onigiri-phone .container.modern-main-menu .main-content.main-content {
 
 /* Phone sidebar: decks right after the actions, Ready to go below them
    (a phone shows only a screenful, and decks are what people open first). */
-html.onigiri-phone .modern-main-menu .onigiri-sidebar-profile-section { order: 0 !important; }
-html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section { order: 1 !important; }
-html.onigiri-phone .modern-main-menu .onigiri-sidebar-decks-section { order: 2 !important; }
-html.onigiri-phone .modern-main-menu .onigiri-ready-sidebar { order: 3 !important; margin-top: 8px; }
+html.bingsu-phone .modern-main-menu .bingsu-sidebar-profile-section { order: 0 !important; }
+html.bingsu-phone .modern-main-menu .bingsu-sidebar-actions-section { order: 1 !important; }
+html.bingsu-phone .modern-main-menu .bingsu-sidebar-decks-section { order: 2 !important; }
+html.bingsu-phone .modern-main-menu .bingsu-ready-sidebar { order: 3 !important; margin-top: 8px; }
 
-html.onigiri-phone .modern-main-menu .onigiri-sidebar-profile-section .profile-bar {
+html.bingsu-phone .modern-main-menu .bingsu-sidebar-profile-section .profile-bar {
     min-height: 0;
 }
 
 /* Actions: one row of five tiles (first four actions + More); the rest
    open from More as a sheet (mobile.js setupActionTiles). */
-html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section:not(:empty) {
+html.bingsu-phone .modern-main-menu .bingsu-sidebar-actions-section:not(:empty) {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 6px;
     margin: 6px 0 10px;
 }
 
-html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > .onigiri-action-overflow {
+html.bingsu-phone .modern-main-menu .bingsu-sidebar-actions-section > .bingsu-action-overflow {
     display: none !important;
 }
 
-html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > details.menu-group > .menu-group-items {
+html.bingsu-phone .modern-main-menu .bingsu-sidebar-actions-section > details.menu-group > .menu-group-items {
     display: none !important;
 }
 
-html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > .menu-item,
-html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > details.menu-group > summary.menu-item {
+html.bingsu-phone .modern-main-menu .bingsu-sidebar-actions-section > .menu-item,
+html.bingsu-phone .modern-main-menu .bingsu-sidebar-actions-section > details.menu-group > summary.menu-item {
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -728,8 +728,8 @@ html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > details.
     background: var(--highlight-bg, rgba(127, 127, 127, 0.08));
 }
 
-html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > .menu-item > span,
-html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > details.menu-group > summary.menu-item > span {
+html.bingsu-phone .modern-main-menu .bingsu-sidebar-actions-section > .menu-item > span,
+html.bingsu-phone .modern-main-menu .bingsu-sidebar-actions-section > details.menu-group > summary.menu-item > span {
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -737,36 +737,36 @@ html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > details.
     margin: 0 !important;
 }
 
-html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > .menu-item > .icon,
-html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > details.menu-group > summary.menu-item > .icon {
+html.bingsu-phone .modern-main-menu .bingsu-sidebar-actions-section > .menu-item > .icon,
+html.bingsu-phone .modern-main-menu .bingsu-sidebar-actions-section > details.menu-group > summary.menu-item > .icon {
     margin: 0 !important;
 }
 
-html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > details.menu-group {
+html.bingsu-phone .modern-main-menu .bingsu-sidebar-actions-section > details.menu-group {
     margin: 0;
 }
 
-html.onigiri-phone .modern-main-menu .onigiri-sidebar-actions-section > details.menu-group > summary.menu-item::after {
+html.bingsu-phone .modern-main-menu .bingsu-sidebar-actions-section > details.menu-group > summary.menu-item::after {
     display: none;
 }
 
 /* Tabs: one pane at a time. */
-html.onigiri-phone.onigiri-has-phone-tabs.onigiri-phone-tab-decks .container.modern-main-menu .main-content.main-content {
+html.bingsu-phone.bingsu-has-phone-tabs.bingsu-phone-tab-decks .container.modern-main-menu .main-content.main-content {
     display: none !important;
 }
 
-html.onigiri-phone.onigiri-has-phone-tabs.onigiri-phone-tab-home .container.modern-main-menu .sidebar-left.sidebar-left {
+html.bingsu-phone.bingsu-has-phone-tabs.bingsu-phone-tab-home .container.modern-main-menu .sidebar-left.sidebar-left {
     display: none !important;
 }
 
-#onigiri-phone-tabs {
+#bingsu-phone-tabs {
     display: none;
 }
 
 /* Tab bar: full width, flush with the bottom of the screen (the strip
    under it is painted the same colour), full-size icons. Content scrolls
    behind it; the lists are padded so the last row clears it. */
-html.onigiri-phone #onigiri-phone-tabs {
+html.bingsu-phone #bingsu-phone-tabs {
     display: flex;
     align-items: stretch;
     overflow: hidden;
@@ -777,18 +777,18 @@ html.onigiri-phone #onigiri-phone-tabs {
     left: 0;
     right: 0;
     bottom: 0;
-    height: var(--onigiri-phone-tabs-h);
-    padding: 4px calc(10px + var(--onigiri-safe-right)) calc(4px + var(--onigiri-safe-bottom)) calc(10px + var(--onigiri-safe-left));
+    height: var(--bingsu-phone-tabs-h);
+    padding: 4px calc(10px + var(--bingsu-safe-right)) calc(4px + var(--bingsu-safe-bottom)) calc(10px + var(--bingsu-safe-left));
     gap: 2px;
     box-sizing: content-box;
     border-radius: 0;
-    background: var(--onigiri-surface, var(--onigiri-quick-menu-bg, var(--canvas, #fff)));
+    background: var(--bingsu-surface, var(--bingsu-quick-menu-bg, var(--canvas, #fff)));
     border: 0;
-    border-top: 0.5px solid var(--onigiri-surface-line, var(--border, rgba(127, 127, 127, 0.25)));
+    border-top: 0.5px solid var(--bingsu-surface-line, var(--border, rgba(127, 127, 127, 0.25)));
     box-shadow: none;
 }
 
-#onigiri-phone-tabs button {
+#bingsu-phone-tabs button {
     flex: 1 1 0;
     display: flex;
     flex-direction: column;
@@ -804,15 +804,15 @@ html.onigiri-phone #onigiri-phone-tabs {
     cursor: pointer;
 }
 
-#onigiri-phone-tabs button svg {
+#bingsu-phone-tabs button svg {
     width: 24px;
     height: 24px;
 }
 
 /* Themes style bare <button>s (Anki's .fancy gradient, Kome's accent):
    the tabs keep their own look everywhere. */
-html #onigiri-phone-tabs button,
-html #onigiri-phone-tabs button:focus {
+html #bingsu-phone-tabs button,
+html #bingsu-phone-tabs button:focus {
     -webkit-appearance: none;
     appearance: none;
     background: transparent !important;
@@ -837,41 +837,41 @@ html #onigiri-phone-tabs button:focus {
     left: auto !important;
 }
 
-html #onigiri-phone-tabs button[aria-selected="true"] {
+html #bingsu-phone-tabs button[aria-selected="true"] {
     color: var(--accent-color, var(--fg, #111)) !important;
-    background: var(--onigiri-surface-fill, rgba(127, 127, 127, 0.16)) !important;
+    background: var(--bingsu-surface-fill, rgba(127, 127, 127, 0.16)) !important;
 }
 
 /* The widget grid reflows itself to the available width
    (engine.js reflowWidgetGrid): one column on a phone. */
-html.onigiri-phone .main-content .unified-grid {
+html.bingsu-phone .main-content .unified-grid {
     max-width: 100% !important;
 }
 
 /* Heavy effects: the full-page blurred background layers and particle
    canvases cost a lot of GPU on a phone. */
-html.onigiri-touch body::before,
-html.onigiri-touch body::after {
+html.bingsu-touch body::before,
+html.bingsu-touch body::after {
     filter: none !important;
     -webkit-filter: none !important;
 }
 
 /* The desktop welcome overlay uses desktop type sizes. */
-html.onigiri-phone #onigiri-welcome-overlay {
+html.bingsu-phone #bingsu-welcome-overlay {
     padding: 24px;
     box-sizing: border-box;
     text-align: center;
 }
 
-html.onigiri-phone #onigiri-welcome-overlay img {
+html.bingsu-phone #bingsu-welcome-overlay img {
     width: min(240px, 70vw) !important;
 }
 
-html.onigiri-phone #onigiri-welcome-overlay h1 {
+html.bingsu-phone #bingsu-welcome-overlay h1 {
     font-size: 36px !important;
 }
 
-html.onigiri-phone #onigiri-welcome-overlay p {
+html.bingsu-phone #bingsu-welcome-overlay p {
     font-size: 19px !important;
 }
 
@@ -879,17 +879,17 @@ html.onigiri-phone #onigiri-welcome-overlay p {
 /* Home screen: iPad                                                          */
 /* ------------------------------------------------------------------------- */
 
-html.onigiri-tablet .container.modern-main-menu:not(.onigiri-cycle-stacked) .sidebar-left {
+html.bingsu-tablet .container.modern-main-menu:not(.bingsu-cycle-stacked) .sidebar-left {
     width: clamp(300px, 40vw, 420px) !important;
     min-width: 300px !important;
 }
 
-html.onigiri-tablet .container.modern-main-menu .main-content {
+html.bingsu-tablet .container.modern-main-menu .main-content {
     padding: 20px 16px !important;
 }
 
-html.onigiri-tablet .container.modern-main-menu .resize-handle,
-html.onigiri-tablet .container.modern-main-menu .sidebar-edge-toggle-zone {
+html.bingsu-tablet .container.modern-main-menu .resize-handle,
+html.bingsu-tablet .container.modern-main-menu .sidebar-edge-toggle-zone {
     display: none !important;
 }
 
@@ -899,7 +899,7 @@ html.onigiri-tablet .container.modern-main-menu .sidebar-edge-toggle-zone {
 
 /* Intervals: "show on hover" can't work on touch (the tap answers the
    card), so the interval always sits under the label. */
-html.onigiri-touch #outer button[data-onigiri-ease] {
+html.bingsu-touch #outer button[data-bingsu-ease] {
     display: inline-flex !important;
     flex-direction: column !important;
     align-items: center !important;
@@ -907,11 +907,11 @@ html.onigiri-touch #outer button[data-onigiri-ease] {
     gap: 1px !important;
 }
 
-html.onigiri-touch #outer button[data-onigiri-ease] .onigiri-answer-label {
+html.bingsu-touch #outer button[data-bingsu-ease] .bingsu-answer-label {
     opacity: 1 !important;
 }
 
-html.onigiri-touch #outer button[data-onigiri-ease] .onigiri-answer-hover-number {
+html.bingsu-touch #outer button[data-bingsu-ease] .bingsu-answer-hover-number {
     position: static !important;
     inset: auto !important;
     width: auto !important;
@@ -926,32 +926,32 @@ html.onigiri-touch #outer button[data-onigiri-ease] .onigiri-answer-hover-number
 /* Phones: Anki's three-cell table (Edit | answer buttons | More) is ~510px
    wide. Make it a flex row: compact Edit and More at the edges, the four
    answer buttons sharing the rest. */
-html.onigiri-phone #outer {
+html.bingsu-phone #outer {
     display: block;
     width: 100%;
-    --onigiri-bbar-primary-width: 100%;
-    --onigiri-bbar-side-space: 96px;
+    --bingsu-bbar-primary-width: 100%;
+    --bingsu-bbar-side-space: 96px;
 }
 
-html.onigiri-phone #outer > #innertable,
-html.onigiri-phone #outer > #innertable > tbody {
+html.bingsu-phone #outer > #innertable,
+html.bingsu-phone #outer > #innertable > tbody {
     display: block !important;
     width: 100% !important;
 }
 
-html.onigiri-phone #outer > #innertable > tbody > tr {
+html.bingsu-phone #outer > #innertable > tbody > tr {
     display: flex !important;
     align-items: center;
     gap: 4px;
     width: 100%;
     /* in from the screen's rounded corners */
-    padding: 0 calc(16px + var(--onigiri-safe-right)) 22px calc(16px + var(--onigiri-safe-left));
+    padding: 0 calc(16px + var(--bingsu-safe-right)) 22px calc(16px + var(--bingsu-safe-left));
     box-sizing: border-box;
 }
 
-html.onigiri-phone #outer > #innertable > tbody > tr > td.stat,
-html.onigiri-phone #outer.onigiri-bbar-fixed > table > tbody > tr > td:first-child,
-html.onigiri-phone #outer.onigiri-bbar-fixed > table > tbody > tr > td:last-child {
+html.bingsu-phone #outer > #innertable > tbody > tr > td.stat,
+html.bingsu-phone #outer.bingsu-bbar-fixed > table > tbody > tr > td:first-child,
+html.bingsu-phone #outer.bingsu-bbar-fixed > table > tbody > tr > td:last-child {
     display: flex !important;
     flex: 0 0 auto !important;
     width: auto !important;
@@ -959,7 +959,7 @@ html.onigiri-phone #outer.onigiri-bbar-fixed > table > tbody > tr > td:last-chil
     padding: 0 !important;
 }
 
-html.onigiri-phone #outer > #innertable > tbody > tr > td#middle {
+html.bingsu-phone #outer > #innertable > tbody > tr > td#middle {
     display: block !important;
     flex: 1 1 auto !important;
     min-width: 0 !important;
@@ -967,14 +967,14 @@ html.onigiri-phone #outer > #innertable > tbody > tr > td#middle {
     padding: 0 !important;
 }
 
-html.onigiri-phone #outer #middle > center,
-html.onigiri-phone #outer #middle table,
-html.onigiri-phone #outer #middle tbody {
+html.bingsu-phone #outer #middle > center,
+html.bingsu-phone #outer #middle table,
+html.bingsu-phone #outer #middle tbody {
     display: block !important;
     width: 100% !important;
 }
 
-html.onigiri-phone #outer #middle tr {
+html.bingsu-phone #outer #middle tr {
     display: flex !important;
     gap: 5px !important;
     width: 100% !important;
@@ -982,15 +982,15 @@ html.onigiri-phone #outer #middle tr {
     max-width: none !important;
 }
 
-html.onigiri-phone #outer #middle td {
+html.bingsu-phone #outer #middle td {
     display: flex !important;
     flex: 1 1 0 !important;
     min-width: 0 !important;
     padding: 0 !important;
 }
 
-html.onigiri-phone #outer button[data-onigiri-ease],
-html.onigiri-phone #outer.onigiri-bbar-fixed button[data-onigiri-ease].is-fixed {
+html.bingsu-phone #outer button[data-bingsu-ease],
+html.bingsu-phone #outer.bingsu-bbar-fixed button[data-bingsu-ease].is-fixed {
     width: 100% !important;
     min-width: 0 !important;
     max-width: none !important;
@@ -1000,19 +1000,19 @@ html.onigiri-phone #outer.onigiri-bbar-fixed button[data-onigiri-ease].is-fixed 
     padding: 4px 2px !important;
 }
 
-html.onigiri-phone #outer button[data-onigiri-ease] .onigiri-answer-label {
+html.bingsu-phone #outer button[data-bingsu-ease] .bingsu-answer-label {
     font-size: 14px !important;
     white-space: nowrap !important;
 }
 
-html.onigiri-phone #outer button.onigiri-show-answer-btn {
+html.bingsu-phone #outer button.bingsu-show-answer-btn {
     width: 100% !important;
     min-width: 0 !important;
     max-width: none !important;
     min-height: 44px;
 }
 
-html.onigiri-phone #outer button.onigiri-other-btn:not(.onigiri-show-answer-btn) {
+html.bingsu-phone #outer button.bingsu-other-btn:not(.bingsu-show-answer-btn) {
     min-width: 0 !important;
     width: auto !important;
     height: 44px;
@@ -1021,47 +1021,47 @@ html.onigiri-phone #outer button.onigiri-other-btn:not(.onigiri-show-answer-btn)
 }
 
 /* More: an icon button ("⋯"); the label and chevron don't fit. */
-html.onigiri-phone body #outer button.onigiri-other-btn.onigiri-more-btn:not(.onigiri-show-answer-btn) {
+html.bingsu-phone body #outer button.bingsu-other-btn.bingsu-more-btn:not(.bingsu-show-answer-btn) {
     position: relative;
     width: 40px !important;
     padding: 0 !important;
     font-size: 0 !important;
 }
 
-html.onigiri-phone body #outer button.onigiri-more-btn > svg,
-html.onigiri-phone #outer button.onigiri-more-btn > .stattxt {
+html.bingsu-phone body #outer button.bingsu-more-btn > svg,
+html.bingsu-phone #outer button.bingsu-more-btn > .stattxt {
     display: none !important;
 }
 
-html.onigiri-phone #outer button.onigiri-more-btn::before {
+html.bingsu-phone #outer button.bingsu-more-btn::before {
     content: "\22EF";
     font-size: 22px;
     line-height: 1;
 }
 
 /* ------------------------------------------------------------------------- */
-/* Onigiri Settings: phone drill-down (rail list -> full-width page)          */
+/* Bingsu Settings: phone drill-down (rail list -> full-width page)          */
 /* ------------------------------------------------------------------------- */
 
 /* Phones: like iOS Settings. Edge to edge (Kioku's window bar is the only
    chrome; its Back closes the window and changes save as they are made),
    the list scrolls as one, groups are inset rounded lists with › rows,
    and a page slides in over the list. */
-html.onigiri-phone .osw-shell {
+html.bingsu-phone .osw-shell {
     --osw-shell-pad: 0px;
     gap: 0 !important;
     padding: 0 !important;
 }
 
-html.onigiri-phone .osw-shell > .osw-panel {
+html.bingsu-phone .osw-shell > .osw-panel {
     border: 0 !important;
     border-radius: 0 !important;
     box-shadow: none !important;
     background: var(--osw-outer) !important;
 }
 
-html.onigiri-phone .osw-shell .osw-rail,
-html.onigiri-phone .osw-shell.is-collapsed .osw-rail {
+html.bingsu-phone .osw-shell .osw-rail,
+html.bingsu-phone .osw-shell.is-collapsed .osw-rail {
     display: block;
     flex: 1 1 auto;
     width: auto;
@@ -1069,33 +1069,33 @@ html.onigiri-phone .osw-shell.is-collapsed .osw-rail {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
-    padding-bottom: calc(24px + var(--onigiri-safe-bottom));
+    padding-bottom: calc(24px + var(--bingsu-safe-bottom));
 }
 
-html.onigiri-phone .osw-shell.is-collapsed .osw-search { display: flex; }
-html.onigiri-phone .osw-shell.is-collapsed .osw-rail-action-label { display: inline; }
-html.onigiri-phone .osw-shell .osw-rail-toggle { display: none !important; }
+html.bingsu-phone .osw-shell.is-collapsed .osw-search { display: flex; }
+html.bingsu-phone .osw-shell.is-collapsed .osw-rail-action-label { display: inline; }
+html.bingsu-phone .osw-shell .osw-rail-toggle { display: none !important; }
 
 /* List or page, one at a time. */
-html.onigiri-phone:not(.onigiri-settings-page) .osw-shell .osw-main {
+html.bingsu-phone:not(.bingsu-settings-page) .osw-shell .osw-main {
     display: none;
 }
 
-html.onigiri-phone.onigiri-settings-page .osw-shell .osw-rail {
+html.bingsu-phone.bingsu-settings-page .osw-shell .osw-rail {
     display: none;
 }
 
-html.onigiri-phone .osw-shell .osw-rail-top {
+html.bingsu-phone .osw-shell .osw-rail-top {
     padding: 12px 16px 8px;
 }
 
-html.onigiri-phone .osw-shell .osw-complexity {
+html.bingsu-phone .osw-shell .osw-complexity {
     margin-left: 16px;
     margin-right: 16px;
 }
 
-html.onigiri-phone .osw-shell .osw-nav,
-html.onigiri-phone .osw-shell.is-collapsed .osw-nav {
+html.bingsu-phone .osw-shell .osw-nav,
+html.bingsu-phone .osw-shell.is-collapsed .osw-nav {
     flex: none;
     overflow: visible;
     padding: 4px 16px 0;
@@ -1103,19 +1103,19 @@ html.onigiri-phone .osw-shell.is-collapsed .osw-nav {
     mask-image: none;
 }
 
-html.onigiri-phone .osw-shell .osw-nav-group + .osw-nav-group {
+html.bingsu-phone .osw-shell .osw-nav-group + .osw-nav-group {
     margin-top: 22px;
 }
 
-html.onigiri-phone .osw-shell .osw-nav-title {
+html.bingsu-phone .osw-shell .osw-nav-title {
     padding: 0 14px 7px;
     font-size: 12px;
     font-weight: 500;
     letter-spacing: 0.02em;
 }
 
-html.onigiri-phone .osw-shell .osw-nav-item,
-html.onigiri-phone .osw-shell .osw-rail-bottom .osw-rail-action {
+html.bingsu-phone .osw-shell .osw-nav-item,
+html.bingsu-phone .osw-shell .osw-rail-bottom .osw-rail-action {
     height: auto;
     min-height: 48px;
     margin: 0;
@@ -1128,31 +1128,31 @@ html.onigiri-phone .osw-shell .osw-rail-bottom .osw-rail-action {
     box-shadow: inset 0 -0.5px 0 var(--osw-hairline, rgba(127, 127, 127, 0.25));
 }
 
-html.onigiri-phone .osw-shell .osw-nav-item .osw-nav-icon,
-html.onigiri-phone .osw-shell .osw-nav-item.is-active .osw-nav-icon {
+html.bingsu-phone .osw-shell .osw-nav-item .osw-nav-icon,
+html.bingsu-phone .osw-shell .osw-nav-item.is-active .osw-nav-icon {
     color: var(--osw-accent);
 }
 
-html.onigiri-phone .osw-shell .osw-nav-item .osw-nav-icon svg {
+html.bingsu-phone .osw-shell .osw-nav-item .osw-nav-icon svg {
     width: 20px;
     height: 20px;
 }
 
-html.onigiri-phone .osw-shell .osw-nav-title + .osw-nav-item,
-html.onigiri-phone .osw-shell .osw-rail-bottom .osw-rail-action:first-child {
+html.bingsu-phone .osw-shell .osw-nav-title + .osw-nav-item,
+html.bingsu-phone .osw-shell .osw-rail-bottom .osw-rail-action:first-child {
     border-top-left-radius: 12px;
     border-top-right-radius: 12px;
 }
 
-html.onigiri-phone .osw-shell .osw-nav-item:last-child,
-html.onigiri-phone .osw-shell .osw-rail-bottom .osw-rail-action:nth-last-child(2) {
+html.bingsu-phone .osw-shell .osw-nav-item:last-child,
+html.bingsu-phone .osw-shell .osw-rail-bottom .osw-rail-action:nth-last-child(2) {
     border-bottom-left-radius: 12px;
     border-bottom-right-radius: 12px;
     box-shadow: none;
 }
 
 /* the › of a row that opens a page */
-html.onigiri-phone .osw-shell .osw-nav-item::after {
+html.bingsu-phone .osw-shell .osw-nav-item::after {
     content: "";
     flex: 0 0 auto;
     width: 8px;
@@ -1164,12 +1164,12 @@ html.onigiri-phone .osw-shell .osw-nav-item::after {
     opacity: 0.7;
 }
 
-html.onigiri-phone .osw-shell .osw-nav-label {
+html.bingsu-phone .osw-shell .osw-nav-label {
     flex: 1 1 auto;
 }
 
 /* Donate / Report Bugs: the last group; the status line under it. */
-html.onigiri-phone .osw-shell .osw-rail-bottom {
+html.bingsu-phone .osw-shell .osw-rail-bottom {
     position: static;
     margin: 22px 16px 0;
     padding: 0;
@@ -1177,47 +1177,47 @@ html.onigiri-phone .osw-shell .osw-rail-bottom {
     background: transparent;
 }
 
-html.onigiri-phone .osw-shell .osw-rail-bottom .osw-rail-action {
+html.bingsu-phone .osw-shell .osw-rail-bottom .osw-rail-action {
     width: 100%;
     justify-content: flex-start;
 }
 
-html.onigiri-phone .osw-shell .osw-rail-commit {
+html.bingsu-phone .osw-shell .osw-rail-commit {
     margin-top: 14px;
     padding: 0;
     justify-content: center;
 }
 
-html.onigiri-phone .osw-shell #oswDone {
+html.bingsu-phone .osw-shell #oswDone {
     display: none !important;
 }
 
 /* The page: full screen, sliding in from the right. */
-html.onigiri-phone.onigiri-settings-page .osw-shell .osw-main {
-    animation: onigiri-page-in 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+html.bingsu-phone.bingsu-settings-page .osw-shell .osw-main {
+    animation: bingsu-page-in 0.32s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-@keyframes onigiri-page-in {
+@keyframes bingsu-page-in {
     from { transform: translateX(40%); opacity: 0.4; }
     to { transform: none; opacity: 1; }
 }
 
-html.onigiri-phone .osw-shell .osw-page-scroll {
+html.bingsu-phone .osw-shell .osw-page-scroll {
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
     overflow-x: hidden;
-    padding-bottom: calc(24px + var(--onigiri-safe-bottom));
+    padding-bottom: calc(24px + var(--bingsu-safe-bottom));
 }
 
-html.onigiri-phone .osw-shell .osw-nav-item {
+html.bingsu-phone .osw-shell .osw-nav-item {
     min-height: 48px;
 }
 
-.onigiri-settings-back {
+.bingsu-settings-back {
     display: none;
 }
 
-html.onigiri-phone .onigiri-settings-back {
+html.bingsu-phone .bingsu-settings-back {
     display: inline-flex;
     align-items: center;
     gap: 2px;
@@ -1234,21 +1234,21 @@ html.onigiri-phone .onigiri-settings-back {
     cursor: pointer;
 }
 
-html.onigiri-phone .onigiri-settings-back svg {
+html.bingsu-phone .bingsu-settings-back svg {
     width: 20px;
     height: 20px;
 }
 
-html.onigiri-phone .osw-page-head {
+html.bingsu-phone .osw-page-head {
     padding-top: 14px;
 }
 
-html.onigiri-phone .osw-page-head-row {
+html.bingsu-phone .osw-page-head-row {
     flex-wrap: wrap;
     row-gap: 8px;
 }
 
-html.onigiri-phone .osw-page-head h1 {
+html.bingsu-phone .osw-page-head h1 {
     font-size: 21px;
 }
 
@@ -1259,66 +1259,66 @@ html.onigiri-phone .osw-page-head h1 {
 /* Deck list: the desktop columns (progress 112px + three counts 216px)
    left deck names ~100px on an iPad. Tighter columns on touch screens; no
    progress column on phones. The gear (deck options) is always visible. */
-html.onigiri-touch .ad-list {
+html.bingsu-touch .ad-list {
     --ad-count-cols: 40px 52px 44px;
     --ad-cols: 24px minmax(0, 1fr) 76px var(--ad-count-cols) 36px;
     --ad-row-cols: minmax(0, 1fr) 76px var(--ad-count-cols) 36px;
 }
 
-html.onigiri-phone .ad-list {
+html.bingsu-phone .ad-list {
     --ad-count-cols: 34px 34px 34px;
     --ad-cols: 24px minmax(0, 1fr) var(--ad-count-cols) 36px;
     --ad-row-cols: minmax(0, 1fr) var(--ad-count-cols) 36px;
 }
 
-html.onigiri-phone .ad-list .ad-list-header-cell--progress,
-html.onigiri-phone .ad-list .ad-list-progress {
+html.bingsu-phone .ad-list .ad-list-header-cell--progress,
+html.bingsu-phone .ad-list .ad-list-progress {
     display: none !important;
 }
 
-html.onigiri-phone .ad-list .ad-list-header-cell {
+html.bingsu-phone .ad-list .ad-list-header-cell {
     font-size: 9px;
     letter-spacing: 0.04em;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-html.onigiri-touch .ad-list .ad-list-gear {
+html.bingsu-touch .ad-list .ad-list-gear {
     opacity: 0.6;
 }
 
-html.onigiri-touch .ad-list .ad-list-row {
+html.bingsu-touch .ad-list .ad-list-row {
     min-height: 44px;
 }
 
-html.onigiri-tablet .ba-home {
+html.bingsu-tablet .ba-home {
     padding-left: 24px;
     padding-right: 24px;
 }
 
 /* Phones: the fixed 264px sidebar and the deck list become the two tabs. */
-html.onigiri-phone body.ba-with-side {
+html.bingsu-phone body.ba-with-side {
     padding-left: 0 !important;
 }
 
-html.onigiri-phone .ba-home {
-    padding: 16px 10px calc(var(--onigiri-phone-tabs-h) + var(--onigiri-safe-bottom) + 24px);
+html.bingsu-phone .ba-home {
+    padding: 16px 10px calc(var(--bingsu-phone-tabs-h) + var(--bingsu-safe-bottom) + 24px);
     min-height: 0;
 }
 
-html.onigiri-phone .ba-side {
+html.bingsu-phone .ba-side {
     width: auto;
     right: 0;
     bottom: 0;
-    padding-bottom: calc(var(--onigiri-phone-tabs-h) + var(--onigiri-safe-bottom) + 24px);
+    padding-bottom: calc(var(--bingsu-phone-tabs-h) + var(--bingsu-safe-bottom) + 24px);
     border-right: 0;
 }
 
-html.onigiri-phone.onigiri-has-phone-tabs.onigiri-phone-tab-decks .ba-side {
+html.bingsu-phone.bingsu-has-phone-tabs.bingsu-phone-tab-decks .ba-side {
     display: none !important;
 }
 
-html.onigiri-phone.onigiri-has-phone-tabs.onigiri-phone-tab-home .ba-home {
+html.bingsu-phone.bingsu-has-phone-tabs.bingsu-phone-tab-home .ba-home {
     display: none !important;
 }
 
@@ -1326,25 +1326,25 @@ html.onigiri-phone.onigiri-has-phone-tabs.onigiri-phone-tab-home .ba-home {
 /* Overview and reviewer on phones: iOS navigation bar                        */
 /* ------------------------------------------------------------------------- */
 
-#onigiri-phone-nav {
+#bingsu-phone-nav {
     display: none;
 }
 
-html.onigiri-phone #onigiri-phone-nav {
+html.bingsu-phone #bingsu-phone-nav {
     display: flex;
     align-items: center;
     justify-content: space-between;
     position: fixed;
     z-index: 9000;
     top: 10px;
-    left: calc(6px + var(--onigiri-safe-left));
-    right: calc(6px + var(--onigiri-safe-right));
+    left: calc(6px + var(--bingsu-safe-left));
+    right: calc(6px + var(--bingsu-safe-right));
     height: 44px;
     padding: 0 4px;
     pointer-events: none;
 }
 
-html.onigiri-phone #onigiri-phone-nav > button {
+html.bingsu-phone #bingsu-phone-nav > button {
     pointer-events: auto;
     -webkit-appearance: none;
     appearance: none;
@@ -1364,34 +1364,34 @@ html.onigiri-phone #onigiri-phone-nav > button {
     font-size: 17px;
 }
 
-html.onigiri-phone #onigiri-phone-nav > button.onigiri-nav-more {
+html.bingsu-phone #bingsu-phone-nav > button.bingsu-nav-more {
     justify-content: center;
     padding: 0;
 }
 
-html.onigiri-phone #onigiri-phone-nav > button svg {
+html.bingsu-phone #bingsu-phone-nav > button svg {
     flex: 0 0 auto;
 }
 
-html.onigiri-phone #onigiri-phone-nav .onigiri-nav-more svg {
+html.bingsu-phone #bingsu-phone-nav .bingsu-nav-more svg {
     width: 24px;
     height: 24px;
 }
 
 /* Overview: its own copy of the circled toolbar goes; the page clears the
    nav bar. */
-html.onigiri-phone.onigiri-has-phone-nav #onigiri-reviewer-header a.onigiri-reviewer-button,
-html.onigiri-phone.onigiri-has-phone-nav #onigiri-reviewer-header .onigiri-rubber-dock,
-html.onigiri-phone.onigiri-has-phone-nav #onigiri-reviewer-external-actions {
+html.bingsu-phone.bingsu-has-phone-nav #bingsu-reviewer-header a.bingsu-reviewer-button,
+html.bingsu-phone.bingsu-has-phone-nav #bingsu-reviewer-header .bingsu-rubber-dock,
+html.bingsu-phone.bingsu-has-phone-nav #bingsu-reviewer-external-actions {
     display: none !important;
 }
 
-html.onigiri-phone.onigiri-has-phone-nav #onigiri-reviewer-header {
+html.bingsu-phone.bingsu-has-phone-nav #bingsu-reviewer-header {
     min-height: 44px !important;
 }
 
 /* Overview buttons: thumb-sized. */
-html.onigiri-touch .overview-bottom-actions .overview-button {
+html.bingsu-touch .overview-bottom-actions .overview-button {
     display: inline-flex !important;
     align-items: center;
     justify-content: center;
@@ -1400,7 +1400,7 @@ html.onigiri-touch .overview-bottom-actions .overview-button {
 }
 
 /* Edge-swipe cue: a chevron following the finger from the left edge. */
-#onigiri-edge-cue {
+#bingsu-edge-cue {
     position: fixed;
     z-index: 100002;
     left: -36px;
@@ -1417,32 +1417,32 @@ html.onigiri-touch .overview-bottom-actions .overview-button {
     transition: color 0.12s ease, background-color 0.12s ease;
 }
 
-#onigiri-edge-cue.is-armed {
+#bingsu-edge-cue.is-armed {
     color: var(--accent-color, var(--fg));
 }
 
 /* Reviewer bottom bar: Edit and More are full 44pt targets. */
-html.onigiri-phone #outer button.onigiri-other-btn:not(.onigiri-show-answer-btn) {
+html.bingsu-phone #outer button.bingsu-other-btn:not(.bingsu-show-answer-btn) {
     min-width: 52px !important;
     height: 44px !important;
 }
 
-html.onigiri-phone body #outer button.onigiri-other-btn.onigiri-more-btn:not(.onigiri-show-answer-btn) {
+html.bingsu-phone body #outer button.bingsu-other-btn.bingsu-more-btn:not(.bingsu-show-answer-btn) {
     width: 44px !important;
     min-width: 44px !important;
 }
 
-html.onigiri-phone #outer button.onigiri-show-answer-btn,
-html.onigiri-phone #outer button[data-onigiri-ease] {
+html.bingsu-phone #outer button.bingsu-show-answer-btn,
+html.bingsu-phone #outer button[data-bingsu-ease] {
     min-height: 48px !important;
 }
 
 /* ------------------------------------------------------------------------- */
-/* Onigiri Settings on phones: controls that fit                             */
+/* Bingsu Settings on phones: controls that fit                             */
 /* ------------------------------------------------------------------------- */
 
 /* Segmented controls share the width instead of running off the screen. */
-html.onigiri-phone .osw-shell :has(> .osw-segment-btn):not(.osw-subtabs *):not(.osw-subtabs) {
+html.bingsu-phone .osw-shell :has(> .osw-segment-btn):not(.osw-subtabs *):not(.osw-subtabs) {
     display: flex !important;
     flex-wrap: nowrap !important;
     width: 100% !important;
@@ -1451,7 +1451,7 @@ html.onigiri-phone .osw-shell :has(> .osw-segment-btn):not(.osw-subtabs *):not(.
     overflow: hidden !important;
 }
 
-html.onigiri-phone .osw-shell .osw-segment-btn:not(.osw-subtabs *) {
+html.bingsu-phone .osw-shell .osw-segment-btn:not(.osw-subtabs *) {
     flex: 1 1 0 !important;
     min-width: 0 !important;
     min-height: 36px;
@@ -1462,34 +1462,34 @@ html.onigiri-phone .osw-shell .osw-segment-btn:not(.osw-subtabs *) {
     font-size: 12.5px !important;
 }
 
-html.onigiri-phone .osw-shell .osw-segment-btn:not(.osw-subtabs *) .osw-segment-label {
+html.bingsu-phone .osw-shell .osw-segment-btn:not(.osw-subtabs *) .osw-segment-label {
     white-space: normal !important;
     overflow-wrap: anywhere;
 }
 
 /* Rows of action chips wrap under their title. */
-html.onigiri-phone .osw-shell :has(> .osw-themes-actions),
-html.onigiri-phone .osw-shell .osw-themes-actions {
+html.bingsu-phone .osw-shell :has(> .osw-themes-actions),
+html.bingsu-phone .osw-shell .osw-themes-actions {
     flex-wrap: wrap !important;
     row-gap: 10px;
 }
 
-html.onigiri-phone .osw-shell .osw-themes-actions {
+html.bingsu-phone .osw-shell .osw-themes-actions {
     flex: 1 1 100% !important;
 }
 
-html.onigiri-phone .osw-shell :has(> .osw-themes-actions) > :not(.osw-themes-actions) {
+html.bingsu-phone .osw-shell :has(> .osw-themes-actions) > :not(.osw-themes-actions) {
     flex: 1 1 100% !important;
     min-width: 0 !important;
 }
 
 /* Preview cards: the controls go under the card's title. */
-html.onigiri-phone .osw-shell :has(> .osw-preview-head-controls) {
+html.bingsu-phone .osw-shell :has(> .osw-preview-head-controls) {
     flex-wrap: wrap !important;
     row-gap: 10px;
 }
 
-html.onigiri-phone .osw-shell .osw-preview-head-controls {
+html.bingsu-phone .osw-shell .osw-preview-head-controls {
     flex: 1 1 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
@@ -1498,35 +1498,35 @@ html.onigiri-phone .osw-shell .osw-preview-head-controls {
     margin-left: 0 !important;
 }
 
-html.onigiri-phone .osw-shell .osw-preview-head-controls > * {
+html.bingsu-phone .osw-shell .osw-preview-head-controls > * {
     min-width: 0;
     max-width: 100%;
 }
 
 /* Sub-page tab strips (Reviewer: Background, icons...) scroll sideways
    inside themselves, never the page. */
-html.onigiri-phone .osw-shell .osw-subtabs,
-html.onigiri-phone .osw-shell .osw-subtabs-strip {
+html.bingsu-phone .osw-shell .osw-subtabs,
+html.bingsu-phone .osw-shell .osw-subtabs-strip {
     max-width: 100%;
     overflow-x: auto;
     overscroll-behavior-x: contain;
     scrollbar-width: none;
 }
 
-html.onigiri-phone .osw-shell .osw-page {
+html.bingsu-phone .osw-shell .osw-page {
     max-width: 100%;
     overflow-x: hidden;
 }
 
 /* Inputs: 16px text (no iOS focus zoom), 44pt rows. */
-html.onigiri-touch .osw-shell :is(input[type="text"], input[type="search"], input[type="number"], input:not([type]), select, textarea) {
+html.bingsu-touch .osw-shell :is(input[type="text"], input[type="search"], input[type="number"], input:not([type]), select, textarea) {
     font-size: 16px !important;
     min-height: 40px;
 }
 
 /* Themes on touch: tap to pick, then Apply. */
-html.onigiri-touch .osw-theme-tile.is-tap-to-pick .osw-theme-hold-hint,
-html.onigiri-touch .osw-theme-tile.is-tap-to-pick .osw-theme-hold-progress {
+html.bingsu-touch .osw-theme-tile.is-tap-to-pick .osw-theme-hold-hint,
+html.bingsu-touch .osw-theme-tile.is-tap-to-pick .osw-theme-hold-progress {
     display: none !important;
 }
 
@@ -1545,9 +1545,9 @@ html.onigiri-touch .osw-theme-tile.is-tap-to-pick .osw-theme-hold-progress {
 .osw-theme-apply-bar {
     position: fixed;
     z-index: 50;
-    left: calc(16px + var(--onigiri-safe-left, 0px));
-    right: calc(16px + var(--onigiri-safe-right, 0px));
-    bottom: calc(14px + var(--onigiri-safe-bottom, 0px));
+    left: calc(16px + var(--bingsu-safe-left, 0px));
+    right: calc(16px + var(--bingsu-safe-right, 0px));
+    bottom: calc(14px + var(--bingsu-safe-bottom, 0px));
     transform: translateY(140%);
     transition: transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
     pointer-events: none;
@@ -1568,14 +1568,14 @@ html.onigiri-touch .osw-theme-tile.is-tap-to-pick .osw-theme-hold-progress {
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
 }
 
-html.onigiri-phone .osw-shell #oswPageTabs {
+html.bingsu-phone .osw-shell #oswPageTabs {
     margin-left: 0 !important;
     margin-right: auto !important;
     max-width: 100%;
 }
 
 /* Heatmap month view on phones: day squares sized for a finger. */
-html.onigiri-phone .heatmap-grid.month-view {
+html.bingsu-phone .heatmap-grid.month-view {
     --hm-cell: min(36px, calc((100vw - 120px) / 7)) !important;
     --hm-cell-gap: 5px !important;
 }
@@ -1584,7 +1584,7 @@ html.onigiri-phone .heatmap-grid.month-view {
 /* Profile on phones: a full-screen page                                     */
 /* ------------------------------------------------------------------------- */
 
-html.onigiri-phone .sidebar-left.profile-sidebar-open .onigiri-sidebar-profile {
+html.bingsu-phone .sidebar-left.profile-sidebar-open .bingsu-sidebar-profile {
     position: fixed !important;
     inset: 0 !important;
     z-index: 9500 !important;
@@ -1599,24 +1599,24 @@ html.onigiri-phone .sidebar-left.profile-sidebar-open .onigiri-sidebar-profile {
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
-    padding-bottom: calc(24px + var(--onigiri-safe-bottom)) !important;
+    padding-bottom: calc(24px + var(--bingsu-safe-bottom)) !important;
     background: var(--canvas, var(--rf-paper, #fff)) !important;
 }
 
 /* One motion only: mobile.js slides the page up once per open. The
    desktop fade-and-shift is off on phones (it played as a second pop). */
-html.onigiri-phone .sidebar-left .onigiri-sidebar-profile,
-html.onigiri-phone .sidebar-left .sidebar-expanded-content > :not(.onigiri-sidebar-profile) {
+html.bingsu-phone .sidebar-left .bingsu-sidebar-profile,
+html.bingsu-phone .sidebar-left .sidebar-expanded-content > :not(.bingsu-sidebar-profile) {
     transition: none !important;
     animation: none !important;
 }
 
-html.onigiri-phone.onigiri-profile-open #onigiri-phone-tabs {
+html.bingsu-phone.bingsu-profile-open #bingsu-phone-tabs {
     display: none !important;
 }
 
 /* Close (×) is a 44pt target. */
-html.onigiri-phone .onigiri-sidebar-profile .onigiri-sidebar-profile-back {
+html.bingsu-phone .bingsu-sidebar-profile .bingsu-sidebar-profile-back {
     /* 44pt tap target around the 26px circle: the extra 9px is a transparent
        border (the background is clipped to the padding box), the ring is an
        inset shadow, and the box moves 9px out so the circle stays put. */
@@ -1631,18 +1631,18 @@ html.onigiri-phone .onigiri-sidebar-profile .onigiri-sidebar-profile-back {
 }
 
 /* Active-cards donut: the total fits inside the ring. */
-html.onigiri-phone .onigiri-sidebar-profile .ba-side-donut-ring {
+html.bingsu-phone .bingsu-sidebar-profile .ba-side-donut-ring {
     flex-basis: 96px;
     width: 96px;
     height: 96px;
 }
 
-.onigiri-sidebar-profile .ba-side-donut-core strong.is-compact {
+.bingsu-sidebar-profile .ba-side-donut-core strong.is-compact {
     font-size: 16px !important;
     letter-spacing: -0.04em;
 }
 
-.onigiri-sidebar-profile .ba-side-donut-core strong.is-tiny {
+.bingsu-sidebar-profile .ba-side-donut-core strong.is-tiny {
     font-size: 13px !important;
     letter-spacing: -0.04em;
 }
@@ -1651,37 +1651,37 @@ html.onigiri-phone .onigiri-sidebar-profile .ba-side-donut-ring {
 /* Anki's menus as a full-screen page (mobile.js showAppMenu)                 */
 /* ------------------------------------------------------------------------- */
 
-#onigiri-app-menu {
+#bingsu-app-menu {
     position: fixed;
     inset: 0;
     z-index: 100003;
     display: flex;
     flex-direction: column;
-    background: var(--onigiri-surface, var(--canvas, var(--bg, #f2f2f7)));
-    color: var(--onigiri-surface-ink, var(--fg, #111));
+    background: var(--bingsu-surface, var(--canvas, var(--bg, #f2f2f7)));
+    color: var(--bingsu-surface-ink, var(--fg, #111));
     font-family: inherit;
     -webkit-user-select: none;
     user-select: none;
     /* the third tab: slides in from the right, like the other two */
-    animation: onigiri-tab-from-right 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+    animation: bingsu-tab-from-right 0.32s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-#onigiri-app-menu.is-closing {
+#bingsu-app-menu.is-closing {
     transform: translateX(100%);
     transition: transform 0.26s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-#onigiri-app-menu .oam-bar {
+#bingsu-app-menu .oam-bar {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
     flex: 0 0 auto;
     min-height: 52px;
-    padding: 0 calc(6px + var(--onigiri-safe-right)) 0 calc(6px + var(--onigiri-safe-left));
-    border-bottom: 0.5px solid var(--onigiri-surface-line, var(--border, rgba(127, 127, 127, 0.3)));
+    padding: 0 calc(6px + var(--bingsu-safe-right)) 0 calc(6px + var(--bingsu-safe-left));
+    border-bottom: 0.5px solid var(--bingsu-surface-line, var(--border, rgba(127, 127, 127, 0.3)));
 }
 
-#onigiri-app-menu .oam-title {
+#bingsu-app-menu .oam-title {
     font-size: 17px;
     font-weight: 600;
     text-align: center;
@@ -1691,7 +1691,7 @@ html.onigiri-phone .onigiri-sidebar-profile .ba-side-donut-ring {
     max-width: 50vw;
 }
 
-html #onigiri-app-menu .oam-bar button {
+html #bingsu-app-menu .oam-bar button {
     -webkit-appearance: none;
     appearance: none;
     display: inline-flex;
@@ -1708,55 +1708,55 @@ html #onigiri-app-menu .oam-bar button {
     font-size: 17px !important;
 }
 
-#onigiri-app-menu .oam-back {
+#bingsu-app-menu .oam-back {
     justify-self: start;
     padding-left: 0 !important;
 }
 
-#onigiri-app-menu .oam-back span {
+#bingsu-app-menu .oam-back span {
     max-width: 28vw;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-#onigiri-app-menu .oam-done {
+#bingsu-app-menu .oam-done {
     justify-self: end;
     font-weight: 600 !important;
 }
 
-#onigiri-app-menu .oam-body {
+#bingsu-app-menu .oam-body {
     flex: 1 1 auto;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
-    padding: 18px calc(16px + var(--onigiri-safe-right)) calc(28px + var(--onigiri-safe-bottom)) calc(16px + var(--onigiri-safe-left));
+    padding: 18px calc(16px + var(--bingsu-safe-right)) calc(28px + var(--bingsu-safe-bottom)) calc(16px + var(--bingsu-safe-left));
 }
 
-#onigiri-app-menu .oam-list.is-push {
-    animation: onigiri-page-in 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+#bingsu-app-menu .oam-list.is-push {
+    animation: bingsu-page-in 0.3s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-#onigiri-app-menu .oam-list.is-pop {
-    animation: onigiri-page-back 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+#bingsu-app-menu .oam-list.is-pop {
+    animation: bingsu-page-back 0.3s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-@keyframes onigiri-page-back {
+@keyframes bingsu-page-back {
     from { transform: translateX(-30%); opacity: 0.4; }
     to { transform: none; opacity: 1; }
 }
 
-#onigiri-app-menu .oam-group {
+#bingsu-app-menu .oam-group {
     overflow: hidden;
     border-radius: 12px;
-    background: var(--onigiri-surface-raised, rgba(127, 127, 127, 0.12));
+    background: var(--bingsu-surface-raised, rgba(127, 127, 127, 0.12));
 }
 
-#onigiri-app-menu .oam-group + .oam-group {
+#bingsu-app-menu .oam-group + .oam-group {
     margin-top: 22px;
 }
 
-html #onigiri-app-menu .oam-row {
+html #bingsu-app-menu .oam-row {
     -webkit-appearance: none;
     appearance: none;
     display: flex;
@@ -1771,27 +1771,27 @@ html #onigiri-app-menu .oam-row {
     border-radius: 0 !important;
     background: transparent !important;
     box-shadow: none !important;
-    border-bottom: 0.5px solid var(--onigiri-surface-line, rgba(127, 127, 127, 0.28)) !important;
-    color: var(--onigiri-surface-ink, var(--fg, #111)) !important;
+    border-bottom: 0.5px solid var(--bingsu-surface-line, rgba(127, 127, 127, 0.28)) !important;
+    color: var(--bingsu-surface-ink, var(--fg, #111)) !important;
     font: inherit;
     font-size: 17px !important;
     text-align: left;
 }
 
-html #onigiri-app-menu .oam-row:last-child {
+html #bingsu-app-menu .oam-row:last-child {
     border-bottom: 0 !important;
 }
 
-html #onigiri-app-menu .oam-row.onigiri-pressed {
+html #bingsu-app-menu .oam-row.bingsu-pressed {
     opacity: 1 !important;
-    background: var(--onigiri-surface-fill, rgba(127, 127, 127, 0.18)) !important;
+    background: var(--bingsu-surface-fill, rgba(127, 127, 127, 0.18)) !important;
 }
 
-#onigiri-app-menu .oam-row.is-disabled {
+#bingsu-app-menu .oam-row.is-disabled {
     opacity: 0.4;
 }
 
-#onigiri-app-menu .oam-label {
+#bingsu-app-menu .oam-label {
     flex: 1 1 auto;
     min-width: 0;
     overflow: hidden;
@@ -1799,19 +1799,19 @@ html #onigiri-app-menu .oam-row.onigiri-pressed {
     white-space: nowrap;
 }
 
-#onigiri-app-menu .oam-chevron {
+#bingsu-app-menu .oam-chevron {
     display: inline-flex;
     color: var(--fg-subtle, rgba(127, 127, 127, 0.8));
     opacity: 0.7;
 }
 
-#onigiri-app-menu .oam-check {
+#bingsu-app-menu .oam-check {
     display: inline-flex;
     color: var(--accent-color, #0a84ff);
 }
 
-html.onigiri-app-menu-open #onigiri-phone-tabs,
-html.onigiri-app-menu-open #onigiri-phone-nav {
+html.bingsu-app-menu-open #bingsu-phone-tabs,
+html.bingsu-app-menu-open #bingsu-phone-nav {
     visibility: hidden;
 }
 
@@ -1820,12 +1820,12 @@ html.onigiri-app-menu-open #onigiri-phone-nav {
 /* same colour) as it scrolls up, instead of ending at a hard edge.         */
 /* ------------------------------------------------------------------------- */
 
-#onigiri-top-fade {
+#bingsu-top-fade {
     display: none;
 }
 
-html.onigiri-ios.onigiri-phone body:has(.container.modern-main-menu, .ba-home) #onigiri-top-fade,
-html.onigiri-ios.onigiri-phone body:has(.container.modern-main-menu, .ba-home) > #onigiri-top-fade {
+html.bingsu-ios.bingsu-phone body:has(.container.modern-main-menu, .ba-home) #bingsu-top-fade,
+html.bingsu-ios.bingsu-phone body:has(.container.modern-main-menu, .ba-home) > #bingsu-top-fade {
     display: block;
     position: fixed;
     z-index: 8999;
@@ -1834,72 +1834,72 @@ html.onigiri-ios.onigiri-phone body:has(.container.modern-main-menu, .ba-home) >
     right: 0;
     height: 28px;
     pointer-events: none;
-    background: linear-gradient(to bottom, var(--onigiri-edge-bg, transparent) 0%, transparent 100%);
+    background: linear-gradient(to bottom, var(--bingsu-edge-bg, transparent) 0%, transparent 100%);
 }
 
-html .onigiri-quick-menu.is-sheet .quick-menu-item {
-    color: var(--onigiri-surface-ink, var(--fg, inherit));
+html .bingsu-quick-menu.is-sheet .quick-menu-item {
+    color: var(--bingsu-surface-ink, var(--fg, inherit));
 }
 
 /* Study screen bottom bar (phones): Edit and More level with Show Answer
    (same top, same 48px height) and in from the screen edges; Show Answer
    takes what is left. Ids repeated: other bottom-bar rules zeroed the
    row's side padding. */
-html.onigiri-phone body #outer#outer > #innertable > tbody > tr {
+html.bingsu-phone body #outer#outer > #innertable > tbody > tr {
     align-items: flex-start !important;
     gap: 10px !important;
-    padding-left: calc(18px + var(--onigiri-safe-left)) !important;
-    padding-right: calc(18px + var(--onigiri-safe-right)) !important;
+    padding-left: calc(18px + var(--bingsu-safe-left)) !important;
+    padding-right: calc(18px + var(--bingsu-safe-right)) !important;
     padding-top: 6px !important;
 }
 
-html.onigiri-phone body #outer#outer > #innertable > tbody > tr > td {
+html.bingsu-phone body #outer#outer > #innertable > tbody > tr > td {
     align-items: flex-start !important;
     align-self: flex-start !important;
     vertical-align: top !important;
 }
 
-html.onigiri-phone body #outer#outer button.onigiri-other-btn:not(.onigiri-show-answer-btn),
-html.onigiri-phone body #outer#outer button.onigiri-show-answer-btn,
-html.onigiri-phone body #outer#outer button[data-onigiri-ease] {
+html.bingsu-phone body #outer#outer button.bingsu-other-btn:not(.bingsu-show-answer-btn),
+html.bingsu-phone body #outer#outer button.bingsu-show-answer-btn,
+html.bingsu-phone body #outer#outer button[data-bingsu-ease] {
     height: 48px !important;
     min-height: 48px !important;
     margin: 0 !important;
 }
 
-html.onigiri-phone body #outer#outer button.onigiri-other-btn:not(.onigiri-show-answer-btn):not(.onigiri-more-btn) {
+html.bingsu-phone body #outer#outer button.bingsu-other-btn:not(.bingsu-show-answer-btn):not(.bingsu-more-btn) {
     min-width: 60px !important;
     padding: 0 12px !important;
 }
 
-html.onigiri-phone body #outer#outer button.onigiri-other-btn.onigiri-more-btn:not(.onigiri-show-answer-btn) {
+html.bingsu-phone body #outer#outer button.bingsu-other-btn.bingsu-more-btn:not(.bingsu-show-answer-btn) {
     width: 48px !important;
     min-width: 48px !important;
 }
 
 /* Tab switches: the incoming pane slides in. */
-html body .onigiri-slide-from-right.onigiri-slide-from-right {
-    animation: onigiri-tab-from-right 0.3s cubic-bezier(0.32, 0.72, 0, 1) !important;
+html body .bingsu-slide-from-right.bingsu-slide-from-right {
+    animation: bingsu-tab-from-right 0.3s cubic-bezier(0.32, 0.72, 0, 1) !important;
 }
 
-html body .onigiri-slide-from-left.onigiri-slide-from-left {
-    animation: onigiri-tab-from-left 0.3s cubic-bezier(0.32, 0.72, 0, 1) !important;
+html body .bingsu-slide-from-left.bingsu-slide-from-left {
+    animation: bingsu-tab-from-left 0.3s cubic-bezier(0.32, 0.72, 0, 1) !important;
 }
 
-@keyframes onigiri-tab-from-right {
+@keyframes bingsu-tab-from-right {
     from { transform: translateX(100%); }
     to { transform: none; }
 }
 
-@keyframes onigiri-tab-from-left {
+@keyframes bingsu-tab-from-left {
     from { transform: translateX(-100%); }
     to { transform: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    html body .onigiri-slide-from-right.onigiri-slide-from-right,
-    html body .onigiri-slide-from-left.onigiri-slide-from-left,
-    #onigiri-app-menu {
+    html body .bingsu-slide-from-right.bingsu-slide-from-right,
+    html body .bingsu-slide-from-left.bingsu-slide-from-left,
+    #bingsu-app-menu {
         animation: none !important;
     }
 }
@@ -1911,51 +1911,51 @@ html body .onigiri-slide-from-left.onigiri-slide-from-left {
 /* Deck list <-> deck overview (mobile.js screenTransition): the new page
    waits off screen, then slides in (an animation, so it always plays from
    the edge) once it is ready to be shown. Pure slide, like iOS navigation. */
-html.onigiri-enter-forward body {
+html.bingsu-enter-forward body {
     transform: translateX(100%);
     /* never left off screen if the script didn't run */
-    animation: onigiri-enter-failsafe 0s linear 1.6s forwards;
+    animation: bingsu-enter-failsafe 0s linear 1.6s forwards;
 }
 
-html.onigiri-enter-back body {
+html.bingsu-enter-back body {
     transform: translateX(-100%);
-    animation: onigiri-enter-failsafe 0s linear 1.6s forwards;
+    animation: bingsu-enter-failsafe 0s linear 1.6s forwards;
 }
 
-html.onigiri-enter-forward.onigiri-entering body {
-    animation: onigiri-push-from-right 0.42s cubic-bezier(0.32, 0.72, 0, 1) both !important;
+html.bingsu-enter-forward.bingsu-entering body {
+    animation: bingsu-push-from-right 0.42s cubic-bezier(0.32, 0.72, 0, 1) both !important;
 }
 
-html.onigiri-enter-back.onigiri-entering body {
-    animation: onigiri-push-from-left 0.42s cubic-bezier(0.32, 0.72, 0, 1) both !important;
+html.bingsu-enter-back.bingsu-entering body {
+    animation: bingsu-push-from-left 0.42s cubic-bezier(0.32, 0.72, 0, 1) both !important;
 }
 
-@keyframes onigiri-push-from-right {
+@keyframes bingsu-push-from-right {
     from { transform: translateX(100%); }
     to { transform: none; }
 }
 
-@keyframes onigiri-push-from-left {
+@keyframes bingsu-push-from-left {
     from { transform: translateX(-100%); }
     to { transform: none; }
 }
 
-@keyframes onigiri-enter-failsafe {
+@keyframes bingsu-enter-failsafe {
     to { transform: none; }
 }
 
 /* Taps: tiles and big buttons sink a little under the finger. */
-html.onigiri-touch.onigiri-app :is(.onigiri-sidebar-actions-section .menu-item,
-    .overview-button, .overview-bottom-actions button, #onigiri-phone-tabs button,
-    .onigiri-ready-action, .stat-card, #outer button, .onigiri-row-more,
-    #onigiri-phone-nav > button, .osw-theme-tile) {
+html.bingsu-touch.bingsu-app :is(.bingsu-sidebar-actions-section .menu-item,
+    .overview-button, .overview-bottom-actions button, #bingsu-phone-tabs button,
+    .bingsu-ready-action, .stat-card, #outer button, .bingsu-row-more,
+    #bingsu-phone-nav > button, .osw-theme-tile) {
     transition: transform 0.18s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.18s ease, background-color 0.18s ease;
 }
 
-html.onigiri-touch.onigiri-app :is(.onigiri-sidebar-actions-section .menu-item,
-    .overview-button, .overview-bottom-actions button, #onigiri-phone-tabs button,
-    .onigiri-ready-action, .stat-card, #outer button, .onigiri-row-more,
-    #onigiri-phone-nav > button, .osw-theme-tile).onigiri-pressed {
+html.bingsu-touch.bingsu-app :is(.bingsu-sidebar-actions-section .menu-item,
+    .overview-button, .overview-bottom-actions button, #bingsu-phone-tabs button,
+    .bingsu-ready-action, .stat-card, #outer button, .bingsu-row-more,
+    #bingsu-phone-nav > button, .osw-theme-tile).bingsu-pressed {
     transform: scale(0.96) !important;
     opacity: 0.8 !important;
 }
@@ -1963,74 +1963,74 @@ html.onigiri-touch.onigiri-app :is(.onigiri-sidebar-actions-section .menu-item,
 /* Deck rows ease in once, when the page is drawn (mobile.js removes the
    class again). A permanent animation replayed for every row each time the
    pane was shown again, on every tab switch. */
-html.onigiri-first-paint #deck-list-container tr.deck {
-    animation: onigiri-rise-in 0.28s cubic-bezier(0.32, 0.72, 0, 1) both;
+html.bingsu-first-paint #deck-list-container tr.deck {
+    animation: bingsu-rise-in 0.28s cubic-bezier(0.32, 0.72, 0, 1) both;
 }
 
 /* Home tab: the widget cards rise in one after another the first time the
    tab is opened. */
-html.onigiri-reveal-home .main-content .unified-grid > * {
-    animation: onigiri-rise-in 0.36s cubic-bezier(0.32, 0.72, 0, 1) both;
+html.bingsu-reveal-home .main-content .unified-grid > * {
+    animation: bingsu-rise-in 0.36s cubic-bezier(0.32, 0.72, 0, 1) both;
 }
 
-html.onigiri-reveal-home .main-content .unified-grid > :nth-child(2) { animation-delay: 0.03s; }
-html.onigiri-reveal-home .main-content .unified-grid > :nth-child(3) { animation-delay: 0.06s; }
-html.onigiri-reveal-home .main-content .unified-grid > :nth-child(4) { animation-delay: 0.09s; }
-html.onigiri-reveal-home .main-content .unified-grid > :nth-child(5) { animation-delay: 0.12s; }
-html.onigiri-reveal-home .main-content .unified-grid > :nth-child(n + 6) { animation-delay: 0.15s; }
+html.bingsu-reveal-home .main-content .unified-grid > :nth-child(2) { animation-delay: 0.03s; }
+html.bingsu-reveal-home .main-content .unified-grid > :nth-child(3) { animation-delay: 0.06s; }
+html.bingsu-reveal-home .main-content .unified-grid > :nth-child(4) { animation-delay: 0.09s; }
+html.bingsu-reveal-home .main-content .unified-grid > :nth-child(5) { animation-delay: 0.12s; }
+html.bingsu-reveal-home .main-content .unified-grid > :nth-child(n + 6) { animation-delay: 0.15s; }
 
 /* Study screen: the answer buttons fade up when they replace Show Answer. */
-html.onigiri-touch #outer #middle button {
-    animation: onigiri-rise-in 0.24s cubic-bezier(0.32, 0.72, 0, 1) both;
+html.bingsu-touch #outer #middle button {
+    animation: bingsu-rise-in 0.24s cubic-bezier(0.32, 0.72, 0, 1) both;
 }
 
 /* Settings list rows and menu page rows. */
-html.onigiri-touch .osw-shell .osw-nav-group,
-html.onigiri-touch #onigiri-app-menu .oam-group {
-    animation: onigiri-rise-in 0.3s cubic-bezier(0.32, 0.72, 0, 1) both;
+html.bingsu-touch .osw-shell .osw-nav-group,
+html.bingsu-touch #bingsu-app-menu .oam-group {
+    animation: bingsu-rise-in 0.3s cubic-bezier(0.32, 0.72, 0, 1) both;
 }
 
 /* Sheet rows follow the sheet up. */
-html.onigiri-touch .onigiri-quick-menu.is-sheet > .quick-menu-item {
-    animation: onigiri-rise-in 0.32s cubic-bezier(0.32, 0.72, 0, 1) both;
+html.bingsu-touch .bingsu-quick-menu.is-sheet > .quick-menu-item {
+    animation: bingsu-rise-in 0.32s cubic-bezier(0.32, 0.72, 0, 1) both;
 }
 
 /* Backdrop and edit toolbar. */
-html.onigiri-touch.onigiri-select-mode #onigiri-edit-toolbar {
-    animation: onigiri-sheet-in 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+html.bingsu-touch.bingsu-select-mode #bingsu-edit-toolbar {
+    animation: bingsu-sheet-in 0.28s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-html.onigiri-touch .heatmap-day-cell.is-tip-open::after {
-    animation: onigiri-rise-in 0.18s ease-out both;
+html.bingsu-touch .heatmap-day-cell.is-tip-open::after {
+    animation: bingsu-rise-in 0.18s ease-out both;
 }
 
-@keyframes onigiri-rise-in {
+@keyframes bingsu-rise-in {
     from { transform: translateY(8px); opacity: 0; }
     to { transform: none; opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    html.onigiri-first-paint #deck-list-container tr.deck,
-    html.onigiri-reveal-home .main-content .unified-grid > *,
-    html.onigiri-touch #outer #middle button,
-    html.onigiri-touch .osw-shell .osw-nav-group,
-    html.onigiri-touch #onigiri-app-menu .oam-group,
-    html.onigiri-touch .onigiri-quick-menu.is-sheet > .quick-menu-item {
+    html.bingsu-first-paint #deck-list-container tr.deck,
+    html.bingsu-reveal-home .main-content .unified-grid > *,
+    html.bingsu-touch #outer #middle button,
+    html.bingsu-touch .osw-shell .osw-nav-group,
+    html.bingsu-touch #bingsu-app-menu .oam-group,
+    html.bingsu-touch .bingsu-quick-menu.is-sheet > .quick-menu-item {
         animation: none !important;
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    html.onigiri-enter-forward body,
-    html.onigiri-enter-back body {
+    html.bingsu-enter-forward body,
+    html.bingsu-enter-back body {
         transform: none !important;
         animation: none !important;
     }
 }
 
 /* Keyboard up: the fixed bottom bars step aside. */
-html.onigiri-keyboard #onigiri-phone-tabs,
-html.onigiri-keyboard #onigiri-edit-toolbar {
+html.bingsu-keyboard #bingsu-phone-tabs,
+html.bingsu-keyboard #bingsu-edit-toolbar {
     display: none !important;
 }
 
@@ -2039,7 +2039,7 @@ html.onigiri-keyboard #onigiri-edit-toolbar {
 /* ------------------------------------------------------------------------- */
 
 /* Heatmap previous/next: an invisible 44pt overlay around the 22px button. */
-html.onigiri-touch .heatmap-nav .nav-btn::after {
+html.bingsu-touch .heatmap-nav .nav-btn::after {
     content: "";
     position: absolute;
     inset: -11px;
@@ -2047,40 +2047,40 @@ html.onigiri-touch .heatmap-nav .nav-btn::after {
 
 /* Deck search: a 44pt row, 16px text (anything smaller makes iOS zoom into
    the field on focus), 44pt close target. */
-html.onigiri-touch #onigiri-deck-search-bar {
+html.bingsu-touch #bingsu-deck-search-bar {
     height: 44px;
     min-height: 44px;
 }
 
-html.onigiri-touch #onigiri-deck-search-input {
+html.bingsu-touch #bingsu-deck-search-input {
     height: 40px;
     font-size: 16px;
 }
 
-html.onigiri-touch #onigiri-deck-search-close {
+html.bingsu-touch #bingsu-deck-search-close {
     position: relative;
 }
 
-html.onigiri-touch #onigiri-deck-search-close::after {
+html.bingsu-touch #bingsu-deck-search-close::after {
     content: "";
     position: absolute;
     inset: -12px;
 }
 
 /* Every text field on the touch screens: 16px, so focusing it never zooms. */
-html.onigiri-touch.onigiri-app :is(input[type="text"], input[type="search"], input[type="number"],
+html.bingsu-touch.bingsu-app :is(input[type="text"], input[type="search"], input[type="number"],
     input[type="email"], input[type="url"], input:not([type]), textarea, select) {
     font-size: max(16px, 1em);
 }
 
 /* Deck search on phones takes the whole header row (the title and buttons
    made it a sliver: "De" and a tiny pill). */
-html.onigiri-phone #deck-list-header:has(#onigiri-deck-search-bar.is-visible) > .deck-focus-mode-group,
-html.onigiri-phone #deck-list-header:has(#onigiri-deck-search-bar.is-visible) > .deck-header-actions {
+html.bingsu-phone #deck-list-header:has(#bingsu-deck-search-bar.is-visible) > .deck-focus-mode-group,
+html.bingsu-phone #deck-list-header:has(#bingsu-deck-search-bar.is-visible) > .deck-header-actions {
     display: none !important;
 }
 
-html.onigiri-phone #deck-list-header #onigiri-deck-search-bar.is-visible {
+html.bingsu-phone #deck-list-header #bingsu-deck-search-bar.is-visible {
     flex: 1 1 100% !important;
     width: 100% !important;
     max-width: none !important;
@@ -2088,7 +2088,7 @@ html.onigiri-phone #deck-list-header #onigiri-deck-search-bar.is-visible {
 
 /* Controls that appear on hover only (touch has no hover): always visible
    and big enough to hit on touch screens. */
-html.onigiri-touch .osw-gal-del {
+html.bingsu-touch .osw-gal-del {
     opacity: 0.9;
     width: 30px;
     height: 30px;
@@ -2096,13 +2096,13 @@ html.onigiri-touch .osw-gal-del {
     right: 8px;
 }
 
-html.onigiri-touch .osw-gal-del svg {
+html.bingsu-touch .osw-gal-del svg {
     width: 13px;
     height: 13px;
 }
 
-html.onigiri-touch .osw-organize-tile-remove,
-html.onigiri-touch .onigiri-icon-delete {
+html.bingsu-touch .osw-organize-tile-remove,
+html.bingsu-touch .bingsu-icon-delete {
     opacity: 1;
     pointer-events: auto;
 }
@@ -2114,16 +2114,16 @@ html.onigiri-touch .onigiri-icon-delete {
 /* congrats.css fixes the page to 100vh with hidden overflow: content was
    clipped (large text, landscape) with no way to scroll, and ran under the
    home indicator. */
-html.onigiri-touch body:has(.congrats-container) {
+html.bingsu-touch body:has(.congrats-container) {
     height: auto;
-    min-height: calc(100vh - var(--onigiri-safe-bottom));
-    min-height: calc(100dvh - var(--onigiri-safe-bottom));
+    min-height: calc(100vh - var(--bingsu-safe-bottom));
+    min-height: calc(100dvh - var(--bingsu-safe-bottom));
     overflow-y: auto;
     box-sizing: border-box;
     padding: 56px 0 24px;
 }
 
-html.onigiri-touch .congrats-bottom-actions .overview-button {
+html.bingsu-touch .congrats-bottom-actions .overview-button {
     display: inline-flex !important;
     align-items: center;
     justify-content: center;
@@ -2133,8 +2133,8 @@ html.onigiri-touch .congrats-bottom-actions .overview-button {
 }
 
 /* the nav bar replaces the row of circled icons */
-html.onigiri-phone.onigiri-has-phone-nav body:has(.congrats-container) #onigiri-reviewer-header a.onigiri-reviewer-button,
-html.onigiri-phone.onigiri-has-phone-nav body:has(.congrats-container) #onigiri-reviewer-header .onigiri-rubber-dock {
+html.bingsu-phone.bingsu-has-phone-nav body:has(.congrats-container) #bingsu-reviewer-header a.bingsu-reviewer-button,
+html.bingsu-phone.bingsu-has-phone-nav body:has(.congrats-container) #bingsu-reviewer-header .bingsu-rubber-dock {
     display: none !important;
 }
 
@@ -2144,20 +2144,20 @@ html.onigiri-phone.onigiri-has-phone-nav body:has(.congrats-container) #onigiri-
 
 /* Centred dialogs ended up behind the keyboard when a field was focused:
    anchored near the top they stay clear of it, and scroll if needed. */
-html.onigiri-touch :is(#onigiri-rename-backdrop, #onigiri-create-deck-backdrop,
-    #onigiri-add-subdeck-backdrop, #onigiri-move-backdrop, #onigiri-delete-backdrop) {
+html.bingsu-touch :is(#bingsu-rename-backdrop, #bingsu-create-deck-backdrop,
+    #bingsu-add-subdeck-backdrop, #bingsu-move-backdrop, #bingsu-delete-backdrop) {
     align-items: flex-start !important;
-    padding: calc(16px + var(--onigiri-safe-bottom, 0px)) 12px 12px !important;
+    padding: calc(16px + var(--bingsu-safe-bottom, 0px)) 12px 12px !important;
     overflow-y: auto;
     overscroll-behavior: contain;
 }
 
-html.onigiri-touch :is(#onigiri-rename-backdrop, #onigiri-create-deck-backdrop,
-    #onigiri-add-subdeck-backdrop, #onigiri-move-backdrop, #onigiri-delete-backdrop) :is(button, input) {
+html.bingsu-touch :is(#bingsu-rename-backdrop, #bingsu-create-deck-backdrop,
+    #bingsu-add-subdeck-backdrop, #bingsu-move-backdrop, #bingsu-delete-backdrop) :is(button, input) {
     min-height: 44px;
 }
 
-html.onigiri-touch :is(#onigiri-rename-backdrop, #onigiri-create-deck-backdrop,
-    #onigiri-add-subdeck-backdrop, #onigiri-move-backdrop, #onigiri-delete-backdrop) input {
+html.bingsu-touch :is(#bingsu-rename-backdrop, #bingsu-create-deck-backdrop,
+    #bingsu-add-subdeck-backdrop, #bingsu-move-backdrop, #bingsu-delete-backdrop) input {
     font-size: 16px !important;
 }

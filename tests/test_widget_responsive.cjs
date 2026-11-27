@@ -12,7 +12,7 @@ const context = {
 };
 vm.createContext(context);
 vm.runInContext(fs.readFileSync(path.join(__dirname, '../web/engine.js'), 'utf8'), context);
-const engine = context.window.OnigiriEngine;
+const engine = context.window.BingsuEngine;
 const tiles = [
     [1, 1, 1, 1], [1, 2, 1, 1], [1, 3, 1, 1], [1, 4, 1, 1],
     [2, 1, 2, 3], [2, 4, 2, 1],

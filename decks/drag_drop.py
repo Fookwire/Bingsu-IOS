@@ -9,7 +9,7 @@ VALID_DROP_TYPES = {"nest", "before", "after"}
 
 
 def apply_drag_drop(payload: Mapping[str, Any]) -> bool:
-    """Validate and apply an Onigiri deck-browser drag/drop payload.
+    """Validate and apply an Bingsu deck-browser drag/drop payload.
 
     Returns True only when a real structural or custom-order change was saved.
     """
@@ -81,9 +81,9 @@ def apply_drag_drop(payload: Mapping[str, Any]) -> bool:
     if not final_order:
         return False
 
-    mw.col.conf["onigiri_sort_mode"] = "custom"
-    mw.col.conf["onigiri_deck_sort"] = "custom"
-    mw.col.conf["onigiri_custom_deck_order"] = final_order
+    mw.col.conf["bingsu_sort_mode"] = "custom"
+    mw.col.conf["bingsu_deck_sort"] = "custom"
+    mw.col.conf["bingsu_custom_deck_order"] = final_order
     mw.col.setMod()
     return True
 
@@ -129,11 +129,11 @@ def _deck_names_by_id() -> Dict[str, str]:
 def _current_tree_order() -> List[str]:
     try:
         tree = mw.col.sched.deck_due_tree()
-        sort_mode = mw.col.conf.get("onigiri_sort_mode", "")
+        sort_mode = mw.col.conf.get("bingsu_sort_mode", "")
         if sort_mode:
             from . import tree_updater
 
-            saved_order = [str(value) for value in mw.col.conf.get("onigiri_custom_deck_order", [])]
+            saved_order = [str(value) for value in mw.col.conf.get("bingsu_custom_deck_order", [])]
             tree_updater._apply_sort_recursive(tree.children, sort_mode, saved_order, is_top_level=True)
 
         order: List[str] = []

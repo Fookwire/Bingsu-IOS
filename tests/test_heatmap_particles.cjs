@@ -43,7 +43,7 @@ function fixture(reduced = false, locations = [10, 30, 100]) {
         cancelAnimationFrame(key) { frames.delete(key); }
     };
     vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../web/Particles.js'), 'utf8'), context);
-    const particles = new context.window.OnigiriParticles.Particles(grid);
+    const particles = new context.window.BingsuParticles.Particles(grid);
     const step = () => {
         const callbacks = [...frames.values()]; frames.clear(); clock += 16.67;
         callbacks.forEach(fn => fn(clock));

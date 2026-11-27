@@ -1,5 +1,5 @@
 (function () {
-    if (window.OnigiriMoveToDialog) return;
+    if (window.BingsuMoveToDialog) return;
 
     var state = {
         source: null,
@@ -12,8 +12,8 @@
     };
 
     function T(key, fallback) {
-        if (window.OnigiriI18n && typeof OnigiriI18n.t === 'function') {
-            return OnigiriI18n.t(key, fallback);
+        if (window.BingsuI18n && typeof BingsuI18n.t === 'function') {
+            return BingsuI18n.t(key, fallback);
         }
         return fallback;
     }
@@ -33,32 +33,32 @@
         var url = String(iconRef || '');
         if (!url) return '';
         if (url.indexOf('/') !== -1) return url;
-        if (window.OnigiriEngine && typeof OnigiriEngine.systemIconUrl === 'function') {
-            return OnigiriEngine.systemIconUrl(url);
+        if (window.BingsuEngine && typeof BingsuEngine.systemIconUrl === 'function') {
+            return BingsuEngine.systemIconUrl(url);
         }
         return url;
     }
 
     function makeIcon(iconRef, className, size, color) {
-        if (window.OnigiriEngine && typeof OnigiriEngine.createMaskIcon === 'function') {
-            return OnigiriEngine.createMaskIcon(resolveIconUrl(iconRef), {
-                className: className || 'onigiri-move-icon',
+        if (window.BingsuEngine && typeof BingsuEngine.createMaskIcon === 'function') {
+            return BingsuEngine.createMaskIcon(resolveIconUrl(iconRef), {
+                className: className || 'bingsu-move-icon',
                 size: size || 16,
                 color: color || 'currentColor'
             });
         }
         var fallback = document.createElement('span');
-        fallback.className = className || 'onigiri-move-icon';
+        fallback.className = className || 'bingsu-move-icon';
         return fallback;
     }
 
-    // Shared light/dark tokens for Onigiri dialogs. They read the Onigiri palette
+    // Shared light/dark tokens for Bingsu dialogs. They read the Bingsu palette
     // (which flips on .night-mode) instead of Anki's --canvas*, so a dialog can
     // never end up with light-theme surfaces under dark-theme text.
     function ensureDialogThemeTokens() {
-        if (document.getElementById('onigiri-dialog-theme-tokens')) return;
+        if (document.getElementById('bingsu-dialog-theme-tokens')) return;
         var tokenStyle = document.createElement('style');
-        tokenStyle.id = 'onigiri-dialog-theme-tokens';
+        tokenStyle.id = 'bingsu-dialog-theme-tokens';
         tokenStyle.textContent = [
             ':root{--odlg-surface:#ffffff;--odlg-inset:#ffffff;',
             '  --odlg-fg:#202124;--odlg-fg-subtle:#6f7177;',
@@ -74,95 +74,95 @@
 
     function ensureStyles() {
         ensureDialogThemeTokens();
-        if (document.getElementById('onigiri-move-to-style')) return;
+        if (document.getElementById('bingsu-move-to-style')) return;
 
         var style = document.createElement('style');
-        style.id = 'onigiri-move-to-style';
+        style.id = 'bingsu-move-to-style';
         style.textContent = [
-            '#onigiri-move-backdrop{position:fixed;inset:0;z-index:200000;display:flex;align-items:center;justify-content:center;',
+            '#bingsu-move-backdrop{position:fixed;inset:0;z-index:200000;display:flex;align-items:center;justify-content:center;',
             '  background:var(--odlg-scrim, rgba(0,0,0,0.58));contain:layout paint style;isolation:isolate;transform:translateZ(0);',
             '  backface-visibility:hidden;-webkit-backface-visibility:hidden;}',
-            '#onigiri-move-backdrop.is-preparing{visibility:hidden;}',
-            '#onigiri-move-backdrop *{box-sizing:border-box;}',
-            '#onigiri-move-backdrop button,#onigiri-move-backdrop input{appearance:none;-webkit-appearance:none;',
+            '#bingsu-move-backdrop.is-preparing{visibility:hidden;}',
+            '#bingsu-move-backdrop *{box-sizing:border-box;}',
+            '#bingsu-move-backdrop button,#bingsu-move-backdrop input{appearance:none;-webkit-appearance:none;',
             '  font-family:var(--font-main,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif);}',
-            '#onigiri-move-backdrop button{border:none !important;outline:none !important;box-shadow:none !important;',
+            '#bingsu-move-backdrop button{border:none !important;outline:none !important;box-shadow:none !important;',
             '  background-image:none !important;appearance:none;-webkit-appearance:none;}',
-            '.onigiri-move-modal{width:540px;max-width:94vw;height:620px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;',
+            '.bingsu-move-modal{width:540px;max-width:94vw;height:620px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;',
             '  border-radius:16px;border:1px solid var(--odlg-border, rgba(0,0,0,0.14));',
             '  background:var(--odlg-surface, #ffffff);color:var(--odlg-fg, #212121);',
             '  box-shadow:0 24px 70px rgba(0,0,0,0.42);',
             '  backface-visibility:hidden;-webkit-backface-visibility:hidden;transform:translateZ(0);contain:layout paint style;isolation:isolate;}',
-            '.onigiri-move-header{display:flex;align-items:flex-start;gap:12px;padding:18px 18px 14px;border-bottom:1px solid var(--odlg-border, rgba(0,0,0,0.14));}',
-            '.onigiri-move-header-icon{width:34px;height:34px;min-width:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;',
+            '.bingsu-move-header{display:flex;align-items:flex-start;gap:12px;padding:18px 18px 14px;border-bottom:1px solid var(--odlg-border, rgba(0,0,0,0.14));}',
+            '.bingsu-move-header-icon{width:34px;height:34px;min-width:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;',
             '  color:var(--odlg-accent, #0077C8);background:var(--odlg-highlight, rgba(0,0,0,0.06));}',
-            '.onigiri-move-title-wrap{min-width:0;flex:1;}',
-            '.onigiri-move-title{font-size:16px;font-weight:700;line-height:1.2;margin:0 0 5px;color:var(--odlg-fg, #212121);}',
-            '.onigiri-move-subtitle{display:flex;align-items:center;gap:7px;min-width:0;font-size:13px;color:var(--odlg-fg-subtle, #757575);line-height:1.35;}',
-            '.onigiri-move-source{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--odlg-fg, #212121);font-weight:600;}',
-            '.onigiri-move-close{width:30px;height:30px;min-width:30px;padding:0;border:none !important;border-radius:8px;background:transparent !important;color:var(--odlg-fg-subtle, #757575);',
+            '.bingsu-move-title-wrap{min-width:0;flex:1;}',
+            '.bingsu-move-title{font-size:16px;font-weight:700;line-height:1.2;margin:0 0 5px;color:var(--odlg-fg, #212121);}',
+            '.bingsu-move-subtitle{display:flex;align-items:center;gap:7px;min-width:0;font-size:13px;color:var(--odlg-fg-subtle, #757575);line-height:1.35;}',
+            '.bingsu-move-source{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--odlg-fg, #212121);font-weight:600;}',
+            '.bingsu-move-close{width:30px;height:30px;min-width:30px;padding:0;border:none !important;border-radius:8px;background:transparent !important;color:var(--odlg-fg-subtle, #757575);',
             '  display:flex;align-items:center;justify-content:center;cursor:pointer;outline:none !important;box-shadow:none !important;filter:none !important;',
             '  opacity:0.72;transition:none;}',
-            '.onigiri-move-close:hover,.onigiri-move-close:focus,.onigiri-move-close:active{background:transparent !important;color:var(--odlg-fg, #212121);opacity:1;box-shadow:none !important;border:none !important;}',
-            '.onigiri-move-search-wrap{position:relative;margin:14px 18px 10px;flex-shrink:0;}',
-            '.onigiri-move-search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--odlg-fg-subtle, #757575);pointer-events:none;}',
-            '.onigiri-move-search{width:100%;height:38px;padding:0 13px 0 38px;border-radius:999px;border:1px solid var(--odlg-border, rgba(0,0,0,0.14));',
+            '.bingsu-move-close:hover,.bingsu-move-close:focus,.bingsu-move-close:active{background:transparent !important;color:var(--odlg-fg, #212121);opacity:1;box-shadow:none !important;border:none !important;}',
+            '.bingsu-move-search-wrap{position:relative;margin:14px 18px 10px;flex-shrink:0;}',
+            '.bingsu-move-search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--odlg-fg-subtle, #757575);pointer-events:none;}',
+            '.bingsu-move-search{width:100%;height:38px;padding:0 13px 0 38px;border-radius:999px;border:1px solid var(--odlg-border, rgba(0,0,0,0.14));',
             '  background:var(--odlg-inset, #ffffff);color:var(--odlg-fg, #212121);font-size:13px;outline:none;box-shadow:none;',
             '  transition:none;}',
-            '.onigiri-move-search::placeholder{color:var(--odlg-fg-subtle, #757575);}',
-            '.onigiri-move-search:hover{background:var(--odlg-inset, #ffffff);}',
-            '.onigiri-move-search:focus{border-color:var(--odlg-accent, #0077C8);}',
-            '.onigiri-move-list{flex:1;min-height:0;margin:0 18px 12px;padding:5px;overflow:auto;border:1px solid var(--odlg-border, rgba(0,0,0,0.14));',
+            '.bingsu-move-search::placeholder{color:var(--odlg-fg-subtle, #757575);}',
+            '.bingsu-move-search:hover{background:var(--odlg-inset, #ffffff);}',
+            '.bingsu-move-search:focus{border-color:var(--odlg-accent, #0077C8);}',
+            '.bingsu-move-list{flex:1;min-height:0;margin:0 18px 12px;padding:5px;overflow:auto;border:1px solid var(--odlg-border, rgba(0,0,0,0.14));',
             '  border-radius:12px;background:var(--odlg-highlight, rgba(0,0,0,0.06));position:relative;contain:layout paint style;isolation:isolate;}',
-            '.onigiri-move-highlight{position:absolute;top:0;left:5px;right:5px;height:0;border-radius:9px;pointer-events:none;opacity:0;',
+            '.bingsu-move-highlight{position:absolute;top:0;left:5px;right:5px;height:0;border-radius:9px;pointer-events:none;opacity:0;',
             '  transform:translate3d(0,0,0);will-change:transform,opacity,height;contain:paint;}',
-            '.onigiri-move-hover-layer{z-index:0;background:var(--odlg-inset, #ffffff);}',
-            '.onigiri-move-selected-layer{z-index:1;background:transparent;box-shadow:inset 0 0 0 2px var(--odlg-accent, #0077C8);}',
-            '.onigiri-move-row{width:100%;display:flex;align-items:center;gap:11px;padding:10px;border-radius:9px;border:none;',
+            '.bingsu-move-hover-layer{z-index:0;background:var(--odlg-inset, #ffffff);}',
+            '.bingsu-move-selected-layer{z-index:1;background:transparent;box-shadow:inset 0 0 0 2px var(--odlg-accent, #0077C8);}',
+            '.bingsu-move-row{width:100%;display:flex;align-items:center;gap:11px;padding:10px;border-radius:9px;border:none;',
             '  color:var(--odlg-fg, #212121);cursor:pointer;user-select:none;background:transparent;position:relative;z-index:2;transition:none;}',
-            '.onigiri-move-row + .onigiri-move-row{margin-top:3px;}',
-            '.onigiri-move-row.is-selected{color:var(--odlg-fg, #212121);}',
-            '.onigiri-move-row.is-selected .onigiri-move-row-icon{color:var(--odlg-accent, #0077C8);}',
-            '.onigiri-move-row.is-hidden{display:none;}',
-            '.onigiri-move-row.is-disabled{cursor:not-allowed;opacity:0.46;}',
-            '.onigiri-move-row-icon{width:28px;height:28px;min-width:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;',
+            '.bingsu-move-row + .bingsu-move-row{margin-top:3px;}',
+            '.bingsu-move-row.is-selected{color:var(--odlg-fg, #212121);}',
+            '.bingsu-move-row.is-selected .bingsu-move-row-icon{color:var(--odlg-accent, #0077C8);}',
+            '.bingsu-move-row.is-hidden{display:none;}',
+            '.bingsu-move-row.is-disabled{cursor:not-allowed;opacity:0.46;}',
+            '.bingsu-move-row-icon{width:28px;height:28px;min-width:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;',
             '  color:var(--odlg-fg-subtle, #757575);background:var(--odlg-inset, #ffffff);}',
-            '.onigiri-move-row-text{min-width:0;flex:1;}',
-            '.onigiri-move-row-name{font-size:13px;font-weight:650;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}',
-            '.onigiri-move-row-path{font-size:11px;color:var(--odlg-fg-subtle, #757575);line-height:1.25;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}',
-            '.onigiri-move-row-reason{font-size:11px;color:var(--odlg-fg-subtle, #757575);margin-left:auto;padding-left:8px;white-space:nowrap;}',
-            '.onigiri-move-empty{height:100%;min-height:160px;display:none;align-items:center;justify-content:center;text-align:center;',
+            '.bingsu-move-row-text{min-width:0;flex:1;}',
+            '.bingsu-move-row-name{font-size:13px;font-weight:650;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}',
+            '.bingsu-move-row-path{font-size:11px;color:var(--odlg-fg-subtle, #757575);line-height:1.25;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}',
+            '.bingsu-move-row-reason{font-size:11px;color:var(--odlg-fg-subtle, #757575);margin-left:auto;padding-left:8px;white-space:nowrap;}',
+            '.bingsu-move-empty{height:100%;min-height:160px;display:none;align-items:center;justify-content:center;text-align:center;',
             '  color:var(--odlg-fg-subtle, #757575);font-size:13px;padding:20px;}',
-            '.onigiri-move-error{display:none;margin:0 18px 10px;padding:9px 11px;border-radius:9px;background:rgba(192,48,48,0.12);',
+            '.bingsu-move-error{display:none;margin:0 18px 10px;padding:9px 11px;border-radius:9px;background:rgba(192,48,48,0.12);',
             '  color:#d84a4a;font-size:12px;line-height:1.35;}',
-            '.onigiri-move-footer{display:flex;align-items:center;gap:8px;padding:12px 18px 16px;border-top:1px solid var(--odlg-border, rgba(0,0,0,0.14));}',
-            '.onigiri-move-spacer{flex:1;}',
-            '.onigiri-move-btn{height:36px;padding:0 15px;border:none !important;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;gap:7px;',
+            '.bingsu-move-footer{display:flex;align-items:center;gap:8px;padding:12px 18px 16px;border-top:1px solid var(--odlg-border, rgba(0,0,0,0.14));}',
+            '.bingsu-move-spacer{flex:1;}',
+            '.bingsu-move-btn{height:36px;padding:0 15px;border:none !important;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;gap:7px;',
             '  cursor:pointer;font-size:13px;font-weight:650;outline:none !important;box-shadow:none !important;background-image:none !important;',
             '  filter:none !important;transition:none;}',
-            '.onigiri-move-btn-secondary{background:var(--odlg-inset, #ffffff) !important;color:var(--odlg-fg, #212121);}',
-            '.onigiri-move-btn-secondary:hover,.onigiri-move-btn-secondary:focus,.onigiri-move-btn-secondary:active{background:var(--odlg-inset, #ffffff) !important;border:none !important;box-shadow:none !important;outline:none !important;}',
-            '.onigiri-move-btn-primary{background:var(--odlg-accent, #0077C8) !important;color:#fff;}',
-            '.onigiri-move-btn-primary:hover,.onigiri-move-btn-primary:focus,.onigiri-move-btn-primary:active{background:var(--odlg-accent, #0077C8) !important;border:none !important;box-shadow:none !important;outline:none !important;filter:none !important;}',
-            '.onigiri-move-btn:not(:disabled):hover{opacity:0.92;}',
-            '.onigiri-move-btn:not(:disabled):active{opacity:0.84;}',
-            '.onigiri-move-btn:disabled{opacity:0.42;cursor:not-allowed;filter:none !important;}',
-            '.onigiri-move-btn-primary:disabled{color:rgba(255,255,255,0.82) !important;-webkit-text-fill-color:rgba(255,255,255,0.82);}',
-            '.onigiri-move-btn:disabled:hover{filter:none !important;}',
-            '.onigiri-move-list::-webkit-scrollbar{width:10px;background:transparent;}',
-            '.onigiri-move-list::-webkit-scrollbar-thumb{background:rgba(128,128,128,0.38);border-radius:999px;border:2px solid transparent;background-clip:content-box;}',
-            '.onigiri-move-list::-webkit-scrollbar-track{background:transparent;}'
+            '.bingsu-move-btn-secondary{background:var(--odlg-inset, #ffffff) !important;color:var(--odlg-fg, #212121);}',
+            '.bingsu-move-btn-secondary:hover,.bingsu-move-btn-secondary:focus,.bingsu-move-btn-secondary:active{background:var(--odlg-inset, #ffffff) !important;border:none !important;box-shadow:none !important;outline:none !important;}',
+            '.bingsu-move-btn-primary{background:var(--odlg-accent, #0077C8) !important;color:#fff;}',
+            '.bingsu-move-btn-primary:hover,.bingsu-move-btn-primary:focus,.bingsu-move-btn-primary:active{background:var(--odlg-accent, #0077C8) !important;border:none !important;box-shadow:none !important;outline:none !important;filter:none !important;}',
+            '.bingsu-move-btn:not(:disabled):hover{opacity:0.92;}',
+            '.bingsu-move-btn:not(:disabled):active{opacity:0.84;}',
+            '.bingsu-move-btn:disabled{opacity:0.42;cursor:not-allowed;filter:none !important;}',
+            '.bingsu-move-btn-primary:disabled{color:rgba(255,255,255,0.82) !important;-webkit-text-fill-color:rgba(255,255,255,0.82);}',
+            '.bingsu-move-btn:disabled:hover{filter:none !important;}',
+            '.bingsu-move-list::-webkit-scrollbar{width:10px;background:transparent;}',
+            '.bingsu-move-list::-webkit-scrollbar-thumb{background:rgba(128,128,128,0.38);border-radius:999px;border:2px solid transparent;background-clip:content-box;}',
+            '.bingsu-move-list::-webkit-scrollbar-track{background:transparent;}'
         ].join('');
         document.head.appendChild(style);
     }
 
     function close(skipUiClose) {
-        var backdrop = document.getElementById('onigiri-move-backdrop');
+        var backdrop = document.getElementById('bingsu-move-backdrop');
         runCleanup();
         if (backdrop) backdrop.remove();
 
-        if (window.OnigiriEngine && typeof OnigiriEngine.clearDialogFocus === 'function') {
-            OnigiriEngine.clearDialogFocus();
+        if (window.BingsuEngine && typeof BingsuEngine.clearDialogFocus === 'function') {
+            BingsuEngine.clearDialogFocus();
         } else {
             document.querySelectorAll('tr.deck.ctx-row-active').forEach(function (row) {
                 row.classList.remove('ctx-row-active');
@@ -184,7 +184,7 @@
         }
 
         if (!skipUiClose && backdrop && typeof pycmd === 'function') {
-            pycmd('onigiri_ui_close');
+            pycmd('bingsu_ui_close');
         }
     }
 
@@ -202,8 +202,8 @@
         var iconUrl = String(iconRef || '');
         if (!iconUrl) return '';
         if (iconUrl.indexOf('/') !== -1) return iconUrl;
-        if (window.OnigiriEngine && typeof OnigiriEngine.systemIconUrl === 'function') {
-            return OnigiriEngine.systemIconUrl(iconUrl);
+        if (window.BingsuEngine && typeof BingsuEngine.systemIconUrl === 'function') {
+            return BingsuEngine.systemIconUrl(iconUrl);
         }
         return iconUrl;
     }
@@ -212,8 +212,8 @@
         var urls = ['move_deck.svg', 'cancel.svg', 'search.svg', 'deck.svg', 'subdeck.svg', 'folder.svg', 'filtered_deck.svg']
             .map(resolveIconUrl)
             .filter(Boolean);
-        if (window.OnigiriEngine && typeof OnigiriEngine.preloadMaskIcons === 'function') {
-            OnigiriEngine.preloadMaskIcons(urls);
+        if (window.BingsuEngine && typeof BingsuEngine.preloadMaskIcons === 'function') {
+            BingsuEngine.preloadMaskIcons(urls);
         }
         return urls.map(function (url) {
             var img = new Image();
@@ -224,28 +224,28 @@
     }
 
     function warmDialogSurface() {
-        if (document.getElementById('onigiri-move-warmup')) return;
+        if (document.getElementById('bingsu-move-warmup')) return;
         var warmup = document.createElement('div');
-        warmup.id = 'onigiri-move-warmup';
+        warmup.id = 'bingsu-move-warmup';
         warmup.setAttribute('aria-hidden', 'true');
         warmup.style.cssText = 'position:fixed;left:-10000px;top:-10000px;width:540px;height:620px;visibility:hidden;pointer-events:none;contain:layout paint style;overflow:hidden;';
 
         var modal = document.createElement('div');
-        modal.className = 'onigiri-move-modal';
+        modal.className = 'bingsu-move-modal';
         var search = document.createElement('input');
-        search.className = 'onigiri-move-search';
+        search.className = 'bingsu-move-search';
         var list = document.createElement('div');
-        list.className = 'onigiri-move-list';
+        list.className = 'bingsu-move-list';
         var row = document.createElement('div');
-        row.className = 'onigiri-move-row is-selected';
+        row.className = 'bingsu-move-row is-selected';
         list.appendChild(row);
         var footer = document.createElement('div');
-        footer.className = 'onigiri-move-footer';
+        footer.className = 'bingsu-move-footer';
         var secondary = document.createElement('span');
-        secondary.className = 'onigiri-move-btn onigiri-move-btn-secondary';
+        secondary.className = 'bingsu-move-btn bingsu-move-btn-secondary';
         secondary.textContent = T('cancel', 'Cancel');
         var primary = document.createElement('span');
-        primary.className = 'onigiri-move-btn onigiri-move-btn-primary';
+        primary.className = 'bingsu-move-btn bingsu-move-btn-primary';
         primary.textContent = T('move_action', 'Move');
         footer.appendChild(secondary);
         footer.appendChild(primary);
@@ -316,7 +316,7 @@
     }
 
     function updateConfirmState() {
-        var confirmBtn = document.getElementById('onigiri-move-confirm');
+        var confirmBtn = document.getElementById('bingsu-move-confirm');
         if (!confirmBtn) return;
         var selected = state.destinations.filter(function (dest) {
             return String(dest.id) === String(state.selectedId);
@@ -333,55 +333,55 @@
             state.rowById[id].classList.toggle('is-selected', id === state.selectedId);
         });
 
-        var err = document.getElementById('onigiri-move-error');
+        var err = document.getElementById('bingsu-move-error');
         if (err) err.style.display = 'none';
         updateConfirmState();
         queueHighlightUpdate();
     }
 
     function buildRows() {
-        var list = document.getElementById('onigiri-move-list');
-        var empty = document.getElementById('onigiri-move-empty');
-        var search = document.getElementById('onigiri-move-search');
+        var list = document.getElementById('bingsu-move-list');
+        var empty = document.getElementById('bingsu-move-empty');
+        var search = document.getElementById('bingsu-move-search');
         if (!list || !empty) return;
 
         list.innerHTML = '';
         state.rowById = {};
 
         state.hoverLayer = document.createElement('div');
-        state.hoverLayer.className = 'onigiri-move-highlight onigiri-move-hover-layer';
+        state.hoverLayer.className = 'bingsu-move-highlight bingsu-move-hover-layer';
         state.selectedLayer = document.createElement('div');
-        state.selectedLayer.className = 'onigiri-move-highlight onigiri-move-selected-layer';
+        state.selectedLayer.className = 'bingsu-move-highlight bingsu-move-selected-layer';
         list.appendChild(state.hoverLayer);
         list.appendChild(state.selectedLayer);
 
         state.destinations.forEach(function (dest) {
             var row = document.createElement('div');
-            row.className = 'onigiri-move-row';
+            row.className = 'bingsu-move-row';
             row.dataset.destinationId = String(dest.id);
             if (dest.disabled) row.classList.add('is-disabled');
 
             var iconWrap = document.createElement('div');
-            iconWrap.className = 'onigiri-move-row-icon';
-            iconWrap.appendChild(makeIcon(dest.iconUrl || (dest.kind === 'root' ? 'folder.svg' : 'deck.svg'), 'onigiri-move-row-svg', 15, 'currentColor'));
+            iconWrap.className = 'bingsu-move-row-icon';
+            iconWrap.appendChild(makeIcon(dest.iconUrl || (dest.kind === 'root' ? 'folder.svg' : 'deck.svg'), 'bingsu-move-row-svg', 15, 'currentColor'));
             row.appendChild(iconWrap);
 
             var text = document.createElement('div');
-            text.className = 'onigiri-move-row-text';
+            text.className = 'bingsu-move-row-text';
             var name = document.createElement('div');
-            name.className = 'onigiri-move-row-name';
+            name.className = 'bingsu-move-row-name';
             name.textContent = dest.name || dest.path || 'Untitled deck';
             text.appendChild(name);
 
             var path = document.createElement('div');
-            path.className = 'onigiri-move-row-path';
+            path.className = 'bingsu-move-row-path';
             path.textContent = dest.kind === 'root' ? 'Move to the deck browser root' : (dest.path || dest.name || '');
             text.appendChild(path);
             row.appendChild(text);
 
             if (dest.reason) {
                 var reason = document.createElement('div');
-                reason.className = 'onigiri-move-row-reason';
+                reason.className = 'bingsu-move-row-reason';
                 reason.textContent = dest.reason;
                 row.appendChild(reason);
             }
@@ -401,8 +401,8 @@
     }
 
     function applyFilter() {
-        var empty = document.getElementById('onigiri-move-empty');
-        var search = document.getElementById('onigiri-move-search');
+        var empty = document.getElementById('bingsu-move-empty');
+        var search = document.getElementById('bingsu-move-search');
         var query = search ? search.value.trim().toLowerCase() : '';
         var visibleCount = 0;
         var selectedVisible = false;
@@ -434,7 +434,7 @@
 
     function showError(message) {
         state.busy = false;
-        var error = document.getElementById('onigiri-move-error');
+        var error = document.getElementById('bingsu-move-error');
         if (error) {
             error.textContent = message || 'Could not move deck.';
             error.style.display = 'block';
@@ -458,36 +458,36 @@
         state.highlightRaf = 0;
 
         var backdrop = document.createElement('div');
-        backdrop.id = 'onigiri-move-backdrop';
+        backdrop.id = 'bingsu-move-backdrop';
         backdrop.className = 'is-preparing';
 
         var modal = document.createElement('div');
-        modal.className = 'onigiri-move-modal';
+        modal.className = 'bingsu-move-modal';
         modal.addEventListener('click', function (evt) { evt.stopPropagation(); });
         modal.addEventListener('pointerdown', function (evt) { evt.stopPropagation(); });
 
         var header = document.createElement('div');
-        header.className = 'onigiri-move-header';
+        header.className = 'bingsu-move-header';
 
         var headerIcon = document.createElement('div');
-        headerIcon.className = 'onigiri-move-header-icon';
-        headerIcon.appendChild(makeIcon('move_deck.svg', 'onigiri-move-header-svg', 18, 'currentColor'));
+        headerIcon.className = 'bingsu-move-header-icon';
+        headerIcon.appendChild(makeIcon('move_deck.svg', 'bingsu-move-header-svg', 18, 'currentColor'));
         header.appendChild(headerIcon);
 
         var titleWrap = document.createElement('div');
-        titleWrap.className = 'onigiri-move-title-wrap';
+        titleWrap.className = 'bingsu-move-title-wrap';
         var title = document.createElement('div');
-        title.className = 'onigiri-move-title';
+        title.className = 'bingsu-move-title';
         title.textContent = state.source.count > 1 ? 'Move Decks' : 'Move Deck';
         titleWrap.appendChild(title);
 
         var subtitle = document.createElement('div');
-        subtitle.className = 'onigiri-move-subtitle';
+        subtitle.className = 'bingsu-move-subtitle';
         var subtitleLabel = document.createElement('span');
         subtitleLabel.textContent = T('moving_label', 'Moving');
         subtitle.appendChild(subtitleLabel);
         var sourceName = document.createElement('span');
-        sourceName.className = 'onigiri-move-source';
+        sourceName.className = 'bingsu-move-source';
         sourceName.title = state.source.count > 1 && Array.isArray(state.source.names)
             ? state.source.names.join('\n')
             : (state.source.name || '');
@@ -501,19 +501,19 @@
         closeBtn.tabIndex = 0;
         // Set tabindex for accessibility
         try { arguments[0].tabIndex = 0; } catch(e){};
-        closeBtn.className = 'onigiri-move-close';
+        closeBtn.className = 'bingsu-move-close';
         closeBtn.title = T('close', 'Close');
-        closeBtn.appendChild(makeIcon('cancel.svg', 'onigiri-move-close-svg', 14, 'currentColor'));
+        closeBtn.appendChild(makeIcon('cancel.svg', 'bingsu-move-close-svg', 14, 'currentColor'));
         closeBtn.addEventListener('click', function () { close(false); });
         header.appendChild(closeBtn);
         modal.appendChild(header);
 
         var searchWrap = document.createElement('div');
-        searchWrap.className = 'onigiri-move-search-wrap';
-        searchWrap.appendChild(makeIcon('search.svg', 'onigiri-move-search-icon', 15, 'currentColor'));
+        searchWrap.className = 'bingsu-move-search-wrap';
+        searchWrap.appendChild(makeIcon('search.svg', 'bingsu-move-search-icon', 15, 'currentColor'));
         var search = document.createElement('input');
-        search.id = 'onigiri-move-search';
-        search.className = 'onigiri-move-search';
+        search.id = 'bingsu-move-search';
+        search.className = 'bingsu-move-search';
         search.type = 'text';
         search.placeholder = T('search_destination_decks', 'Search destination decks');
         search.autocomplete = 'off';
@@ -523,10 +523,10 @@
         modal.appendChild(searchWrap);
 
         var list = document.createElement('div');
-        list.id = 'onigiri-move-list';
-        list.className = 'onigiri-move-list';
+        list.id = 'bingsu-move-list';
+        list.className = 'bingsu-move-list';
         var onListPointerOver = function (evt) {
-            var row = evt.target && evt.target.closest ? evt.target.closest('.onigiri-move-row') : null;
+            var row = evt.target && evt.target.closest ? evt.target.closest('.bingsu-move-row') : null;
             if (!row || row.parentElement !== list || row.classList.contains('is-disabled') || state.busy) {
                 if (state.hoverId !== null) {
                     state.hoverId = null;
@@ -552,28 +552,28 @@
             list.removeEventListener('pointerleave', onListPointerLeave);
         });
         var empty = document.createElement('div');
-        empty.id = 'onigiri-move-empty';
-        empty.className = 'onigiri-move-empty';
+        empty.id = 'bingsu-move-empty';
+        empty.className = 'bingsu-move-empty';
         empty.textContent = T('no_matching_decks', 'No matching decks found');
         list.appendChild(empty);
         modal.appendChild(list);
 
         var error = document.createElement('div');
-        error.id = 'onigiri-move-error';
-        error.className = 'onigiri-move-error';
+        error.id = 'bingsu-move-error';
+        error.className = 'bingsu-move-error';
         modal.appendChild(error);
 
         var footer = document.createElement('div');
-        footer.className = 'onigiri-move-footer';
+        footer.className = 'bingsu-move-footer';
         var spacer = document.createElement('div');
-        spacer.className = 'onigiri-move-spacer';
+        spacer.className = 'bingsu-move-spacer';
 
         var cancelBtn = document.createElement('span');
         cancelBtn.setAttribute('role', 'button');
         cancelBtn.tabIndex = 0;
         // Set tabindex for accessibility
         try { arguments[0].tabIndex = 0; } catch(e){};
-        cancelBtn.className = 'onigiri-move-btn onigiri-move-btn-secondary';
+        cancelBtn.className = 'bingsu-move-btn bingsu-move-btn-secondary';
         cancelBtn.textContent = T('cancel', 'Cancel');
         cancelBtn.addEventListener('click', function () { close(false); });
 
@@ -582,8 +582,8 @@
         confirmBtn.tabIndex = 0;
         // Set tabindex for accessibility
         try { arguments[0].tabIndex = 0; } catch(e){};
-        confirmBtn.id = 'onigiri-move-confirm';
-        confirmBtn.className = 'onigiri-move-btn onigiri-move-btn-primary';
+        confirmBtn.id = 'bingsu-move-confirm';
+        confirmBtn.className = 'bingsu-move-btn bingsu-move-btn-primary';
         confirmBtn.disabled = true;
         confirmBtn.textContent = T('move_action', 'Move');
         confirmBtn.addEventListener('click', function () {
@@ -594,7 +594,7 @@
                 source_dids: state.source.ids || (state.source.id ? [state.source.id] : []),
                 target_did: state.selectedId
             };
-            pycmd('onigiri_move_deck:' + encodeURIComponent(JSON.stringify(payload)));
+            pycmd('bingsu_move_deck:' + encodeURIComponent(JSON.stringify(payload)));
         });
 
         footer.appendChild(spacer);
@@ -625,27 +625,27 @@
         revealWhenStable(backdrop, search);
     }
 
-    window.OnigiriMoveToDialog = {
+    window.BingsuMoveToDialog = {
         open: function (data) {
             close(true);
-            if (window.OnigiriEngine) {
-                OnigiriEngine._clearAllRowVisualStates();
-                OnigiriEngine._beginOverrideState('dialog-focus');
+            if (window.BingsuEngine) {
+                BingsuEngine._clearAllRowVisualStates();
+                BingsuEngine._beginOverrideState('dialog-focus');
                 var sourceIds = data.source && Array.isArray(data.source.ids)
                     ? data.source.ids
                     : [data.source && data.source.id || ''];
                 sourceIds.forEach(function (sourceId) {
                     sourceId = String(sourceId || '');
                     if (!sourceId) return;
-                    var selectorId = typeof OnigiriEngine.escapeSelectorValue === 'function'
-                        ? OnigiriEngine.escapeSelectorValue(sourceId)
+                    var selectorId = typeof BingsuEngine.escapeSelectorValue === 'function'
+                        ? BingsuEngine.escapeSelectorValue(sourceId)
                         : sourceId.replace(/["\\]/g, '\\$&');
                     var row = document.querySelector('tr.deck[data-did="' + selectorId + '"]');
                     if (row) row.classList.add('ctx-row-active');
                 });
             }
             buildModal(data || {});
-            if (typeof pycmd === 'function') pycmd('onigiri_ui_open');
+            if (typeof pycmd === 'function') pycmd('bingsu_ui_open');
         },
         close: close,
         showError: showError

@@ -1,6 +1,6 @@
 # Value store for the WebUI settings dialog.
 #
-# Onigiri keeps settings in three different places and the old PyQt dialog read
+# Bingsu keeps settings in three different places and the old PyQt dialog read
 # them straight out of live Qt widgets at save time. This module makes that
 # addressing explicit instead: every field in `schema.py` carries a `bind`
 # descriptor, and this file is the only thing that knows how to read/write one.
@@ -8,9 +8,9 @@
 #   {"kind": "config", "key": "maxHide"}                    -> addon config JSON
 #   {"kind": "config", "path": ["colors", "light", "--fg"]}  -> nested config JSON
 #   {"kind": "col",    "key": "modern_menu_statsTitle"}      -> mw.col.conf
-#   {"kind": "col_path", "key": "onigiri_pomodoro_settings", "path": ["size"]}
+#   {"kind": "col_path", "key": "bingsu_pomodoro_settings", "path": ["size"]}
 #                                                               -> nested mw.col.conf
-#   {"kind": "profile", "key": "onigiri_language"}           -> mw.pm.profile
+#   {"kind": "profile", "key": "bingsu_language"}           -> mw.pm.profile
 #   {"kind": "game",   "key": "nook_name"}                   -> a gamification
 #                                                               manager's own
 #                                                               state, via
@@ -40,7 +40,7 @@ class MissingBinding(Exception):
 
 def _col_get(col, key, default=None):
     """Read via the modern col.get_config, falling back to the deprecated
-    col.conf dict. Mirrors onigiri_renderer._col_conf_get — the real UI reads
+    col.conf dict. Mirrors bingsu_renderer._col_conf_get — the real UI reads
     collection config this way, so writes must go through the matching
     _col_set below or the WebUI and the real render disagree on the value."""
     try:
@@ -55,7 +55,7 @@ def _col_get(col, key, default=None):
 
 def _col_set(col, key, value):
     """Write via the modern col.set_config, falling back to col.conf. Mirrors
-    onigiri_renderer._col_conf_set."""
+    bingsu_renderer._col_conf_set."""
     try:
         col.set_config(key, value)
         return

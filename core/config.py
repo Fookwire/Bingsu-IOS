@@ -4,7 +4,7 @@ import os
 import time
 from aqt import mw
 
-from . import safe_storage
+from . import safe_storage, legacy_names
 
 DEFAULT_ACCENT_COLOR = "#33AEBF"
 DEFAULT_PROFILE_LEVEL_COLOR = "#95D5E0"
@@ -57,9 +57,9 @@ def set_collection_config(key, value, col=None):
 
 def effective_night_mode(conf=None):
     """
-    Return the active dark/light mode for Onigiri previews and rendered UI.
+    Return the active dark/light mode for Bingsu previews and rendered UI.
 
-    The add-on can force a theme via ``onigiriThemeMode``; when it is set to
+    The add-on can force a theme via ``bingsuThemeMode``; when it is set to
     ``system`` we follow Anki's current night-mode state.
     """
     if not isinstance(conf, dict):
@@ -67,7 +67,7 @@ def effective_night_mode(conf=None):
             conf = get_config_readonly()
         except Exception:
             conf = {}
-    mode = str(conf.get("onigiriThemeMode", "system")).lower() if isinstance(conf, dict) else "system"
+    mode = str(conf.get("bingsuThemeMode", "system")).lower() if isinstance(conf, dict) else "system"
 
     if mode in {"dark", "night", "night_mode"}:
         return True
@@ -193,13 +193,13 @@ DEFAULTS = {
     "showNextLearningCardNoticeOnOverview": True,
     "congratsMessage": "Congratulations! You have finished this deck for now.",
     "showWelcomePopup": True,
-    # Top-level visual system. Classic preserves Onigiri's existing renderer;
+    # Top-level visual system. Classic preserves Bingsu's existing renderer;
     # Kome delegates the deck browser to the bundled editorial redesign, while
     # Shima renders only a centered deck island over the shared main background.
-    "onigiri_ui_theme": "classic",
-    "onigiriThemeMode": "system",
-    # Empty slots use Onigiri's flag icon; keys are Anki's seven flag numbers.
-    "onigiri_reviewer_flag_icons": {},
+    "bingsu_ui_theme": "classic",
+    "bingsuThemeMode": "system",
+    # Empty slots use Bingsu's flag icon; keys are Anki's seven flag numbers.
+    "bingsu_reviewer_flag_icons": {},
     "things_theme": {
         # Kome keeps one calm, fixed spacing system. Its small settings
         # surface only exposes visibility and the Active Cards palette.
@@ -218,7 +218,7 @@ DEFAULTS = {
         # Kome deck list. Kept off by default so existing profiles retain
         # the theme's compact dashboard until they explicitly opt in.
         "advanced_stats": False,
-        # Empty values inherit the shared Onigiri palette. Kome can
+        # Empty values inherit the shared Bingsu palette. Kome can
         # optionally override its own page background without recolouring the
         # Classic layout.
         "background_light": "",
@@ -276,12 +276,12 @@ DEFAULTS = {
         "show_in_reviewer_header": True,
         "font_size": 14,
     },
-    "onigiri_pomodoro_show_in_reviewer_header": True,
+    "bingsu_pomodoro_show_in_reviewer_header": True,
     "userBirthday": "",  # Format: YYYY-MM-DD, empty = not set
     "lastBirthdayShown": "",  # Year when birthday popup was last shown 
     "hideRetentionStars": False,
     "showHeatmapOnProfile": True,
-    "onigiriProfile": {
+    "bingsuProfile": {
         "bio": "",
         "musicLink": "",
         "spotifyLink": ""
@@ -289,7 +289,7 @@ DEFAULTS = {
     # Every optional row in the expanded Profile Sidebar is controlled from
     # one place. Keeping these flags together prevents a game-specific setting
     # from getting out of sync with the Profile Sidebar settings page.
-    "onigiriProfilePanel": {
+    "bingsuProfilePanel": {
         "show_active_cards": True,
         "show_today_stats": True,
         "show_weekly_chart": True,
@@ -396,7 +396,7 @@ DEFAULTS = {
         # without muting notifications from the other games.
         "reviewer_notifications_enabled": True,
         # Replace Ankimon's Reviewer HUD and floating tooltips with Onigimon's
-        # minimal, Onigiri-aligned HUD and notifications by default.
+        # minimal, Bingsu-aligned HUD and notifications by default.
         "reviewer_hud_enabled": True,
         "reviewer_hud_mode": "battle",  # "minimal", "battle", "war"
         "reviewer_hud_motion": "animated",  # "animated", "static"
@@ -430,7 +430,7 @@ DEFAULTS = {
         "green": "#44BB66",
         "yellow": "#FFB800",
     },
-    "onigiriWidgetLayout": {
+    "bingsuWidgetLayout": {
     "grid": {
         "stats_title": {"pos": 0, "row": 1, "col": 4},
         "studied": {"pos": 4, "row": 1, "col": 1},
@@ -445,7 +445,7 @@ DEFAULTS = {
     "widget_height": 150,
     },
     "externalWidgetLayout": {}, 
-    "onigiriDecklineAutoEmbed": True,
+    "bingsuDecklineAutoEmbed": True,
 
     # --- NEW: Sidebar Action Buttons Mode ---
     # "list" (default), "collapsed" (toolbar icons), "archived" (hidden)
@@ -474,194 +474,194 @@ DEFAULTS = {
 
 
     # --- NEW: Reviewer Background Settings ---
-    "onigiri_reviewer_bg_mode": "main", # "main", "color", "image_color"
+    "bingsu_reviewer_bg_mode": "main", # "main", "color", "image_color"
     # --- Fonts ---
-    "onigiri_font_main": "system",
-    "onigiri_font_subtle": "system",
-    "onigiri_font_small_title": "system",
-    "onigiri_font_size_main": 14,
-    "onigiri_font_size_subtle": 20,
-    "onigiri_font_size_small_title": 15,
+    "bingsu_font_main": "system",
+    "bingsu_font_subtle": "system",
+    "bingsu_font_small_title": "system",
+    "bingsu_font_size_main": 14,
+    "bingsu_font_size_subtle": 20,
+    "bingsu_font_size_small_title": 15,
     # -------------
-    "onigiri_reviewer_bg_main_blur": 0, # Blur when using main background
-    "onigiri_reviewer_bg_main_opacity": 100, # Opacity when using main background
-    "onigiri_reviewer_bg_light_color": "#ececeb",
-    "onigiri_reviewer_bg_dark_color": "#202124",
-    "onigiri_reviewer_bg_image": "",
-    "onigiri_reviewer_bg_image_light": "",
-    "onigiri_reviewer_bg_image_dark": "",
-    "onigiri_reviewer_bg_image_mode": "single", # "single" or "separate"
-    "onigiri_reviewer_bg_color_theme_mode": "separate",
-    "onigiri_reviewer_bg_image_theme_mode": "separate",
-    "onigiri_reviewer_bg_blur": 0,
-    "onigiri_reviewer_bg_opacity": 100,
-    "onigiri_reviewer_slideshow_images": [],
-    "onigiri_reviewer_slideshow_interval": 10,
+    "bingsu_reviewer_bg_main_blur": 0, # Blur when using main background
+    "bingsu_reviewer_bg_main_opacity": 100, # Opacity when using main background
+    "bingsu_reviewer_bg_light_color": "#ececeb",
+    "bingsu_reviewer_bg_dark_color": "#202124",
+    "bingsu_reviewer_bg_image": "",
+    "bingsu_reviewer_bg_image_light": "",
+    "bingsu_reviewer_bg_image_dark": "",
+    "bingsu_reviewer_bg_image_mode": "single", # "single" or "separate"
+    "bingsu_reviewer_bg_color_theme_mode": "separate",
+    "bingsu_reviewer_bg_image_theme_mode": "separate",
+    "bingsu_reviewer_bg_blur": 0,
+    "bingsu_reviewer_bg_opacity": 100,
+    "bingsu_reviewer_slideshow_images": [],
+    "bingsu_reviewer_slideshow_interval": 10,
     # --- Reviewer Header Dock ---
-    "onigiri_reviewer_dock_mode": "static",  # "static", "minimal", "island"
-    "onigiri_reviewer_dock_icons": {},
-    "onigiri_reviewer_dock_icon_colors_light": {},
-    "onigiri_reviewer_dock_icon_colors_dark": {},
-    "onigiri_reviewer_dock_goo_color_light": "#17181a",
-    "onigiri_reviewer_dock_goo_color_dark": "#ffffff",
-    "onigiri_web_rdock_goo_theme_mode": "separate",
+    "bingsu_reviewer_dock_mode": "static",  # "static", "minimal", "island"
+    "bingsu_reviewer_dock_icons": {},
+    "bingsu_reviewer_dock_icon_colors_light": {},
+    "bingsu_reviewer_dock_icon_colors_dark": {},
+    "bingsu_reviewer_dock_goo_color_light": "#17181a",
+    "bingsu_reviewer_dock_goo_color_dark": "#ffffff",
+    "bingsu_web_rdock_goo_theme_mode": "separate",
     # --- Reviewer Notification Position ---
-    "onigiri_reviewer_notification_mode": "classic",  # "classic" or "mini"
-    "onigiri_reviewer_notification_position": "top-center", # top-left, top-center, top-right, bottom-left, bottom-center, bottom-right
-    "onigiri_reviewer_silent_notifications": False,
-    "onigiri_notification_duration_ms": 5200,
+    "bingsu_reviewer_notification_mode": "classic",  # "classic" or "mini"
+    "bingsu_reviewer_notification_position": "top-center", # top-left, top-center, top-right, bottom-left, bottom-center, bottom-right
+    "bingsu_reviewer_silent_notifications": False,
+    "bingsu_notification_duration_ms": 5200,
     # --- Reviewer Bottom Bar Settings ---
-    "onigiri_reviewer_bottom_bar_bg_mode": "match_reviewer_bg", # "main", "color", "image", "image_color", "match_overview_bg", "match_reviewer_bg"
-    "onigiri_reviewer_bottom_bar_bg_light_color": "#ececeb",
-    "onigiri_reviewer_bottom_bar_bg_dark_color": "#202124",
-    "onigiri_reviewer_bottom_bar_bg_image": "",
-    "onigiri_reviewer_bottom_bar_bg_blur": 0,
-    "onigiri_reviewer_bottom_bar_bg_opacity": 100,
-    "onigiri_reviewer_bottom_bar_match_main_blur": 0,
-    "onigiri_reviewer_bottom_bar_match_main_opacity": 100,
-    "onigiri_reviewer_bottom_bar_match_reviewer_bg_blur": 0,
-    "onigiri_reviewer_bottom_bar_match_reviewer_bg_opacity": 100,
-    "onigiri_reviewer_bottom_bar_match_overview_bg_blur": 0,
-    "onigiri_reviewer_bottom_bar_match_overview_bg_opacity": 100,
+    "bingsu_reviewer_bottom_bar_bg_mode": "match_reviewer_bg", # "main", "color", "image", "image_color", "match_overview_bg", "match_reviewer_bg"
+    "bingsu_reviewer_bottom_bar_bg_light_color": "#ececeb",
+    "bingsu_reviewer_bottom_bar_bg_dark_color": "#202124",
+    "bingsu_reviewer_bottom_bar_bg_image": "",
+    "bingsu_reviewer_bottom_bar_bg_blur": 0,
+    "bingsu_reviewer_bottom_bar_bg_opacity": 100,
+    "bingsu_reviewer_bottom_bar_match_main_blur": 0,
+    "bingsu_reviewer_bottom_bar_match_main_opacity": 100,
+    "bingsu_reviewer_bottom_bar_match_reviewer_bg_blur": 0,
+    "bingsu_reviewer_bottom_bar_match_reviewer_bg_opacity": 100,
+    "bingsu_reviewer_bottom_bar_match_overview_bg_blur": 0,
+    "bingsu_reviewer_bottom_bar_match_overview_bg_opacity": 100,
     "restaurant_countdown_hour": 4,  # Default to 4 AM
     "restaurant_countdown_minute": 0,  # Default to 0 minutes
     
     # --- NEW: Overviewer Background Settings ---
-    "onigiri_overview_bg_mode": "main", # "main", "color", "image_color"
-    "onigiri_overview_bg_main_blur": 0,
-    "onigiri_overview_bg_main_opacity": 100,
-    "onigiri_overview_bg_light_color": "#ececeb",
+    "bingsu_overview_bg_mode": "main", # "main", "color", "image_color"
+    "bingsu_overview_bg_main_blur": 0,
+    "bingsu_overview_bg_main_opacity": 100,
+    "bingsu_overview_bg_light_color": "#ececeb",
     # The following lines appear to be UI setup code and cannot be directly inserted into a dictionary.
-    # Assuming the intent was to add a default for 'onigiri_reviewer_btn_custom_enabled' if not already present.
+    # Assuming the intent was to add a default for 'bingsu_reviewer_btn_custom_enabled' if not already present.
     # The other lines are likely from a different context (e.g., a settings dialog setup).
-    "onigiri_reviewer_btn_border_size": 0,
-    "onigiri_reviewer_btn_custom_enabled": True, # Global toggle (Default OFF)
+    "bingsu_reviewer_btn_border_size": 0,
+    "bingsu_reviewer_btn_custom_enabled": True, # Global toggle (Default OFF)
     "language": "English (Default)",
     "deck_indentation_mode": "default", # default, smaller, bigger, custom
     "deck_indentation_custom_px": 20, # px per level
-    "onigiri_reviewer_btn_radius": 12, # px
-    "onigiri_reviewer_btn_padding": 5, # px (affects size)
-    "onigiri_reviewer_btn_height": 40, # px (button height)
-    "onigiri_reviewer_bar_height": 60, # px (default height)
+    "bingsu_reviewer_btn_radius": 12, # px
+    "bingsu_reviewer_btn_padding": 5, # px (affects size)
+    "bingsu_reviewer_btn_height": 40, # px (button height)
+    "bingsu_reviewer_bar_height": 60, # px (default height)
 
     # --- Reviewer header progress bar ---
     # The "end of the tunnel" gauge in the reviewer header. `left` mirrors the
     # bottom bar's new/learning/review counts; `done` is either this session's
     # answers or today's whole revlog for the deck (see progress_scope).
-    "onigiri_reviewer_progress_enabled": True,
-    "onigiri_reviewer_progress_style": "bar",        # bar | segments | ring | text
-    "onigiri_reviewer_progress_label": "fraction",   # fraction | percent | remaining | done | none
-    "onigiri_reviewer_progress_scope": "session",    # session | today
-    "onigiri_reviewer_progress_position": "right",   # right | left
-    "onigiri_reviewer_progress_width": 96,           # px, bar/segments only
-    "onigiri_reviewer_progress_thickness": 6,        # px
-    "onigiri_reviewer_progress_radius": 999,         # px
-    "onigiri_reviewer_progress_ring_size": 16,       # px, ring only
-    "onigiri_reviewer_progress_chrome": True,        # draw the button-style chip behind it
-    "onigiri_reviewer_progress_animate": True,
-    "onigiri_reviewer_progress_gradient": True,
-    "onigiri_reviewer_progress_hide_when_done": False,
-    "onigiri_reviewer_progress_fill_light": "#19c96b",
-    "onigiri_reviewer_progress_fill_dark": "#12b765",
-    "onigiri_reviewer_progress_fill_end_light": "#5ad6f0",
-    "onigiri_reviewer_progress_fill_end_dark": "#4bc4de",
-    "onigiri_reviewer_progress_track_light": "rgba(0, 0, 0, 0.12)",
-    "onigiri_reviewer_progress_track_dark": "rgba(255, 255, 255, 0.16)",
-    "onigiri_reviewer_progress_text_light": "#2c2c2c",
-    "onigiri_reviewer_progress_text_dark": "#e8e8e8",
+    "bingsu_reviewer_progress_enabled": True,
+    "bingsu_reviewer_progress_style": "bar",        # bar | segments | ring | text
+    "bingsu_reviewer_progress_label": "fraction",   # fraction | percent | remaining | done | none
+    "bingsu_reviewer_progress_scope": "session",    # session | today
+    "bingsu_reviewer_progress_position": "right",   # right | left
+    "bingsu_reviewer_progress_width": 96,           # px, bar/segments only
+    "bingsu_reviewer_progress_thickness": 6,        # px
+    "bingsu_reviewer_progress_radius": 999,         # px
+    "bingsu_reviewer_progress_ring_size": 16,       # px, ring only
+    "bingsu_reviewer_progress_chrome": True,        # draw the button-style chip behind it
+    "bingsu_reviewer_progress_animate": True,
+    "bingsu_reviewer_progress_gradient": True,
+    "bingsu_reviewer_progress_hide_when_done": False,
+    "bingsu_reviewer_progress_fill_light": "#19c96b",
+    "bingsu_reviewer_progress_fill_dark": "#12b765",
+    "bingsu_reviewer_progress_fill_end_light": "#5ad6f0",
+    "bingsu_reviewer_progress_fill_end_dark": "#4bc4de",
+    "bingsu_reviewer_progress_track_light": "rgba(0, 0, 0, 0.12)",
+    "bingsu_reviewer_progress_track_dark": "rgba(255, 255, 255, 0.16)",
+    "bingsu_reviewer_progress_text_light": "#2c2c2c",
+    "bingsu_reviewer_progress_text_dark": "#e8e8e8",
     # "counts" borrows the very colours the count bubbles use, so the segmented
     # gauge and the bottom bar agree on what blue/red/green mean.
-    "onigiri_reviewer_progress_segment_source": "counts",  # counts | custom
-    "onigiri_reviewer_progress_seg_new_light": "#1e8cff",
-    "onigiri_reviewer_progress_seg_new_dark": "#0a84ff",
-    "onigiri_reviewer_progress_seg_learn_light": "#ff5757",
-    "onigiri_reviewer_progress_seg_learn_dark": "#ff453a",
-    "onigiri_reviewer_progress_seg_review_light": "#19c96b",
-    "onigiri_reviewer_progress_seg_review_dark": "#12b765",
-    "onigiri_reviewer_btn_interval_color_light": "#555555",
-    "onigiri_reviewer_btn_interval_color_dark": "#dddddd",
-    "onigiri_reviewer_btn_border_color_light": "#DBDBDB",
-    "onigiri_reviewer_btn_border_color_dark": "#444444",
+    "bingsu_reviewer_progress_segment_source": "counts",  # counts | custom
+    "bingsu_reviewer_progress_seg_new_light": "#1e8cff",
+    "bingsu_reviewer_progress_seg_new_dark": "#0a84ff",
+    "bingsu_reviewer_progress_seg_learn_light": "#ff5757",
+    "bingsu_reviewer_progress_seg_learn_dark": "#ff453a",
+    "bingsu_reviewer_progress_seg_review_light": "#19c96b",
+    "bingsu_reviewer_progress_seg_review_dark": "#12b765",
+    "bingsu_reviewer_btn_interval_color_light": "#555555",
+    "bingsu_reviewer_btn_interval_color_dark": "#dddddd",
+    "bingsu_reviewer_btn_border_color_light": "#DBDBDB",
+    "bingsu_reviewer_btn_border_color_dark": "#444444",
     # Empty family colours inherit the existing shared reviewer border colour.
-    "onigiri_reviewer_show_answer_border_light": "",
-    "onigiri_reviewer_show_answer_border_dark": "",
-    "onigiri_reviewer_again_border_light": "",
-    "onigiri_reviewer_again_border_dark": "",
-    "onigiri_reviewer_hard_border_light": "",
-    "onigiri_reviewer_hard_border_dark": "",
-    "onigiri_reviewer_good_border_light": "",
-    "onigiri_reviewer_good_border_dark": "",
-    "onigiri_reviewer_easy_border_light": "",
-    "onigiri_reviewer_easy_border_dark": "",
-    "onigiri_reviewer_other_border_light": "",
-    "onigiri_reviewer_other_border_dark": "",
-    "onigiri_reviewer_timer_border_light": "",
-    "onigiri_reviewer_timer_border_dark": "",
-    "onigiri_reviewer_btn_again_bg_light": "#ffb3b3",
-    "onigiri_reviewer_btn_again_text_light": "#4d0000",
-    "onigiri_reviewer_btn_again_bg_dark": "#ffcccb",
-    "onigiri_reviewer_btn_again_text_dark": "#4a0000",
-    "onigiri_reviewer_btn_hard_bg_light": "#ffe0b3",
-    "onigiri_reviewer_btn_hard_text_light": "#4d2600",
-    "onigiri_reviewer_btn_hard_bg_dark": "#ffd699",
-    "onigiri_reviewer_btn_hard_text_dark": "#4d1d00",
-    "onigiri_reviewer_btn_good_bg_light": "#b3ffb3",
-    "onigiri_reviewer_btn_good_text_light": "#004d00",
-    "onigiri_reviewer_btn_good_bg_dark": "#90ee90",
-    "onigiri_reviewer_btn_good_text_dark": "#004000",
-    "onigiri_reviewer_btn_easy_bg_light": "#b3d9ff",
-    "onigiri_reviewer_btn_easy_text_light": "#00264d",
-    "onigiri_reviewer_btn_easy_bg_dark": "#add8e6",
-    "onigiri_reviewer_btn_easy_text_dark": "#002952",
+    "bingsu_reviewer_show_answer_border_light": "",
+    "bingsu_reviewer_show_answer_border_dark": "",
+    "bingsu_reviewer_again_border_light": "",
+    "bingsu_reviewer_again_border_dark": "",
+    "bingsu_reviewer_hard_border_light": "",
+    "bingsu_reviewer_hard_border_dark": "",
+    "bingsu_reviewer_good_border_light": "",
+    "bingsu_reviewer_good_border_dark": "",
+    "bingsu_reviewer_easy_border_light": "",
+    "bingsu_reviewer_easy_border_dark": "",
+    "bingsu_reviewer_other_border_light": "",
+    "bingsu_reviewer_other_border_dark": "",
+    "bingsu_reviewer_timer_border_light": "",
+    "bingsu_reviewer_timer_border_dark": "",
+    "bingsu_reviewer_btn_again_bg_light": "#ffb3b3",
+    "bingsu_reviewer_btn_again_text_light": "#4d0000",
+    "bingsu_reviewer_btn_again_bg_dark": "#ffcccb",
+    "bingsu_reviewer_btn_again_text_dark": "#4a0000",
+    "bingsu_reviewer_btn_hard_bg_light": "#ffe0b3",
+    "bingsu_reviewer_btn_hard_text_light": "#4d2600",
+    "bingsu_reviewer_btn_hard_bg_dark": "#ffd699",
+    "bingsu_reviewer_btn_hard_text_dark": "#4d1d00",
+    "bingsu_reviewer_btn_good_bg_light": "#b3ffb3",
+    "bingsu_reviewer_btn_good_text_light": "#004d00",
+    "bingsu_reviewer_btn_good_bg_dark": "#90ee90",
+    "bingsu_reviewer_btn_good_text_dark": "#004000",
+    "bingsu_reviewer_btn_easy_bg_light": "#b3d9ff",
+    "bingsu_reviewer_btn_easy_text_light": "#00264d",
+    "bingsu_reviewer_btn_easy_bg_dark": "#add8e6",
+    "bingsu_reviewer_btn_easy_text_dark": "#002952",
     
     # --- Show Answer button ---
-    "onigiri_reviewer_show_answer_btn_bg_light": "#ffffff",
-    "onigiri_reviewer_show_answer_btn_text_light": "#2c2c2c",
-    "onigiri_reviewer_show_answer_btn_bg_dark": "#3a3a3a",
-    "onigiri_reviewer_show_answer_btn_text_dark": "#e0e0e0",
-    "onigiri_reviewer_show_answer_btn_hover_bg_light": "#2c2c2c",
-    "onigiri_reviewer_show_answer_btn_hover_text_light": "#f0f0f0",
-    "onigiri_reviewer_show_answer_btn_hover_bg_dark": "#e0e0e0",
-    "onigiri_reviewer_show_answer_btn_hover_text_dark": "#3a3a3a",
+    "bingsu_reviewer_show_answer_btn_bg_light": "#ffffff",
+    "bingsu_reviewer_show_answer_btn_text_light": "#2c2c2c",
+    "bingsu_reviewer_show_answer_btn_bg_dark": "#3a3a3a",
+    "bingsu_reviewer_show_answer_btn_text_dark": "#e0e0e0",
+    "bingsu_reviewer_show_answer_btn_hover_bg_light": "#2c2c2c",
+    "bingsu_reviewer_show_answer_btn_hover_text_light": "#f0f0f0",
+    "bingsu_reviewer_show_answer_btn_hover_bg_dark": "#e0e0e0",
+    "bingsu_reviewer_show_answer_btn_hover_text_dark": "#3a3a3a",
 
     # --- Other Bottom Bar Buttons (Edit, More, etc.) ---
-    "onigiri_reviewer_other_btn_bg_light": "#ffffff",
-    "onigiri_reviewer_other_btn_text_light": "#2c2c2c",
-    "onigiri_reviewer_other_btn_bg_dark": "#3a3a3a",
-    "onigiri_reviewer_other_btn_text_dark": "#e0e0e0",
-    "onigiri_reviewer_other_btn_hover_bg_light": "#2c2c2c",
-    "onigiri_reviewer_other_btn_hover_text_light": "#f0f0f0",
-    "onigiri_reviewer_other_btn_hover_bg_dark": "#e0e0e0",
-    "onigiri_reviewer_other_btn_hover_text_dark": "#3a3a3a",
+    "bingsu_reviewer_other_btn_bg_light": "#ffffff",
+    "bingsu_reviewer_other_btn_text_light": "#2c2c2c",
+    "bingsu_reviewer_other_btn_bg_dark": "#3a3a3a",
+    "bingsu_reviewer_other_btn_text_dark": "#e0e0e0",
+    "bingsu_reviewer_other_btn_hover_bg_light": "#2c2c2c",
+    "bingsu_reviewer_other_btn_hover_text_light": "#f0f0f0",
+    "bingsu_reviewer_other_btn_hover_bg_dark": "#e0e0e0",
+    "bingsu_reviewer_other_btn_hover_text_dark": "#3a3a3a",
 
     # --- Stats Bar Background (timer + New/Learn/Review pills panel behind the
     # Show Answer button). Independent color, unless synced with the "Other"
     # active Show Answer background above. ---
-    "onigiri_reviewer_show_answer_bar_bg_sync": True,
-    "onigiri_reviewer_show_answer_bar_bg_light": "#2c2c2c",
-    "onigiri_reviewer_show_answer_bar_bg_dark": "#e0e0e0",
+    "bingsu_reviewer_show_answer_bar_bg_sync": True,
+    "bingsu_reviewer_show_answer_bar_bg_light": "#2c2c2c",
+    "bingsu_reviewer_show_answer_bar_bg_dark": "#e0e0e0",
 
     # --- Stat Text (.stattxt) Colors (intervals like "10m", "4d" and "+" signs) ---
-    "onigiri_reviewer_stattxt_mode": "hover",  # "hover" | "inverted" | "fixed" | "off"
-    "onigiri_reviewer_stattxt_color_light": "#666666",
-    "onigiri_reviewer_stattxt_color_dark": "#aaaaaa",
+    "bingsu_reviewer_stattxt_mode": "hover",  # "hover" | "inverted" | "fixed" | "off"
+    "bingsu_reviewer_stattxt_color_light": "#666666",
+    "bingsu_reviewer_stattxt_color_dark": "#aaaaaa",
 
     # --- Timer (deck options "Show answer timer") adaptation ---
-    "onigiri_reviewer_timer_position": "right",  # "right" | "left" | "out" | "off"
-    "onigiri_reviewer_timer_bg_light": "#e5e5e5",
-    "onigiri_reviewer_timer_text_light": "#2c2c2c",
-    "onigiri_reviewer_timer_bg_dark": "#3a3a3a",
-    "onigiri_reviewer_timer_text_dark": "#e0e0e0",
+    "bingsu_reviewer_timer_position": "right",  # "right" | "left" | "out" | "off"
+    "bingsu_reviewer_timer_bg_light": "#e5e5e5",
+    "bingsu_reviewer_timer_text_light": "#2c2c2c",
+    "bingsu_reviewer_timer_bg_dark": "#3a3a3a",
+    "bingsu_reviewer_timer_text_dark": "#e0e0e0",
 
-    "onigiri_overview_bg_dark_color": "#202124",
-    "onigiri_overview_bg_image_light": "",
-    "onigiri_overview_bg_image_dark": "",
-    "onigiri_overview_bg_image": "",
-    "onigiri_overview_bg_image_mode": "single",
-    "onigiri_overview_bg_blur": 0,
-    "onigiri_overview_bg_opacity": 100,
-    "onigiri_overview_bg_color_theme_mode": "separate",
-    "onigiri_overview_bg_image_theme_mode": "separate",
+    "bingsu_overview_bg_dark_color": "#202124",
+    "bingsu_overview_bg_image_light": "",
+    "bingsu_overview_bg_image_dark": "",
+    "bingsu_overview_bg_image": "",
+    "bingsu_overview_bg_image_mode": "single",
+    "bingsu_overview_bg_blur": 0,
+    "bingsu_overview_bg_opacity": 100,
+    "bingsu_overview_bg_color_theme_mode": "separate",
+    "bingsu_overview_bg_image_theme_mode": "separate",
     "overview_style": {
         "sync_box_effect": False,
         "dynamic": True,
@@ -1205,7 +1205,7 @@ def _place_stats_title_widget(layout_conf):
 
 
 def _place_external_widgets(layout_conf, external_grid_conf):
-    """Keep external widgets out of occupied Onigiri grid cells.
+    """Keep external widgets out of occupied Bingsu grid cells.
 
     External add-ons commonly add their first widget at position zero. That
     was safe when Anki rendered their ``content.stats`` below the deck list,
@@ -1368,6 +1368,8 @@ def _build_config():
         except Exception:
             pass
         safe_storage.backup_before_upgrade(shared_config)
+        legacy_names.migrate_all(mw.col)
+        shared_config = legacy_names.normalize(shared_config)
     # Start with a clean copy of the defaults
     clean_config = copy.deepcopy(DEFAULTS)
 
@@ -1423,11 +1425,11 @@ def _build_config():
                 clean_config[key] = True
     # Layout maps are complete user selections, not dictionaries of default
     # overrides. Deep-merging them reintroduces widgets the user removed.
-    saved_layout = user_config.get("onigiriWidgetLayout", {})
+    saved_layout = user_config.get("bingsuWidgetLayout", {})
     if isinstance(saved_layout, dict) and isinstance(saved_layout.get("grid"), dict):
-        clean_config["onigiriWidgetLayout"]["grid"] = copy.deepcopy(saved_layout["grid"])
+        clean_config["bingsuWidgetLayout"]["grid"] = copy.deepcopy(saved_layout["grid"])
         if "archive" not in saved_layout:
-            clean_config["onigiriWidgetLayout"]["archive"] = []
+            clean_config["bingsuWidgetLayout"]["archive"] = []
         # Original rendered the stats title outside the widget grid. Carry
         # that visible title into its new tile without reintroducing other
         # default widgets, and respect an explicitly archived title.
@@ -1436,20 +1438,20 @@ def _build_config():
             if not isinstance(archive, (dict, list)):
                 archive = []
             if "stats_title" not in saved_layout["grid"] and "stats_title" not in archive:
-                clean_config["onigiriWidgetLayout"]["grid"]["stats_title"] = copy.deepcopy(
-                    DEFAULTS["onigiriWidgetLayout"]["grid"]["stats_title"]
+                clean_config["bingsuWidgetLayout"]["grid"]["stats_title"] = copy.deepcopy(
+                    DEFAULTS["bingsuWidgetLayout"]["grid"]["stats_title"]
                 )
     clean_config["_widget_title_migrated_v2"] = True
 
     # Overviewer slideshows were retired in favour of one image background.
     # Normalizing old profiles here keeps the mode picker valid on first open
     # and preserves the existing colour, blur, and opacity values.
-    if clean_config.get("onigiri_overview_bg_mode") == "slideshow":
-        clean_config["onigiri_overview_bg_mode"] = "image_color"
-        images = user_config.get("onigiri_overview_slideshow_images", [])
+    if clean_config.get("bingsu_overview_bg_mode") == "slideshow":
+        clean_config["bingsu_overview_bg_mode"] = "image_color"
+        images = user_config.get("bingsu_overview_slideshow_images", [])
         first_image = next((name for name in images if isinstance(name, str) and name), "") if isinstance(images, list) else ""
         for suffix in ("light", "dark"):
-            key = "onigiri_overview_bg_image_" + suffix
+            key = "bingsu_overview_bg_image_" + suffix
             if first_image and not clean_config.get(key):
                 clean_config[key] = first_image
 
@@ -1468,14 +1470,14 @@ def _build_config():
     # independent controls from each profile's existing utility-button colors
     # so the split does not visually change an established setup.
     for new_key, legacy_key in (
-        ("onigiri_reviewer_show_answer_btn_bg_light", "onigiri_reviewer_other_btn_bg_light"),
-        ("onigiri_reviewer_show_answer_btn_text_light", "onigiri_reviewer_other_btn_text_light"),
-        ("onigiri_reviewer_show_answer_btn_bg_dark", "onigiri_reviewer_other_btn_bg_dark"),
-        ("onigiri_reviewer_show_answer_btn_text_dark", "onigiri_reviewer_other_btn_text_dark"),
-        ("onigiri_reviewer_show_answer_btn_hover_bg_light", "onigiri_reviewer_other_btn_hover_bg_light"),
-        ("onigiri_reviewer_show_answer_btn_hover_text_light", "onigiri_reviewer_other_btn_hover_text_light"),
-        ("onigiri_reviewer_show_answer_btn_hover_bg_dark", "onigiri_reviewer_other_btn_hover_bg_dark"),
-        ("onigiri_reviewer_show_answer_btn_hover_text_dark", "onigiri_reviewer_other_btn_hover_text_dark"),
+        ("bingsu_reviewer_show_answer_btn_bg_light", "bingsu_reviewer_other_btn_bg_light"),
+        ("bingsu_reviewer_show_answer_btn_text_light", "bingsu_reviewer_other_btn_text_light"),
+        ("bingsu_reviewer_show_answer_btn_bg_dark", "bingsu_reviewer_other_btn_bg_dark"),
+        ("bingsu_reviewer_show_answer_btn_text_dark", "bingsu_reviewer_other_btn_text_dark"),
+        ("bingsu_reviewer_show_answer_btn_hover_bg_light", "bingsu_reviewer_other_btn_hover_bg_light"),
+        ("bingsu_reviewer_show_answer_btn_hover_text_light", "bingsu_reviewer_other_btn_hover_text_light"),
+        ("bingsu_reviewer_show_answer_btn_hover_bg_dark", "bingsu_reviewer_other_btn_hover_bg_dark"),
+        ("bingsu_reviewer_show_answer_btn_hover_text_dark", "bingsu_reviewer_other_btn_hover_text_dark"),
     ):
         if new_key not in user_config and legacy_key in user_config:
             clean_config[new_key] = user_config[legacy_key]
@@ -1567,7 +1569,7 @@ def _build_config():
     # briefly received the intermediate collapsed-toolbar default.
     if not clean_config.get("_shima_actions_hidden_migrated"):
         if (
-            clean_config.get("onigiri_ui_theme") == "shima"
+            clean_config.get("bingsu_ui_theme") == "shima"
             and clean_config.get("sidebarActionsMode") == "collapsed"
         ):
             clean_config["sidebarActionsMode"] = "archived"
@@ -1594,8 +1596,8 @@ def _build_config():
     # Compatibility: Check for old profile page visibility settings and migrate them
     # This ensures users updating the addon don't lose their settings
     if "showHeatmapOnProfile" not in user_config:
-         if mw.col and "onigiri_profile_show_stats" in mw.col.conf:
-            clean_config["showHeatmapOnProfile"] = mw.col.conf.get("onigiri_profile_show_stats", True)
+         if mw.col and "bingsu_profile_show_stats" in mw.col.conf:
+            clean_config["showHeatmapOnProfile"] = mw.col.conf.get("bingsu_profile_show_stats", True)
         
     # Compatibility: Migrate restaurant_level and daily_special from achievements to top-level
     if "achievements" in clean_config:
@@ -1617,9 +1619,9 @@ def _build_config():
 
     # Nook Level used to keep this particular Profile Sidebar visibility flag
     # inside its game settings, while the other rows lived in
-    # ``onigiriProfilePanel``. Preserve that existing preference as we move
+    # ``bingsuProfilePanel``. Preserve that existing preference as we move
     # all Profile Sidebar controls under the same config object.
-    saved_panel = user_config.get("onigiriProfilePanel", {})
+    saved_panel = user_config.get("bingsuProfilePanel", {})
     if not isinstance(saved_panel, dict) or "show_nook_level" not in saved_panel:
         restaurant_conf = clean_config.get("restaurant_level", {})
         legacy_show_nook = (
@@ -1627,7 +1629,7 @@ def _build_config():
             if isinstance(restaurant_conf, dict)
             else True
         )
-        clean_config.setdefault("onigiriProfilePanel", {})["show_nook_level"] = bool(
+        clean_config.setdefault("bingsuProfilePanel", {})["show_nook_level"] = bool(
             legacy_show_nook
         )
 
@@ -1646,7 +1648,7 @@ def _build_config():
                     import shutil
                     shutil.copy2(shared_game_path, game_path)
                 except OSError as exc:
-                    print(f"Could not adopt legacy Onigiri progress: {exc}")
+                    print(f"Could not adopt legacy Bingsu progress: {exc}")
                     return clean_config
         game_data = safe_storage.read_json(game_path, default={}, label="Your Bingsu progress")
         game_restaurant = game_data.setdefault("restaurant_level", {})
@@ -1665,7 +1667,7 @@ def _build_config():
     # --- NEW FIX: Enforce Archive Exclusivity ---
     # Ensure items in 'archive' are NOT in 'grid'. The merge process might have
     # kept default grid positions for items the user wanted to archive.
-    layout_conf = clean_config.get("onigiriWidgetLayout", {})
+    layout_conf = clean_config.get("bingsuWidgetLayout", {})
     if "grid" in layout_conf and "archive" in layout_conf:
         grid_conf = layout_conf["grid"]
         archive_conf = layout_conf["archive"]
@@ -1730,9 +1732,9 @@ def _build_config():
 
         # Ankimon's old overview_team hook renders a self-contained flex grid
         # with fixed sprite sizes and its own palette. Its dimensions conflict
-        # with Onigiri's grid, so migrate any saved placement to our native
+        # with Bingsu's grid, so migrate any saved placement to our native
         # team widget once. The old hook remains registered for Ankimon's
-        # standalone UI, but Onigiri will no longer render its markup.
+        # standalone UI, but Bingsu will no longer render its markup.
         external_layout = clean_config.get("externalWidgetLayout", {})
         if isinstance(external_layout, dict):
             external_grid = external_layout.get("grid", external_layout)
@@ -1808,8 +1810,8 @@ def _build_config():
 
     # Compatibility: the old "Show numbers" boolean toggle became a 3-way
     # "Stats Numbers" mode (hover / fixed / off).
-    if "onigiri_reviewer_stattxt_mode" not in user_config and "onigiri_reviewer_stattxt_visible" in user_config:
-        clean_config["onigiri_reviewer_stattxt_mode"] = "hover" if user_config["onigiri_reviewer_stattxt_visible"] else "off"
+    if "bingsu_reviewer_stattxt_mode" not in user_config and "bingsu_reviewer_stattxt_visible" in user_config:
+        clean_config["bingsu_reviewer_stattxt_mode"] = "hover" if user_config["bingsu_reviewer_stattxt_visible"] else "off"
 
     return clean_config
 

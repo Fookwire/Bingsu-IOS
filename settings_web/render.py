@@ -82,7 +82,7 @@ def read_web_asset(name):
         with open(path, "r", encoding="utf-8") as handle:
             return handle.read()
     except Exception as exc:  # noqa: BLE001 - surfaced in the dialog body
-        print(f"[Onigiri] settings_web: could not read web/{name}: {exc}")
+        print(f"[Bingsu] settings_web: could not read web/{name}: {exc}")
         return ""
 
 
@@ -93,7 +93,7 @@ def read_things_asset(name):
         with open(path, "r", encoding="utf-8") as handle:
             return handle.read()
     except Exception as exc:  # noqa: BLE001 - the preview has a safe fallback
-        print(f"[Onigiri] settings_web: could not read Kome {name}: {exc}")
+        print(f"[Bingsu] settings_web: could not read Kome {name}: {exc}")
         return ""
 
 
@@ -332,7 +332,7 @@ def _strings():
     out["reset_theme_to_default"] = tr("reset_theme_to_default", "Reset to default")
     out["no_custom_themes"] = tr("no_custom_themes", "No custom themes yet")
     out["no_custom_themes_hint"] = tr(
-        "settings_web_no_custom_themes_hint", "Import a .onigiri file, or export your current setup to start one."
+        "settings_web_no_custom_themes_hint", "Import a .bingsu file, or export your current setup to start one."
     )
     out["theme_applied_toast"] = tr("theme_applied_toast", "Theme applied:")
     out["theme_deleted_toast"] = tr("theme_deleted_toast", "Theme deleted:")
@@ -512,16 +512,16 @@ def profile_assets_context():
 
 def profile_level_context():
     try:
-        from ..rendering import onigiri_renderer
-        enabled, level, fraction, color = onigiri_renderer._profile_level_progress()
-        game = onigiri_renderer._selected_profile_level_game()
+        from ..rendering import bingsu_renderer
+        enabled, level, fraction, color = bingsu_renderer._profile_level_progress()
+        game = bingsu_renderer._selected_profile_level_game()
         return {
             "enabled": enabled,
             "level": level if level is not None else 0,
             "fraction": fraction if fraction is not None else 0.0,
             "color": color or "",
             "game": game,
-            "sourceName": onigiri_renderer._profile_level_source_name(game),
+            "sourceName": bingsu_renderer._profile_level_source_name(game),
         }
     except Exception:
         return {"enabled": False, "level": 0, "fraction": 0.0, "color": ""}
@@ -717,12 +717,12 @@ def gallery_context(pages):
 
 
 # Widget catalogue for the Organize page's grid editor — mirrors
-# settings/_widget_grid_v2.py's _ONIGIRI_CATALOGUE exactly (wid, default_span,
+# settings/_widget_grid_v2.py's _BINGSU_CATALOGUE exactly (wid, default_span,
 # min_span, max_span, fixed_rows); the settings dialog owns this list, so it
 # stays a Python constant rather than being duplicated in JS. Deck Stats is the
 # one deliberate exception to the one-widget-per-kind rule: the organizer can
 # add it more than once and gives every instance its own persistent ID.
-ORGANIZE_ONIGIRI_CATALOGUE = [
+ORGANIZE_BINGSU_CATALOGUE = [
     ("stats_title", (1, 4), (1, 1), (1, 4), 1),
     ("studied", (1, 1), (1, 1), (1, 4), None),
     ("time", (1, 1), (1, 1), (1, 4), None),
@@ -741,7 +741,7 @@ ORGANIZE_ONIGIRI_CATALOGUE = [
 ]
 
 
-def _organize_onigiri_name(wid):
+def _organize_bingsu_name(wid):
     names = {
         "stats_title": tr("menu_title", "Menu Title"),
         "studied": tr("widget_studied", "Studied"),
@@ -773,19 +773,19 @@ def organize_context():
     """Everything the Organize grid editor needs about *available* widgets —
     computed once per dialog open, matching legacy (`_build_specs`/
     `_build_external_specs`, settings/_widget_grid_v2.py:429-509). Current
-    placement lives in the ordinary `onigiriWidgetLayout`/`externalWidgetLayout`
+    placement lives in the ordinary `bingsuWidgetLayout`/`externalWidgetLayout`
     config fields, not here."""
-    onigiri = [
+    bingsu = [
         {
             "wid": wid,
-            "name": _organize_onigiri_name(wid),
+            "name": _organize_bingsu_name(wid),
             "defaultSpan": list(default_span),
             "minSpan": list(min_span),
             "maxSpan": list(max_span),
             "fixedRows": fixed_rows,
             "multiInstance": wid == "deck_stats",
         }
-        for wid, default_span, min_span, max_span, fixed_rows in ORGANIZE_ONIGIRI_CATALOGUE
+        for wid, default_span, min_span, max_span, fixed_rows in ORGANIZE_BINGSU_CATALOGUE
     ]
 
     external = []
@@ -907,9 +907,9 @@ def organize_context():
                 "fixedRows": None,
             })
     except Exception as exc:
-        print(f"[Onigiri] Error building organize context: {exc}")
+        print(f"[Bingsu] Error building organize context: {exc}")
 
-    return {"onigiri": onigiri, "external": external}
+    return {"bingsu": bingsu, "external": external}
 
 
 def icon_assets_context():
@@ -1046,7 +1046,7 @@ def things_preview_context():
             ),
         })
     except Exception as exc:  # noqa: BLE001 - preview remains available
-        print(f"[Onigiri] settings_web: Kome preview data failed: {exc}")
+        print(f"[Bingsu] settings_web: Kome preview data failed: {exc}")
     return out
 
 
@@ -1185,7 +1185,7 @@ def build_context(store, pages, initial_page=None):
         "iconAssets": icon_assets_context(),
         "iconPicker": pickable_icons_context(),
         # The production heatmap renderer formats month/day labels with
-        # Onigiri's selected language rather than Chromium's UI locale.  Its
+        # Bingsu's selected language rather than Chromium's UI locale.  Its
         # settings preview runs that same renderer, so give it the same input.
         "heatmapLocale": current_language(),
         "localization": {"locale": current_language(), "literals": literal_strings()},
@@ -1289,8 +1289,8 @@ def real_widget_css():
     blocks = []
     for name in ("widget-head", "stats-widgets", "hashi-widget", "prep-widget",
                  "sidebar-count-bubbles"):
-        head = f"@onigiri:{name}:start"
-        tail = f"@onigiri:{name}:end"
+        head = f"@bingsu:{name}:start"
+        tail = f"@bingsu:{name}:end"
         if head not in css or tail not in css:
             continue
         body = css.split(head, 1)[1].split(tail, 1)[0]
@@ -1306,13 +1306,13 @@ def real_widget_css():
     if learner_css:
         blocks.append(learner_css.strip())
     # Heatmap: same wholesale-include as Deck Stats — every rule is scoped to
-    # #onigiri-heatmap-container / .heatmap-*, nothing to cut around.
+    # #bingsu-heatmap-container / .heatmap-*, nothing to cut around.
     heatmap_css = read_web_asset("heatmap.css")
     if heatmap_css:
         blocks.append(heatmap_css.strip())
     # Notifications: both the global and Mochi previews draw the *real* toast
-    # (.onigiri-notification-card / .onigiri-mini-notification), so they need
-    # the live stylesheet. Its `.onigiri-notification-stack` is fixed, which is
+    # (.bingsu-notification-card / .bingsu-mini-notification), so they need
+    # the live stylesheet. Its `.bingsu-notification-stack` is fixed, which is
     # why previews substitute only their own stage-local positioner.
     notifications_css = read_web_asset("notifications.css")
     if notifications_css:
@@ -1333,12 +1333,12 @@ def render(store, pages, initial_page=None):
     return (
         template
         .replace("</head>", web_localization_script() + "</head>")
-        .replace("/*__ONIGIRI_FONT_FACE__*/", font_face_css())
-        .replace("/*__ONIGIRI_REAL_WIDGET_CSS__*/", real_widget_css())
-        .replace("/*__ONIGIRI_SETTINGS_CSS__*/", css)
-        .replace("/*__ONIGIRI_HEATMAP_JS__*/", heatmap_js)
-        .replace("/*__ONIGIRI_NOTIFICATIONS_JS__*/", notifications_js)
-        .replace("/*__ONIGIRI_SETTINGS_JS__*/", js)
-        .replace("/*__ONIGIRI_SETTINGS_CONTEXT__*/null", safe_json(context))
-        .replace("/*__ONIGIRI_BOOT_BACKGROUND__*/", boot_background)
+        .replace("/*__BINGSU_FONT_FACE__*/", font_face_css())
+        .replace("/*__BINGSU_REAL_WIDGET_CSS__*/", real_widget_css())
+        .replace("/*__BINGSU_SETTINGS_CSS__*/", css)
+        .replace("/*__BINGSU_HEATMAP_JS__*/", heatmap_js)
+        .replace("/*__BINGSU_NOTIFICATIONS_JS__*/", notifications_js)
+        .replace("/*__BINGSU_SETTINGS_JS__*/", js)
+        .replace("/*__BINGSU_SETTINGS_CONTEXT__*/null", safe_json(context))
+        .replace("/*__BINGSU_BOOT_BACKGROUND__*/", boot_background)
     )

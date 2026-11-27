@@ -1,4 +1,4 @@
-# Onigiri's dedicated Deck Browser Rendering Engine
+# Bingsu's dedicated Deck Browser Rendering Engine
 
 import html
 import json
@@ -144,7 +144,7 @@ def _render_registered_bento_home(hook_id: str) -> str:
     Most external widgets arrive through Anki's deck-browser hook. Bento
     widgets may be registered after that hook list is captured, however, so
     the callback is a stable fallback for a grid entry that is already known
-    to Onigiri. It is intentionally optional and has no effect on add-ons
+    to Bingsu. It is intentionally optional and has no effect on add-ons
     using the traditional hook path.
     """
     try:
@@ -169,11 +169,11 @@ def render_ankimon_team_widget_html(
     col_span: int = 1,
     surface: str = "menu",
 ) -> str:
-    """Render Ankimon companions with Onigiri's lightweight widget system.
+    """Render Ankimon companions with Bingsu's lightweight widget system.
 
     Ankimon's own ``poke-grid`` embeds a complete card theme and fixed 120px
     sprites. This adapter reads the same bridge data but owns all markup and
-    layout, keeping the team sharp and inside its assigned Onigiri cell.
+    layout, keeping the team sharp and inside its assigned Bingsu cell.
     """
     try:
         manager = _onigimon().manager
@@ -232,7 +232,7 @@ def render_ankimon_team_widget_html(
         sprite = html.escape(str(sprite_urls[0]), quote=True) if sprite_urls else ""
         sprite_html = (
             f'<img src="{sprite}" alt="" draggable="false">'
-            if sprite else '<span class="onigiri-ankimon-team-initial">?</span>'
+            if sprite else '<span class="bingsu-ankimon-team-initial">?</span>'
         )
         type_badges = []
         raw_types = pokemon.get("types", [])
@@ -246,35 +246,35 @@ def render_ankimon_team_widget_html(
                 pokemon_type, ("#8A8D91", "#FFFFFF")
             )
             type_badges.append(
-                '<span class="onigiri-ankimon-team-type" '
+                '<span class="bingsu-ankimon-team-type" '
                 f'style="--pokemon-type-bg:{type_bg};--pokemon-type-fg:{type_fg}">'
                 f'{html.escape(pokemon_type.title())}</span>'
             )
         types_html = (
-            '<span class="onigiri-ankimon-team-types">'
+            '<span class="bingsu-ankimon-team-types">'
             + "".join(type_badges)
             + "</span>"
             if type_badges else ""
         )
         cards.append(f"""
-            <button class="onigiri-ankimon-team-member" type="button"
+            <button class="bingsu-ankimon-team-member" type="button"
                     title="{name} · Lv. {level}"
                     onclick="pycmd('openOnigimonCare');">
-                <span class="onigiri-ankimon-team-sprite">{sprite_html}</span>
-                <span class="onigiri-ankimon-team-name">{name}</span>
-                <span class="onigiri-ankimon-team-level">Lv. {level}</span>
+                <span class="bingsu-ankimon-team-sprite">{sprite_html}</span>
+                <span class="bingsu-ankimon-team-name">{name}</span>
+                <span class="bingsu-ankimon-team-level">Lv. {level}</span>
                 {types_html}
             </button>
         """)
 
-    widget_class = "onigiri-ankimon-team-overview" if surface == "overview" else ""
+    widget_class = "bingsu-ankimon-team-overview" if surface == "overview" else ""
     return f"""
-        <section class="onigiri-ankimon-team-widget {widget_class}"
+        <section class="bingsu-ankimon-team-widget {widget_class}"
                  aria-label="Ankimon team">
-            <div class="onigiri-ankimon-team-head">
+            <div class="bingsu-ankimon-team-head">
                 <span>{html.escape(tr("ankimon_team_widget_title", "Pokémon"))}</span><em>{len(selected[:max_items])}</em>
             </div>
-            <div class="onigiri-ankimon-team-list">{''.join(cards)}</div>
+            <div class="bingsu-ankimon-team-list">{''.join(cards)}</div>
         </section>
     """
 
@@ -338,7 +338,7 @@ BUTTON_HTML = {
         </div>
     """,
     "settings": """
-        <div class="menu-item action-settings" onclick="pycmd('openOnigiriSettings')">
+        <div class="menu-item action-settings" onclick="pycmd('openBingsuSettings')">
             <i class="icon"></i>
             <span>{tr("settings")}</span>
         </div>
@@ -346,7 +346,7 @@ BUTTON_HTML = {
     "gamification": """
         <div class="menu-item action-gamification" onclick="pycmd('openGamificationSettings')">
             <i class="icon"></i>
-            <span>{tr("onigiri_games")}</span>
+            <span>{tr("bingsu_games")}</span>
         </div>
     """,
     "get_shared": """
@@ -356,7 +356,7 @@ BUTTON_HTML = {
         </div>
     """,
     "create_deck": """
-        <div class="menu-item action-create-deck" onclick="pycmd('onigiri_create_deck')">
+        <div class="menu-item action-create-deck" onclick="pycmd('bingsu_create_deck')">
             <i class="icon"></i>
             <span>{tr("create_deck")}</span>
         </div>
@@ -398,15 +398,15 @@ COLLAPSED_ACTIONS = {
     "browse": ("browse", "browse", "Browse"),
     "stats": ("stats", "stats", "Stats"),
     "sync": ("sync", "sync", "Sync"),
-    "settings": ("openOnigiriSettings", "settings", "Settings"),
+    "settings": ("openBingsuSettings", "settings", "Settings"),
     "gamification": (
         "openGamificationSettings",
-        "onigiri_games",
+        "bingsu_games",
         "Bingsu Games",
     ),
     "more": ("", "more", "More"),
     "get_shared": ("shared", "get_shared", "Get Shared"),
-    "create_deck": ("onigiri_create_deck", "create_deck", "Create Deck"),
+    "create_deck": ("bingsu_create_deck", "create_deck", "Create Deck"),
     "import_file": ("import", "import_file", "Import File"),
 }
 
@@ -427,9 +427,9 @@ def _build_archived_home_button(conf: dict, addon_package: str) -> str:
         "modern_menu_icon_header_home", "home.svg", "home-btn-icon", addon_package
     )
     return f"""
-        <button id="onigiri-home-toolbar-btn" class="deck-header-btn"
+        <button id="bingsu-home-toolbar-btn" class="deck-header-btn"
                 type="button" title="{label}" aria-label="{label}"
-                onclick="OnigiriEngine.showHomeMenu(this, event)">
+                onclick="BingsuEngine.showHomeMenu(this, event)">
             {icon_markup}
         </button>
     """.strip()
@@ -493,9 +493,9 @@ def _build_hidden_ready_marker(addon_package: str) -> str:
         "ready-toolbar-icon", addon_package,
     )
     return f"""
-        <button id="onigiri-ready-toolbar-marker" class="deck-header-btn"
+        <button id="bingsu-ready-toolbar-marker" class="deck-header-btn"
                 type="button" aria-label="{label}" title="{label}"
-                onclick="OnigiriEngine.showReadyMenu(this, event)">
+                onclick="BingsuEngine.showReadyMenu(this, event)">
             {icon_markup}
         </button>
     """.strip()
@@ -913,7 +913,7 @@ def _nook_level_progress():
         chip_color = _chip_color_to_css(nook.get_chip_style_values(conf).get("progress") or "")
         return (True, level, fraction, chip_color)
     except Exception as exc:
-        print(f"Onigiri: Error reading nook level progress: {exc}")
+        print(f"Bingsu: Error reading nook level progress: {exc}")
         return (False, 0, 0.0, "")
 
 
@@ -957,7 +957,7 @@ def _onigimon_level_progress():
         fraction = max(0.0, min(1.0, (xp - base) / span))
         return (True, level, fraction, "#f5a623")
     except Exception as exc:
-        print(f"Onigiri: Error reading onigimon level: {exc}")
+        print(f"Bingsu: Error reading onigimon level: {exc}")
         return (False, 0, 0.0, "")
 
 
@@ -974,7 +974,7 @@ def _hexagon_level_progress():
         info = hexagon.manager.level_info()
         return (True, int(info["level"]), float(info["fraction"]), "#1597d1")
     except Exception as exc:
-        print(f"Onigiri: Error reading hexagon level: {exc}")
+        print(f"Bingsu: Error reading hexagon level: {exc}")
         return (False, 0, 0.0, "")
 
 
@@ -1035,7 +1035,7 @@ def _profile_sidebar_accent_color():
 def _nook_level_page_progress():
     """Return Nook Level data for the expanded Profile Sidebar.
 
-    Visibility is deliberately handled by ``onigiriProfilePanel`` alongside
+    Visibility is deliberately handled by ``bingsuProfilePanel`` alongside
     the other sidebar rows. The Nook manager retains progress even when its
     gameplay loop is paused, so the Profile Sidebar can faithfully render an
     enabled Nook row instead of silently dropping it.
@@ -1052,7 +1052,7 @@ def _nook_level_page_progress():
         chip_color = _chip_color_to_css(nook.get_chip_style_values(conf).get("progress") or "#B94632")
         return (True, level, fraction, chip_color)
     except Exception as exc:
-        print(f"Onigiri: Error reading nook level page progress: {exc}")
+        print(f"Bingsu: Error reading nook level page progress: {exc}")
         return (False, 0, 0.0, "")
 
 
@@ -1067,7 +1067,7 @@ def _hexagon_land_count():
             return (False, 0)
         return (True, int(payload.get("builtLands", 0) or 0))
     except Exception as exc:
-        print(f"Onigiri: Error reading hexagon land count: {exc}")
+        print(f"Bingsu: Error reading hexagon land count: {exc}")
         return (False, 0)
 
 
@@ -1093,7 +1093,7 @@ def _onigimon_hp_summary():
             "health_pct": max(0, min(100, int(health_pct or 0))),
         }
     except Exception as exc:
-        print(f"Onigiri: Error reading onigimon HP: {exc}")
+        print(f"Bingsu: Error reading onigimon HP: {exc}")
         return None
 
 
@@ -1131,7 +1131,7 @@ def _weekly_chart_svg(values, color):
         )
 
     return f"""
-    <svg class="onigiri-sidebar-profile-chart-svg" viewBox="0 0 {width} {height}" preserveAspectRatio="none" aria-hidden="true">
+    <svg class="bingsu-sidebar-profile-chart-svg" viewBox="0 0 {width} {height}" preserveAspectRatio="none" aria-hidden="true">
         <defs>
             <linearGradient id="opro-chart-fill" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="{color}" stop-opacity="0.35"></stop>
@@ -1149,18 +1149,18 @@ def _weekly_chart_html(color):
         from ..study_tools import prep_station
         values, labels = prep_station._weekly_review_counts()
     except Exception as exc:
-        print(f"Onigiri: Error reading weekly review counts: {exc}")
+        print(f"Bingsu: Error reading weekly review counts: {exc}")
         return ""
     chart_svg = _weekly_chart_svg(values, color)
     labels_html = "".join(f"<span>{html.escape(str(label))}</span>" for label in labels)
     return f"""
-    <section class="onigiri-sidebar-profile-chart">
-        <div class="onigiri-sidebar-profile-chart-head">
+    <section class="bingsu-sidebar-profile-chart">
+        <div class="bingsu-sidebar-profile-chart-head">
             <h3>{html.escape(tr("profile_panel_weekly_chart", "Weekly Study Chart"))}</h3>
             <span>{sum(values)}</span>
         </div>
         {chart_svg}
-        <div class="onigiri-sidebar-profile-chart-labels">{labels_html}</div>
+        <div class="bingsu-sidebar-profile-chart-labels">{labels_html}</div>
     </section>
     """
 
@@ -1173,10 +1173,10 @@ def _profile_gamification_summary_html(panel_conf):
         if enabled:
             pct = fraction * 100
             items.append(f"""
-            <div class="onigiri-sidebar-profile-summary-row">
-                <span class="onigiri-sidebar-profile-summary-label">{html.escape(tr("restaurant_level", "Nook Level"))} {level}</span>
-                <div class="onigiri-sidebar-profile-summary-track">
-                    <div class="onigiri-sidebar-profile-summary-fill" style="width: {pct:.1f}%; background: {color};"></div>
+            <div class="bingsu-sidebar-profile-summary-row">
+                <span class="bingsu-sidebar-profile-summary-label">{html.escape(tr("restaurant_level", "Nook Level"))} {level}</span>
+                <div class="bingsu-sidebar-profile-summary-track">
+                    <div class="bingsu-sidebar-profile-summary-fill" style="width: {pct:.1f}%; background: {color};"></div>
                 </div>
             </div>
             """)
@@ -1185,9 +1185,9 @@ def _profile_gamification_summary_html(panel_conf):
         hex_enabled, count = _hexagon_land_count()
         if hex_enabled:
             items.append(f"""
-            <div class="onigiri-sidebar-profile-summary-row onigiri-sidebar-profile-summary-row-count">
-                <span class="onigiri-sidebar-profile-summary-label">{html.escape(tr("hexagon_land", "Hexagon Land"))}</span>
-                <span class="onigiri-sidebar-profile-summary-value" style="color: #2D8CFF;">{count}</span>
+            <div class="bingsu-sidebar-profile-summary-row bingsu-sidebar-profile-summary-row-count">
+                <span class="bingsu-sidebar-profile-summary-label">{html.escape(tr("hexagon_land", "Hexagon Land"))}</span>
+                <span class="bingsu-sidebar-profile-summary-value" style="color: #2D8CFF;">{count}</span>
             </div>
             """)
 
@@ -1195,19 +1195,19 @@ def _profile_gamification_summary_html(panel_conf):
         hp = _onigimon_hp_summary()
         if hp:
             items.append(f"""
-            <div class="onigiri-sidebar-profile-summary-row">
-                <span class="onigiri-sidebar-profile-summary-label">{html.escape(hp["name"])} HP</span>
-                <div class="onigiri-sidebar-profile-summary-track">
-                    <div class="onigiri-sidebar-profile-summary-fill" style="width: {hp["health_pct"]}%; background: #08c46b;"></div>
+            <div class="bingsu-sidebar-profile-summary-row">
+                <span class="bingsu-sidebar-profile-summary-label">{html.escape(hp["name"])} HP</span>
+                <div class="bingsu-sidebar-profile-summary-track">
+                    <div class="bingsu-sidebar-profile-summary-fill" style="width: {hp["health_pct"]}%; background: #08c46b;"></div>
                 </div>
-                <span class="onigiri-sidebar-profile-summary-detail">{hp["current_hp"]}/{hp["max_hp"]}</span>
+                <span class="bingsu-sidebar-profile-summary-detail">{hp["current_hp"]}/{hp["max_hp"]}</span>
             </div>
             """)
 
     if not items:
         return ""
     return f"""
-    <section class="onigiri-sidebar-profile-summary">
+    <section class="bingsu-sidebar-profile-summary">
         {''.join(items)}
     </section>
     """
@@ -1249,7 +1249,7 @@ def _profile_study_summary_html(sidebar_conf):
         compact = ' class="is-tiny"' if len(f"{total:,}") >= 7 else (' class="is-compact"' if len(f"{total:,}") >= 5 else '')
         sections.append(f"""
         <section class="ba-side-donut-block" style="{''.join(colors)}">
-            <div class="onigiri-sidebar-profile-chart-head"><h3>{html.escape(tr("profile_sidebar_active_cards", "Active Cards"))}</h3></div>
+            <div class="bingsu-sidebar-profile-chart-head"><h3>{html.escape(tr("profile_sidebar_active_cards", "Active Cards"))}</h3></div>
             <div class="ba-side-donut-row">
                 <div class="ba-side-donut-ring">
                     <svg class="ba-side-donut-svg" viewBox="0 0 100 100" aria-hidden="true">
@@ -1274,10 +1274,10 @@ def _profile_study_summary_html(sidebar_conf):
             rows = ((tr("profile_sidebar_reviews", "Reviews"), f"{reviews:,}"),
                     (tr("profile_sidebar_study_time", "Study Time"), duration),
                     (tr("profile_sidebar_streak", "Study Streak"), f'{streak} {tr("profile_sidebar_days", "days")}'))
-            details = ''.join(f'<div class="onigiri-sidebar-profile-summary-row onigiri-sidebar-profile-summary-row-count"><dt>{html.escape(label)}</dt><dd>{html.escape(value)}</dd></div>' for label, value in rows)
-            sections.append(f'<section class="onigiri-sidebar-profile-today"><div class="onigiri-sidebar-profile-chart-head"><h3>{html.escape(tr("profile_sidebar_today", "Today"))}</h3></div><dl>{details}</dl></section>')
+            details = ''.join(f'<div class="bingsu-sidebar-profile-summary-row bingsu-sidebar-profile-summary-row-count"><dt>{html.escape(label)}</dt><dd>{html.escape(value)}</dd></div>' for label, value in rows)
+            sections.append(f'<section class="bingsu-sidebar-profile-today"><div class="bingsu-sidebar-profile-chart-head"><h3>{html.escape(tr("profile_sidebar_today", "Today"))}</h3></div><dl>{details}</dl></section>')
         except Exception as exc:
-            print(f"Onigiri: Error reading Profile Sidebar study stats: {exc}")
+            print(f"Bingsu: Error reading Profile Sidebar study stats: {exc}")
     return ''.join(sections)
 
 
@@ -1292,7 +1292,7 @@ def _profile_birthday_badge_html(birthday_str):
     today = date.today()
     if (birth_month, birth_day) != (today.month, today.day):
         return ""
-    return f'<p class="onigiri-sidebar-profile-birthday-badge">🎂 {html.escape(tr("happy_birthday", "Happy Birthday!"))}</p>'
+    return f'<p class="bingsu-sidebar-profile-birthday-badge">🎂 {html.escape(tr("happy_birthday", "Happy Birthday!"))}</p>'
 
 
 def build_profile_type_html(surface, profile_type, user_name, profile_pic_html):
@@ -1320,7 +1320,7 @@ def build_profile_type_html(surface, profile_type, user_name, profile_pic_html):
 
     surface_class = f"opro-surface-{surface}"
     onclick_attr = (
-        ' onclick="window.OnigiriProfileSidebar && OnigiriProfileSidebar.toggle(event)"'
+        ' onclick="window.BingsuProfileSidebar && BingsuProfileSidebar.toggle(event)"'
         if surface == "sidebar" else ""
     )
     level_html = ""
@@ -1365,7 +1365,7 @@ def build_profile_type_html(surface, profile_type, user_name, profile_pic_html):
         """
         type_class = "minimal-profile"
 
-    classes = f"onigiri-profile {type_class} {surface_class}".strip()
+    classes = f"bingsu-profile {type_class} {surface_class}".strip()
     return (
         f'<div class="{classes}"{onclick_attr}>'
         f'{inner}'
@@ -1430,16 +1430,16 @@ def _profile_background_render_parts(addon_package, include_default_image=True):
 def _profile_sidebar_page_background_style():
     """The flat or gradient backdrop of the expanded Profile Sidebar."""
     is_dark = config.effective_night_mode()
-    dynamic = bool(_col_conf_get("onigiri_profile_page_bg_dynamic_mode", True))
+    dynamic = bool(_col_conf_get("bingsu_profile_page_bg_dynamic_mode", True))
     theme_key = "dark" if (is_dark and dynamic) else "light"
     color1 = _col_conf_get(
-        f"onigiri_profile_page_bg_{theme_key}_color1",
+        f"bingsu_profile_page_bg_{theme_key}_color1",
         "#2C2C2C" if is_dark else "#F5F5F5",
     ) or ("#2C2C2C" if is_dark else "#F5F5F5")
-    if _col_conf_get("onigiri_profile_page_bg_mode", "color") != "gradient":
+    if _col_conf_get("bingsu_profile_page_bg_mode", "color") != "gradient":
         return f"background: {color1} !important;"
     color2 = _col_conf_get(
-        f"onigiri_profile_page_bg_{theme_key}_color2",
+        f"bingsu_profile_page_bg_{theme_key}_color2",
         "#1A1A1A" if is_dark else "#E0E0E0",
     ) or ("#1A1A1A" if is_dark else "#E0E0E0")
     return f"background: linear-gradient(135deg, {color1}, {color2}) !important;"
@@ -1450,9 +1450,9 @@ def _profile_sidebar_cover_render_parts(addon_package):
     is_dark = config.effective_night_mode()
     cover_file = config.themed_asset(
         _col_conf_get,
-        "onigiri_profile_sidebar_cover_image",
+        "bingsu_profile_sidebar_cover_image",
         is_dark,
-        dynamic_key="onigiri_profile_page_bg_dynamic_mode",
+        dynamic_key="bingsu_profile_page_bg_dynamic_mode",
     )
     if cover_file:
         base_dir = os.path.join(
@@ -1540,7 +1540,7 @@ def _music_link_service_label(url: str) -> str:
 
 
 def _profile_sidebar_config(conf: dict) -> dict:
-    profile = conf.get("onigiriProfile", {})
+    profile = conf.get("bingsuProfile", {})
     if not isinstance(profile, dict):
         profile = {}
     return {
@@ -1553,9 +1553,9 @@ def _build_profile_sidebar_html(conf: dict, addon_package: str, user_name: str, 
     profile = _profile_sidebar_config(conf)
     page_style = _profile_sidebar_page_background_style()
     bg_style, layer_style = _profile_sidebar_cover_render_parts(addon_package)
-    bg_layer_html = f'<div class="onigiri-sidebar-profile-bg-layer" style="{layer_style}"></div>' if layer_style else ""
+    bg_layer_html = f'<div class="bingsu-sidebar-profile-bg-layer" style="{layer_style}"></div>' if layer_style else ""
 
-    bio_html = f'<p class="onigiri-sidebar-profile-bio">{html.escape(profile["bio"], quote=False)}</p>' if profile["bio"] else ""
+    bio_html = f'<p class="bingsu-sidebar-profile-bio">{html.escape(profile["bio"], quote=False)}</p>' if profile["bio"] else ""
     birthday_html = _profile_birthday_badge_html(conf.get("userBirthday", ""))
     music_link = profile["musicLink"]
     music_html = ""
@@ -1563,19 +1563,19 @@ def _build_profile_sidebar_html(conf: dict, addon_package: str, user_name: str, 
         embed_url = _music_embed_url(music_link)
         if embed_url:
             music_html = f"""
-            <section class="onigiri-sidebar-profile-music">
+            <section class="bingsu-sidebar-profile-music">
                 <iframe src="{html.escape(embed_url, quote=True)}" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
             </section>
             """
         else:
             music_html = f"""
-            <a class="onigiri-sidebar-profile-music-link" href="{html.escape(music_link, quote=True)}">
+            <a class="bingsu-sidebar-profile-music-link" href="{html.escape(music_link, quote=True)}">
                 <span>{html.escape(_music_link_service_label(music_link), quote=False)}</span>
                 <strong>{html.escape(music_link, quote=False)}</strong>
             </a>
             """
 
-    panel_conf = conf.get("onigiriProfilePanel", {})
+    panel_conf = conf.get("bingsuProfilePanel", {})
     if not isinstance(panel_conf, dict):
         panel_conf = {}
 
@@ -1587,13 +1587,13 @@ def _build_profile_sidebar_html(conf: dict, addon_package: str, user_name: str, 
     study_html = _profile_study_summary_html(panel_conf)
 
     return f"""
-    <section class="onigiri-sidebar-profile" data-profile-sidebar style="{page_style}">
-        <button type="button" class="onigiri-sidebar-profile-back" aria-label="Back" onclick="window.OnigiriProfileSidebar && OnigiriProfileSidebar.close(event)"></button>
-        <div class="onigiri-sidebar-profile-cover" style="{bg_style}">
+    <section class="bingsu-sidebar-profile" data-profile-sidebar style="{page_style}">
+        <button type="button" class="bingsu-sidebar-profile-back" aria-label="Back" onclick="window.BingsuProfileSidebar && BingsuProfileSidebar.close(event)"></button>
+        <div class="bingsu-sidebar-profile-cover" style="{bg_style}">
             {bg_layer_html}
         </div>
-        <div class="onigiri-sidebar-profile-body">
-            <div class="onigiri-sidebar-profile-avatar">{profile_pic_html}</div>
+        <div class="bingsu-sidebar-profile-body">
+            <div class="bingsu-sidebar-profile-avatar">{profile_pic_html}</div>
             <h2>{html.escape(user_name, quote=False)}</h2>
             {birthday_html}
             {bio_html}
@@ -1882,7 +1882,7 @@ def _stats_widget_card_html(
     """
 
     return f"""
-    <div class="stat-card onigiri-stat-card is-{design}{size_class} {widget_id}-card" data-stat="{widget_id}">
+    <div class="stat-card bingsu-stat-card is-{design}{size_class} {widget_id}-card" data-stat="{widget_id}">
         {head_html}
         {body_html}
         {spark_html}
@@ -1890,7 +1890,7 @@ def _stats_widget_card_html(
     """
 
 
-def _get_onigiri_stat_card_html(label: str, value: str, widget_id: str) -> str:
+def _get_bingsu_stat_card_html(label: str, value: str, widget_id: str) -> str:
     """Back-compat entry point: `value` still arrives as one pre-joined string."""
     return _stats_widget_card_html(widget_id, label, value)
 
@@ -1948,7 +1948,7 @@ def _stats_widget_weekly_series() -> dict:
     _DASHBOARD_STATS_CACHE["weekly_series"] = series
     return series
 
-def _get_onigiri_retention_html(row_span: int = 1, col_span: int = 1) -> str:
+def _get_bingsu_retention_html(row_span: int = 1, col_span: int = 1) -> str:
     # Query retention directly (fast index on id)
     total_reviews, correct_reviews = mw.col.db.first(
         "select count(*), sum(case when ease > 1 then 1 else 0 end) from revlog where type = 1 and id > ?",
@@ -1985,27 +1985,27 @@ def _get_onigiri_retention_html(row_span: int = 1, col_span: int = 1) -> str:
     )
     return process_tr_markers(res_html)
 
-def _get_onigiri_heatmap_html() -> str:
+def _get_bingsu_heatmap_html() -> str:
     skeleton_cells = "".join(["<div class='skeleton-cell'></div>" for _ in range(371)])
     return f"""
-    <div id='onigiri-heatmap-container'>
+    <div id='bingsu-heatmap-container'>
         <div class="heatmap-header-skeleton"><div class="header-left-skeleton"><div class="skeleton-title"></div></div><div class="header-right-skeleton"><div class="skeleton-streak"></div><div class="skeleton-nav"></div><div class="skeleton-filters"></div></div></div>
         <div class="heatmap-grid-skeleton">{skeleton_cells}</div>
     </div>"""
 
 
 
-def _get_onigiri_favorites_html() -> str:
+def _get_bingsu_favorites_html() -> str:
     """
     Generates the HTML for the favorites widget.
     Automatically cleans up deleted decks from the favorites list.
     """
     try:
-        favorite_dids = _col_conf_get("onigiri_favorite_decks", [])
+        favorite_dids = _col_conf_get("bingsu_favorite_decks", [])
         if not favorite_dids:
             fav_placeholder = """
-            <div class="onigiri-favorites-widget">
-                <div class="onigiri-widget-head"><h3>{tr("favorites")}</h3></div>
+            <div class="bingsu-favorites-widget">
+                <div class="bingsu-widget-head"><h3>{tr("favorites")}</h3></div>
                 <div class="favorites-placeholder">
                     {tr("no_favorites_selected")}
                     <br>
@@ -2028,7 +2028,7 @@ def _get_onigiri_favorites_html() -> str:
             
             # Check if deck actually exists in the collection
             if did_str not in existing_deck_ids:
-                print(f"Onigiri: Skipping deleted deck ID {did_str}")
+                print(f"Bingsu: Skipping deleted deck ID {did_str}")
                 continue
             
             # Get the deck object
@@ -2037,13 +2037,13 @@ def _get_onigiri_favorites_html() -> str:
             except Exception:
                 deck = mw.col.decks.get(did)
             if not deck:
-                print(f"Onigiri: Skipping invalid deck ID {did_str}")
+                print(f"Bingsu: Skipping invalid deck ID {did_str}")
                 continue
             
             # Get the deck name
             deck_name = deck.get("name", "")
             if not deck_name:
-                print(f"Onigiri: Skipping deck with no name, ID {did_str}")
+                print(f"Bingsu: Skipping deck with no name, ID {did_str}")
                 continue
             
             # Deck is valid - add to valid list and create HTML
@@ -2055,8 +2055,8 @@ def _get_onigiri_favorites_html() -> str:
             # Create a clickable link
             links_html.append(
                 f"""<a class="favorite-deck-link" 
-                      href=# onclick="return OnigiriEngine.openDeck(event, '{did_str}');"
-                      oncontextmenu="return OnigiriEngine.showFavoriteDeckContextMenu(event, '{did_str}');"
+                      href=# onclick="return BingsuEngine.openDeck(event, '{did_str}');"
+                      oncontextmenu="return BingsuEngine.showFavoriteDeckContextMenu(event, '{did_str}');"
                       title="{tr('open')} {html.escape(deck_name, quote=True)}">
                     <span class="fav-deck-icon"></span>
                     <span class="fav-deck-name">{html.escape(short_name)}</span>
@@ -2065,15 +2065,15 @@ def _get_onigiri_favorites_html() -> str:
         
         # Clean up deleted decks from favorites if any were found
         if len(valid_dids) != len(favorite_dids):
-            _col_conf_set("onigiri_favorite_decks", valid_dids)
+            _col_conf_set("bingsu_favorite_decks", valid_dids)
             removed_count = len(favorite_dids) - len(valid_dids)
-            print(f"Onigiri: Cleaned up {removed_count} deleted/ghost deck(s) from favorites")
+            print(f"Bingsu: Cleaned up {removed_count} deleted/ghost deck(s) from favorites")
         
         # If no valid favorites remain after cleanup, show placeholder
         if not links_html:
             empty_fav = """
-            <div class="onigiri-favorites-widget">
-                <div class="onigiri-widget-head"><h3>{tr("favorites")}</h3></div>
+            <div class="bingsu-favorites-widget">
+                <div class="bingsu-widget-head"><h3>{tr("favorites")}</h3></div>
                 <div class="favorites-placeholder">
                     {tr("no_favorites_selected")}
                     <br>
@@ -2084,8 +2084,8 @@ def _get_onigiri_favorites_html() -> str:
             return process_tr_markers(empty_fav)
         
         fav_html = f"""
-        <div class="onigiri-favorites-widget">
-            <div class="onigiri-widget-head"><h3>{tr("favorites")}</h3></div>
+        <div class="bingsu-favorites-widget">
+            <div class="bingsu-widget-head"><h3>{tr("favorites")}</h3></div>
             <div class="favorites-list">
                 {''.join(links_html)}
             </div>
@@ -2093,13 +2093,13 @@ def _get_onigiri_favorites_html() -> str:
         """
         return process_tr_markers(fav_html)
     except Exception as e:
-        print(f"Onigiri: Error building favorites widget: {e}")
+        print(f"Bingsu: Error building favorites widget: {e}")
         import traceback
         traceback.print_exc()
-        return "<div class='onigiri-favorites-widget'>Error loading favorites.</div>"
+        return "<div class='bingsu-favorites-widget'>Error loading favorites.</div>"
 # --- END OF NEW FUNCTION ---
 
-def _get_onigiri_stats_title_html() -> str:
+def _get_bingsu_stats_title_html() -> str:
     """Keep a selected backdrop visible even when the phrase is cleared."""
     stats_title = _col_conf_get("modern_menu_statsTitle", None)
     if stats_title is None:
@@ -2128,8 +2128,8 @@ def _get_onigiri_stats_title_html() -> str:
         if bool(_col_conf_get("modern_menu_title_sync_widgets", False)):
             layer_style = (
                 "opacity:1;background-color:var(--canvas-inset);"
-                "backdrop-filter:blur(var(--onigiri-widget-blur, 0px));"
-                "-webkit-backdrop-filter:blur(var(--onigiri-widget-blur, 0px));"
+                "backdrop-filter:blur(var(--bingsu-widget-blur, 0px));"
+                "-webkit-backdrop-filter:blur(var(--bingsu-widget-blur, 0px));"
             )
         elif kind == "image":
             layer_style = f"opacity:{opacity};"
@@ -2146,12 +2146,12 @@ def _get_onigiri_stats_title_html() -> str:
             # Fade the tint, not the filtered layer: an opaque fill would
             # cover the blurred backdrop before element opacity is applied.
             layer_style += f"opacity:1;background-color:color-mix(in srgb, {color} {opacity * 100}%, transparent);backdrop-filter:blur({blur}px);-webkit-backdrop-filter:blur({blur}px);"
-        background = f'<div class="onigiri-menu-title-background" aria-hidden="true" style="{html.escape(layer_style, quote=True)}"></div>'
-    phrase = f'<h1 class="onigiri-widget-title">{html.escape(str(stats_title))}</h1>' if has_text else ""
-    classes = "onigiri-menu-title" + (" has-background" if enabled else "")
+        background = f'<div class="bingsu-menu-title-background" aria-hidden="true" style="{html.escape(layer_style, quote=True)}"></div>'
+    phrase = f'<h1 class="bingsu-widget-title">{html.escape(str(stats_title))}</h1>' if has_text else ""
+    classes = "bingsu-menu-title" + (" has-background" if enabled else "")
     return f'<div class="{classes}" style="--menu-title-alignment:{alignment};">{background}{phrase}</div>'
 
-def _get_onigiri_nook_level_html(orientation: str = "horizontal", row_span: int = 2, col_span: int = 2) -> str:
+def _get_bingsu_nook_level_html(orientation: str = "horizontal", row_span: int = 2, col_span: int = 2) -> str:
     """
     Generates the HTML for the Nook Level widget.
     """
@@ -2164,7 +2164,7 @@ def _get_onigiri_nook_level_html(orientation: str = "horizontal", row_span: int 
     rl_payload = nook_level.manager.get_progress_payload()
     if not rl_payload.get("enabled"):
         return process_tr_markers("""
-        <div class="onigiri-restaurant-level-widget disabled">
+        <div class="bingsu-restaurant-level-widget disabled">
             <div class="restaurant-info">
                 <h3>{tr("restaurant_level")}</h3>
                 <p>{tr("feature_disabled")}</p>
@@ -2223,7 +2223,7 @@ def _get_onigiri_nook_level_html(orientation: str = "horizontal", row_span: int 
 
     if row_span <= 1:
         return process_tr_markers(f"""
-        <div class="onigiri-restaurant-level-widget onigiri-restaurant-level-widget-compact {snow_class}" role="button" tabindex="0" style="--theme-bg: {bg_style_value};" onclick="pycmd('openRestaurantLevel')" onkeydown="if(event.key==='Enter'||event.key===' '){{event.preventDefault();pycmd('openRestaurantLevel');}}">
+        <div class="bingsu-restaurant-level-widget bingsu-restaurant-level-widget-compact {snow_class}" role="button" tabindex="0" style="--theme-bg: {bg_style_value};" onclick="pycmd('openRestaurantLevel')" onkeydown="if(event.key==='Enter'||event.key===' '){{event.preventDefault();pycmd('openRestaurantLevel');}}">
             <div class="restaurant-image-container">
                 <img src="{image_path}" class="restaurant-image">
                 {snowflakes_html}
@@ -2237,7 +2237,7 @@ def _get_onigiri_nook_level_html(orientation: str = "horizontal", row_span: int 
     restaurant_svg = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="rl-nav-icon"><path fill="currentColor" d="m21 6.424v-2.424c1.654 0 3-1.346 3-3 0-.552-.447-1-1-1s-1 .448-1 1-.448 1-1 1h-19v-1c0-.552-.447-1-1-1s-1 .448-1 1v22c0 .552.447 1 1 1s1-.448 1-1v-19h5v2.424c-1.763.774-3 2.531-3 4.576v8c0 2.757 2.243 5 5 5h10c2.757 0 5-2.243 5-5v-8c0-2.045-1.237-3.802-3-4.576zm-12-2.424h10v2h-10zm13 15c0 1.654-1.346 3-3 3h-10c-1.654 0-3-1.346-3-3v-8c0-1.654 1.346-3 3-3h10c1.654 0 3 1.346 3 3zm-3-2c0-2.414-1.721-4.434-4-4.899v-.101c0-.552-.447-1-1-1s-1 .448-1 1v.101c-2.279.465-4 2.484-4 4.899-.553 0-1 .448-1 1s.447 1 1 1h10c.553 0 1-.448 1-1s-.447-1-1-1zm-5-3c1.654 0 3 1.346 3 3h-6c0-1.654 1.346-3 3-3z"/></svg>'''
     
     nav_buttons_html = f"""
-    <div class="rl-widget-nav-buttons onigiri-widget-head-aside">
+    <div class="rl-widget-nav-buttons bingsu-widget-head-aside">
         <button class="rl-nav-btn" onclick="event.stopPropagation(); pycmd('openTaiyakiStore');" title="{tr('open_taiyaki_store')}">
             {shop_svg}
         </button>
@@ -2277,13 +2277,13 @@ def _get_onigiri_nook_level_html(orientation: str = "horizontal", row_span: int 
 
     widget_orientation = "vertical" if orientation == "vertical" else "horizontal"
     return process_tr_markers(f"""
-    <div class="onigiri-restaurant-level-widget orientation-{widget_orientation} {snow_class}" style="--theme-bg: {bg_style_value}; --theme-color: {bar_color}">
-        <div class="onigiri-widget-head rl-widget-head">
+    <div class="bingsu-restaurant-level-widget orientation-{widget_orientation} {snow_class}" style="--theme-bg: {bg_style_value}; --theme-color: {bar_color}">
+        <div class="bingsu-widget-head rl-widget-head">
             <h3>{name}</h3>
             {nav_buttons_html}
         </div>
         <div class="rl-widget-body">
-            <div class="restaurant-image-container" onclick="this.closest('.onigiri-restaurant-level-widget').classList.toggle('expanded-view'); event.stopPropagation();" style="cursor: pointer;">
+            <div class="restaurant-image-container" onclick="this.closest('.bingsu-restaurant-level-widget').classList.toggle('expanded-view'); event.stopPropagation();" style="cursor: pointer;">
                 <img src="{image_path}" class="restaurant-image">
                 {snowflakes_html}
             </div>
@@ -2305,10 +2305,10 @@ def _get_onigiri_nook_level_html(orientation: str = "horizontal", row_span: int 
 
 # --- The Main Rendering Function ---
 
-def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
+def render_bingsu_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
     """
     A complete replacement for Anki's DeckBrowser._renderPage.
-    It builds the entire modern UI, including Onigiri and external widgets,
+    It builds the entire modern UI, including Bingsu and external widgets,
     into a stable CSS grid.
     """
     # Ensure hooks from other add-ons are captured just-in-time
@@ -2316,11 +2316,11 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
     conf = config.get_config_readonly()
     addon_package = mw.addonManager.addonFromModule(__name__)
     
-    # --- Part 1: Build Onigiri Widgets Grid ---
-    onigiri_layout = conf.get("onigiriWidgetLayout", {}).get("grid", {})
-    col_count = conf.get("onigiriWidgetLayout", {}).get("column_count", 4) # Default to 4
+    # --- Part 1: Build Bingsu Widgets Grid ---
+    bingsu_layout = conf.get("bingsuWidgetLayout", {}).get("grid", {})
+    col_count = conf.get("bingsuWidgetLayout", {}).get("column_count", 4) # Default to 4
 
-    onigiri_grid_html = ""
+    bingsu_grid_html = ""
     
     # Check cache for main stats
     global _DASHBOARD_STATS_CACHE, _DASHBOARD_LAST_UPDATE, _DASHBOARD_CACHE_TTL
@@ -2348,7 +2348,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
     seconds_per_card = time_today_seconds / cards_today if cards_today > 0 else 0
 
     widget_generators = {
-        "stats_title": _get_onigiri_stats_title_html,
+        "stats_title": _get_bingsu_stats_title_html,
         # The stat cards take their grid span so the sparkline only appears on
         # a card big enough for it; the loop below re-invokes them with the
         # real spans, these zero-arg defaults are the 1x1 fallback.
@@ -2368,10 +2368,10 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
             series=_stats_widget_weekly_series().get("pace"),
             row_span=rs, col_span=cs,
         ),
-        "retention": _get_onigiri_retention_html,
-        "heatmap": _get_onigiri_heatmap_html,
-        "favorites": _get_onigiri_favorites_html, 
-        "restaurant_level": _get_onigiri_nook_level_html,
+        "retention": _get_bingsu_retention_html,
+        "heatmap": _get_bingsu_heatmap_html,
+        "favorites": _get_bingsu_favorites_html, 
+        "restaurant_level": _get_bingsu_nook_level_html,
         "onigimon": lambda: _onigimon().render_widget_html(),
         "ankimon_team": render_ankimon_team_widget_html,
         "hexagon_land": lambda: _hexagon_land().render_widget_html(),
@@ -2386,16 +2386,16 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
         try:
             return renderer()
         except Exception as exc:
-            print(f"Onigiri: {widget_id} widget failed: {exc}")
+            print(f"Bingsu: {widget_id} widget failed: {exc}")
             return ""
     
     if col_count > 0:
-        for widget_id, widget_config in onigiri_layout.items():
+        for widget_id, widget_config in bingsu_layout.items():
             if widget_id in TOOL_IDS and not tool_visible(widget_id, conf):
                 continue
             if widget_id in widget_generators or _is_deck_stats_widget_id(widget_id):
                 if not isinstance(widget_config, dict):
-                    print(f"Onigiri: ignored invalid {widget_id} widget layout")
+                    print(f"Bingsu: ignored invalid {widget_id} widget layout")
                     continue
                 try:
                     pos = max(0, int(widget_config.get("pos", 0)))
@@ -2459,7 +2459,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
                 if widget_id == "restaurant_level":
                     widget_html = render_widget_safely(
                         widget_id,
-                        lambda: _get_onigiri_nook_level_html(
+                        lambda: _get_bingsu_nook_level_html(
                             widget_config.get("orientation", "horizontal"),
                             row_span=row_span,
                             col_span=col_span,
@@ -2495,7 +2495,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
                 elif widget_id == "retention":
                     widget_html = render_widget_safely(
                         widget_id,
-                        lambda: _get_onigiri_retention_html(
+                        lambda: _get_bingsu_retention_html(
                             row_span=row_span,
                             col_span=col_span,
                         ),
@@ -2554,10 +2554,10 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
                 # Their root surface participates in the grid directly, so an
                 # empty generic card cannot add a second border or title.
                 if widget_id in ("onigimon", "hexagon_land"):
-                    onigiri_grid_html += widget_html
+                    bingsu_grid_html += widget_html
                 else:
-                    onigiri_grid_html += (
-                        f'<div class="onigiri-widget-container" '
+                    bingsu_grid_html += (
+                        f'<div class="bingsu-widget-container" '
                         f'style="{style}">{widget_html}</div>'
                     )
 
@@ -2575,7 +2575,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
     
     external_widgets_data = {}
     grid_hook_ids = set(grid_config.keys())
-    deckline_auto_embed = conf.get("onigiriDecklineAutoEmbed", True)
+    deckline_auto_embed = conf.get("bingsuDecklineAutoEmbed", True)
     for hook in external_hooks:
         hook_id = patcher._get_hook_name(hook)
         # The native Ankimon team widget above replaces this legacy hook. Do
@@ -2639,7 +2639,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
                 class_name = "external-widget-container"
                 if _is_shige_leaderboard_hook_id(hook_id):
                     class_name += " shige-leaderboard-widget"
-                # Add external widgets to the same grid as Onigiri widgets
+                # Add external widgets to the same grid as Bingsu widgets
                 external_widgets_html += f'<div class="{class_name}" style="{style}">{hook_html}</div>'
 
     if deckline_auto_embed:
@@ -2651,15 +2651,15 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
                 and str(hook_html or "").strip()
             ):
                 deckline_compat_html += (
-                    '<div class="external-widget-container onigiri-deckline-compat-container" '
-                    f'data-onigiri-external-hook="{html.escape(hook_id, quote=True)}">'
+                    '<div class="external-widget-container bingsu-deckline-compat-container" '
+                    f'data-bingsu-external-hook="{html.escape(hook_id, quote=True)}">'
                     f"{hook_html}"
                     "</div>"
                 )
         if deckline_compat_html:
             deckline_compat_html += """
-            <style id="onigiri-deckline-compat-style">
-                .onigiri-deckline-compat-container {
+            <style id="bingsu-deckline-compat-style">
+                .bingsu-deckline-compat-container {
                     display: block !important;
                     width: 100%;
                     max-width: min(100%, 1180px);
@@ -2671,30 +2671,30 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
                     box-sizing: border-box;
                 }
 
-                .onigiri-deckline-compat-container .deckline-cards,
-                .onigiri-deckline-compat-container .deckline-cards-embedded {
+                .bingsu-deckline-compat-container .deckline-cards,
+                .bingsu-deckline-compat-container .deckline-cards-embedded {
                     height: auto !important;
                     max-height: none !important;
                     min-height: 0 !important;
                     width: 100%;
                 }
 
-                .onigiri-deckline-compat-container .deckline-list {
+                .bingsu-deckline-compat-container .deckline-list {
                     max-height: none !important;
                     overflow: visible !important;
                 }
 
-                .onigiri-deckline-compat-container .deckline-bottom-bar-shell {
+                .bingsu-deckline-compat-container .deckline-bottom-bar-shell {
                     margin-top: 10px;
                 }
             </style>
             """
 
     # --- Part 3: Assemble the Final Stats Block ---
-    # Combine both Onigiri and External widgets into a single unified grid
-    unified_grid_html = onigiri_grid_html + external_widgets_html
+    # Combine both Bingsu and External widgets into a single unified grid
+    unified_grid_html = bingsu_grid_html + external_widgets_html
     grid_gap = 15
-    widget_layout_conf = conf.get("onigiriWidgetLayout", {})
+    widget_layout_conf = conf.get("bingsuWidgetLayout", {})
     try:
         saved_grid_width = int(widget_layout_conf.get("grid_width", 250))
     except (TypeError, ValueError):
@@ -2742,8 +2742,8 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
 
     # Calculate row for stats_title to make its height min-content instead of grid_widget_height
     title_row = 1
-    if "stats_title" in onigiri_layout and col_count > 0:
-        pos = onigiri_layout["stats_title"].get("pos", 0)
+    if "stats_title" in bingsu_layout and col_count > 0:
+        pos = bingsu_layout["stats_title"].get("pos", 0)
         title_row = pos // col_count + 1
     grid_template_rows = " ".join([f"{grid_row_height}px"] * (title_row - 1)) + " min-content"
     title_margin_top = "12px" if title_row == 1 else "-5px"
@@ -2782,7 +2782,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
             align-items: {grid_align_items};
         }}
 
-        .onigiri-widget-title {{
+        .bingsu-widget-title {{
             width: 100%;
             max-width: {grid_content_width}px;
             box-sizing: border-box;
@@ -2790,7 +2790,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
 
         /* As a grid widget the title fills its cell and sits on the vertical
            centre line, so it lines up with the stat cards beside it. */
-        .onigiri-widget-container .onigiri-widget-title {{
+        .bingsu-widget-container .bingsu-widget-title {{
             flex: 1;
             display: flex;
             align-items: flex-start;
@@ -2801,7 +2801,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
             overflow: hidden;
         }}
 
-        .onigiri-menu-title {{
+        .bingsu-menu-title {{
             position: relative;
             isolation: isolate;
             width: 100%;
@@ -2809,14 +2809,14 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
             min-width: 0;
             box-sizing: border-box;
         }}
-        .onigiri-menu-title.has-background {{
+        .bingsu-menu-title.has-background {{
             min-height: 54px;
             padding: 12px 16px;
-            border-radius: var(--onigiri-widget-border-radius, 20px);
-            border: var(--onigiri-widget-border-width, 1px) solid var(--border, rgba(128, 128, 128, 0.24));
+            border-radius: var(--bingsu-widget-border-radius, 20px);
+            border: var(--bingsu-widget-border-width, 1px) solid var(--border, rgba(128, 128, 128, 0.24));
             overflow: hidden;
         }}
-        .onigiri-menu-title-background {{
+        .bingsu-menu-title-background {{
             position: absolute;
             inset: 0;
             z-index: -1;
@@ -2824,16 +2824,16 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
             background-size: cover;
             background-position: center;
         }}
-        .onigiri-widget-container .onigiri-menu-title .onigiri-widget-title {{
+        .bingsu-widget-container .bingsu-menu-title .bingsu-widget-title {{
             justify-content: var(--menu-title-alignment, left);
             text-align: var(--menu-title-alignment, left);
         }}
-        .onigiri-widget-container .onigiri-menu-title.has-background .onigiri-widget-title {{
+        .bingsu-widget-container .bingsu-menu-title.has-background .bingsu-widget-title {{
             margin: 0;
         }}
 
         /* Make the container expand to fill the grid area (rows/cols) */
-        .onigiri-widget-container, .external-widget-container {{
+        .bingsu-widget-container, .external-widget-container {{
             width: 100%;
             height: 100%;
             min-width: 0;
@@ -2855,7 +2855,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
         }}
 
         /* Force the inner content (cards, heatmap, favorites) to fill the container */
-        .stat-card, #onigiri-heatmap-container, .onigiri-favorites-widget, .onigimon-card, .hex-land-preview, .prep-station-widget, .hashi-notes-widget, .onigiri-ankimon-team-widget {{
+        .stat-card, #bingsu-heatmap-container, .bingsu-favorites-widget, .onigimon-card, .hex-land-preview, .prep-station-widget, .hashi-notes-widget, .bingsu-ankimon-team-widget {{
             flex: 1;
             width: 100%;
             height: 100%;
@@ -2865,22 +2865,22 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
         /* Ankimon team — deliberately small, neutral, and grid-contained.
            These rules never target Ankimon's legacy .poke-grid, so a normal
            Ankimon screen remains untouched. */
-        .onigiri-ankimon-team-widget {{
+        .bingsu-ankimon-team-widget {{
             display: flex;
             flex-direction: column;
             min-width: 0;
             min-height: 0;
-            padding: var(--onigiri-widget-pad, 12px);
-            border: var(--onigiri-box-effect-stroke, 1px) solid var(--onigiri-box-effect-border, var(--border, rgba(128,128,128,.22)));
-            border-radius: var(--onigiri-box-effect-radius, 14px);
-            background: var(--onigiri-box-effect-bg, var(--canvas-inset, rgba(128,128,128,.08)));
-            color: var(--onigiri-box-effect-fg, var(--fg, inherit));
+            padding: var(--bingsu-widget-pad, 12px);
+            border: var(--bingsu-box-effect-stroke, 1px) solid var(--bingsu-box-effect-border, var(--border, rgba(128,128,128,.22)));
+            border-radius: var(--bingsu-box-effect-radius, 14px);
+            background: var(--bingsu-box-effect-bg, var(--canvas-inset, rgba(128,128,128,.08)));
+            color: var(--bingsu-box-effect-fg, var(--fg, inherit));
             box-shadow: none !important;
-            backdrop-filter: blur(var(--onigiri-box-effect-blur, 0px));
-            -webkit-backdrop-filter: blur(var(--onigiri-box-effect-blur, 0px));
+            backdrop-filter: blur(var(--bingsu-box-effect-blur, 0px));
+            -webkit-backdrop-filter: blur(var(--bingsu-box-effect-blur, 0px));
             overflow: hidden;
         }}
-        .onigiri-ankimon-team-head {{
+        .bingsu-ankimon-team-head {{
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -2890,7 +2890,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
             font-weight: 700;
             line-height: 1;
         }}
-        .onigiri-ankimon-team-head em {{
+        .bingsu-ankimon-team-head em {{
             display: inline-flex;
             min-width: 18px;
             height: 18px;
@@ -2903,7 +2903,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
             font-size: 10px;
             font-style: normal;
         }}
-        .onigiri-ankimon-team-list {{
+        .bingsu-ankimon-team-list {{
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(min(92px, 100%), 1fr));
             gap: 7px;
@@ -2912,7 +2912,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
             min-height: 0;
             align-content: center;
         }}
-        .onigiri-ankimon-team-member {{
+        .bingsu-ankimon-team-member {{
             display: grid;
             grid-template-columns: 1fr;
             grid-template-rows: minmax(0, 1fr) auto auto auto;
@@ -2930,10 +2930,10 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
             overflow: hidden;
             box-shadow: none !important;
         }}
-        .onigiri-ankimon-team-member:hover {{
+        .bingsu-ankimon-team-member:hover {{
             background: color-mix(in srgb, var(--accent-color, #00a982) 10%, transparent);
         }}
-        .onigiri-ankimon-team-sprite {{
+        .bingsu-ankimon-team-sprite {{
             display: flex;
             align-items: center;
             justify-content: center;
@@ -2941,7 +2941,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
             min-height: 0;
             overflow: hidden;
         }}
-        .onigiri-ankimon-team-sprite img {{
+        .bingsu-ankimon-team-sprite img {{
             display: block;
             width: min(100%, 74px);
             height: min(100%, 74px);
@@ -2950,7 +2950,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
             image-rendering: pixelated;
             image-rendering: crisp-edges;
         }}
-        .onigiri-ankimon-team-name {{
+        .bingsu-ankimon-team-name {{
             width: 100%;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -2959,12 +2959,12 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
             font-weight: 650;
             line-height: 1.1;
         }}
-        .onigiri-ankimon-team-level {{
+        .bingsu-ankimon-team-level {{
             font-size: 9px;
             opacity: .62;
             line-height: 1;
         }}
-        .onigiri-ankimon-team-types {{
+        .bingsu-ankimon-team-types {{
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
@@ -2975,7 +2975,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
             box-sizing: border-box;
             white-space: normal !important;
         }}
-        .onigiri-ankimon-team-type {{
+        .bingsu-ankimon-team-type {{
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -2992,7 +2992,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
             white-space: nowrap;
             overflow: visible;
         }}
-        .onigiri-ankimon-team-initial {{
+        .bingsu-ankimon-team-initial {{
             font-size: 18px;
             opacity: .55;
         }}
@@ -3002,7 +3002,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
             display: flex;
             flex-direction: column;
             gap: 6px;
-            padding: var(--onigiri-widget-pad);
+            padding: var(--bingsu-widget-pad);
             cursor: pointer;
             overflow: hidden;
             font-family: inherit;
@@ -3159,7 +3159,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
         .hex-land-preview.disabled {{
             display: grid;
             place-items: center;
-            padding: var(--onigiri-widget-pad);
+            padding: var(--bingsu-widget-pad);
             box-sizing: border-box;
             background: var(--canvas-inset, #ffffff);
             color: var(--fg, #222);
@@ -3343,7 +3343,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
             height: 100%;
             box-sizing: border-box;
             min-height: 0;
-            border-radius: var(--onigiri-widget-border-radius, var(--onigiri-box-effect-radius, 20px));
+            border-radius: var(--bingsu-widget-border-radius, var(--bingsu-box-effect-radius, 20px));
             overflow: hidden;
             border: 1px solid var(--border, #e0e0e0);
             cursor: pointer;
@@ -3352,7 +3352,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
         .onigimon-card-disabled {{
             display: grid;
             place-items: center;
-            padding: var(--onigiri-widget-pad);
+            padding: var(--bingsu-widget-pad);
             background: var(--canvas-inset, #ffffff);
             color: var(--fg, #222);
             text-align: center;
@@ -3822,7 +3822,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
             height: 100%;
             min-height: 0;
             justify-content: center;
-            border-radius: max(0px, calc(var(--onigiri-widget-border-radius, var(--onigiri-box-effect-radius, 20px)) - 8px));
+            border-radius: max(0px, calc(var(--bingsu-widget-border-radius, var(--bingsu-box-effect-radius, 20px)) - 8px));
         }}
 
         .onigimon-scene-compact .onigimon-sprite {{
@@ -3985,11 +3985,11 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
            follow Bingsu's shared widget variables while keeping any configured
            scenario or custom image above the synced backdrop. */
         .onigimon-card.onigimon-sync-widgets {{
-            background: var(--onigiri-box-effect-bg, var(--canvas-inset, #ffffff));
-            border: var(--onigiri-widget-border-width, var(--onigiri-box-effect-stroke, 1px)) solid var(--onigiri-box-effect-border, var(--border, #e0e0e0));
-            color: var(--onigiri-box-effect-fg, var(--fg, #222));
-            backdrop-filter: blur(var(--onigiri-widget-blur, var(--onigiri-box-effect-blur, 0px)));
-            -webkit-backdrop-filter: blur(var(--onigiri-widget-blur, var(--onigiri-box-effect-blur, 0px)));
+            background: var(--bingsu-box-effect-bg, var(--canvas-inset, #ffffff));
+            border: var(--bingsu-widget-border-width, var(--bingsu-box-effect-stroke, 1px)) solid var(--bingsu-box-effect-border, var(--border, #e0e0e0));
+            color: var(--bingsu-box-effect-fg, var(--fg, #222));
+            backdrop-filter: blur(var(--bingsu-widget-blur, var(--bingsu-box-effect-blur, 0px)));
+            -webkit-backdrop-filter: blur(var(--bingsu-widget-blur, var(--bingsu-box-effect-blur, 0px)));
         }}
 
         .onigimon-card.onigimon-sync-widgets .onigimon-top.onigimon-scene,
@@ -4005,25 +4005,25 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
         .onigimon-card.onigimon-sync-widgets .onigimon-bottom,
         .night-mode .onigimon-card.onigimon-sync-widgets .onigimon-bottom {{
             background: transparent !important;
-            color: var(--onigiri-box-effect-fg, var(--fg, #222));
+            color: var(--bingsu-box-effect-fg, var(--fg, #222));
         }}
 
         .onigimon-card.onigimon-sync-widgets.onigimon-span-1x2 .onigimon-scene-compact .onigimon-info strong,
         .night-mode .onigimon-card.onigimon-sync-widgets.onigimon-span-1x2 .onigimon-scene-compact .onigimon-info strong {{
-            color: var(--onigiri-box-effect-fg, var(--fg, #222));
+            color: var(--bingsu-box-effect-fg, var(--fg, #222));
         }}
 
         .onigimon-card.onigimon-sync-widgets.onigimon-span-1x2 .onigimon-scene-compact .onigimon-info span,
         .night-mode .onigimon-card.onigimon-sync-widgets.onigimon-span-1x2 .onigimon-scene-compact .onigimon-info span {{
-            color: color-mix(in srgb, var(--onigiri-box-effect-fg, var(--fg, #222)) 72%, transparent);
+            color: color-mix(in srgb, var(--bingsu-box-effect-fg, var(--fg, #222)) 72%, transparent);
         }}
 
         /* Restaurant Level Widget Styles */
-        .onigiri-restaurant-level-widget {{
+        .bingsu-restaurant-level-widget {{
             display: flex;
             flex-direction: column;
             background: var(--canvas-inset, #f5f5f5);
-            border-radius: var(--onigiri-box-effect-radius, 15px);
+            border-radius: var(--bingsu-box-effect-radius, 15px);
             overflow: hidden;
             height: 100%;
             border: 1px solid var(--border, #e0e0e0);
@@ -4033,7 +4033,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
         }}
 
         .rl-widget-head {{
-            padding: var(--onigiri-widget-pad) var(--onigiri-widget-pad) 0;
+            padding: var(--bingsu-widget-pad) var(--bingsu-widget-pad) 0;
         }}
 
         /* The building and the level column sit below the header row; this is
@@ -4046,21 +4046,21 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
             min-width: 0;
         }}
 
-        .onigiri-restaurant-level-widget.orientation-vertical .rl-widget-body {{
+        .bingsu-restaurant-level-widget.orientation-vertical .rl-widget-body {{
             flex-direction: column;
         }}
 
-        .onigiri-restaurant-level-widget.expanded-view {{
+        .bingsu-restaurant-level-widget.expanded-view {{
             background: var(--theme-bg) !important;
             border-color: transparent;
         }}
 
         /* Expanded view is the building alone, edge to edge. */
-        .onigiri-restaurant-level-widget.expanded-view .rl-widget-head {{
+        .bingsu-restaurant-level-widget.expanded-view .rl-widget-head {{
             display: none;
         }}
         
-        .night .onigiri-restaurant-level-widget {{
+        .night .bingsu-restaurant-level-widget {{
             background: var(--canvas-inset, #2c2c2c);
             border-color: var(--border, #e0e0e0);
         }}
@@ -4072,7 +4072,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
             justify-content: center;
             /* Let the widget's backdrop supply the opacity behind the sprite. */
             background: transparent;
-            padding: calc(10px * var(--onigiri-widget-pad-scale));
+            padding: calc(10px * var(--bingsu-widget-pad-scale));
             position: relative;
             transition: all 0.3s ease;
             box-sizing: border-box;
@@ -4081,16 +4081,16 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
             overflow: hidden;
         }}
 
-        .onigiri-restaurant-level-widget.orientation-vertical .restaurant-image-container {{
+        .bingsu-restaurant-level-widget.orientation-vertical .restaurant-image-container {{
             flex: 1 1 0;
             width: 100%;
             height: auto;
             aspect-ratio: auto;
             min-height: 0;
-            padding: calc(8px * var(--onigiri-widget-pad-scale))
-                     calc(10px * var(--onigiri-widget-pad-scale))
+            padding: calc(8px * var(--bingsu-widget-pad-scale))
+                     calc(10px * var(--bingsu-widget-pad-scale))
                      0
-                     calc(10px * var(--onigiri-widget-pad-scale));
+                     calc(10px * var(--bingsu-widget-pad-scale));
         }}
 
         /* Unrestricted Sidebar resizing */
@@ -4119,14 +4119,14 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
             max-width: {grid_max_width}px !important;
         }}
 
-        .onigiri-restaurant-level-widget.expanded-view .restaurant-image-container {{
+        .bingsu-restaurant-level-widget.expanded-view .restaurant-image-container {{
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             background: transparent;
-            padding: calc(5px * var(--onigiri-widget-pad-scale)); /* Reduced padding to make image larger */
+            padding: calc(5px * var(--bingsu-widget-pad-scale)); /* Reduced padding to make image larger */
             z-index: 10;
         }}
         
@@ -4137,24 +4137,24 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
             transition: transform 0.3s ease;
         }}
         
-        .onigiri-restaurant-level-widget:hover .restaurant-image {{
+        .bingsu-restaurant-level-widget:hover .restaurant-image {{
             transform: scale(1.05);
         }}
         
-        .onigiri-restaurant-level-widget.expanded-view .restaurant-image {{
+        .bingsu-restaurant-level-widget.expanded-view .restaurant-image {{
             transform: scale(1.0);
         }}
 
         /* Compact 1-row Nook Level widget: just the building over its theme background */
-        .onigiri-restaurant-level-widget-compact {{
+        .bingsu-restaurant-level-widget-compact {{
             cursor: pointer;
         }}
 
-        .onigiri-restaurant-level-widget-compact .restaurant-image-container {{
+        .bingsu-restaurant-level-widget-compact .restaurant-image-container {{
             flex: 1;
             width: 100%;
             height: 100%;
-            padding: calc(10px * var(--onigiri-widget-pad-scale));
+            padding: calc(10px * var(--bingsu-widget-pad-scale));
             background: var(--theme-bg, var(--canvas-inset, #f5f5f5));
         }}
 
@@ -4167,22 +4167,22 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
             /* Only the top inset is this block's own -- it spaces the level text
                off the head/image above it. The other three are the widget's
                shared edge gutter. */
-            padding: calc(8px * var(--onigiri-widget-pad-scale))
-                     var(--onigiri-widget-pad)
-                     var(--onigiri-widget-pad);
+            padding: calc(8px * var(--bingsu-widget-pad-scale))
+                     var(--bingsu-widget-pad)
+                     var(--bingsu-widget-pad);
             gap: 15px;
             transition: opacity 0.2s ease;
         }}
 
-        .onigiri-restaurant-level-widget.orientation-vertical .restaurant-info {{
+        .bingsu-restaurant-level-widget.orientation-vertical .restaurant-info {{
             flex: 0 0 auto;
-            padding: calc(6px * var(--onigiri-widget-pad-scale))
-                     var(--onigiri-widget-pad)
-                     var(--onigiri-widget-pad);
+            padding: calc(6px * var(--bingsu-widget-pad-scale))
+                     var(--bingsu-widget-pad)
+                     var(--bingsu-widget-pad);
             gap: 10px;
         }}
 
-        .onigiri-restaurant-level-widget.expanded-view .restaurant-info {{
+        .bingsu-restaurant-level-widget.expanded-view .restaurant-info {{
             display: none;
             opacity: 0;
         }}
@@ -4268,7 +4268,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
         }}
         
         /* Snow Animation for Santa's Coffee Theme */
-        .onigiri-restaurant-level-widget.with-snow .restaurant-image-container {{
+        .bingsu-restaurant-level-widget.with-snow .restaurant-image-container {{
             overflow: visible;
         }}
         
@@ -4302,7 +4302,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
         }}
         
         /* Make snowflakes visible in expanded view too */
-        .onigiri-restaurant-level-widget.expanded-view.with-snow .snowflake {{
+        .bingsu-restaurant-level-widget.expanded-view.with-snow .snowflake {{
             display: block;
         }}
         
@@ -4370,7 +4370,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
         sidebar_search_placeholder = tr("search_tags", "Search tags…")
         sidebar_search_title = tr("search_tags", "Search tags")
         sidebar_list_class = "is-tags-mode"
-        sidebar_table_class = "onigiri-tag-table"
+        sidebar_table_class = "bingsu-tag-table"
     else:
         tree_html = deck_tree_updater._render_deck_tree_html_only(self)
         sidebar_content_title = tr("decks_header", "DECKS")
@@ -4379,11 +4379,11 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
         sidebar_list_class = "is-decks-mode"
         sidebar_table_class = ""
     
-    # Add OnigiriEngine JavaScript
-    onigiri_engine_js = """
+    # Add BingsuEngine JavaScript
+    bingsu_engine_js = """
     <script>
-    // Onigiri Performance Engine
-    window.OnigiriEngine = {
+    // Bingsu Performance Engine
+    window.BingsuEngine = {
         currentHoveredRow: null,
 
         init: function() {
@@ -4391,7 +4391,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
             if (!this.deckListContainer) return;
             this.bindEvents();
             this.observeMutations();
-            console.log('OnigiriEngine initialized');
+            console.log('BingsuEngine initialized');
         },
 
         saveScrollPosition: function() {
@@ -4439,7 +4439,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
                     
                     const deckRow = event.target.closest('tr.deck');
                     if (deckRow && deckRow.dataset.did) {
-                        pycmd(`onigiri_collapse:${deckRow.dataset.did}`);
+                        pycmd(`bingsu_collapse:${deckRow.dataset.did}`);
                     }
                     return false;
                 }
@@ -4505,21 +4505,21 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
 
     // Initialize the engine once the DOM is ready
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => OnigiriEngine.init());
+        document.addEventListener('DOMContentLoaded', () => BingsuEngine.init());
     } else {
-        OnigiriEngine.init();
+        BingsuEngine.init();
     }
     </script>
     """
     
     # --- Part 5: Populate the Main Template ---
-    is_collapsed = _col_conf_get("onigiri_sidebar_collapsed", False)
+    is_collapsed = _col_conf_get("bingsu_sidebar_collapsed", False)
     try:
-        deck_cycle_state = int(_col_conf_get("onigiri_deck_cycle_state", -1))
+        deck_cycle_state = int(_col_conf_get("bingsu_deck_cycle_state", -1))
     except (TypeError, ValueError):
         deck_cycle_state = -1
     if deck_cycle_state < 0 or deck_cycle_state > 4:
-        deck_cycle_state = 1 if _col_conf_get("onigiri_deck_focus_mode", False) else 0
+        deck_cycle_state = 1 if _col_conf_get("bingsu_deck_focus_mode", False) else 0
     sidebar_position = _col_conf_get("modern_menu_sidebar_position", conf.get("sidebarPosition", "left"))
     if sidebar_position not in {"left", "right", "center"}:
         sidebar_position = "left"
@@ -4646,11 +4646,11 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
         section_id: index for index, section_id in enumerate(_sidebar_section_order())
     }
     theme_css += f"""
-    <style id="onigiri-sidebar-section-order">
-        .onigiri-sidebar-profile-section {{ order: {section_order['profile']}; }}
-        .onigiri-sidebar-actions-section {{ order: {section_order['actions']}; }}
-        .onigiri-ready-sidebar {{ order: {section_order['ready_to_go']}; }}
-        .onigiri-sidebar-decks-section {{ order: {section_order['decks']}; }}
+    <style id="bingsu-sidebar-section-order">
+        .bingsu-sidebar-profile-section {{ order: {section_order['profile']}; }}
+        .bingsu-sidebar-actions-section {{ order: {section_order['actions']}; }}
+        .bingsu-ready-sidebar {{ order: {section_order['ready_to_go']}; }}
+        .bingsu-sidebar-decks-section {{ order: {section_order['decks']}; }}
     </style>
     """
 
@@ -4675,17 +4675,17 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
     theme_css += f"""
     <style id="profile-name-color">
         .profile-bar .profile-name,
-        .onigiri-profile .opro-name {{ color: {name_light} !important; text-shadow: none !important; }}
+        .bingsu-profile .opro-name {{ color: {name_light} !important; text-shadow: none !important; }}
         .profile-bar .restaurant-level-chip .rl-chip-level,
-        .onigiri-profile .opro-level {{ color: {level_light} !important; }}
+        .bingsu-profile .opro-level {{ color: {level_light} !important; }}
         .night-mode .profile-bar .profile-name,
         .nightMode .profile-bar .profile-name,
-        .night-mode .onigiri-profile .opro-name,
-        .nightMode .onigiri-profile .opro-name {{ color: {name_dark} !important; }}
+        .night-mode .bingsu-profile .opro-name,
+        .nightMode .bingsu-profile .opro-name {{ color: {name_dark} !important; }}
         .night-mode .profile-bar .restaurant-level-chip .rl-chip-level,
         .nightMode .profile-bar .restaurant-level-chip .rl-chip-level,
-        .night-mode .onigiri-profile .opro-level,
-        .nightMode .onigiri-profile .opro-level {{ color: {level_dark} !important; }}
+        .night-mode .bingsu-profile .opro-level,
+        .nightMode .bingsu-profile .opro-level {{ color: {level_dark} !important; }}
     </style>
     """
 
@@ -4695,7 +4695,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
     if _col_conf_get("modern_menu_hide_profile_bar", False):
         theme_css += """
         <style id="hide-profile-bar">
-            .profile-bar, .onigiri-profile, .collapsed-profile-item { display: none !important; }
+            .profile-bar, .bingsu-profile, .collapsed-profile-item { display: none !important; }
         </style>
         """
 
@@ -4707,7 +4707,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
     else:
         profile_bar_html = (
             f"<div class=\"profile-bar {bg_class_str}\" style=\"{bg_style_str}\" "
-            f"onclick=\"window.OnigiriProfileSidebar && OnigiriProfileSidebar.toggle(event)\">"
+            f"onclick=\"window.BingsuProfileSidebar && BingsuProfileSidebar.toggle(event)\">"
             f"{bg_layer_html}{profile_bar_contents}"
             f"</div>"
         )
@@ -4715,7 +4715,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
         conf,
         addon_package,
         user_name,
-        _get_profile_pic_html(user_name, addon_package, "onigiri-sidebar-profile-img"),
+        _get_profile_pic_html(user_name, addon_package, "bingsu-sidebar-profile-img"),
     )
     
     # 1. Build the dynamic sidebar HTML from the layout config
@@ -4737,22 +4737,22 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
     except (TypeError, ValueError):
         saved_height = 520
     sidebar_style_parts = [
-        f"--onigiri-sidebar-width: {saved_width}px",
+        f"--bingsu-sidebar-width: {saved_width}px",
         f"width: {saved_width}px",
     ]
     if sidebar_position == "center":
         sidebar_style_parts.extend([
-            f"--onigiri-sidebar-height: {saved_height}px",
+            f"--bingsu-sidebar-height: {saved_height}px",
             f"height: {saved_height}px",
         ])
     sidebar_style = "; ".join(sidebar_style_parts) + ";"
     container_extra_classes = []
     if is_cycle_stacked:
-        container_extra_classes.append("onigiri-cycle-stacked")
+        container_extra_classes.append("bingsu-cycle-stacked")
     if sidebar_position == "right" and not is_cycle_stacked:
-        container_extra_classes.append("onigiri-sidebar-right")
+        container_extra_classes.append("bingsu-sidebar-right")
     if sidebar_position == "center":
-        container_extra_classes.append("onigiri-sidebar-center")
+        container_extra_classes.append("bingsu-sidebar-center")
     container_extra_class = " ".join(container_extra_classes)
 
     # 3. Use the new {sidebar_buttons} placeholder in the template
@@ -4785,15 +4785,15 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
         "sidebarPosition": sidebar_position,
         "sidebarWidthPinned": sidebar_width_pinned,
         "sidebarContentMode": sidebar_content_mode,
-        "deckSortMode": _col_conf_get("onigiri_sort_mode", "default"),
+        "deckSortMode": _col_conf_get("bingsu_sort_mode", "default"),
         "decklineAvailable": deckline_available,
         "fsrsHelperAvailable": fsrs_helper_integration.is_available(),
         "markerColors": conf.get("markerColors", config.DEFAULTS.get("markerColors", {})),
         "markerIcons": conf.get("markerIcons", {}),
         "markerNames": conf.get("markerNames", {}),
         "filters": {
-            "favorites": bool(_col_conf_get("onigiri_show_favourites", False) or _col_conf_get("onigiri_show_favorites", False)),
-            "marked": bool(_col_conf_get("onigiri_show_marked", False)),
+            "favorites": bool(_col_conf_get("bingsu_show_favourites", False) or _col_conf_get("bingsu_show_favorites", False)),
+            "marked": bool(_col_conf_get("bingsu_show_marked", False)),
         },
     }
     
@@ -4803,8 +4803,8 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
     # Create JS Injection Script
     js_injection = f"""
     <script>
-        window.ONIGIRI_CONFIG = {json.dumps(js_config)};
-        window.ONIGIRI_SYNC_STATUS = "{sync_status}";
+        window.BINGSU_CONFIG = {json.dumps(js_config)};
+        window.BINGSU_SYNC_STATUS = "{sync_status}";
     </script>
     """
     
@@ -4847,7 +4847,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
         try:
             self._drawButtons()
         except Exception as e:
-            print(f"Onigiri: Error drawing deck browser bottom buttons: {e}")
+            print(f"Bingsu: Error drawing deck browser bottom buttons: {e}")
 
     from aqt import gui_hooks
     gui_hooks.deck_browser_did_render(self)

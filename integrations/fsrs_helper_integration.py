@@ -18,7 +18,7 @@ from ..api import sidebar as sidebar_api
 
 FSRS_HELPER_ADDON_ID = "759844606"
 _ENTRY_ID = "fsrs_helper.open_menu"
-_COMMAND = "onigiri_open_fsrs_helper_menu"
+_COMMAND = "bingsu_open_fsrs_helper_menu"
 _ICON_SVG = (
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">'
     '<path fill="currentColor" d="M12 4V1L8 5l4 4V6a6 6 0 1 1-6 6H4a8 8 0 1 0 8-8"/>'
@@ -66,7 +66,7 @@ def _open_fsrs_helper_menu(handled, message, context):
                     return (True, None)
             menu.popup(QCursor.pos())
     except Exception as exc:
-        print(f"Onigiri: Failed to open FSRS4Anki Helper menu: {exc}")
+        print(f"Bingsu: Failed to open FSRS4Anki Helper menu: {exc}")
     return (True, None)
 
 
@@ -88,4 +88,4 @@ def setup_fsrs_helper_integration() -> None:
         gui_hooks.webview_did_receive_js_message.append(_open_fsrs_helper_menu)
         _installed = True
     except Exception as exc:
-        print(f"Onigiri: Failed to set up FSRS4Anki Helper integration: {exc}")
+        print(f"Bingsu: Failed to set up FSRS4Anki Helper integration: {exc}")

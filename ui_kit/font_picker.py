@@ -1,10 +1,10 @@
 # Dedicated font picker dialog with live previews of every available font
-# (official ones shipped with Onigiri plus any the user has added). Mirrors the
+# (official ones shipped with Bingsu plus any the user has added). Mirrors the
 # look and behaviour of DeckIconPickerDialog in _icon_picker.py: a frameless,
 # rounded, theme-aware container with a light/dark preview toggle, a scrollable
 # gallery, and a Save / Cancel / Reset footer.
 from .common import *
-from .onigiri_notifications import notify_warning, brand_message_box
+from .bingsu_notifications import notify_warning, brand_message_box
 from .common import _font_popup_svg_icon, _font_popup_svg_pixmap
 
 
@@ -160,7 +160,7 @@ class FontPickerDialog(QDialog):
         )
         self.title_label.setStyleSheet(f"font-weight: 700; font-size: 15px; color: {self._fg}; background: transparent;")
         self.close_btn.setStyleSheet(
-            f"/* onigiri-rounded-button-fix */\nQPushButton {{ background: transparent;"
+            f"/* bingsu-rounded-button-fix */\nQPushButton {{ background: transparent;"
             f" border: 1px solid transparent; border-radius: 14px; color: {self._muted}; font-size: 20px; }}"
             f" QPushButton:hover {{ color: {self._fg}; background: rgba(128,128,128,0.14);"
             f" border: 1px solid transparent; border-radius: 14px; }}"
@@ -308,7 +308,7 @@ class FontPickerDialog(QDialog):
             del_btn.setCursor(Qt.CursorShape.PointingHandCursor)
             del_btn.setToolTip(tr("delete", "Delete"))
             del_btn.setStyleSheet(
-                f"/* onigiri-rounded-button-fix */\nQPushButton {{ background: transparent;"
+                f"/* bingsu-rounded-button-fix */\nQPushButton {{ background: transparent;"
                 f" border: 1px solid transparent; border-radius: 12px; color: {self._muted}; }}"
                 f" QPushButton:hover {{ background: rgba(239,68,68,0.16); color: #ef4444;"
                 f" border: 1px solid transparent; border-radius: 12px; }}"

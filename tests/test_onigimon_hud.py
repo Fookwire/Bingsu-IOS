@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def _load_onigimon_hud(conf_state, notified_calls, eval_calls, mw_state="review", inventory_state=None, used_items=None):
     """Load gamification/onigimon_hud.py with lightweight stubs (no Anki/Qt required)."""
-    pkg_name = "_onigiri_hud_test"
+    pkg_name = "_bingsu_hud_test"
     # Ensure a fresh module import per test
     for key in list(sys.modules):
         if key == pkg_name or key.startswith(pkg_name + "."):
@@ -40,7 +40,7 @@ def _load_onigimon_hud(conf_state, notified_calls, eval_calls, mw_state="review"
     ui_kit_pkg = types.ModuleType(pkg_name + ".ui_kit")
     ui_kit_pkg.__path__ = [str(ROOT / "ui_kit")]
 
-    notif_mod = types.ModuleType(pkg_name + ".ui_kit.onigiri_notifications")
+    notif_mod = types.ModuleType(pkg_name + ".ui_kit.bingsu_notifications")
     notif_mod.notify = lambda msg, **kwargs: notified_calls.append((msg, kwargs))
 
     gamif_pkg = types.ModuleType(pkg_name + ".gamification")
@@ -100,7 +100,7 @@ def _load_onigimon_hud(conf_state, notified_calls, eval_calls, mw_state="review"
         pkg_name + ".core.config": config_mod,
         pkg_name + ".core.translations": trans_mod,
         pkg_name + ".ui_kit": ui_kit_pkg,
-        pkg_name + ".ui_kit.onigiri_notifications": notif_mod,
+        pkg_name + ".ui_kit.bingsu_notifications": notif_mod,
         pkg_name + ".gamification": gamif_pkg,
         pkg_name + ".gamification.onigimon": og_mod,
         "aqt": aqt_mod,

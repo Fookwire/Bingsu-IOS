@@ -25,7 +25,7 @@ class FileOrganizationTests(unittest.TestCase):
     def test_relative_imports_resolve_after_moves(self):
         for source in ROOT.rglob("*.py"):
             relative = source.relative_to(ROOT)
-            if relative.parts[0] == "tests" or relative.parts[0].startswith("Onigiri("):
+            if relative.parts[0] == "tests" or relative.parts[0].startswith("Bingsu("):
                 continue
             package = list(relative.parent.parts)
             for node in ast.walk(ast.parse(source.read_text())):
@@ -51,7 +51,7 @@ class FileOrganizationTests(unittest.TestCase):
 
     def test_storage_sync_and_sidebar_keep_root_data_and_shared_modules(self):
         with tempfile.TemporaryDirectory() as folder:
-            root = Path(folder) / "addons21" / "onigiri"
+            root = Path(folder) / "addons21" / "bingsu"
             root.mkdir(parents=True)
             for name in ("core", "api"):
                 shutil.copytree(ROOT / name, root / name)
@@ -60,7 +60,7 @@ class FileOrganizationTests(unittest.TestCase):
                 pm=types.SimpleNamespace(name="Organization", base=folder),
                 col=types.SimpleNamespace(conf={}),
                 addonManager=types.SimpleNamespace(
-                    getConfig=lambda _: {}, addonFromModule=lambda _: "onigiri"),
+                    getConfig=lambda _: {}, addonFromModule=lambda _: "bingsu"),
             )
             aqt = types.ModuleType("aqt")
             aqt.mw = mw
@@ -84,7 +84,7 @@ class FileOrganizationTests(unittest.TestCase):
                 self.assertEqual(Path(config._get_settings_path()), settings_path)
                 config.write_config({"userName": "Saved learner"})
                 self.assertEqual(json.loads(settings_path.read_text())["userName"], "Saved learner")
-                self.assertEqual(Path(sync.onigiri_sync._user_files_dir), root / "user_files")
+                self.assertEqual(Path(sync.bingsu_sync._user_files_dir), root / "user_files")
                 self.assertFalse((root / "core" / "user_files").exists())
 
 

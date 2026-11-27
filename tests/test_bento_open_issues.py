@@ -33,7 +33,7 @@ class OpenBentoIssueTests(unittest.TestCase):
                 self.refreshes += 1
             def _showOptions(self, did):
                 self.menus.append(did)
-        saved = {'onigiri_custom_deck_icons': {'old': {'icon': 'star.svg'}}}
+        saved = {'bingsu_custom_deck_icons': {'old': {'icon': 'star.svg'}}}
         errors = []
         cfg = types.SimpleNamespace(get_collection_config=lambda k, default: saved.get(k, default),
                                     set_collection_config=lambda k, v: saved.update({k: v}))
@@ -46,25 +46,25 @@ class OpenBentoIssueTests(unittest.TestCase):
     def test_icon_save_then_reset_preserves_other_decks_and_dark_color(self):
         env, db, saved, errors = self.handler_env()
         payload = {'icon': 'system:folder.svg', 'color': '#123456', 'colorDark': '#abcdef'}
-        result = env['handle_webview_cmd']((False, None), 'onigiri_icon_chooser_save:42:' + json.dumps(payload), db)
+        result = env['handle_webview_cmd']((False, None), 'bingsu_icon_chooser_save:42:' + json.dumps(payload), db)
         self.assertEqual(result, (True, None))
-        self.assertEqual(saved['onigiri_custom_deck_icons']['42'], {'icon': payload['icon'], 'color': '#123456', 'colorDark': '#abcdef'})
-        self.assertEqual(saved['onigiri_custom_deck_icons']['old'], {'icon': 'star.svg'})
-        env['handle_webview_cmd']((False, None), 'onigiri_icon_chooser_reset:42', db)
-        self.assertEqual(saved['onigiri_custom_deck_icons'], {'old': {'icon': 'star.svg'}})
+        self.assertEqual(saved['bingsu_custom_deck_icons']['42'], {'icon': payload['icon'], 'color': '#123456', 'colorDark': '#abcdef'})
+        self.assertEqual(saved['bingsu_custom_deck_icons']['old'], {'icon': 'star.svg'})
+        env['handle_webview_cmd']((False, None), 'bingsu_icon_chooser_reset:42', db)
+        self.assertEqual(saved['bingsu_custom_deck_icons'], {'old': {'icon': 'star.svg'}})
         self.assertEqual(errors, [])
         self.assertEqual(db.refreshes, 2)
 
     def test_tag_icon_save_keeps_encoded_colons_out_of_command_target(self):
         env, db, saved, errors = self.handler_env()
-        cmd = 'onigiri_icon_chooser_save:tag~a%3Ab:' + json.dumps({'icon': 'emoji:🍙', 'color': '#123456'})
+        cmd = 'bingsu_icon_chooser_save:tag~a%3Ab:' + json.dumps({'icon': 'emoji:🍙', 'color': '#123456'})
         env['handle_webview_cmd']((False, None), cmd, db)
-        self.assertEqual(saved['onigiri_custom_tag_icons']['a:b'], {'icon': 'emoji:🍙', 'color': '#123456'})
+        self.assertEqual(saved['bingsu_custom_tag_icons']['a:b'], {'icon': 'emoji:🍙', 'color': '#123456'})
         self.assertEqual(errors, [])
 
     def test_addon_actions_use_native_deck_menu_and_exact_deck(self):
         env, db, _, _ = self.handler_env()
-        self.assertEqual(env['handle_webview_cmd']((False, None), 'onigiri_ctx_addon_actions:42', db), (True, None))
+        self.assertEqual(env['handle_webview_cmd']((False, None), 'bingsu_ctx_addon_actions:42', db), (True, None))
         self.assertEqual(db.menus, ['42'])
 
     def test_hidden_cached_and_deleted_editors_do_not_dim_dashboard(self):
@@ -216,7 +216,7 @@ class OpenBentoIssueTests(unittest.TestCase):
                 self.assertEqual(state['taiyaki_coins'], 0)
 
     def test_scoped_fonts_read_supported_config_and_keep_poppins_faces(self):
-        saved = {'onigiri_font_main': 'custom', 'onigiri_font_size_main': 23}
+        saved = {'bingsu_font_main': 'custom', 'bingsu_font_size_main': 23}
         module = types.ModuleType('bento_test.ui_kit.fonts')
         module.FONTS = {'system': {'family': 'Poppins', 'file': None}, 'custom': {'family': 'Custom Font', 'file': 'custom.ttf', 'user': True}}
         module.get_all_fonts = lambda _: module.FONTS

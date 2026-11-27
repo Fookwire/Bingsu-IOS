@@ -84,7 +84,7 @@ class MochiMessenger:
     def _is_enabled(self) -> bool:
         # Silent mode (Settings > Games > Gamification > Notifications) means
         # no game speaks up: a Mochi message *is* a notification.
-        if bool(config.get_config_readonly().get("onigiri_reviewer_silent_notifications", False)):
+        if bool(config.get_config_readonly().get("bingsu_reviewer_silent_notifications", False)):
             return False
         return bool(self._mochi_config().get("enabled", False))
 
@@ -206,7 +206,7 @@ class MochiMessenger:
         if font_face:
             font_face_json = json.dumps(font_face)
             font_face_script = (
-                "(function(){var id='onigiri-mochi-font';"
+                "(function(){var id='bingsu-mochi-font';"
                 "var s=document.getElementById(id);"
                 "if(!s){s=document.createElement('style');s.id=id;"
                 "(document.head||document.documentElement).appendChild(s);}"
@@ -216,8 +216,8 @@ class MochiMessenger:
 
         script = (
             font_face_script
-            + "if (window.OnigiriNotifications) {"
-            f"window.OnigiriNotifications.show({payload});"
+            + "if (window.BingsuNotifications) {"
+            f"window.BingsuNotifications.show({payload});"
             "}"
         )
 

@@ -325,7 +325,7 @@ def get_heatmap_and_config():
         "heatmapTerrainEnabled": conf.get("heatmapTerrainEnabled", DEFAULTS["heatmapTerrainEnabled"]),
         "heatmapDefaultView": conf.get("heatmapDefaultView", DEFAULTS["heatmapDefaultView"]),
         "heatmapWeekStart": conf.get("heatmapWeekStart", DEFAULTS.get("heatmapWeekStart", "monday")),
-        # The browser's locale can differ from the language chosen for Onigiri.
+        # The browser's locale can differ from the language chosen for Bingsu.
         "locale": current_language(),
         "i18n": {
             "activity": tr("heatmap_activity_label"),

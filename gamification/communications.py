@@ -1,4 +1,4 @@
-"""Shared Onigiri announcements inbox backed by the Database Apps Script."""
+"""Shared Bingsu announcements inbox backed by the Database Apps Script."""
 
 from __future__ import annotations
 
@@ -34,7 +34,7 @@ def _addon_package() -> str:
 
 def _logo_markup() -> str:
     addon_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    logo_path = os.path.join(addon_root, "system_files", "onigiri_mini_logo.svg")
+    logo_path = os.path.join(addon_root, "system_files", "bingsu_mini_logo.svg")
     try:
         with open(logo_path, encoding="utf-8") as logo_file:
             svg = logo_file.read()
@@ -199,7 +199,7 @@ class CommunicationsDialog(QDialog):
                 body = handle.read()
         except OSError:
             body = "<main><h1>Communications page assets are missing.</h1></main>"
-        body = body.replace("<!--__ONIGIRI_LOGO__-->", _logo_markup())
+        body = body.replace("<!--__BINGSU_LOGO__-->", _logo_markup())
 
         initial_status = (
             tr("communications_syncing", "Checking for announcements…")
@@ -212,7 +212,7 @@ class CommunicationsDialog(QDialog):
         font_css = poppins_font_face_css(_addon_package())
         head = (
             f"<style>{font_css}</style>"
-            f"<script>window.ONIGIRI_COMMUNICATIONS_DATA={data};</script>"
+            f"<script>window.BINGSU_COMMUNICATIONS_DATA={data};</script>"
         )
         html_root = os.path.dirname(html_path)
         css = [f"/_addons/{_addon_package()}/web/gamification/communications/communications.css"]
@@ -302,7 +302,7 @@ class CommunicationsDialog(QDialog):
                 _save_state(self._state)
                 self._push(tr("communications_sync_success", "Announcements synced."))
             except Exception as exc:
-                print(f"Onigiri Communications sync failed: {exc}")
+                print(f"Bingsu Communications sync failed: {exc}")
                 self._push(
                     tr(
                         "communications_sync_failed",

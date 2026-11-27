@@ -1,4 +1,4 @@
-"""Reproduce Onigiri's original tone pairs without third-party audio samples.
+"""Reproduce Bingsu's original tone pairs without third-party audio samples.
 
 Run this file with Python 3 to regenerate the fourteen bundled PCM WAV files.
 Start rises into focus; End resolves downward in the same sound family.

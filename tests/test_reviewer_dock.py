@@ -15,13 +15,13 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def _load_dock_module(test_case, conf=None):
     conf = conf or {"hideNativeHeaderAndBottomBar": True}
-    pkg = types.ModuleType("onigiri_dock_test")
+    pkg = types.ModuleType("bingsu_dock_test")
     pkg.__path__ = [str(ROOT)]
-    core_pkg = types.ModuleType("onigiri_dock_test.core")
+    core_pkg = types.ModuleType("bingsu_dock_test.core")
     core_pkg.__path__ = [str(ROOT / "core")]
-    rendering_pkg = types.ModuleType("onigiri_dock_test.rendering")
+    rendering_pkg = types.ModuleType("bingsu_dock_test.rendering")
     rendering_pkg.__path__ = [str(ROOT / "rendering")]
-    api_pkg = types.ModuleType("onigiri_dock_test.api")
+    api_pkg = types.ModuleType("bingsu_dock_test.api")
     api_pkg.__path__ = [str(ROOT / "api")]
 
     fake_config = types.SimpleNamespace(
@@ -33,13 +33,13 @@ def _load_dock_module(test_case, conf=None):
     fake_sidebar = types.SimpleNamespace(render_reviewer_toolbar_entries=lambda: "")
     fake_patcher = types.SimpleNamespace(
         generate_reviewer_top_bar_html_and_css=lambda include_overview_class=False: (
-            '<div id="onigiri-reviewer-header" class="header"><div class="onigiri-reviewer-header-buttons">static</div></div>',
+            '<div id="bingsu-reviewer-header" class="header"><div class="bingsu-reviewer-header-buttons">static</div></div>',
             "<style>/* static */</style>",
         ),
         _get_reviewer_nook_level_chip_html=lambda: '<div class="restaurant-level-chip">Lv 8</div>',
         _reviewer_progress_settings=lambda _c, force=False: {"enabled": True, "position": "right"},
         reset_reviewer_progress_session=lambda: None,
-        _reviewer_progress_html=lambda _s: '<div id="onigiri-reviewer-progress">2/20</div>',
+        _reviewer_progress_html=lambda _s: '<div id="bingsu-reviewer-progress">2/20</div>',
         generate_scoped_main_font_css=lambda *_a: "<style></style>",
         generate_box_effect_button_vars_css=lambda *_a, **_kw: "<style></style>",
     )
@@ -52,33 +52,33 @@ def _load_dock_module(test_case, conf=None):
     patcher_ctx = patch.dict(
         sys.modules,
         {
-            "onigiri_dock_test": pkg,
-            "onigiri_dock_test.core": core_pkg,
-            "onigiri_dock_test.core.config": fake_config,
-            "onigiri_dock_test.core.translations": fake_translations,
-            "onigiri_dock_test.core.study_tool_visibility": fake_visibility,
-            "onigiri_dock_test.api": api_pkg,
-            "onigiri_dock_test.api.sidebar": fake_sidebar,
-            "onigiri_dock_test.rendering": rendering_pkg,
-            "onigiri_dock_test.rendering.patcher": fake_patcher,
+            "bingsu_dock_test": pkg,
+            "bingsu_dock_test.core": core_pkg,
+            "bingsu_dock_test.core.config": fake_config,
+            "bingsu_dock_test.core.translations": fake_translations,
+            "bingsu_dock_test.core.study_tool_visibility": fake_visibility,
+            "bingsu_dock_test.api": api_pkg,
+            "bingsu_dock_test.api.sidebar": fake_sidebar,
+            "bingsu_dock_test.rendering": rendering_pkg,
+            "bingsu_dock_test.rendering.patcher": fake_patcher,
         },
     )
     patcher_ctx.start()
     test_case.addCleanup(patcher_ctx.stop)
-    return importlib.import_module("onigiri_dock_test.rendering.reviewer_dock")
+    return importlib.import_module("bingsu_dock_test.rendering.reviewer_dock")
 
 
 class ReviewerDockTests(unittest.TestCase):
     def test_config_and_settings_schema_expose_merged_dock_designer(self):
         cfg_text = (ROOT / "core/config.py").read_text(encoding="utf-8")
         for key in (
-            '"onigiri_reviewer_dock_mode": "static"',
-            '"onigiri_reviewer_dock_icons": {}',
-            '"onigiri_reviewer_dock_icon_colors_light": {}',
-            '"onigiri_reviewer_dock_icon_colors_dark": {}',
-            '"onigiri_reviewer_dock_goo_color_light": "#17181a"',
-            '"onigiri_reviewer_dock_goo_color_dark": "#ffffff"',
-            '"onigiri_web_rdock_goo_theme_mode": "separate"',
+            '"bingsu_reviewer_dock_mode": "static"',
+            '"bingsu_reviewer_dock_icons": {}',
+            '"bingsu_reviewer_dock_icon_colors_light": {}',
+            '"bingsu_reviewer_dock_icon_colors_dark": {}',
+            '"bingsu_reviewer_dock_goo_color_light": "#17181a"',
+            '"bingsu_reviewer_dock_goo_color_dark": "#ffffff"',
+            '"bingsu_web_rdock_goo_theme_mode": "separate"',
         ):
             self.assertIn(key, cfg_text)
 
@@ -124,7 +124,7 @@ class ReviewerDockTests(unittest.TestCase):
 
         fields_by_id = {f["id"]: f for f in dock_section["fields"]}
         mode_field = fields_by_id["reviewer_dock_mode"]
-        self.assertEqual(mode_field["bind"]["key"], "onigiri_reviewer_dock_mode")
+        self.assertEqual(mode_field["bind"]["key"], "bingsu_reviewer_dock_mode")
         self.assertEqual(mode_field["default"], "static")
         self.assertEqual([opt["value"] for opt in mode_field["options"]], ["static", "minimal", "island"])
 
@@ -142,7 +142,7 @@ class ReviewerDockTests(unittest.TestCase):
         for key in ("decks", "add", "browse", "stats", "sync", "hashi_notes", "pomodoro"):
             icon_f = fields_by_id[f"rdock_icon_{key}"]
             self.assertEqual(icon_f["icon_group"], "dock_icons")
-            self.assertEqual(icon_f["bind"], {"kind": "config", "path": ["onigiri_reviewer_dock_icons", key]})
+            self.assertEqual(icon_f["bind"], {"kind": "config", "path": ["bingsu_reviewer_dock_icons", key]})
             svg_name = icon_f["default_icon"].split("system:", 1)[1]
             self.assertTrue(
                 any(
@@ -203,87 +203,87 @@ class ReviewerDockTests(unittest.TestCase):
 
     def test_dock_mode_icons_colors_goo_and_html_variants(self):
         mod = _load_dock_module(self)
-        self.assertEqual(mod.dock_mode({"onigiri_reviewer_dock_mode": "static"}), "static")
-        self.assertEqual(mod.dock_mode({"onigiri_reviewer_dock_mode": "minimal"}), "minimal")
-        self.assertEqual(mod.dock_mode({"onigiri_reviewer_dock_mode": "ISLAND"}), "island")
-        self.assertEqual(mod.dock_mode({"onigiri_reviewer_dock_mode": "unknown"}), "static")
+        self.assertEqual(mod.dock_mode({"bingsu_reviewer_dock_mode": "static"}), "static")
+        self.assertEqual(mod.dock_mode({"bingsu_reviewer_dock_mode": "minimal"}), "minimal")
+        self.assertEqual(mod.dock_mode({"bingsu_reviewer_dock_mode": "ISLAND"}), "island")
+        self.assertEqual(mod.dock_mode({"bingsu_reviewer_dock_mode": "unknown"}), "static")
 
         base_conf = {
             "hideNativeHeaderAndBottomBar": True,
             "restaurant_level": {"enabled": True, "show_reviewer_header": True},
-            "onigiri_reviewer_dock_icons": {
+            "bingsu_reviewer_dock_icons": {
                 "decks": "emoji:🍙",
                 "add": "../../etc/passwd",
             },
-            "onigiri_reviewer_dock_icon_colors_light": {"decks": "#123456"},
-            "onigiri_reviewer_dock_icon_colors_dark": {"decks": "#abcdef"},
-            "onigiri_reviewer_dock_goo_color_light": "#ffd23f",
-            "onigiri_reviewer_dock_goo_color_dark": "#112233",
-            "onigiri_web_rdock_goo_theme_mode": "separate",
+            "bingsu_reviewer_dock_icon_colors_light": {"decks": "#123456"},
+            "bingsu_reviewer_dock_icon_colors_dark": {"decks": "#abcdef"},
+            "bingsu_reviewer_dock_goo_color_light": "#ffd23f",
+            "bingsu_reviewer_dock_goo_color_dark": "#112233",
+            "bingsu_web_rdock_goo_theme_mode": "separate",
         }
         html_static, _ = mod.generate_top_bar_html_and_css(
-            {**base_conf, "onigiri_reviewer_dock_mode": "static"}
+            {**base_conf, "bingsu_reviewer_dock_mode": "static"}
         )
         self.assertNotIn("is-minimal", html_static)
         self.assertNotIn("is-island", html_static)
 
         html_min, css_min = mod.generate_top_bar_html_and_css(
-            {**base_conf, "onigiri_reviewer_dock_mode": "minimal"}
+            {**base_conf, "bingsu_reviewer_dock_mode": "minimal"}
         )
         self.assertIn("is-minimal", html_min)
         self.assertIn("is-icon-only", html_min)
-        self.assertIn("onigiri-pomodoro-button", html_min)
-        self.assertNotIn("onigiri-hashi-notes-button", html_min)
-        self.assertIn("onigiri-dock-glyph is-emoji", html_min)
+        self.assertIn("bingsu-pomodoro-button", html_min)
+        self.assertNotIn("bingsu-hashi-notes-button", html_min)
+        self.assertIn("bingsu-dock-glyph is-emoji", html_min)
         self.assertIn("🍙", html_min)
         self.assertNotIn("/etc/passwd", html_min)
         self.assertIn("data:image/svg+xml;base64,", html_min)
         self.assertIn("--rd-icon-color-light: #123456;", html_min)
         self.assertIn("--rd-icon-color-dark: #abcdef;", html_min)
         self.assertIn("restaurant-level-chip", html_min)
-        self.assertIn("onigiri-reviewer-progress", html_min)
-        self.assertIn("onigiri-reviewer-dock-style", css_min)
+        self.assertIn("bingsu-reviewer-progress", html_min)
+        self.assertIn("bingsu-reviewer-dock-style", css_min)
 
         html_island, _ = mod.generate_top_bar_html_and_css(
-            {**base_conf, "onigiri_reviewer_dock_mode": "island"}
+            {**base_conf, "bingsu_reviewer_dock_mode": "island"}
         )
         self.assertIn("is-island", html_island)
         self.assertIn("--rd-goo-light: #ffd23f;", html_island)
         self.assertIn("--rd-goo-ink-light: #0e0f11;", html_island)
         self.assertIn("--rd-goo-dark: #112233;", html_island)
         self.assertIn("--rd-goo-ink-dark: #ffffff;", html_island)
-        self.assertIn("onigiri-island-shell", html_island)
-        self.assertIn("onigiri-island-surface", html_island)
-        self.assertIn("onigiri-rubber-dock", html_island)
-        self.assertIn("onigiri-dock-indicator", html_island)
-        self.assertIn("onigiri-dock-ink", html_island)
-        self.assertIn("onigiri-island-notice", html_island)
+        self.assertIn("bingsu-island-shell", html_island)
+        self.assertIn("bingsu-island-surface", html_island)
+        self.assertIn("bingsu-rubber-dock", html_island)
+        self.assertIn("bingsu-dock-indicator", html_island)
+        self.assertIn("bingsu-dock-ink", html_island)
+        self.assertIn("bingsu-island-notice", html_island)
         self.assertIn("restaurant-level-chip", html_island)
-        self.assertIn("onigiri-reviewer-progress", html_island)
+        self.assertIn("bingsu-reviewer-progress", html_island)
 
         # Overview / Congrats dock shares the exact same dock style, icons,
         # icon colors, and goo palette, without Progress Bar or Level chip.
         html_ov_min, _ = mod.generate_top_bar_html_and_css(
-            {**base_conf, "onigiri_reviewer_dock_mode": "minimal"},
+            {**base_conf, "bingsu_reviewer_dock_mode": "minimal"},
             include_overview_class=True,
         )
         self.assertIn("is-minimal", html_ov_min)
-        self.assertIn("onigiri-pomodoro-button", html_ov_min)
+        self.assertIn("bingsu-pomodoro-button", html_ov_min)
         self.assertIn("--rd-icon-color-light: #123456;", html_ov_min)
         self.assertNotIn("restaurant-level-chip", html_ov_min)
-        self.assertNotIn("onigiri-reviewer-progress", html_ov_min)
+        self.assertNotIn("bingsu-reviewer-progress", html_ov_min)
 
         html_ov_island, _ = mod.generate_top_bar_html_and_css(
-            {**base_conf, "onigiri_reviewer_dock_mode": "island"},
+            {**base_conf, "bingsu_reviewer_dock_mode": "island"},
             include_overview_class=True,
         )
         self.assertIn("is-island", html_ov_island)
         self.assertIn("--rd-goo-light: #ffd23f;", html_ov_island)
-        self.assertIn("onigiri-rubber-dock", html_ov_island)
+        self.assertIn("bingsu-rubber-dock", html_ov_island)
         self.assertNotIn("restaurant-level-chip", html_ov_island)
-        self.assertNotIn("onigiri-reviewer-progress", html_ov_island)
-        self.assertNotIn("onigiri-dock-divider", html_ov_island)
-        self.assertNotIn("onigiri-island-info", html_ov_island)
+        self.assertNotIn("bingsu-reviewer-progress", html_ov_island)
+        self.assertNotIn("bingsu-dock-divider", html_ov_island)
+        self.assertNotIn("bingsu-island-info", html_ov_island)
 
     def test_island_js_mounts_rubber_dock_and_expands_downward_for_notifications(self):
         script = r'''
@@ -406,23 +406,23 @@ function makeElement(tag) {
 }
 
 const header = makeElement('div');
-header.id = 'onigiri-reviewer-header';
+header.id = 'bingsu-reviewer-header';
 header.className = 'header is-island';
 
-const shell = makeElement('div'); shell.className = 'onigiri-island-shell';
-const surface = makeElement('span'); surface.className = 'onigiri-island-surface';
-const bar = makeElement('div'); bar.className = 'onigiri-island-bar'; bar.offsetWidth = 280; bar.offsetHeight = 42;
-const dock = makeElement('nav'); dock.className = 'onigiri-rubber-dock'; dock.clientWidth = 180; dock.clientHeight = 34;
-const ind = makeElement('i'); ind.className = 'onigiri-dock-indicator';
-const ink = makeElement('div'); ink.className = 'onigiri-dock-ink'; ink.clientWidth = 180; ink.clientHeight = 34;
-const tip = makeElement('span'); tip.className = 'onigiri-dock-tip';
+const shell = makeElement('div'); shell.className = 'bingsu-island-shell';
+const surface = makeElement('span'); surface.className = 'bingsu-island-surface';
+const bar = makeElement('div'); bar.className = 'bingsu-island-bar'; bar.offsetWidth = 280; bar.offsetHeight = 42;
+const dock = makeElement('nav'); dock.className = 'bingsu-rubber-dock'; dock.clientWidth = 180; dock.clientHeight = 34;
+const ind = makeElement('i'); ind.className = 'bingsu-dock-indicator';
+const ink = makeElement('div'); ink.className = 'bingsu-dock-ink'; ink.clientWidth = 180; ink.clientHeight = 34;
+const tip = makeElement('span'); tip.className = 'bingsu-dock-tip';
 
-const dockBtn1 = makeElement('a'); dockBtn1.className = 'onigiri-dock-item'; dockBtn1.setAttribute('data-tip', 'Decks');
+const dockBtn1 = makeElement('a'); dockBtn1.className = 'bingsu-dock-item'; dockBtn1.setAttribute('data-tip', 'Decks');
 dockBtn1.offsetLeft = 0; dockBtn1.offsetWidth = 34; dockBtn1.offsetHeight = 34;
 const svg1 = makeElement('svg'); svg1.clientWidth = 17; svg1.clientHeight = 17;
 dockBtn1.appendChild(svg1);
 
-const dockBtn2 = makeElement('a'); dockBtn2.className = 'onigiri-dock-item'; dockBtn2.setAttribute('data-tip', 'Add');
+const dockBtn2 = makeElement('a'); dockBtn2.className = 'bingsu-dock-item'; dockBtn2.setAttribute('data-tip', 'Add');
 dockBtn2.offsetLeft = 36; dockBtn2.offsetWidth = 34; dockBtn2.offsetHeight = 34;
 const svg2 = makeElement('svg'); svg2.clientWidth = 17; svg2.clientHeight = 17;
 dockBtn2.appendChild(svg2);
@@ -430,18 +430,18 @@ dockBtn2.appendChild(svg2);
 dock.append(ind, dockBtn1, dockBtn2, ink, tip);
 bar.appendChild(dock);
 
-const notice = makeElement('div'); notice.className = 'onigiri-island-notice';
+const notice = makeElement('div'); notice.className = 'bingsu-island-notice';
 notice.offsetHeight = 64;
-const noticeInner = makeElement('div'); noticeInner.className = 'onigiri-island-notice-inner';
+const noticeInner = makeElement('div'); noticeInner.className = 'bingsu-island-notice-inner';
 notice.appendChild(noticeInner);
 
 shell.append(surface, bar, notice);
 header.appendChild(shell);
 
 const shadow = {
-  getElementById(id) { return id === 'onigiri-reviewer-header' ? header : null; }
+  getElementById(id) { return id === 'bingsu-reviewer-header' ? header : null; }
 };
-const host = makeElement('div'); host.id = 'onigiri-reviewer-ui-host'; host.shadowRoot = shadow;
+const host = makeElement('div'); host.id = 'bingsu-reviewer-ui-host'; host.shadowRoot = shadow;
 
 const body = makeElement('body');
 body.appendChild(host);
@@ -451,9 +451,9 @@ const timeouts = [];
 const context = {
   window: {
     innerWidth: 1000,
-    onigiriIsReviewerCardWebview: true,
-    onigiriReviewerDockMode: 'island',
-    onigiriNotificationDuration: 5000,
+    bingsuIsReviewerCardWebview: true,
+    bingsuReviewerDockMode: 'island',
+    bingsuNotificationDuration: 5000,
     matchMedia: () => ({ matches: true }),
     requestAnimationFrame: cb => { cb(16); return 1; },
     cancelAnimationFrame: () => {},
@@ -468,7 +468,7 @@ const context = {
     documentElement: docEl,
     body,
     createElement: tag => makeElement(tag),
-    getElementById(id) { return id === 'onigiri-reviewer-ui-host' ? host : null; },
+    getElementById(id) { return id === 'bingsu-reviewer-ui-host' ? host : null; },
     addEventListener: () => {}
   },
   performance: { now: () => 100 },
@@ -480,8 +480,8 @@ context.window.window = context.window;
 vm.runInNewContext(fs.readFileSync(process.argv[1], 'utf8'), context);
 vm.runInNewContext(fs.readFileSync(process.argv[2], 'utf8'), context);
 
-context.window.OnigiriReviewerDock.mount(shadow);
-assert.ok(context.window.OnigiriReviewerIsland, 'Island API mounted');
+context.window.BingsuReviewerDock.mount(shadow);
+assert.ok(context.window.BingsuReviewerIsland, 'Island API mounted');
 assert.equal(ink.children.length, 2, 'Ink layer cloned both dock icons');
 
 // Hovering second item moves rubber indicator and shows tooltip
@@ -491,19 +491,19 @@ assert.equal(tip.textContent, 'Add');
 assert.ok(ink.style.clipPath.includes('inset('));
 
 // Sending notification expands island downward (reduced motion snaps to target immediately)
-context.window.OnigiriNotifications.show({
+context.window.BingsuNotifications.show({
   name: 'Level Up',
   description: 'Reached Lv 9',
   rewardItems: [{ value: '+25' }]
 });
-assert.ok(context.window.OnigiriReviewerIsland.isExpanded());
+assert.ok(context.window.BingsuReviewerIsland.isExpanded());
 assert.ok(shell.classList.contains('island-notice'));
 assert.equal(noticeInner.children.length, 1);
 assert.equal(surface.style.height, '106.00px'); // 42px bar + 64px notice
 
 // Clicking notice item dismisses and shrinks back to bar height (42px)
 noticeInner.children[0].dispatchEvent({ type: 'click', stopPropagation() {} });
-assert.equal(context.window.OnigiriReviewerIsland.isExpanded(), false);
+assert.equal(context.window.BingsuReviewerIsland.isExpanded(), false);
 assert.equal(surface.style.height, '42.00px');
 assert.equal(noticeInner.children.length, 0);
 '''
@@ -525,11 +525,11 @@ assert.equal(noticeInner.children.length, 0);
 
     def test_pill_background_parity_and_settings_preview_syntax(self):
         dock_css = (ROOT / "web/reviewer_dock.css").read_text(encoding="utf-8")
-        self.assertIn("#onigiri-reviewer-header.is-island .onigiri-reviewer-progress,\n#onigiri-reviewer-header.is-island .onigiri-reviewer-progress.is-bare", dock_css)
-        self.assertIn("#onigiri-reviewer-header.is-minimal .restaurant-level-chip,\n#onigiri-reviewer-header.is-minimal .onigiri-reviewer-progress", dock_css)
+        self.assertIn("#bingsu-reviewer-header.is-island .bingsu-reviewer-progress,\n#bingsu-reviewer-header.is-island .bingsu-reviewer-progress.is-bare", dock_css)
+        self.assertIn("#bingsu-reviewer-header.is-minimal .restaurant-level-chip,\n#bingsu-reviewer-header.is-minimal .bingsu-reviewer-progress", dock_css)
 
         patcher_src = (ROOT / "rendering/patcher.py").read_text(encoding="utf-8")
-        self.assertIn("#onigiri-reviewer-header:not(.is-island):has(.onigiri-reviewer-progress.is-bare) .restaurant-level-chip", patcher_src)
+        self.assertIn("#bingsu-reviewer-header:not(.is-island):has(.bingsu-reviewer-progress.is-bare) .restaurant-level-chip", patcher_src)
 
         settings_js = (ROOT / "web/settings.js").read_text(encoding="utf-8")
         self.assertIn('ICON_POPUP_COMPANIONS["rdock_icon_" + key] = ["rdock_icon_color_" + key]', settings_js)

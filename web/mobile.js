@@ -1,28 +1,28 @@
-/* Onigiri on iPhone/iPad (Kioku): touch and phone-layout support shared by
- * every Onigiri page. Loaded in <head>, before Onigiri's other scripts.
+/* Bingsu on iPhone/iPad (Kioku): touch and phone-layout support shared by
+ * every Bingsu page. Loaded in <head>, before Bingsu's other scripts.
  *
- * - <html> classes: onigiri-touch (coarse pointer, no hover),
- *   onigiri-phone (<= 600px wide), onigiri-tablet (touch, wider), kept up to
+ * - <html> classes: bingsu-touch (coarse pointer, no hover),
+ *   bingsu-phone (<= 600px wide), bingsu-tablet (touch, wider), kept up to
  *   date on rotation / split view.
  * - Long-press -> contextmenu. iOS WKWebView never fires `contextmenu`, and
- *   Onigiri opens every deck/tag/favorite action menu from it. A 500 ms press
+ *   Bingsu opens every deck/tag/favorite action menu from it. A 500 ms press
  *   that does not move dispatches a synthetic contextmenu at the touch point
- *   on elements registered with OnigiriMobile.longPress(selector), and
+ *   on elements registered with BingsuMobile.longPress(selector), and
  *   swallows the click that follows the finger lifting.
  * - Deck list on touch: a visible "more" button per deck row, and a
  *   Select mode that turns taps into multi-selection (desktop uses
  *   Ctrl/Shift+click).
  * - Phone home screen: a bottom tab bar switching between the deck sidebar
  *   and the widget dashboard, which no longer fit side by side.
- * - App feel on Onigiri's own screens (<html class="onigiri-app">, set by
+ * - App feel on Bingsu's own screens (<html class="bingsu-app">, set by
  *   __init__.inject_mobile_assets): no sticky :hover (hover rules are
  *   removed on screens without a mouse or trackpad), instant press
  *   feedback, the screen edges in the page's colour, no rubber band and
- *   haptics through Kioku (core/ios_native.py, "onigiri_native:*").
+ *   haptics through Kioku (core/ios_native.py, "bingsu_native:*").
  */
 (function () {
     'use strict';
-    if (window.OnigiriMobile) return;
+    if (window.BingsuMobile) return;
 
     var root = document.documentElement;
     var PHONE_MAX = 600;
@@ -35,7 +35,7 @@
 
     function isTouch() {
         return mq('(pointer: coarse)') || mq('(hover: none)') ||
-            root.classList.contains('onigiri-mobile');
+            root.classList.contains('bingsu-mobile');
     }
 
     function isPhone() {
@@ -46,22 +46,22 @@
     function updateClasses() {
         var touch = isTouch();
         var phone = isPhone();
-        root.classList.toggle('onigiri-touch', touch);
-        root.classList.toggle('onigiri-phone', phone);
-        root.classList.toggle('onigiri-tablet', touch && !phone);
+        root.classList.toggle('bingsu-touch', touch);
+        root.classList.toggle('bingsu-phone', phone);
+        root.classList.toggle('bingsu-tablet', touch && !phone);
     }
 
     updateClasses();
     window.addEventListener('resize', updateClasses, { passive: true });
 
     // --- Deck list <-> deck overview slide ---------------------------------------
-    // <html> arrives with onigiri-enter-forward/back (__init__): the page is
+    // <html> arrives with bingsu-enter-forward/back (__init__): the page is
     // held just off to the side, and slides in once it is ready to be shown.
     // Starting at once (while WebKit was still loading the page) finished
     // the slide before anything was on screen.
     (function screenTransition() {
-        var cls = root.classList.contains('onigiri-enter-forward') ? 'onigiri-enter-forward'
-            : root.classList.contains('onigiri-enter-back') ? 'onigiri-enter-back' : '';
+        var cls = root.classList.contains('bingsu-enter-forward') ? 'bingsu-enter-forward'
+            : root.classList.contains('bingsu-enter-back') ? 'bingsu-enter-back' : '';
         if (!cls) return;
         var started = false;
         function start() {
@@ -69,9 +69,9 @@
             started = true;
             requestAnimationFrame(function () {
                 requestAnimationFrame(function () {
-                    root.classList.add('onigiri-entering');
+                    root.classList.add('bingsu-entering');
                     setTimeout(function () {
-                        root.classList.remove(cls, 'onigiri-entering');
+                        root.classList.remove(cls, 'bingsu-entering');
                     }, 520);
                 });
             });
@@ -87,7 +87,7 @@
     var longPressSelectors = [
         '#deck-list-container tr.deck',
         '[oncontextmenu]',
-        '[data-onigiri-longpress]',
+        '[data-bingsu-longpress]',
     ];
     var press = null;
     var suppressClickUntil = 0;
@@ -105,7 +105,7 @@
         if (press) {
             clearTimeout(press.timer);
             clearTimeout(press.cue);
-            if (press.el) press.el.classList.remove('onigiri-pressing');
+            if (press.el) press.el.classList.remove('bingsu-pressing');
         }
         press = null;
     }
@@ -125,7 +125,7 @@
                 if (!press) return;
                 var p = press;
                 press = null;
-                p.el.classList.remove('onigiri-pressing');
+                p.el.classList.remove('bingsu-pressing');
                 suppressClickUntil = Date.now() + 800;
                 haptic('medium');
                 var evt = new MouseEvent('contextmenu', {
@@ -139,14 +139,14 @@
                     button: 2,
                     buttons: 2,
                 });
-                evt.onigiriLongPress = true;
+                evt.bingsuLongPress = true;
                 origin.dispatchEvent(evt);
             }, LONG_PRESS_MS),
         };
         // the "about to open the menu" cue shows once the finger has stayed
         // put for a moment, not at the start of every scroll
         var cueRow = press;
-        press.cue = setTimeout(function () { if (press === cueRow) el.classList.add('onigiri-pressing'); }, 160);
+        press.cue = setTimeout(function () { if (press === cueRow) el.classList.add('bingsu-pressing'); }, 160);
     }, true);
 
     document.addEventListener('pointermove', function (event) {
@@ -173,19 +173,19 @@
     // A native contextmenu (iPad trackpad/mouse right click) means no
     // synthetic one is needed for this press.
     document.addEventListener('contextmenu', function (event) {
-        if (!event.onigiriLongPress) cancelPress();
+        if (!event.bingsuLongPress) cancelPress();
     }, true);
 
 
     // --- App feel: native bridge (core/ios_native.py) ----------------------------
 
     function nativeCmd(what) {
-        if (!root.classList.contains('onigiri-ios')) return;
-        try { if (typeof pycmd === 'function') pycmd('onigiri_native:' + what); } catch (e) {}
+        if (!root.classList.contains('bingsu-ios')) return;
+        try { if (typeof pycmd === 'function') pycmd('bingsu_native:' + what); } catch (e) {}
     }
 
     function haptic(kind) {
-        if (root.classList.contains('onigiri-ios')) {
+        if (root.classList.contains('bingsu-ios')) {
             nativeCmd('haptic:' + (kind || 'light'));
         } else {
             try { if (navigator.vibrate) navigator.vibrate(10); } catch (e) {}
@@ -195,7 +195,7 @@
     // --- App feel: no sticky hover -------------------------------------------------
     // On a touch screen a tap leaves :hover on the element until the next tap
     // somewhere else: tapped rows stayed highlighted, buttons stayed lit.
-    // Without a mouse or trackpad, :hover rules are dropped from Onigiri's
+    // Without a mouse or trackpad, :hover rules are dropped from Bingsu's
     // stylesheets (`:not(:hover)` always holds then, so it is just removed).
 
     function hasMousePointer() {
@@ -259,7 +259,7 @@
     var strippedSheets = typeof WeakSet !== 'undefined' ? new WeakSet() : null;
 
     function stripHover() {
-        if (!root.classList.contains('onigiri-app') || !root.classList.contains('onigiri-touch')) return;
+        if (!root.classList.contains('bingsu-app') || !root.classList.contains('bingsu-touch')) return;
         if (hasMousePointer()) return;
         var sheets = document.styleSheets;
         for (var i = 0; i < sheets.length; i++) {
@@ -311,8 +311,8 @@
         pressed = null;
         pressedAt = null;
         if (!el) return;
-        if (delay) setTimeout(function () { el.classList.remove('onigiri-pressed'); }, delay);
-        else el.classList.remove('onigiri-pressed');
+        if (delay) setTimeout(function () { el.classList.remove('bingsu-pressed'); }, delay);
+        else el.classList.remove('bingsu-pressed');
     }
 
     document.addEventListener('touchstart', function () {}, { passive: true });
@@ -325,11 +325,11 @@
         // a whole panel with an onclick is not a button
         var r = el.getBoundingClientRect();
         if (r.height > 160 && r.width > window.innerWidth * 0.6) { pressed = null; return; }
-        el.classList.add('onigiri-pressed');
+        el.classList.add('bingsu-pressed');
     }
 
     document.addEventListener('pointerdown', function (event) {
-        if (event.pointerType === 'mouse' || !root.classList.contains('onigiri-app')) return;
+        if (event.pointerType === 'mouse' || !root.classList.contains('bingsu-app')) return;
         var el = event.target.closest && event.target.closest(PRESSABLE);
         if (!el || el.closest('#qa') || el.disabled) return;
         clearPressed();
@@ -371,7 +371,7 @@
         return bg;
     }
 
-    var MAIN_SCREEN = '.container.modern-main-menu, .ba-home, .ba-side, body.onigiri-overview, .overview-bottom-actions, #qa';
+    var MAIN_SCREEN = '.container.modern-main-menu, .ba-home, .ba-side, body.bingsu-overview, .overview-bottom-actions, #qa';
     var lastEdge = '';
 
     // The colour actually showing at a point: the first opaque background
@@ -403,16 +403,16 @@
             return 'rgb(' + rgb.map(function (v) { return Math.round(v + (target - v) * amount); }).join(', ') + ')';
         }
         var st = root.style;
-        st.setProperty('--onigiri-surface', 'rgb(' + rgb.join(', ') + ')');
-        st.setProperty('--onigiri-surface-raised', mix(dark ? 0.07 : 0.03));
-        st.setProperty('--onigiri-surface-fill', mix(dark ? 0.13 : 0.07));
-        st.setProperty('--onigiri-surface-line', mix(dark ? 0.2 : 0.12));
-        st.setProperty('--onigiri-surface-ink', dark ? '#f2f2f7' : '#1c1c1e');
-        root.classList.toggle('onigiri-surface-dark', dark);
+        st.setProperty('--bingsu-surface', 'rgb(' + rgb.join(', ') + ')');
+        st.setProperty('--bingsu-surface-raised', mix(dark ? 0.07 : 0.03));
+        st.setProperty('--bingsu-surface-fill', mix(dark ? 0.13 : 0.07));
+        st.setProperty('--bingsu-surface-line', mix(dark ? 0.2 : 0.12));
+        st.setProperty('--bingsu-surface-ink', dark ? '#f2f2f7' : '#1c1c1e');
+        root.classList.toggle('bingsu-surface-dark', dark);
     }
 
     function paintEdges() {
-        if (!root.classList.contains('onigiri-app') || !document.body) return;
+        if (!root.classList.contains('bingsu-app') || !document.body) return;
         root.style.backgroundColor = '';
         var color = opaqueBackground(document.body) ||
             opaqueBackground(document.querySelector('.container.modern-main-menu, .ba-home, #outer')) ||
@@ -424,10 +424,10 @@
         var topColor = colorAt(2, 2);
         // the top fade blends the page into the status-bar strip, which
         // takes the same colour
-        if (topColor) root.style.setProperty('--onigiri-edge-bg', topColor);
-        if (!document.getElementById('onigiri-top-fade') && document.body) {
+        if (topColor) root.style.setProperty('--bingsu-edge-bg', topColor);
+        if (!document.getElementById('bingsu-top-fade') && document.body) {
             var fade = document.createElement('div');
-            fade.id = 'onigiri-top-fade';
+            fade.id = 'bingsu-top-fade';
             fade.setAttribute('aria-hidden', 'true');
             document.body.appendChild(fade);
         }
@@ -467,7 +467,7 @@
 
     function t(key, fallback) {
         try {
-            if (typeof window.ONIGIRI_T === 'function') return window.ONIGIRI_T(key, fallback);
+            if (typeof window.BINGSU_T === 'function') return window.BINGSU_T(key, fallback);
         } catch (e) {}
         return fallback;
     }
@@ -481,21 +481,21 @@
             clientY: rect.bottom,
             button: 2,
         });
-        evt.onigiriLongPress = true;
+        evt.bingsuLongPress = true;
         row.dispatchEvent(evt);
     }
 
     function decorateDeckRows() {
-        if (!root.classList.contains('onigiri-touch')) return;
+        if (!root.classList.contains('bingsu-touch')) return;
         var rows = document.querySelectorAll('#deck-list-container tr.deck[data-did]');
         for (var i = 0; i < rows.length; i++) {
             var row = rows[i];
-            if (row.querySelector(':scope > .onigiri-row-more-cell')) continue;
+            if (row.querySelector(':scope > .bingsu-row-more-cell')) continue;
             var cell = document.createElement('td');
-            cell.className = 'onigiri-row-more-cell';
+            cell.className = 'bingsu-row-more-cell';
             var btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'onigiri-row-more';
+            btn.className = 'bingsu-row-more';
             btn.setAttribute('aria-label', t('more', 'More'));
             btn.innerHTML = MORE_SVG;
             cell.appendChild(btn);
@@ -504,7 +504,7 @@
     }
 
     document.addEventListener('click', function (event) {
-        var btn = event.target.closest && event.target.closest('.onigiri-row-more');
+        var btn = event.target.closest && event.target.closest('.bingsu-row-more');
         if (!btn) return;
         event.preventDefault();
         event.stopImmediatePropagation();
@@ -519,29 +519,29 @@
     // tab bar. Outside it there are no handles, so a drag always scrolls.
     function setSelectMode(on) {
         selectMode = !!on;
-        root.classList.toggle('onigiri-select-mode', selectMode);
-        var btn = document.getElementById('onigiri-select-toggle');
+        root.classList.toggle('bingsu-select-mode', selectMode);
+        var btn = document.getElementById('bingsu-select-toggle');
         if (btn) {
             btn.setAttribute('aria-pressed', selectMode ? 'true' : 'false');
             btn.textContent = selectMode ? t('done', 'Done') : t('edit', 'Edit');
         }
-        if (!selectMode && window.OnigiriEngine && OnigiriEngine.clearMultiSelection) {
-            try { OnigiriEngine.clearMultiSelection(); } catch (e) {}
+        if (!selectMode && window.BingsuEngine && BingsuEngine.clearMultiSelection) {
+            try { BingsuEngine.clearMultiSelection(); } catch (e) {}
         }
         if (selectMode) ensureEditToolbar();
         updateEditToolbar();
     }
 
     function selectedDids() {
-        try { return Array.from(OnigiriEngine._multiSelectedDecks || []); } catch (e) { return []; }
+        try { return Array.from(BingsuEngine._multiSelectedDecks || []); } catch (e) { return []; }
     }
 
     function ensureEditToolbar() {
-        if (document.getElementById('onigiri-edit-toolbar')) return;
+        if (document.getElementById('bingsu-edit-toolbar')) return;
         var bar = document.createElement('div');
-        bar.id = 'onigiri-edit-toolbar';
+        bar.id = 'bingsu-edit-toolbar';
         bar.innerHTML = '<button type="button" data-act="actions"></button>' +
-            '<span class="onigiri-edit-count"></span>' +
+            '<span class="bingsu-edit-count"></span>' +
             '<button type="button" data-act="done"></button>';
         bar.querySelector('[data-act="actions"]').textContent = t('actions', 'Actions');
         bar.querySelector('[data-act="done"]').textContent = t('done', 'Done');
@@ -550,30 +550,30 @@
             if (!b) return;
             if (b.dataset.act === 'done') { setSelectMode(false); return; }
             var dids = selectedDids();
-            if (!dids.length || !window.OnigiriEngine) return;
+            if (!dids.length || !window.BingsuEngine) return;
             var rect = b.getBoundingClientRect();
-            if (dids.length > 1) OnigiriEngine.showBulkDeckContextMenu(rect.left, rect.top);
-            else OnigiriEngine.showDeckContextMenu(rect.left, rect.top, dids[0]);
+            if (dids.length > 1) BingsuEngine.showBulkDeckContextMenu(rect.left, rect.top);
+            else BingsuEngine.showDeckContextMenu(rect.left, rect.top, dids[0]);
         });
         document.body.appendChild(bar);
     }
 
     function updateEditToolbar() {
-        var bar = document.getElementById('onigiri-edit-toolbar');
+        var bar = document.getElementById('bingsu-edit-toolbar');
         if (!bar) return;
         var n = selectedDids().length;
-        bar.querySelector('.onigiri-edit-count').textContent = n ? n + ' ' + t('selected', 'selected') : t('select_decks', 'Select decks');
+        bar.querySelector('.bingsu-edit-count').textContent = n ? n + ' ' + t('selected', 'selected') : t('select_decks', 'Select decks');
         bar.querySelector('[data-act="actions"]').disabled = n === 0;
     }
 
     function addSelectToggle() {
-        if (!root.classList.contains('onigiri-touch')) return;
+        if (!root.classList.contains('bingsu-touch')) return;
         var actions = document.querySelector('#deck-list-header .deck-header-actions');
-        if (!actions || document.getElementById('onigiri-select-toggle')) return;
+        if (!actions || document.getElementById('bingsu-select-toggle')) return;
         var btn = document.createElement('button');
         btn.type = 'button';
-        btn.id = 'onigiri-select-toggle';
-        btn.className = 'deck-header-btn onigiri-select-toggle';
+        btn.id = 'bingsu-select-toggle';
+        btn.className = 'deck-header-btn bingsu-select-toggle';
         btn.setAttribute('aria-pressed', 'false');
         btn.textContent = t('edit', 'Edit');
         btn.addEventListener('click', function (event) {
@@ -590,37 +590,37 @@
         if (!selectMode) return;
         var container = document.getElementById('deck-list-container');
         if (!container || !container.contains(event.target)) return;
-        if (event.target.closest('a.collapse, .onigiri-row-more, .drag-handle')) return;
+        if (event.target.closest('a.collapse, .bingsu-row-more, .drag-handle')) return;
         var row = event.target.closest('tr.deck[data-did]');
-        if (!row || !window.OnigiriEngine || !OnigiriEngine.toggleMultiSelection) return;
+        if (!row || !window.BingsuEngine || !BingsuEngine.toggleMultiSelection) return;
         event.preventDefault();
         event.stopImmediatePropagation();
         // a plain tap toggles one row (no Shift/Ctrl range semantics)
-        OnigiriEngine.toggleMultiSelection(row, { shiftKey: false, ctrlKey: true, metaKey: true });
+        BingsuEngine.toggleMultiSelection(row, { shiftKey: false, ctrlKey: true, metaKey: true });
         haptic('selection');
         updateEditToolbar();
     }, true);
 
 
-    // --- iOS sheets for Onigiri's menus -------------------------------------------
-    // engine.js shows deck, sort and tag menus as .onigiri-quick-menu; on
+    // --- iOS sheets for Bingsu's menus -------------------------------------------
+    // engine.js shows deck, sort and tag menus as .bingsu-quick-menu; on
     // phones positionMenu marks them .is-sheet. Here they get what an iOS
     // sheet has: a dimmed backdrop (tap to close), a grab handle, a swipe
     // down to dismiss and a Cancel button. Group rows (Markers ›) push their
     // items inside the sheet (CSS) instead of opening a fly-out.
 
     function closeMenus() {
-        if (window.OnigiriEngine && OnigiriEngine.closeQuickMenus) {
-            try { OnigiriEngine.closeQuickMenus(); return; } catch (e) {}
+        if (window.BingsuEngine && BingsuEngine.closeQuickMenus) {
+            try { BingsuEngine.closeQuickMenus(); return; } catch (e) {}
         }
-        document.querySelectorAll('.onigiri-quick-menu').forEach(function (m) { m.remove(); });
+        document.querySelectorAll('.bingsu-quick-menu').forEach(function (m) { m.remove(); });
     }
 
     function backdrop() {
-        var bd = document.getElementById('onigiri-sheet-backdrop');
+        var bd = document.getElementById('bingsu-sheet-backdrop');
         if (!bd) {
             bd = document.createElement('div');
-            bd.id = 'onigiri-sheet-backdrop';
+            bd.id = 'bingsu-sheet-backdrop';
             bd.addEventListener('click', function (event) {
                 event.preventDefault();
                 event.stopPropagation();
@@ -632,26 +632,26 @@
     }
 
     function syncBackdrop() {
-        var open = !!document.querySelector('body > .onigiri-quick-menu.is-sheet');
-        var bd = document.getElementById('onigiri-sheet-backdrop');
+        var open = !!document.querySelector('body > .bingsu-quick-menu.is-sheet');
+        var bd = document.getElementById('bingsu-sheet-backdrop');
         if (open) backdrop().classList.add('is-visible');
         else if (bd) bd.classList.remove('is-visible');
-        root.classList.toggle('onigiri-sheet-open', open);
+        root.classList.toggle('bingsu-sheet-open', open);
     }
 
     function enhanceSheet(menu) {
-        if (menu.dataset.onigiriSheet) return;
-        menu.dataset.onigiriSheet = '1';
+        if (menu.dataset.bingsuSheet) return;
+        menu.dataset.bingsuSheet = '1';
         var grab = document.createElement('div');
-        grab.className = 'onigiri-sheet-grabber';
+        grab.className = 'bingsu-sheet-grabber';
         grab.setAttribute('aria-hidden', 'true');
         menu.insertBefore(grab, menu.firstChild);
         var cancel = document.createElement('button');
         cancel.type = 'button';
-        cancel.className = 'onigiri-sheet-cancel';
+        cancel.className = 'bingsu-sheet-cancel';
         cancel.textContent = t('cancel', 'Cancel');
         // card and reviewer pages style bare buttons with !important
-        [['background', 'var(--onigiri-surface-fill, var(--highlight-bg, rgba(127, 127, 127, 0.14)))'], ['color', 'var(--onigiri-surface-ink, var(--fg, inherit))'],
+        [['background', 'var(--bingsu-surface-fill, var(--highlight-bg, rgba(127, 127, 127, 0.14)))'], ['color', 'var(--bingsu-surface-ink, var(--fg, inherit))'],
             ['border', '0'], ['box-shadow', 'none'], ['font-weight', '600'], ['font-size', '17px'],
             ['text-transform', 'none']].forEach(function (p) { cancel.style.setProperty(p[0], p[1], 'important'); });
         cancel.addEventListener('click', function (event) {
@@ -676,7 +676,7 @@
         var moved = false;
         menu.addEventListener('pointerdown', function (event) {
             if (event.pointerType === 'mouse') return;
-            if (menu.scrollTop > 0 && !event.target.closest('.onigiri-sheet-grabber')) return;
+            if (menu.scrollTop > 0 && !event.target.closest('.bingsu-sheet-grabber')) return;
             start = { y: event.clientY, t: Date.now() };
             dy = 0;
             moved = false;
@@ -724,7 +724,7 @@
                 var nodes = records[r].addedNodes;
                 for (var n = 0; n < nodes.length; n++) {
                     var node = nodes[n];
-                    if (node.nodeType === 1 && node.classList.contains('onigiri-quick-menu') &&
+                    if (node.nodeType === 1 && node.classList.contains('bingsu-quick-menu') &&
                         node.classList.contains('is-sheet')) enhanceSheet(node);
                 }
                 if (records[r].removedNodes.length || nodes.length) changed = true;
@@ -738,10 +738,10 @@
     function elementItem(el) {
         var label = el.querySelector('span');
         var host = document.createElement('span');
-        host.className = 'onigiri-action-icon-host ' + Array.prototype.filter.call(el.classList, function (c) {
+        host.className = 'bingsu-action-icon-host ' + Array.prototype.filter.call(el.classList, function (c) {
             return c.indexOf('action-') === 0;
         }).join(' ');
-        var icon = el.querySelector('.icon, .onigiri-dock-glyph, [style*="mask-image"], svg, img, i');
+        var icon = el.querySelector('.icon, .bingsu-dock-glyph, [style*="mask-image"], svg, img, i');
         if (icon) host.appendChild(icon.cloneNode(true));
         return {
             label: ((label ? label.textContent : '') || el.getAttribute('aria-label') ||
@@ -754,16 +754,16 @@
     function showActionSheet(elements, anchor) {
         closeMenus();
         var menu = document.createElement('div');
-        menu.className = 'onigiri-quick-menu onigiri-action-sheet';
+        menu.className = 'bingsu-quick-menu bingsu-action-sheet';
         elements.forEach(function (entry) {
             var item = entry && entry.run ? entry : elementItem(entry);
             if (!item.label) return;
             var row = document.createElement('div');
             row.className = 'quick-menu-item';
             if (item.icon) {
-                if (!item.icon.classList.contains('onigiri-action-icon-host')) {
+                if (!item.icon.classList.contains('bingsu-action-icon-host')) {
                     var wrap = document.createElement('span');
-                    wrap.className = 'onigiri-action-icon-host';
+                    wrap.className = 'bingsu-action-icon-host';
                     wrap.appendChild(item.icon);
                     item.icon = wrap;
                 }
@@ -780,8 +780,8 @@
             menu.appendChild(row);
         });
         var rect = anchor ? anchor.getBoundingClientRect() : { left: window.innerWidth - 20, bottom: 50 };
-        if (window.OnigiriEngine && OnigiriEngine.positionMenu) {
-            OnigiriEngine.positionMenu(menu, rect.left, rect.bottom);
+        if (window.BingsuEngine && BingsuEngine.positionMenu) {
+            BingsuEngine.positionMenu(menu, rect.left, rect.bottom);
         } else {
             // pages without engine.js (overview, reviewer): always a sheet,
             // closed by its backdrop, Cancel or a swipe
@@ -792,24 +792,24 @@
 
     // --- Home: action tiles ------------------------------------------------------------
     // Phones show one row of five tiles: the first four actions and More.
-    // Settings, Onigiri Games and the old More fly-out (Get Shared, Create
+    // Settings, Bingsu Games and the old More fly-out (Get Shared, Create
     // Deck, Import) open from More as a labelled sheet.
 
     function setupActionTiles() {
-        var section = document.querySelector('.modern-main-menu .onigiri-sidebar-actions-section');
-        if (!section || section.dataset.onigiriTiles) return;
-        section.dataset.onigiriTiles = '1';
+        var section = document.querySelector('.modern-main-menu .bingsu-sidebar-actions-section');
+        if (!section || section.dataset.bingsuTiles) return;
+        section.dataset.bingsuTiles = '1';
         var items = Array.prototype.filter.call(section.children, function (el) {
             return el.classList.contains('menu-item');
         });
         var group = section.querySelector(':scope > details.menu-group');
         var overflow = items.slice(4);
-        overflow.forEach(function (el) { el.classList.add('onigiri-action-overflow'); });
+        overflow.forEach(function (el) { el.classList.add('bingsu-action-overflow'); });
         var groupItems = group ? Array.prototype.slice.call(group.querySelectorAll('.menu-group-items > .menu-item')) : [];
         var summary = group && group.querySelector('summary');
         if (!summary) return;
         summary.addEventListener('click', function (event) {
-            if (!root.classList.contains('onigiri-phone')) return;
+            if (!root.classList.contains('bingsu-phone')) return;
             event.preventDefault();
             event.stopPropagation();
             group.open = false;
@@ -856,8 +856,8 @@
 
     function titleCaseHeader() {
         var h = document.querySelector('#deck-list-header h2');
-        if (!h || h.dataset.onigiriTitle) return;
-        h.dataset.onigiriTitle = '1';
+        if (!h || h.dataset.bingsuTitle) return;
+        h.dataset.bingsuTitle = '1';
         var text = h.textContent.trim();
         if (/^[A-Z][A-Z ]+$/.test(text)) h.textContent = text.charAt(0) + text.slice(1).toLowerCase();
     }
@@ -874,18 +874,18 @@
 
     function goBack() {
         haptic('light');
-        // Onigiri Settings: a page back to the list (the window itself
+        // Bingsu Settings: a page back to the list (the window itself
         // closes with Kioku's Back)
         if (document.querySelector('.osw-shell')) {
-            root.classList.remove('onigiri-settings-page');
+            root.classList.remove('bingsu-settings-page');
             return;
         }
-        try { if (typeof pycmd === 'function') pycmd('onigiri_native:back'); } catch (e) {}
+        try { if (typeof pycmd === 'function') pycmd('bingsu_native:back'); } catch (e) {}
     }
 
     function headerRoots() {
         var roots = [document];
-        var host = document.getElementById('onigiri-reviewer-ui-host');
+        var host = document.getElementById('bingsu-reviewer-ui-host');
         if (host && host.shadowRoot) roots.push(host.shadowRoot);
         return roots;
     }
@@ -893,8 +893,8 @@
     function headerButtons() {
         var out = [];
         headerRoots().forEach(function (r) {
-            r.querySelectorAll('#onigiri-reviewer-header a.onigiri-reviewer-button, #onigiri-reviewer-header .onigiri-dock-item, ' +
-                '#onigiri-reviewer-external-actions > *').forEach(function (el) {
+            r.querySelectorAll('#bingsu-reviewer-header a.bingsu-reviewer-button, #bingsu-reviewer-header .bingsu-dock-item, ' +
+                '#bingsu-reviewer-external-actions > *').forEach(function (el) {
                 if (out.indexOf(el) < 0) out.push(el);
             });
         });
@@ -902,45 +902,45 @@
     }
 
     function hideHeaderButtonsInShadow() {
-        var host = document.getElementById('onigiri-reviewer-ui-host');
+        var host = document.getElementById('bingsu-reviewer-ui-host');
         var shadow = host && host.shadowRoot;
-        if (!shadow || shadow.getElementById('onigiri-phone-nav-style')) return;
+        if (!shadow || shadow.getElementById('bingsu-phone-nav-style')) return;
         var style = document.createElement('style');
-        style.id = 'onigiri-phone-nav-style';
+        style.id = 'bingsu-phone-nav-style';
         // ids repeated: the header's own rules are !important too
-        var H = '#onigiri-reviewer-header#onigiri-reviewer-header#onigiri-reviewer-header ';
+        var H = '#bingsu-reviewer-header#bingsu-reviewer-header#bingsu-reviewer-header ';
         style.textContent =
-            H + 'a.onigiri-reviewer-button.onigiri-reviewer-button,' +
-            H + '.onigiri-rubber-dock.onigiri-rubber-dock,' +
-            H + '.onigiri-dock-divider.onigiri-dock-divider,' +
-            H + '#onigiri-reviewer-external-actions#onigiri-reviewer-external-actions{display:none!important}' +
-            H + '.onigiri-reviewer-header-buttons.onigiri-reviewer-header-buttons{min-height:44px;justify-content:center!important}';
+            H + 'a.bingsu-reviewer-button.bingsu-reviewer-button,' +
+            H + '.bingsu-rubber-dock.bingsu-rubber-dock,' +
+            H + '.bingsu-dock-divider.bingsu-dock-divider,' +
+            H + '#bingsu-reviewer-external-actions#bingsu-reviewer-external-actions{display:none!important}' +
+            H + '.bingsu-reviewer-header-buttons.bingsu-reviewer-header-buttons{min-height:44px;justify-content:center!important}';
         shadow.appendChild(style);
     }
 
     function isOverviewPage() {
-        return !!(document.body && (document.body.classList.contains('onigiri-overview') ||
-            document.querySelector('.overview-bottom-actions, .congrats-bottom-actions, .congrats-container, #onigiri-overview-header')));
+        return !!(document.body && (document.body.classList.contains('bingsu-overview') ||
+            document.querySelector('.overview-bottom-actions, .congrats-bottom-actions, .congrats-container, #bingsu-overview-header')));
     }
 
     function setupNavBar() {
-        if (!root.classList.contains('onigiri-phone') || document.getElementById('onigiri-phone-nav')) return;
-        // Only Onigiri's own study screens: a card previewer or the card
+        if (!root.classList.contains('bingsu-phone') || document.getElementById('bingsu-phone-nav')) return;
+        // Only Bingsu's own study screens: a card previewer or the card
         // layout window also shows a #qa card.
-        var isReviewer = root.classList.contains('onigiri-screen-review');
-        var isOverview = root.classList.contains('onigiri-screen-overview') && isOverviewPage();
+        var isReviewer = root.classList.contains('bingsu-screen-review');
+        var isOverview = root.classList.contains('bingsu-screen-overview') && isOverviewPage();
         if (!isReviewer && !isOverview) return;
         var nav = document.createElement('nav');
-        nav.id = 'onigiri-phone-nav';
+        nav.id = 'bingsu-phone-nav';
         var back = document.createElement('button');
         back.type = 'button';
-        back.className = 'onigiri-nav-back';
+        back.className = 'bingsu-nav-back';
         back.setAttribute('aria-label', t('back', 'Back'));
         back.innerHTML = BACK_NAV_SVG + '<span>' + (isReviewer ? '' : t('decks', 'Decks')) + '</span>';
         back.addEventListener('click', goBack);
         var more = document.createElement('button');
         more.type = 'button';
-        more.className = 'onigiri-nav-more';
+        more.className = 'bingsu-nav-more';
         more.setAttribute('aria-label', t('more', 'More'));
         more.innerHTML = MORE_SVG;
         more.addEventListener('click', function (event) {
@@ -955,7 +955,7 @@
         nav.appendChild(back);
         nav.appendChild(more);
         document.body.appendChild(nav);
-        root.classList.add('onigiri-has-phone-nav');
+        root.classList.add('bingsu-has-phone-nav');
         hideHeaderButtonsInShadow();
         // the reviewer mounts its header after load
         var tries = 0;
@@ -968,20 +968,20 @@
     // --- Swipe from the left edge to go back (as in iOS navigation) -----------------
 
     function setupEdgeSwipe() {
-        if (!root.classList.contains('onigiri-touch')) return;
-        if (document.documentElement.dataset.onigiriEdgeSwipe) return;
-        var isReviewer = root.classList.contains('onigiri-screen-review');
+        if (!root.classList.contains('bingsu-touch')) return;
+        if (document.documentElement.dataset.bingsuEdgeSwipe) return;
+        var isReviewer = root.classList.contains('bingsu-screen-review');
         var isSettings = !!document.querySelector('.osw-shell');
-        var isOverview = root.classList.contains('onigiri-screen-overview');
+        var isOverview = root.classList.contains('bingsu-screen-overview');
         if (!isReviewer && !isSettings && !isOverview) return;
-        document.documentElement.dataset.onigiriEdgeSwipe = '1';
+        document.documentElement.dataset.bingsuEdgeSwipe = '1';
         var start = null;
         var cue = null;
         document.addEventListener('touchstart', function (event) {
             if (event.touches.length !== 1) return;
             var touch = event.touches[0];
             start = touch.clientX <= 22 ? { x: touch.clientX, y: touch.clientY } : null;
-            if (start && isSettings && !root.classList.contains('onigiri-settings-page')) start = null;
+            if (start && isSettings && !root.classList.contains('bingsu-settings-page')) start = null;
         }, { passive: true });
         document.addEventListener('touchmove', function (event) {
             if (!start) return;
@@ -992,7 +992,7 @@
             if (dx > 12) {
                 if (!cue) {
                     cue = document.createElement('div');
-                    cue.id = 'onigiri-edge-cue';
+                    cue.id = 'bingsu-edge-cue';
                     cue.innerHTML = BACK_NAV_SVG;
                     document.body.appendChild(cue);
                 }
@@ -1021,16 +1021,16 @@
 
     function watchProfile() {
         var sidebar = document.querySelector('.sidebar-left');
-        if (!sidebar || sidebar.dataset.onigiriProfileWatch || typeof MutationObserver === 'undefined') return;
-        sidebar.dataset.onigiriProfileWatch = '1';
+        if (!sidebar || sidebar.dataset.bingsuProfileWatch || typeof MutationObserver === 'undefined') return;
+        sidebar.dataset.bingsuProfileWatch = '1';
         var wasOpen = sidebar.classList.contains('profile-sidebar-open');
         new MutationObserver(function () {
             var open = sidebar.classList.contains('profile-sidebar-open');
             if (open === wasOpen) return;
             wasOpen = open;
-            root.classList.toggle('onigiri-profile-open', open);
-            var panel = sidebar.querySelector('.onigiri-sidebar-profile');
-            if (!open || !panel || !root.classList.contains('onigiri-phone') || !panel.animate) return;
+            root.classList.toggle('bingsu-profile-open', open);
+            var panel = sidebar.querySelector('.bingsu-sidebar-profile');
+            if (!open || !panel || !root.classList.contains('bingsu-phone') || !panel.animate) return;
             if (mq('(prefers-reduced-motion: reduce)')) return;
             panel.animate([{ transform: 'translateY(100%)' }, { transform: 'translateY(0)' }],
                 { duration: 320, easing: 'cubic-bezier(0.32, 0.72, 0, 1)' });
@@ -1042,8 +1042,8 @@
     (function () {
         var start = null;
         document.addEventListener('touchstart', function (event) {
-            var panel = event.target.closest && event.target.closest('.profile-sidebar-open .onigiri-sidebar-profile');
-            if (!panel || !root.classList.contains('onigiri-phone') || panel.scrollTop > 0 || event.touches.length !== 1) {
+            var panel = event.target.closest && event.target.closest('.profile-sidebar-open .bingsu-sidebar-profile');
+            if (!panel || !root.classList.contains('bingsu-phone') || panel.scrollTop > 0 || event.touches.length !== 1) {
                 start = null;
                 return;
             }
@@ -1066,8 +1066,8 @@
                 s.panel.style.transform = 'translateY(100%)';
                 setTimeout(function () {
                     s.panel.style.transform = '';
-                    if (window.OnigiriProfileSidebar && OnigiriProfileSidebar.close) OnigiriProfileSidebar.close();
-                    else if (window.OnigiriProfileSidebar && OnigiriProfileSidebar.toggle) OnigiriProfileSidebar.toggle();
+                    if (window.BingsuProfileSidebar && BingsuProfileSidebar.close) BingsuProfileSidebar.close();
+                    else if (window.BingsuProfileSidebar && BingsuProfileSidebar.toggle) BingsuProfileSidebar.toggle();
                 }, 180);
             } else {
                 s.panel.style.transform = '';
@@ -1081,13 +1081,13 @@
 
     document.addEventListener('pointerdown', function (event) {
         if (event.pointerType === 'mouse') return;
-        var b = event.target.closest && event.target.closest('#outer button[data-onigiri-ease], #outer .onigiri-show-answer-btn');
-        if (b) haptic(b.hasAttribute('data-onigiri-ease') ? 'medium' : 'light');
+        var b = event.target.closest && event.target.closest('#outer button[data-bingsu-ease], #outer .bingsu-show-answer-btn');
+        if (b) haptic(b.hasAttribute('data-bingsu-ease') ? 'medium' : 'light');
     }, true);
 
 
     // --- Anki's menus as a full-screen page -------------------------------------------
-    // The Menu tab / Menu row: File, Edit, View, Tools, Help and Onigiri as
+    // The Menu tab / Menu row: File, Edit, View, Tools, Help and Bingsu as
     // an iOS list page (webview_handlers.show_app_menu sends the tree);
     // a submenu pushes its own page with ‹ back, an item runs and closes.
 
@@ -1095,19 +1095,19 @@
     var CHECK_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4 4L19 7"/></svg>';
 
     function closeAppMenu() {
-        var page = document.getElementById('onigiri-app-menu');
+        var page = document.getElementById('bingsu-app-menu');
         if (!page) return;
         page.classList.add('is-closing');
-        root.classList.remove('onigiri-app-menu-open');
+        root.classList.remove('bingsu-app-menu-open');
         setTimeout(function () { page.remove(); }, 260);
     }
 
     function showAppMenu(data) {
         closeMenus();
-        var old = document.getElementById('onigiri-app-menu');
+        var old = document.getElementById('bingsu-app-menu');
         if (old) old.remove();
         var page = document.createElement('div');
-        page.id = 'onigiri-app-menu';
+        page.id = 'bingsu-app-menu';
         page.setAttribute('role', 'dialog');
         page.innerHTML = '<div class="oam-bar"><button type="button" class="oam-back"></button>' +
             '<div class="oam-title"></div><button type="button" class="oam-done"></button></div>' +
@@ -1167,7 +1167,7 @@
                     if (item.en === false) return;
                     haptic('light');
                     closeAppMenu();
-                    try { pycmd('onigiri_app_menu_run:' + item.id); } catch (e) {}
+                    try { pycmd('bingsu_app_menu_run:' + item.id); } catch (e) {}
                 });
                 group.appendChild(row);
             });
@@ -1177,7 +1177,7 @@
 
         render(0);
         document.body.appendChild(page);
-        root.classList.add('onigiri-app-menu-open');
+        root.classList.add('bingsu-app-menu-open');
     }
 
     // --- Keyboard: fixed bottom bars get out of the way ---------------------------
@@ -1190,20 +1190,20 @@
     document.addEventListener('focusin', function (event) {
         if (!event.target.matches || !event.target.matches(TEXT_FIELD)) return;
         clearTimeout(kbdTimer);
-        root.classList.add('onigiri-keyboard');
+        root.classList.add('bingsu-keyboard');
     });
     document.addEventListener('focusout', function () {
         clearTimeout(kbdTimer);
         // focus often moves straight to another field
         kbdTimer = setTimeout(function () {
             var a = document.activeElement;
-            if (!(a && a.matches && a.matches(TEXT_FIELD))) root.classList.remove('onigiri-keyboard');
+            if (!(a && a.matches && a.matches(TEXT_FIELD))) root.classList.remove('bingsu-keyboard');
         }, 120);
     });
 
     // --- Phone tab bar (deck browser) --------------------------------------------
 
-    var TAB_KEY = 'onigiriPhoneTab';
+    var TAB_KEY = 'bingsuPhoneTab';
 
     function readTab() {
         try { return sessionStorage.getItem(TAB_KEY) || 'decks'; } catch (e) { return 'decks'; }
@@ -1220,8 +1220,8 @@
             : '.container.modern-main-menu .sidebar-left, .ba-home';
         var pane = document.querySelector(sel);
         if (!pane) return;
-        var cls = from === 'right' ? 'onigiri-slide-from-right' : 'onigiri-slide-from-left';
-        pane.classList.remove('onigiri-slide-from-right', 'onigiri-slide-from-left');
+        var cls = from === 'right' ? 'bingsu-slide-from-right' : 'bingsu-slide-from-left';
+        pane.classList.remove('bingsu-slide-from-right', 'bingsu-slide-from-left');
         void pane.offsetWidth;
         pane.classList.add(cls);
         pane.addEventListener('animationend', function done() {
@@ -1237,15 +1237,15 @@
         currentTab = tab;
         if (tab === 'home' && !homeRevealed && previous) {
             homeRevealed = true;
-            root.classList.add('onigiri-reveal-home');
-            setTimeout(function () { root.classList.remove('onigiri-reveal-home'); }, 800);
+            root.classList.add('bingsu-reveal-home');
+            setTimeout(function () { root.classList.remove('bingsu-reveal-home'); }, 800);
         }
-        if (previous && previous !== tab && root.classList.contains('onigiri-phone')) {
+        if (previous && previous !== tab && root.classList.contains('bingsu-phone')) {
             slidePane(tab, TAB_ORDER[tab] > TAB_ORDER[previous] ? 'right' : 'left');
         }
-        root.classList.toggle('onigiri-phone-tab-decks', tab !== 'home');
-        root.classList.toggle('onigiri-phone-tab-home', tab === 'home');
-        var bar = document.getElementById('onigiri-phone-tabs');
+        root.classList.toggle('bingsu-phone-tab-decks', tab !== 'home');
+        root.classList.toggle('bingsu-phone-tab-home', tab === 'home');
+        var bar = document.getElementById('bingsu-phone-tabs');
         if (bar) {
             bar.querySelectorAll('button[data-tab]').forEach(function (b) {
                 b.setAttribute('aria-selected', b.dataset.tab === tab ? 'true' : 'false');
@@ -1265,9 +1265,9 @@
     function addPhoneTabs() {
         // Classic/Shima home (.modern-main-menu) or the Kome theme (.ba-side).
         var container = document.querySelector('.container.modern-main-menu, .ba-side');
-        if (!container || document.getElementById('onigiri-phone-tabs')) return;
+        if (!container || document.getElementById('bingsu-phone-tabs')) return;
         var bar = document.createElement('nav');
-        bar.id = 'onigiri-phone-tabs';
+        bar.id = 'bingsu-phone-tabs';
         bar.setAttribute('role', 'tablist');
         // The Shima theme is only a deck island: it has no widget pane, so
         // a Home tab led to a blank screen.
@@ -1288,7 +1288,7 @@
                 // popup, since the desktop menu row is hidden on phones.
                 b.removeAttribute('role');
                 b.addEventListener('click', function () {
-                    if (typeof pycmd === 'function') pycmd('onigiri_app_menu');
+                    if (typeof pycmd === 'function') pycmd('bingsu_app_menu');
                 });
             } else {
                 b.addEventListener('click', function () { applyTab(spec[0]); });
@@ -1296,44 +1296,44 @@
             bar.appendChild(b);
         });
         document.body.appendChild(bar);
-        root.classList.add('onigiri-has-phone-tabs');
+        root.classList.add('bingsu-has-phone-tabs');
         applyTab(hasHome ? readTab() : 'decks');
     }
 
-    // --- Onigiri Settings on phones: list -> page drill-down --------------------
+    // --- Bingsu Settings on phones: list -> page drill-down --------------------
 
     var BACK_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>';
 
     function setupSettingsDrillDown() {
         var shell = document.querySelector('.osw-shell');
-        if (!shell || shell.dataset.onigiriDrill) return;
-        shell.dataset.onigiriDrill = '1';
+        if (!shell || shell.dataset.bingsuDrill) return;
+        shell.dataset.bingsuDrill = '1';
         var row = document.querySelector('.osw-page-head-row');
-        if (row && !row.querySelector('.onigiri-settings-back')) {
+        if (row && !row.querySelector('.bingsu-settings-back')) {
             var back = document.createElement('button');
             back.type = 'button';
-            back.className = 'onigiri-settings-back';
+            back.className = 'bingsu-settings-back';
             back.innerHTML = BACK_SVG + '<span>' + t('settings_title', 'Settings') + '</span>';
             back.addEventListener('click', function () {
-                root.classList.remove('onigiri-settings-page');
+                root.classList.remove('bingsu-settings-page');
             });
             row.insertBefore(back, row.firstChild);
         }
         // Opening a page (nav item or search result) shows it full width.
         shell.addEventListener('click', function (event) {
             if (event.target.closest('[data-nav-item], .osw-search-results [data-page], .osw-search-result')) {
-                root.classList.add('onigiri-settings-page');
+                root.classList.add('bingsu-settings-page');
             }
         });
         var search = shell.querySelector('.osw-search input');
         if (search) {
             search.addEventListener('input', function () {
-                if (search.value.trim()) root.classList.add('onigiri-settings-page');
+                if (search.value.trim()) root.classList.add('bingsu-settings-page');
             });
         }
     }
 
-    // --- App feel: no pinch-zoom on Onigiri's own screens ----------------------
+    // --- App feel: no pinch-zoom on Bingsu's own screens ----------------------
     // A pinch or a drag moved the whole home screen around like a web page.
     // Reviewer cards (#qa) keep pinch-zoom (images, small print). Kioku keeps
     // the page's own viewport in data-kioku-viewport and scales it by its
@@ -1342,7 +1342,7 @@
     var NO_ZOOM = 'width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no';
 
     function lockZoom() {
-        if (!root.classList.contains('onigiri-mobile')) return;
+        if (!root.classList.contains('bingsu-mobile')) return;
         if (document.getElementById('qa')) return;
         var meta = document.querySelector('meta[name="viewport"]');
         if (!meta) {
@@ -1372,13 +1372,13 @@
         watchProfile();
         setupNavBar();
         setupEdgeSwipe();
-        if (root.classList.contains('onigiri-touch')) {
+        if (root.classList.contains('bingsu-touch')) {
             setupActionTiles();
             titleCaseHeader();
             fixProfileContrast();
         }
         // Kome builds its sidebar after load: add the tabs once it appears.
-        if (!document.getElementById('onigiri-phone-tabs') && typeof MutationObserver !== 'undefined' && document.body) {
+        if (!document.getElementById('bingsu-phone-tabs') && typeof MutationObserver !== 'undefined' && document.body) {
             var tabsObserver = new MutationObserver(function () {
                 if (document.querySelector('.container.modern-main-menu, .ba-side')) {
                     tabsObserver.disconnect();
@@ -1403,9 +1403,9 @@
         onReady();
     }
     // deck rows ease in once when the page is drawn
-    if (root.classList.contains('onigiri-screen-decks') && root.classList.contains('onigiri-touch')) {
-        root.classList.add('onigiri-first-paint');
-        setTimeout(function () { root.classList.remove('onigiri-first-paint'); }, 900);
+    if (root.classList.contains('bingsu-screen-decks') && root.classList.contains('bingsu-touch')) {
+        root.classList.add('bingsu-first-paint');
+        setTimeout(function () { root.classList.remove('bingsu-first-paint'); }, 900);
     }
     window.addEventListener('load', function () {
         stripHover();
@@ -1416,9 +1416,9 @@
         setupEdgeSwipe();
     });
 
-    window.OnigiriMobile = {
-        isTouch: function () { return root.classList.contains('onigiri-touch'); },
-        isPhone: function () { return root.classList.contains('onigiri-phone'); },
+    window.BingsuMobile = {
+        isTouch: function () { return root.classList.contains('bingsu-touch'); },
+        isPhone: function () { return root.classList.contains('bingsu-phone'); },
         longPress: function (selector) {
             if (selector && longPressSelectors.indexOf(selector) < 0) longPressSelectors.push(selector);
         },

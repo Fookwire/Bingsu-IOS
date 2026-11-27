@@ -1,4 +1,4 @@
-/* Onigiri settings — WebUI.
+/* Bingsu settings — WebUI.
    Tokens are written onto :root by settings.js from the palette in render.py.
    Nothing here reads Anki's own CSS variables: this window owns its surface.
 
@@ -83,7 +83,7 @@
   transform: translateY(-50%) rotate(-8deg);
 }
 
-.osw-theme-style-decoration.is-onigiri {
+.osw-theme-style-decoration.is-bingsu {
   background-color: currentColor;
   -webkit-mask: var(--osw-theme-style-decoration-image) center / contain no-repeat;
   mask: var(--osw-theme-style-decoration-image) center / contain no-repeat;
@@ -3169,8 +3169,8 @@ html body .osw-profile-font-menu-btn:hover {
   min-width: 0;
 }
 .osw-profile-page-bg-colors:has(
-  [data-field-host="onigiri_profile_page_bg_color2"].is-hidden
-) [data-field-host="onigiri_profile_page_bg_color1"] {
+  [data-field-host="bingsu_profile_page_bg_color2"].is-hidden
+) [data-field-host="bingsu_profile_page_bg_color1"] {
   grid-column: 1 / -1;
 }
 .osw-profile-tab-content .osw-profile-page-bg-colors [data-field-type="color_pair"] .osw-imagefield-slots {
@@ -3210,8 +3210,8 @@ html body .osw-profile-font-menu-btn:hover {
   }
   .osw-profile-page-bg-colors > [data-field-host],
   .osw-profile-page-bg-colors:has(
-    [data-field-host="onigiri_profile_page_bg_color2"].is-hidden
-  ) [data-field-host="onigiri_profile_page_bg_color1"] {
+    [data-field-host="bingsu_profile_page_bg_color2"].is-hidden
+  ) [data-field-host="bingsu_profile_page_bg_color1"] {
     grid-column: 1;
   }
 }
@@ -4327,7 +4327,7 @@ html body button.osw-gal-import:active { background: var(--osw-accent); }
 
 /* Companion colour under an icon popover's grid (e.g. Heatmap Shape's own
    "Color") — same compact slot shape as the deck browser's own "Edit Icon"
-   modal (web/icon_modal.js's onigiri-icon-color-* classes), rebuilt on
+   modal (web/icon_modal.js's bingsu-icon-color-* classes), rebuilt on
    --osw-* tokens instead of that modal's own pk- prefixed ones. Every
    companion field's section lands in one stack, so the group gets a single
    top gap under the grid and a single bottom gap before the modal's own
@@ -4335,18 +4335,18 @@ html body button.osw-gal-import:active { background: var(--osw-accent); }
    between two stacked colours either (e.g. Heatmap Shape's colour and its
    zero-review colour): the grid, and each swatch, already reads as its own
    block without a hairline spelling that out. */
-.onigiri-icon-color-stack {
+.bingsu-icon-color-stack {
   display: flex;
   flex-direction: column;
   gap: 10px;
   margin: 14px 20px 18px;
   flex-shrink: 0;
 }
-.onigiri-icon-color-slots {
+.bingsu-icon-color-slots {
   display: flex;
   gap: 8px;
 }
-.onigiri-icon-color-slot {
+.bingsu-icon-color-slot {
   container-type: inline-size;
   flex: 1 1 0;
   display: flex;
@@ -4362,8 +4362,8 @@ html body button.osw-gal-import:active { background: var(--osw-accent); }
   cursor: pointer;
   text-align: left;
 }
-.onigiri-icon-color-slot:hover { background: var(--osw-inset-hover); }
-.onigiri-icon-color-swatch {
+.bingsu-icon-color-slot:hover { background: var(--osw-inset-hover); }
+.bingsu-icon-color-swatch {
   flex: 0 0 auto;
   width: 22px;
   height: 22px;
@@ -4371,14 +4371,14 @@ html body button.osw-gal-import:active { background: var(--osw-accent); }
   border: 1px solid rgba(128, 128, 128, 0.3);
   box-sizing: border-box;
 }
-.onigiri-icon-color-meta {
+.bingsu-icon-color-meta {
   flex: 1 1 auto;
   min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
-.onigiri-icon-color-role {
+.bingsu-icon-color-role {
   display: flex;
   align-items: center;
   gap: 5px;
@@ -4388,8 +4388,8 @@ html body button.osw-gal-import:active { background: var(--osw-accent); }
   letter-spacing: 0.05em;
   color: var(--osw-fg-faint);
 }
-.onigiri-icon-color-role svg { width: 11px; height: 11px; }
-.onigiri-icon-color-hex {
+.bingsu-icon-color-role svg { width: 11px; height: 11px; }
+.bingsu-icon-color-hex {
   font-size: 12.5px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
@@ -4399,11 +4399,11 @@ html body button.osw-gal-import:active { background: var(--osw-accent); }
 }
 
 @container (max-width: 152px) {
-  .onigiri-icon-color-slot .onigiri-icon-color-hex { display: none; }
+  .bingsu-icon-color-slot .bingsu-icon-color-hex { display: none; }
 }
 
 /* Icon popover — same visual language as the deck browser's own "Edit Icon"
-   modal (web/icon_modal.js's onigiri-icon-* classes), rebuilt on --osw-*
+   modal (web/icon_modal.js's bingsu-icon-* classes), rebuilt on --osw-*
    tokens instead of that modal's own pk- and odlg- prefixed ones, since this
    lives in the settings dialog, not the deck-browser overlay. */
 .osw-iconpick-modal {
@@ -4424,7 +4424,7 @@ html body button.osw-gal-import:active { background: var(--osw-accent); }
      from) — an opaque background declared twice never reads as "no window". */
   background-color: var(--osw-surface);
 }
-.onigiri-icon-modal-header {
+.bingsu-icon-modal-header {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -4433,17 +4433,17 @@ html body button.osw-gal-import:active { background: var(--osw-accent); }
   border-bottom: 1px solid var(--osw-hairline);
   background: var(--osw-inset);
 }
-.onigiri-icon-modal-title { font-size: 15.5px; font-weight: 600; flex: 1 1 auto; }
-.onigiri-icon-modal-close {
+.bingsu-icon-modal-title { font-size: 15.5px; font-weight: 600; flex: 1 1 auto; }
+.bingsu-icon-modal-close {
   width: 28px; height: 28px; min-width: 28px;
   display: flex; align-items: center; justify-content: center;
   border-radius: 10px;
   color: var(--osw-fg-faint);
   cursor: pointer;
 }
-.onigiri-icon-modal-close:hover { background: var(--osw-inset); color: var(--osw-fg); }
-.onigiri-icon-modal-close svg { width: 15px; height: 15px; }
-.onigiri-icon-tabs {
+.bingsu-icon-modal-close:hover { background: var(--osw-inset); color: var(--osw-fg); }
+.bingsu-icon-modal-close svg { width: 15px; height: 15px; }
+.bingsu-icon-tabs {
   display: flex;
   gap: 2px;
   margin: 14px 20px 0;
@@ -4452,7 +4452,7 @@ html body button.osw-gal-import:active { background: var(--osw-accent); }
   background: var(--osw-inset);
   flex-shrink: 0;
 }
-.onigiri-icon-tab {
+.bingsu-icon-tab {
   display: inline-flex; align-items: center; justify-content: center;
   flex: 1 1 0;
   height: 30px; padding: 0 14px;
@@ -4462,13 +4462,13 @@ html body button.osw-gal-import:active { background: var(--osw-accent); }
   font-size: 12.5px;
   font-weight: 600;
 }
-.onigiri-icon-tab:hover { color: var(--osw-fg); }
-.onigiri-icon-tab.active { background: var(--osw-surface); color: var(--osw-fg); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12); }
-.onigiri-icon-body { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 14px 20px 6px; overflow: hidden; }
-.onigiri-icon-pane { flex: 1; min-height: 0; display: none; flex-direction: column; overflow: hidden; }
-.onigiri-icon-pane.active { display: flex; }
-.onigiri-icon-search-row { flex: 0 0 auto; padding: 0 0 12px; }
-.onigiri-icon-search {
+.bingsu-icon-tab:hover { color: var(--osw-fg); }
+.bingsu-icon-tab.active { background: var(--osw-surface); color: var(--osw-fg); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12); }
+.bingsu-icon-body { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 14px 20px 6px; overflow: hidden; }
+.bingsu-icon-pane { flex: 1; min-height: 0; display: none; flex-direction: column; overflow: hidden; }
+.bingsu-icon-pane.active { display: flex; }
+.bingsu-icon-search-row { flex: 0 0 auto; padding: 0 0 12px; }
+.bingsu-icon-search {
   width: 100%;
   box-sizing: border-box;
   border: 1px solid transparent;
@@ -4478,20 +4478,20 @@ html body button.osw-gal-import:active { background: var(--osw-accent); }
   padding: 8px 11px;
   outline: none;
 }
-.onigiri-icon-search:focus { border-color: var(--osw-accent); }
+.bingsu-icon-search:focus { border-color: var(--osw-accent); }
 /* Smaller than the deck-browser modal's 60px cells — this grid is picked
    from far more often per session, so density wins over generous hit area.
    No panel behind it any more (see the corner-rounding saga this class used
    to carry in history) — each tile now floats directly on the modal's own
    surface, so there is nothing here to round or clip in the first place. */
-.onigiri-icon-grid-wrap {
+.bingsu-icon-grid-wrap {
   flex: 1;
   min-height: 0;
   margin: 0 -6px;
   overflow: hidden;
   display: flex;
 }
-.onigiri-icon-grid {
+.bingsu-icon-grid {
   flex: 1;
   min-height: 0;
   min-width: 0;
@@ -4504,14 +4504,14 @@ html body button.osw-gal-import:active { background: var(--osw-accent); }
   padding: 10px;
   scrollbar-width: thin;
 }
-.onigiri-icon-grid::-webkit-scrollbar { width: 8px; }
-.onigiri-icon-grid::-webkit-scrollbar-thumb {
+.bingsu-icon-grid::-webkit-scrollbar { width: 8px; }
+.bingsu-icon-grid::-webkit-scrollbar-thumb {
   background: var(--osw-fg-faint);
   border-radius: 8px;
   background-clip: content-box;
   border: 2px solid transparent;
 }
-.onigiri-icon-section-title {
+.bingsu-icon-section-title {
   grid-column: 1 / -1;
   color: var(--osw-fg-faint);
   font-size: 10.5px;
@@ -4532,7 +4532,7 @@ html body button.osw-gal-import:active { background: var(--osw-accent); }
   top: 0;
   z-index: 1;
 }
-.onigiri-icon-cell {
+.bingsu-icon-cell {
   position: relative;
   height: 44px;
   min-height: 44px;
@@ -4549,13 +4549,13 @@ html body button.osw-gal-import:active { background: var(--osw-accent); }
   color: var(--osw-fg-faint);
   cursor: pointer;
 }
-.onigiri-icon-cell:hover { background: var(--osw-inset-hover); }
-.onigiri-icon-cell.selected {
+.bingsu-icon-cell:hover { background: var(--osw-inset-hover); }
+.bingsu-icon-cell.selected {
   border-color: var(--osw-accent);
   background: var(--osw-accent-a14);
 }
-.onigiri-icon-cell svg { width: 14px; height: 14px; }
-.onigiri-icon-mask {
+.bingsu-icon-cell svg { width: 14px; height: 14px; }
+.bingsu-icon-mask {
   width: 20px;
   height: 20px;
   background: var(--osw-fg-muted);
@@ -4563,8 +4563,8 @@ html body button.osw-gal-import:active { background: var(--osw-accent); }
   mask-repeat: no-repeat; -webkit-mask-repeat: no-repeat;
   mask-position: center; -webkit-mask-position: center;
 }
-.onigiri-icon-cell.selected .onigiri-icon-mask { background: var(--osw-accent); }
-.onigiri-icon-delete {
+.bingsu-icon-cell.selected .bingsu-icon-mask { background: var(--osw-accent); }
+.bingsu-icon-delete {
   position: absolute;
   top: 2px; right: 2px;
   width: 14px; height: 14px;
@@ -4575,9 +4575,9 @@ html body button.osw-gal-import:active { background: var(--osw-accent); }
   opacity: 0;
   pointer-events: none;
 }
-.onigiri-icon-delete svg { width: 8px; height: 8px; }
-.onigiri-icon-cell:hover .onigiri-icon-delete { opacity: 1; pointer-events: auto; }
-.onigiri-icon-upload {
+.bingsu-icon-delete svg { width: 8px; height: 8px; }
+.bingsu-icon-cell:hover .bingsu-icon-delete { opacity: 1; pointer-events: auto; }
+.bingsu-icon-upload {
   box-sizing: border-box;
   width: 100%;
   height: 48px;
@@ -4595,8 +4595,8 @@ html body button.osw-gal-import:active { background: var(--osw-accent); }
   font-weight: 500;
   margin-bottom: 8px;
 }
-.onigiri-icon-upload:hover { background: var(--osw-inset-hover); }
-.onigiri-icon-upload.is-busy { opacity: 0.55; pointer-events: none; }
+.bingsu-icon-upload:hover { background: var(--osw-inset-hover); }
+.bingsu-icon-upload.is-busy { opacity: 0.55; pointer-events: none; }
 
 /* Font and colour selection intentionally reuse the Icon Picker's modal
    chrome. Only the body changes: a searchable font catalogue or an HSV colour
@@ -5585,16 +5585,16 @@ html body .osw-designer-font-menu-row .osw-organize-fonts-btn:hover {
 
 /* The live menu receives dedicated font rules from patcher.py. The preview
    uses variables instead so its compact typography popup updates instantly. */
-.osw-preview-swidget-row .stat-card.onigiri-stat-card h3 {
+.osw-preview-swidget-row .stat-card.bingsu-stat-card h3 {
   font-family: var(--swidget-label-font, inherit) !important;
 }
 
-.osw-preview-swidget-row .stat-card.onigiri-stat-card .stat-value {
+.osw-preview-swidget-row .stat-card.bingsu-stat-card .stat-value {
   font-family: var(--swidget-number-font, inherit) !important;
 }
 
-.osw-preview-swidget-row .stat-card.onigiri-stat-card .stat-unit,
-.osw-preview-swidget-row .stat-card.onigiri-stat-card .stat-sub {
+.osw-preview-swidget-row .stat-card.bingsu-stat-card .stat-unit,
+.osw-preview-swidget-row .stat-card.bingsu-stat-card .stat-sub {
   font-family: var(--swidget-value-font, inherit) !important;
 }
 
@@ -6398,7 +6398,7 @@ html body .osw-imagelist-add {
 
 /* Production widget CSS is embedded in Settings too. Bound each preview's
    own filtered surface to the same radius without changing the live widget. */
-.osw-designer-preview-stage .stat-card.onigiri-stat-card {
+.osw-designer-preview-stage .stat-card.bingsu-stat-card {
   clip-path: inset(0 round var(--swidget-box-radius, 15px));
 }
 .osw-designer-preview-stage .learner-stats-widget {
@@ -6599,7 +6599,7 @@ html body .osw-pomo-controls .osw-pomo-play:active {
   align-items: stretch;
   transition: opacity 200ms ease;
 }
-.osw-preview-swidget-row .stat-card.onigiri-stat-card {
+.osw-preview-swidget-row .stat-card.bingsu-stat-card {
   flex: 1 1 0;
   width: 0;
   min-width: 0;
@@ -6734,18 +6734,18 @@ html body .osw-pomo-controls .osw-pomo-play:active {
 
 /* ── Heatmap preview ───────────────────────────────────────────────────────── */
 /* The widget itself: real markup (heatmap.js) styled by the real,
-   wholesale-included web/heatmap.css (rules keyed off #onigiri-heatmap-
+   wholesale-included web/heatmap.css (rules keyed off #bingsu-heatmap-
    container, reused verbatim below). This wrapper only maps Anki's own theme
    vars the stylesheet expects to the equivalent --osw-* tokens, same rule as
    Deck Stats/Stats Widgets. */
 .osw-preview-heatmap-wrap {
   width: 100%;
   /* These are the exact shared menu.css values. The wrapper's inline size is
-     also derived from onigiriWidgetLayout by sizeHeatmapPreview(). */
-  --onigiri-widget-pad-scale: 1.4;
-  --onigiri-widget-pad: calc(14px * var(--onigiri-widget-pad-scale));
+     also derived from bingsuWidgetLayout by sizeHeatmapPreview(). */
+  --bingsu-widget-pad-scale: 1.4;
+  --bingsu-widget-pad: calc(14px * var(--bingsu-widget-pad-scale));
 }
-.osw-preview-heatmap-wrap #onigiri-heatmap-container {
+.osw-preview-heatmap-wrap #bingsu-heatmap-container {
   width: 100%;
   height: 100%;
   box-sizing: border-box;
@@ -8517,7 +8517,7 @@ html body .osw-preview-bbar-btn-other {
 
 /* ── Reviewer Header Progress Bar preview ──────────────────────────────────
    A stand-in for the real reviewer header (patcher.py's
-   #onigiri-reviewer-header): the same centred pill of buttons floating over
+   #bingsu-reviewer-header): the same centred pill of buttons floating over
    the reviewer backdrop, with the gauge chip on whichever side is selected.
    The chip deliberately reuses the buttons' own padding, border, and font
    size, because "same height as the buttons" is a promise this preview has to
@@ -10377,7 +10377,7 @@ html body .osw-preview-ovstyle-action-button.is-description {
    The dashed edge is the whole signal: the swatch must stay at full opacity and
    carry no inset ring, or it renders lighter than the grid tiles it is meant to
    be reporting and the two read as different colours. */
-.onigiri-icon-color-slot.is-default {
+.bingsu-icon-color-slot.is-default {
   border-style: dashed;
   border-color: var(--osw-hairline);
 }
@@ -10900,24 +10900,24 @@ html body .osw-action-btn.is-neutral:hover {
    puts that class on <html>. A stage previewing *light* inside a dark Anki
    would inherit the dark card from there, so the light values are re-asserted
    at a specificity the ancestor rule cannot reach. */
-.osw-notifstage:not(.night-mode) .onigiri-notification-card {
-  background: var(--onigiri-notification-bg-light);
-  color: var(--notification-text-light, var(--onigiri-notification-text-light));
+.osw-notifstage:not(.night-mode) .bingsu-notification-card {
+  background: var(--bingsu-notification-bg-light);
+  color: var(--notification-text-light, var(--bingsu-notification-text-light));
 }
 
-.osw-notifstage:not(.night-mode) .onigiri-notification-icon {
+.osw-notifstage:not(.night-mode) .bingsu-notification-icon {
   background: rgba(255, 255, 255, 0.14);
 }
 
 .osw-notifstage:not(.night-mode)
-  .onigiri-notification-card[data-variant="mochi"]
-  .onigiri-notification-icon {
+  .bingsu-notification-card[data-variant="mochi"]
+  .bingsu-notification-icon {
   background: transparent;
 }
 
-.osw-notifstage:not(.night-mode) .onigiri-mini-notification {
-  background: var(--onigiri-notification-bg-light);
-  color: var(--onigiri-notification-text-light);
+.osw-notifstage:not(.night-mode) .bingsu-mini-notification {
+  background: var(--bingsu-notification-bg-light);
+  color: var(--bingsu-notification-text-light);
 }
 
 /* ── picture-card choice ───────────────────────────────────────────────── */

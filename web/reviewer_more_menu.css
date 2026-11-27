@@ -8,7 +8,7 @@
   contain: layout style paint !important;
 }
 
-#onigiri-more-menu-root {
+#bingsu-more-menu-root {
   --rm-font: var(--font-main, "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
   --rm-mono: ui-monospace, "SF Mono", "Geist Mono", Menlo, Monaco, Consolas, monospace;
 
@@ -46,7 +46,7 @@
   pointer-events: none;
 }
 
-:host(.night-mode) #onigiri-more-menu-root {
+:host(.night-mode) #bingsu-more-menu-root {
   /* Dark palette — matte charcoal shell with soft elevated cards */
   --rm-surface: rgba(24, 24, 26, 0.95);
   --rm-surface-solid: #18181a;
@@ -114,7 +114,7 @@
   display: none;
 }
 
-#onigiri-more-menu-root.is-rtl .rm-panel {
+#bingsu-more-menu-root.is-rtl .rm-panel {
   right: auto;
   left: var(--rm-anchor-right, 14px);
   transform-origin: 28px calc(100% + 10px);

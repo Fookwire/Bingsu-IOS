@@ -1,7 +1,7 @@
-"""Compact deck-wide statistics for Onigiri's overview surfaces.
+"""Compact deck-wide statistics for Bingsu's overview surfaces.
 
 The feature is inspired by More Overview Stats 2.1, but keeps data collection
-separate from presentation so Onigiri can render the same calm summary on the
+separate from presentation so Bingsu can render the same calm summary on the
 regular overview and on the finished-deck screen.
 """
 
@@ -139,7 +139,7 @@ def collect_deck_overview_stats(col: Any) -> DeckOverviewStats:
 
 
 def _format_date(value: date) -> str:
-    """Format with Onigiri's selected locale, with an ISO fallback."""
+    """Format with Bingsu's selected locale, with an ISO fallback."""
     try:
         from PyQt6.QtCore import QDate, QLocale
 
@@ -153,7 +153,7 @@ def _format_date(value: date) -> str:
 
 def _detail_item(label: str, value: int) -> str:
     return (
-        '<div class="onigiri-deck-progress-detail">'
+        '<div class="bingsu-deck-progress-detail">'
         f"<span>{html.escape(str(label))}</span>"
         f"<strong>{int(value)}</strong>"
         "</div>"
@@ -197,7 +197,7 @@ def render_deck_overview_stats(col: Any, surface: str = "overview") -> str:
                 "Based on {count} new cards/day",
             ).format(count=stats.new_per_day)
             forecast_html = (
-                '<span class="onigiri-deck-progress-forecast" '
+                '<span class="bingsu-deck-progress-forecast" '
                 f'title="{html.escape(forecast_title, quote=True)}">'
                 f"{html.escape(forecast_text)}"
                 "</span>"
@@ -225,27 +225,27 @@ def render_deck_overview_stats(col: Any, surface: str = "overview") -> str:
         safe_surface = "congrats" if surface == "congrats" else "overview"
 
         return f"""
-        <section class="onigiri-deck-progress onigiri-deck-progress-{safe_surface}"
+        <section class="bingsu-deck-progress bingsu-deck-progress-{safe_surface}"
                  aria-label="{html.escape(progress_label, quote=True)}">
-            <div class="onigiri-deck-progress-heading">
+            <div class="bingsu-deck-progress-heading">
                 <span>{html.escape(progress_label)}</span>
                 <strong>{stats.progress_percent}%</strong>
             </div>
-            <div class="onigiri-deck-progress-track" role="progressbar"
+            <div class="bingsu-deck-progress-track" role="progressbar"
                  aria-valuemin="0" aria-valuemax="100"
                  aria-valuenow="{stats.progress_percent}">
                 <span style="width: {stats.progress_percent}%"></span>
             </div>
-            <div class="onigiri-deck-progress-meta">
+            <div class="bingsu-deck-progress-meta">
                 <span>{html.escape(learned_text)}</span>
                 {forecast_html}
             </div>
-            <details class="onigiri-deck-progress-details">
+            <details class="bingsu-deck-progress-details">
                 <summary>{html.escape(details_label)}</summary>
-                <div class="onigiri-deck-progress-grid">{detail_html}</div>
+                <div class="bingsu-deck-progress-grid">{detail_html}</div>
             </details>
         </section>
         """
     except Exception as exc:
-        print(f"Onigiri: failed to render overview deck stats: {exc}")
+        print(f"Bingsu: failed to render overview deck stats: {exc}")
         return ""

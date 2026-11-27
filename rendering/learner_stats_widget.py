@@ -1,4 +1,4 @@
-# Learner Stats Widget for Onigiri
+# Learner Stats Widget for Bingsu
 
 import html
 import json
@@ -225,7 +225,7 @@ def _get_deck_icon_data(did, name, has_children, custom_deck_icons=None):
     # The picker calls this once per deck; the caller reads the icon map once
     # and passes it in rather than paying a collection read per row.
     if custom_deck_icons is None:
-        custom_deck_icons = config.get_collection_config("onigiri_custom_deck_icons", {})
+        custom_deck_icons = config.get_collection_config("bingsu_custom_deck_icons", {})
     custom_data = custom_deck_icons.get(str(did), {})
     icon_file = custom_data.get("icon")
     
@@ -342,7 +342,7 @@ def _render_deck_picker_html(deck_browser: DeckBrowser, selected_did, labels) ->
         selected_did == "all",
     )]
 
-    custom_deck_icons = config.get_collection_config("onigiri_custom_deck_icons", {})
+    custom_deck_icons = config.get_collection_config("bingsu_custom_deck_icons", {})
     for node, depth, full_path in _flatten_picker_nodes(tree_data.children, []):
         icon_data = _get_deck_icon_data(
             node.deck_id, full_path, bool(node.children), custom_deck_icons
@@ -380,7 +380,7 @@ def saved_row_span(widget_id: str) -> int:
         from ..core import config
         conf = config.get_config_readonly()
         if is_deck_stats_widget_id(widget_id):
-            entry = conf.get("onigiriWidgetLayout", {}).get("grid", {}).get(widget_id, {})
+            entry = conf.get("bingsuWidgetLayout", {}).get("grid", {}).get(widget_id, {})
             return max(1, int(entry.get("row", 2)))
         entry = conf.get("externalWidgetLayout", {}).get("grid", {}).get(widget_id, {})
         return max(1, int(entry.get("row_span", 2)))
@@ -394,7 +394,7 @@ def saved_col_span(widget_id: str) -> int:
         from ..core import config
         conf = config.get_config_readonly()
         if is_deck_stats_widget_id(widget_id):
-            entry = conf.get("onigiriWidgetLayout", {}).get("grid", {}).get(widget_id, {})
+            entry = conf.get("bingsuWidgetLayout", {}).get("grid", {}).get(widget_id, {})
             return max(1, int(entry.get("col", 1)))
         entry = conf.get("externalWidgetLayout", {}).get("grid", {}).get(widget_id, {})
         return max(1, int(entry.get("column_span", 1)))
@@ -441,7 +441,7 @@ def _render_widget(
     is_mini = is_compact and col_span <= 1
     
     # Persistent settings mapping widget ID to selected deck ID
-    saved_decks = config.get_collection_config("onigiri_learner_stats_decks", {})
+    saved_decks = config.get_collection_config("bingsu_learner_stats_decks", {})
     selected_did = saved_decks.get(widget_id, "all")
 
     # Get sorted list of decks
@@ -504,7 +504,7 @@ def _render_widget(
     mature_bar_pct = _pct_of(mature_cnt)
     unseen_bar_pct = _pct_of(unseen_cnt)
 
-    saved_views = config.get_collection_config("onigiri_learner_stats_view", {})
+    saved_views = config.get_collection_config("bingsu_learner_stats_view", {})
     active_view = saved_views.get(widget_id, "grouped") if isinstance(saved_views, dict) else "grouped"
     if active_view not in ("grouped", "bars", "donut"):
         active_view = "grouped"
@@ -542,7 +542,7 @@ def _render_widget(
     script_html = """
     <script>
     (function() {
-        if (window.OnigiriLearnerStatsDialog) return;
+        if (window.BingsuLearnerStatsDialog) return;
 
         function escapeAttr(value) {
             return String(value || '').replace(/["\\\\]/g, '\\\\$&');
@@ -553,11 +553,11 @@ def _render_widget(
         }
 
         function _i18n(key) {
-            const table = window.OnigiriLearnerStatsI18n || {};
+            const table = window.BingsuLearnerStatsI18n || {};
             return table[key] || '';
         }
 
-        window.OnigiriLearnerStatsDialog = {
+        window.BingsuLearnerStatsDialog = {
             state: null,
             open(trigger) {
                 const widget = trigger && trigger.closest ? trigger.closest('.learner-stats-widget') : null;
@@ -665,7 +665,7 @@ def _render_widget(
                     deckId: this.state.pendingDid || 'all'
                 }));
                 if (typeof pycmd === 'function') {
-                    pycmd('onigiri_learner_stats_select_deck:' + payload);
+                    pycmd('bingsu_learner_stats_select_deck:' + payload);
                 }
             },
             finish(widgetId, html) {
@@ -681,14 +681,14 @@ def _render_widget(
             }
         };
 
-        window.OnigiriLearnerStats = window.OnigiriLearnerStats || {
+        window.BingsuLearnerStats = window.BingsuLearnerStats || {
             setView(trigger, view) {
                 const widget = trigger && trigger.closest ? trigger.closest('.learner-stats-widget') : null;
                 if (!widget || widget.getAttribute('data-active-view') === view) return;
                 widget.setAttribute('data-active-view', view);
                 const widgetId = widget.dataset.widgetId;
                 if (typeof pycmd === 'function' && widgetId) {
-                    pycmd('onigiri_learner_stats_select_view:' + encodeURIComponent(JSON.stringify({ widgetId, view })));
+                    pycmd('bingsu_learner_stats_select_view:' + encodeURIComponent(JSON.stringify({ widgetId, view })));
                 }
             },
             cycleView(trigger) {
@@ -714,7 +714,7 @@ def _render_widget(
     # primary source; this global exists so the JS never has to fall back to a
     # hardcoded English literal.
     i18n_script = (
-        "<script>window.OnigiriLearnerStatsI18n = "
+        "<script>window.BingsuLearnerStatsI18n = "
         + json.dumps({
             "all_decks": labels["all_decks"],
             "save": labels["save"],
@@ -967,16 +967,16 @@ def _render_widget(
     # button shows the active style and advances through the three choices on
     # click; the separate pill remains solely for deck selection.
     narrow_switcher_html = f"""
-                    <button type="button" class="learner-stats-view-cycle" aria-label="{html.escape(view_labels[active_view], quote=True)}" title="{html.escape(view_labels[active_view], quote=True)}" onclick="window.OnigiriLearnerStats && window.OnigiriLearnerStats.cycleView(this);">
+                    <button type="button" class="learner-stats-view-cycle" aria-label="{html.escape(view_labels[active_view], quote=True)}" title="{html.escape(view_labels[active_view], quote=True)}" onclick="window.BingsuLearnerStats && window.BingsuLearnerStats.cycleView(this);">
                         {narrow_switcher_icons}
                     </button>"""
     switcher_html = "" if is_compact else (
         narrow_switcher_html if col_span == 1 else f"""
                     <div class="learner-stats-switcher" role="tablist" aria-label="{labels["view_switcher"]}">
                         <div class="learner-stats-switcher-indicator"></div>
-                        <button type="button" class="learner-stats-switcher-btn" data-view="grouped" aria-label="{labels["view_grouped"]}" title="{labels["view_grouped"]}" onclick="window.OnigiriLearnerStats && window.OnigiriLearnerStats.setView(this,'grouped');">{icon_grouped}</button>
-                        <button type="button" class="learner-stats-switcher-btn" data-view="bars" aria-label="{labels["view_bars"]}" title="{labels["view_bars"]}" onclick="window.OnigiriLearnerStats && window.OnigiriLearnerStats.setView(this,'bars');">{icon_bars}</button>
-                        <button type="button" class="learner-stats-switcher-btn" data-view="donut" aria-label="{labels["view_donut"]}" title="{labels["view_donut"]}" onclick="window.OnigiriLearnerStats && window.OnigiriLearnerStats.setView(this,'donut');">{icon_donut}</button>
+                        <button type="button" class="learner-stats-switcher-btn" data-view="grouped" aria-label="{labels["view_grouped"]}" title="{labels["view_grouped"]}" onclick="window.BingsuLearnerStats && window.BingsuLearnerStats.setView(this,'grouped');">{icon_grouped}</button>
+                        <button type="button" class="learner-stats-switcher-btn" data-view="bars" aria-label="{labels["view_bars"]}" title="{labels["view_bars"]}" onclick="window.BingsuLearnerStats && window.BingsuLearnerStats.setView(this,'bars');">{icon_bars}</button>
+                        <button type="button" class="learner-stats-switcher-btn" data-view="donut" aria-label="{labels["view_donut"]}" title="{labels["view_donut"]}" onclick="window.BingsuLearnerStats && window.BingsuLearnerStats.setView(this,'donut');">{icon_donut}</button>
                     </div>"""
     )
 
@@ -1036,11 +1036,11 @@ def _render_widget(
     html_widget = f"""
     <div class="learner-stats-widget" data-widget-id="{escaped_widget_id}" data-selected-did="{html.escape(str(selected_did), quote=True)}" data-picker-payload="{picker_payload}" data-active-view="{active_view}" data-chart-type="{"full" if is_full_chart else "minimal"}" data-grid-span="{col_span}x{row_span}">
         <div class="learner-stats-header">
-            <div class="learner-stats-header-row onigiri-widget-head">
+            <div class="learner-stats-header-row bingsu-widget-head">
                 <h3>{labels["title"]}</h3>
                 <div class="learner-stats-header-controls">
                     {switcher_html}
-                    <div class="learner-stats-deck-trigger" role="button" tabindex="0" onclick="window.OnigiriLearnerStatsDialog && window.OnigiriLearnerStatsDialog.open(this);"><span class="learner-stats-deck-trigger-label">{html.escape(deck_label)}</span><span class="learner-stats-deck-trigger-chevron">{icon_chevron}</span></div>
+                    <div class="learner-stats-deck-trigger" role="button" tabindex="0" onclick="window.BingsuLearnerStatsDialog && window.BingsuLearnerStatsDialog.open(this);"><span class="learner-stats-deck-trigger-label">{html.escape(deck_label)}</span><span class="learner-stats-deck-trigger-chevron">{icon_chevron}</span></div>
                 </div>
             </div>
         </div>
@@ -1063,7 +1063,7 @@ def _render_widget(
 
 def render_learner_stats_widget(deck_browser: DeckBrowser, content) -> None:
     # This is a base template hook. The layout editor uses it to detect the widget.
-    # Onigiri will render instances directly via onigiri_renderer.py.
+    # Bingsu will render instances directly via bingsu_renderer.py.
     pass
 
 def init():

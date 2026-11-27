@@ -63,18 +63,18 @@ from ..rendering.theme_palette import visible_color
 ADDON_PACKAGE = __name__.split(".")[0]
 WEB = f"/_addons/{ADDON_PACKAGE}/things_theme/web"
 ROOT_WEB = f"/_addons/{ADDON_PACKAGE}/web"
-EMBEDDED_IN_ONIGIRI = True
+EMBEDDED_IN_BINGSU = True
 
-# Kome ships inside Onigiri and uses Onigiri's root web-export registration.
+# Kome ships inside Bingsu and uses Bingsu's root web-export registration.
 # Registering this package a second time with a narrower regex replaces the
 # root rule in Anki, which blocks Classic's /web CSS and images after the user
 # has visited Kome once.
 
 
 def _config() -> Dict[str, Any]:
-    from ..core import config as onigiri_config
+    from ..core import config as bingsu_config
 
-    root = onigiri_config.get_config_readonly()
+    root = bingsu_config.get_config_readonly()
     nested = root.get("things_theme", {}) if isinstance(root, dict) else {}
     cfg = dict(nested) if isinstance(nested, dict) else {}
     colors = root.get("colors", {}) if isinstance(root, dict) else {}
@@ -86,7 +86,7 @@ def _config() -> Dict[str, Any]:
     # Kome is a layout, not a second colour theme. It consumes the same
     # light/dark palettes and appearance mode as Classic so switching layouts
     # never changes the user's colours (and official themes work on both).
-    cfg["theme"] = root.get("onigiriThemeMode", "system")
+    cfg["theme"] = root.get("bingsuThemeMode", "system")
     cfg["_palette_light"] = light
     cfg["_palette_dark"] = dark
     # An empty value inherits the shared palette. Preserve an explicit
@@ -96,12 +96,12 @@ def _config() -> Dict[str, Any]:
     cfg.setdefault("background_dark", "")
     # Older Kome profiles persisted the retired cream/ink paper defaults as
     # explicit overrides. Treat those exact legacy values as "inherit" so
-    # they cannot replace Onigiri's #eeeeee / #171717 canvas.
+    # they cannot replace Bingsu's #eeeeee / #171717 canvas.
     if str(cfg.get("background_light", "")).lower() == "#f6f3ec":
         cfg["background_light"] = ""
     if str(cfg.get("background_dark", "")).lower() == "#0b0c0f":
         cfg["background_dark"] = ""
-    active = dark if onigiri_config.effective_night_mode(root) else light
+    active = dark if bingsu_config.effective_night_mode(root) else light
     cfg["accent"] = active.get("--accent-color", "#0077c8")
 
     # Density is intentionally no longer a user-facing choice. Visibility and
@@ -225,12 +225,12 @@ def _surface_effect_vars(cfg: Dict[str, Any]) -> tuple[str, bool]:
 
 
 def is_enabled() -> bool:
-    """Whether Onigiri currently delegates its main menu to Kome."""
+    """Whether Bingsu currently delegates its main menu to Kome."""
     try:
-        from ..core import config as onigiri_config
+        from ..core import config as bingsu_config
 
-        return onigiri_config.get_config_readonly().get(
-            "onigiri_ui_theme", "classic"
+        return bingsu_config.get_config_readonly().get(
+            "bingsu_ui_theme", "classic"
         ) == "things3"
     except Exception:
         return False
@@ -549,7 +549,7 @@ def on_webview_will_set_content(web_content: WebContent, context: Optional[Any])
             web_content.css.append(f"{WEB}/advanced-stats.css")
             web_content.js.append(f"{WEB}/advanced-stats.js")
         # Reuse Classic's deck-icon chooser verbatim. Its commands and
-        # collection-backed storage already belong to Onigiri's root webview
+        # collection-backed storage already belong to Bingsu's root webview
         # handler; Kome only needs to load the same modal frontend.
         from ..rendering import webview_handlers as _webview_handlers
 
@@ -1399,14 +1399,14 @@ def _mark_sidebar_active(state: Optional[str] = None) -> None:
 
 
 def _open_settings() -> None:
-    """Open Onigiri's Themes page, which owns Kome configuration."""
+    """Open Bingsu's Themes page, which owns Kome configuration."""
     try:
         from ..settings_web.dialog import open_settings
 
         open_settings("themes", parent=mw)
     except Exception as e:
         try:
-            from ..ui_kit.onigiri_notifications import notify_warning as showWarning
+            from ..ui_kit.bingsu_notifications import notify_warning as showWarning
             showWarning(f"Bingsu Kome settings: {e}")
         except Exception:
             pass
@@ -2530,10 +2530,10 @@ def _studied_today_by_deck() -> Dict[int, int]:
 def _custom_deck_icons() -> Dict[str, Any]:
     """Return the exact per-deck icon store used by the Classic renderer."""
     try:
-        from ..core import config as onigiri_config
+        from ..core import config as bingsu_config
 
-        stored = onigiri_config.get_collection_config(
-            "onigiri_custom_deck_icons", {}
+        stored = bingsu_config.get_collection_config(
+            "bingsu_custom_deck_icons", {}
         )
         return stored if isinstance(stored, dict) else {}
     except Exception:
@@ -3264,7 +3264,7 @@ def on_reviewer_will_answer_card(proceed_ease, reviewer, card):
 # --------------------------------------------------------------------------- #
 # Register hooks
 # --------------------------------------------------------------------------- #
-if not EMBEDDED_IN_ONIGIRI:
+if not EMBEDDED_IN_BINGSU:
     gui_hooks.webview_will_set_content.append(on_webview_will_set_content)
     gui_hooks.deck_browser_will_render_content.append(
         on_deck_browser_will_render_content
@@ -3276,25 +3276,25 @@ if not EMBEDDED_IN_ONIGIRI:
 # after every page's dynamic styling finishes, so we use it to detect the
 # congrats URL and inject our redesign.
 try:
-    if not EMBEDDED_IN_ONIGIRI:
+    if not EMBEDDED_IN_BINGSU:
         gui_hooks.webview_did_inject_style_into_page.append(
             on_webview_did_inject_style_into_page
         )
 except Exception:
     pass
-if not EMBEDDED_IN_ONIGIRI:
+if not EMBEDDED_IN_BINGSU:
     gui_hooks.state_did_change.append(on_state_did_change)
     gui_hooks.reviewer_did_show_question.append(on_show_question)
     gui_hooks.reviewer_did_show_answer.append(on_show_answer)
     gui_hooks.reviewer_will_end.append(on_reviewer_will_end)
 try:
-    if not EMBEDDED_IN_ONIGIRI:
+    if not EMBEDDED_IN_BINGSU:
         gui_hooks.reviewer_will_answer_card.append(on_reviewer_will_answer_card)
 except Exception:
     pass
 
 # Sidebar nav: route `ba:*` pycmds to the right mw methods + settings dialog.
-if not EMBEDDED_IN_ONIGIRI:
+if not EMBEDDED_IN_BINGSU:
     gui_hooks.webview_did_receive_js_message.append(_on_js_message)
 
 
@@ -3549,13 +3549,13 @@ def _setup_sidebar_shortcuts() -> None:
         pass
 
 
-if not EMBEDDED_IN_ONIGIRI:
+if not EMBEDDED_IN_BINGSU:
     gui_hooks.main_window_did_init.append(_setup_sidebar_shortcuts)
 
 # Sync status indicator — show pending/full when there are changes to push,
 # and a soft pulse while a sync is in progress.
 try:
-    if not EMBEDDED_IN_ONIGIRI:
+    if not EMBEDDED_IN_BINGSU:
         gui_hooks.sync_will_start.append(lambda *a: _push_sidebar_sync("active"))
         gui_hooks.sync_did_finish.append(lambda *a: _refresh_sync_status())
 except Exception:
@@ -3565,20 +3565,20 @@ except Exception:
 # mw._sync_collection_and_media, so it needs mw to exist — install on
 # main_window_did_init.
 try:
-    if not EMBEDDED_IN_ONIGIRI:
+    if not EMBEDDED_IN_BINGSU:
         gui_hooks.main_window_did_init.append(lambda *a: _install_silent_sync())
 except Exception:
     pass
 
 # Hide Anki's top toolbar webview as soon as the main window / profile is up.
-if not EMBEDDED_IN_ONIGIRI:
+if not EMBEDDED_IN_BINGSU:
     gui_hooks.main_window_did_init.append(_apply_chrome)
     gui_hooks.profile_did_open.append(_apply_chrome)
 
 # Re-tag the toolbar after Anki rebuilds it (e.g. sync-status redraw), so the
 # active-section highlight isn't lost. Optional — guarded per add-on policy.
 try:
-    if not EMBEDDED_IN_ONIGIRI:
+    if not EMBEDDED_IN_BINGSU:
         gui_hooks.top_toolbar_did_redraw.append(lambda tb: _mark_toolbar_state())
 except Exception:
     pass
@@ -3587,7 +3587,7 @@ except Exception:
 # entry point — including the Tools-menu "Preferences…" / app-menu shortcut
 # the user already knows — surfaces our settings alongside Anki's own.
 try:
-    if not EMBEDDED_IN_ONIGIRI:
+    if not EMBEDDED_IN_BINGSU:
         from .settings import install_into_preferences
 
         install_into_preferences()
@@ -3597,7 +3597,7 @@ except Exception:
 # Anki add-on dialog "Config" → open Preferences on the Anki Design tab
 # instead of dumping raw JSON in front of the user.
 try:
-    if not EMBEDDED_IN_ONIGIRI:
+    if not EMBEDDED_IN_BINGSU:
         mw.addonManager.setConfigAction(__name__, _open_settings)
 except Exception:
     pass
@@ -3624,19 +3624,19 @@ def _add_tools_menu_action() -> None:
         sc2.activated.connect(_open_settings)
     except Exception as e:
         try:
-            from ..ui_kit.onigiri_notifications import notify_warning as showWarning
+            from ..ui_kit.bingsu_notifications import notify_warning as showWarning
             showWarning(f"Bingsu: failed to register settings shortcut: {e}")
         except Exception:
             pass
 
 
-if not EMBEDDED_IN_ONIGIRI:
+if not EMBEDDED_IN_BINGSU:
     gui_hooks.main_window_did_init.append(_add_tools_menu_action)
 
 
 # Add Card window redesign — separate module so the file stays focused.
 try:
-    if not EMBEDDED_IN_ONIGIRI:
+    if not EMBEDDED_IN_BINGSU:
         from . import addcard as _addcard
 
         _addcard.register()
@@ -3649,7 +3649,7 @@ except Exception as _e:
 
 # Inline reviewer editing — replaces the EditCurrent dialog.
 try:
-    if not EMBEDDED_IN_ONIGIRI:
+    if not EMBEDDED_IN_BINGSU:
         from . import editreviewer as _editreviewer
 
         _editreviewer.register()
@@ -4983,7 +4983,7 @@ def _dev_showcase_arrange() -> None:
         pass
 
 
-if not EMBEDDED_IN_ONIGIRI:
+if not EMBEDDED_IN_BINGSU:
     gui_hooks.profile_did_open.append(_dev_showcase_arrange)
     gui_hooks.profile_did_open.append(_dev_start)
     gui_hooks.profile_did_open.append(_dev_cmd_start)

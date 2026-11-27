@@ -5,17 +5,17 @@
 <style>
   /* First-paint guard. Kept in the template rather than the large bundled
      stylesheet so Chromium sees it before parsing any of the settings assets. */
-  html, body { background: /*__ONIGIRI_BOOT_BACKGROUND__*/; }
+  html, body { background: /*__BINGSU_BOOT_BACKGROUND__*/; }
   html.osw-booting .osw-shell,
   html.osw-booting .osw-toast { visibility: hidden !important; }
 </style>
 <style>
-  /*__ONIGIRI_FONT_FACE__*/
+  /*__BINGSU_FONT_FACE__*/
   /* The Main Menu's real widget rules, lifted from web/menu.css so previews
      render with them rather than with a lookalike. Its class names (.stat-card,
      .star-rating, …) are disjoint from the dialog's own .osw-* namespace. */
-  /*__ONIGIRI_REAL_WIDGET_CSS__*/
-  /*__ONIGIRI_SETTINGS_CSS__*/
+  /*__BINGSU_REAL_WIDGET_CSS__*/
+  /*__BINGSU_SETTINGS_CSS__*/
 </style>
 </head>
 <body>
@@ -80,15 +80,15 @@
   <div class="osw-toast" id="oswToast" role="status" aria-live="polite"></div>
 
 <script>
-  const ONIGIRI_SETTINGS_CONTEXT = /*__ONIGIRI_SETTINGS_CONTEXT__*/null;
+  const BINGSU_SETTINGS_CONTEXT = /*__BINGSU_SETTINGS_CONTEXT__*/null;
   /* Settings supplies its own illustrative data. The renderer itself is the
      production menu renderer; only its menu auto-boot is disabled here. */
-  window.onigiriHeatmapDisableAutoRender = true;
-  /*__ONIGIRI_HEATMAP_JS__*/
+  window.bingsuHeatmapDisableAutoRender = true;
+  /*__BINGSU_HEATMAP_JS__*/
   /* The settings previews call the same element factory as live reviewer
      notifications, so notification markup cannot drift into a lookalike. */
-  /*__ONIGIRI_NOTIFICATIONS_JS__*/
-  /*__ONIGIRI_SETTINGS_JS__*/
+  /*__BINGSU_NOTIFICATIONS_JS__*/
+  /*__BINGSU_SETTINGS_JS__*/
 </script>
 </body>
 </html>

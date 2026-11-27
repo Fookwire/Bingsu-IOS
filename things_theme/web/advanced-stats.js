@@ -1,7 +1,7 @@
 /* Kome advanced statistics.
  *
  * This is deliberately dependency-free. Charts are SVG/HTML generated in the
- * existing Onigiri WebView, period changes use the established ba:* bridge,
+ * existing Bingsu WebView, period changes use the established ba:* bridge,
  * and every icon is an inline Lucide/Lucide Lab glyph using currentColor.
  */
 (function () {
@@ -59,7 +59,7 @@
   function number(value, digits) {
     var n = Number(value || 0);
     if (!isFinite(n)) n = 0;
-    return n.toLocaleString((window.ONIGIRI_LOCALIZATION || {}).locale || "en", {
+    return n.toLocaleString((window.BINGSU_LOCALIZATION || {}).locale || "en", {
       maximumFractionDigits: digits == null ? 1 : digits,
     });
   }
@@ -77,14 +77,14 @@
     return values.map(function (value, index) {
       var x = pad + ((width - pad * 2) * index / Math.max(1, values.length - 1));
       var y = height - pad - ((height - pad * 2) * (value - min) / span);
-      return (index ? "L" : window.onigiriText("M")) + x.toFixed(1) + " " + y.toFixed(1);
+      return (index ? "L" : window.bingsuText("M")) + x.toFixed(1) + " " + y.toFixed(1);
     }).join(" ");
   }
 
   function spark(values, className, label) {
     var d = pathFor(values, 320, 96, 6);
-    if (!d) return window.onigiriTemplate('<div class="ba-as-empty-chart">No activity in this period</div>');
-    return '<svg class="ba-as-spark ' + (className || "") + '" viewBox="0 0 320 96" preserveAspectRatio="none" role="img" aria-label="' + esc(label || window.onigiriText("Trend")) + '">' +
+    if (!d) return window.bingsuTemplate('<div class="ba-as-empty-chart">No activity in this period</div>');
+    return '<svg class="ba-as-spark ' + (className || "") + '" viewBox="0 0 320 96" preserveAspectRatio="none" role="img" aria-label="' + esc(label || window.bingsuText("Trend")) + '">' +
       '<path class="ba-as-gridline" d="M6 24H314M6 48H314M6 72H314"/>' +
       '<path class="ba-as-spark-line" d="' + d + '"/>' +
       '</svg>';
@@ -92,10 +92,10 @@
 
   function periods() {
     var options = [
-      [window.onigiriText("today"), window.onigiriText("Today")], ["7d", "7D"], ["30d", "30D"],
-      ["90d", "90D"], ["12m", "1Y"], ["all", window.onigiriText("All")],
+      [window.bingsuText("today"), window.bingsuText("Today")], ["7d", "7D"], ["30d", "30D"],
+      ["90d", "90D"], ["12m", "1Y"], ["all", window.bingsuText("All")],
     ];
-    return window.onigiriTemplate('<div class="ba-as-periods" role="group" aria-label="Statistics range">') +
+    return window.bingsuTemplate('<div class="ba-as-periods" role="group" aria-label="Statistics range">') +
       options.map(function (item) {
         var isActive = state.period === item[0];
         return '<button type="button" class="ba-as-period' + (isActive ? " is-active" : "") + '" data-ba-as-period="' + item[0] + '" aria-pressed="' + isActive + '">' + item[1] + '</button>';
@@ -115,9 +115,9 @@
     var scores = data.scores || {};
     var activity = data.activity || {};
     return '<div class="ba-as-score-grid">' +
-      metricCard(window.onigiriText("Retention"), "target", (scores.retention || {}).value, window.onigiriText("Mature cards remembered"), "accent") +
-      metricCard(window.onigiriText("Consistency"), "activity", (scores.consistency || {}).value, number(activity.daysActive, 0) + window.onigiriText(" active days"), "green") +
-      metricCard(window.onigiriText("Efficiency"), "zap", (scores.efficiency || {}).value, window.onigiriText("Accuracy balanced with pace"), "gold") +
+      metricCard(window.bingsuText("Retention"), "target", (scores.retention || {}).value, window.bingsuText("Mature cards remembered"), "accent") +
+      metricCard(window.bingsuText("Consistency"), "activity", (scores.consistency || {}).value, number(activity.daysActive, 0) + window.bingsuText(" active days"), "green") +
+      metricCard(window.bingsuText("Efficiency"), "zap", (scores.efficiency || {}).value, window.bingsuText("Accuracy balanced with pace"), "gold") +
       '</div>';
   }
 
@@ -127,13 +127,13 @@
     var lapse = data.lapseAnalysis || {};
     var velocity = data.learningVelocity || {};
     var items = [
-      ["calendar", window.onigiriText("Current streak"), number(activity.currentStreak, 0), window.onigiriText("days")],
-      ["trend", window.onigiriText("Longest streak"), number(activity.longestStreak, 0), window.onigiriText("days")],
-      ["brain", window.onigiriText("Mature cards"), number(mature.totalMature, 0), window.onigiriText("cards")],
-      ["rotate", window.onigiriText("Lapses"), number(lapse.totalLapses, 0), number(lapse.lapseRate) + "% " + window.onigiriText("rate")],
-      ["rocket", window.onigiriText("Learning velocity"), number(velocity.newCardsPerDay), window.onigiriText("new / day")],
+      ["calendar", window.bingsuText("Current streak"), number(activity.currentStreak, 0), window.bingsuText("days")],
+      ["trend", window.bingsuText("Longest streak"), number(activity.longestStreak, 0), window.bingsuText("days")],
+      ["brain", window.bingsuText("Mature cards"), number(mature.totalMature, 0), window.bingsuText("cards")],
+      ["rotate", window.bingsuText("Lapses"), number(lapse.totalLapses, 0), number(lapse.lapseRate) + "% " + window.bingsuText("rate")],
+      ["rocket", window.bingsuText("Learning velocity"), number(velocity.newCardsPerDay), window.bingsuText("new / day")],
     ];
-    return window.onigiriTemplate('<section class="ba-as-card ba-as-summary"><div class="ba-as-section-head"><div><span class="ba-as-eyebrow">Activity</span><h3>Study pulse</h3></div></div><div class="ba-as-summary-grid">') +
+    return window.bingsuTemplate('<section class="ba-as-card ba-as-summary"><div class="ba-as-section-head"><div><span class="ba-as-eyebrow">Activity</span><h3>Study pulse</h3></div></div><div class="ba-as-summary-grid">') +
       items.map(function (item) {
         return '<div class="ba-as-summary-item">' + icon(item[0]) + '<span>' + esc(item[1]) + '</span><strong>' + esc(item[2]) + '</strong><small>' + esc(item[3]) + '</small></div>';
       }).join("") + '</div></section>';
@@ -142,45 +142,45 @@
   function renderMetrics(data) {
     var metrics = data.metricsOverTime || {};
     var lines = [
-      [window.onigiriText("Retention"), metrics.retention || [], "ba-as-line-accent"],
-      [window.onigiriText("Consistency"), metrics.consistency || [], "ba-as-line-green"],
-      [window.onigiriText("Efficiency"), metrics.efficiency || [], "ba-as-line-gold"],
+      [window.bingsuText("Retention"), metrics.retention || [], "ba-as-line-accent"],
+      [window.bingsuText("Consistency"), metrics.consistency || [], "ba-as-line-green"],
+      [window.bingsuText("Efficiency"), metrics.efficiency || [], "ba-as-line-gold"],
     ];
-    return window.onigiriTemplate('<section class="ba-as-card ba-as-wide"><div class="ba-as-section-head"><div><span class="ba-as-eyebrow">Trajectory</span><h3>Key metrics over time</h3></div><div class="ba-as-legend">') +
+    return window.bingsuTemplate('<section class="ba-as-card ba-as-wide"><div class="ba-as-section-head"><div><span class="ba-as-eyebrow">Trajectory</span><h3>Key metrics over time</h3></div><div class="ba-as-legend">') +
       lines.map(function (line) { return '<span class="' + line[2] + '"><i></i>' + line[0] + '</span>'; }).join("") +
       '</div></div><div class="ba-as-multi-chart">' +
-      lines.map(function (line) { return spark(line[1], line[2], line[0] + " · " + window.onigiriText("Trend")); }).join("") +
+      lines.map(function (line) { return spark(line[1], line[2], line[0] + " · " + window.bingsuText("Trend")); }).join("") +
       '</div></section>';
   }
 
   function renderUsage(data) {
     var trends = data.usageTrends || {};
     var items = [
-      ["timer", window.onigiriText("Duration"), trends.duration || {}, window.onigiriText("min / active day"), "accent"],
-      [window.onigiriText("cards"), window.onigiriText("Cards reviewed"), trends.cardsReviewed || {}, window.onigiriText("cards / active day"), "green"],
-      ["clock", window.onigiriText("Answer pace"), trends.secondsPerCard || {}, window.onigiriText("seconds / card"), "gold"],
+      ["timer", window.bingsuText("Duration"), trends.duration || {}, window.bingsuText("min / active day"), "accent"],
+      [window.bingsuText("cards"), window.bingsuText("Cards reviewed"), trends.cardsReviewed || {}, window.bingsuText("cards / active day"), "green"],
+      ["clock", window.bingsuText("Answer pace"), trends.secondsPerCard || {}, window.bingsuText("seconds / card"), "gold"],
     ];
-    return window.onigiriTemplate('<section class="ba-as-block"><div class="ba-as-section-head"><div><span class="ba-as-eyebrow">Volume</span><h3>Usage trends</h3></div></div><div class="ba-as-usage-grid">') +
+    return window.bingsuTemplate('<section class="ba-as-block"><div class="ba-as-section-head"><div><span class="ba-as-eyebrow">Volume</span><h3>Usage trends</h3></div></div><div class="ba-as-usage-grid">') +
       items.map(function (item) {
-        return '<article class="ba-as-card ba-as-usage ba-as-tone-' + item[4] + '"><div class="ba-as-card-kicker">' + icon(item[0]) + '<span>' + item[1] + '</span></div><strong>' + number(item[2].avg) + '</strong><small>' + item[3] + '</small>' + spark(item[2].data || [], "", item[1] + " · " + window.onigiriText("Trend")) + '</article>';
+        return '<article class="ba-as-card ba-as-usage ba-as-tone-' + item[4] + '"><div class="ba-as-card-kicker">' + icon(item[0]) + '<span>' + item[1] + '</span></div><strong>' + number(item[2].avg) + '</strong><small>' + item[3] + '</small>' + spark(item[2].data || [], "", item[1] + " · " + window.bingsuText("Trend")) + '</article>';
       }).join("") + '</div></section>';
   }
 
   function renderTimeOfDay(data) {
     var iconNames = { Morning: "sunrise", Afternoon: "sun", Evening: "sunset", Night: "moon" };
-    return window.onigiriTemplate('<section class="ba-as-block"><div class="ba-as-section-head"><div><span class="ba-as-eyebrow">Timing</span><h3>Performance by time of day</h3></div></div><div class="ba-as-time-grid">') +
+    return window.bingsuTemplate('<section class="ba-as-block"><div class="ba-as-section-head"><div><span class="ba-as-eyebrow">Timing</span><h3>Performance by time of day</h3></div></div><div class="ba-as-time-grid">') +
       (data.timeOfDay || []).map(function (item) {
-        return '<article class="ba-as-card ba-as-time">' + icon(iconNames[item.period] || "clock") + '<div><strong>' + esc(window.onigiriText(item.period)) + '</strong><small>' + esc(({"6 AM - 12 PM": "06:00–12:00", "12 PM - 6 PM": "12:00–18:00", "6 PM - 12 AM": "18:00–00:00", "12 AM - 6 AM": "00:00–06:00"})[item.range] || item.range) + '</small></div><b>' + number(item.pct, 0) + window.onigiriTemplate('%</b><div class="ba-as-time-metrics"><span>Retention <strong>') + number(item.retention) + window.onigiriTemplate('%</strong></span><span>Efficiency <strong>') + number(item.efficiency) + '</strong></span></div></article>';
+        return '<article class="ba-as-card ba-as-time">' + icon(iconNames[item.period] || "clock") + '<div><strong>' + esc(window.bingsuText(item.period)) + '</strong><small>' + esc(({"6 AM - 12 PM": "06:00–12:00", "12 PM - 6 PM": "12:00–18:00", "6 PM - 12 AM": "18:00–00:00", "12 AM - 6 AM": "00:00–06:00"})[item.range] || item.range) + '</small></div><b>' + number(item.pct, 0) + window.bingsuTemplate('%</b><div class="ba-as-time-metrics"><span>Retention <strong>') + number(item.retention) + window.bingsuTemplate('%</strong></span><span>Efficiency <strong>') + number(item.efficiency) + '</strong></span></div></article>';
       }).join("") + '</div></section>';
   }
 
   function performanceTable(title, iconName, rows, isTag) {
     var tableRows = Array.isArray(rows) ? rows : [];
     var id = isTag ? "tags" : "topics";
-    var filterLabel = esc(window.onigiriText(isTag ? "Filter tags" : "Filter topics"));
-    return '<section class="ba-as-card ba-as-table-card" data-ba-as-table="' + id + window.onigiriTemplate('"><div class="ba-as-section-head"><div><span class="ba-as-eyebrow">Breakdown</span><h3>') + icon(iconName) + esc(title) + '</h3></div><label class="ba-as-search">' + icon("search") + '<input type="search" data-ba-as-search="' + id + '" placeholder="' + filterLabel + '" aria-label="' + filterLabel + window.onigiriTemplate('"></label></div><div class="ba-as-table-scroll"><table><thead><tr><th>Name</th>') + (isTag ? window.onigiriTemplate('<th>Reviews</th>') : '') + window.onigiriTemplate('<th>Retention</th><th>Efficiency</th></tr></thead><tbody>') +
+    var filterLabel = esc(window.bingsuText(isTag ? "Filter tags" : "Filter topics"));
+    return '<section class="ba-as-card ba-as-table-card" data-ba-as-table="' + id + window.bingsuTemplate('"><div class="ba-as-section-head"><div><span class="ba-as-eyebrow">Breakdown</span><h3>') + icon(iconName) + esc(title) + '</h3></div><label class="ba-as-search">' + icon("search") + '<input type="search" data-ba-as-search="' + id + '" placeholder="' + filterLabel + '" aria-label="' + filterLabel + window.bingsuTemplate('"></label></div><div class="ba-as-table-scroll"><table><thead><tr><th>Name</th>') + (isTag ? window.bingsuTemplate('<th>Reviews</th>') : '') + window.bingsuTemplate('<th>Retention</th><th>Efficiency</th></tr></thead><tbody>') +
       tableRows.map(function (row) {
-        var name = row.name || row.category || row.tag || row.fullTag || window.onigiriText("Untitled");
+        var name = row.name || row.category || row.tag || row.fullTag || window.bingsuText("Untitled");
         return '<tr data-ba-as-name="' + esc(String(name).toLowerCase()) + '"><td title="' + esc(row.fullName || row.fullCategory || row.fullTag || name) + '">' + esc(name) + '</td>' + (isTag ? '<td>' + number(row.reviews || row.reviewCount, 0) + '</td>' : '') + '<td><span class="ba-as-cell-meter"><i style="width:' + clamp(row.retention, 0, 100) + '%"></i></span>' + number(row.retention) + '%</td><td>' + number(row.efficiency) + '</td></tr>';
       }).join("") + '</tbody></table></div></section>';
   }
@@ -189,7 +189,7 @@
     var session = data.sessionAnalysis || {};
     var dist = session.distribution || [];
     var max = Math.max.apply(Math, dist.map(function (item) { return Number(item.pct || 0); }).concat([1]));
-    return window.onigiriTemplate('<section class="ba-as-card"><div class="ba-as-section-head"><div><span class="ba-as-eyebrow">Rhythm</span><h3>') + icon("timer") + window.onigiriTemplate('Session analysis</h3></div></div><div class="ba-as-mini-stats"><span><strong>') + number(session.avgSessionLength, 0) + window.onigiriTemplate('</strong>avg min</span><span><strong>') + number(session.medianSessionLength, 0) + window.onigiriTemplate('</strong>median min</span><span><strong>') + number(session.sessionsPerDay) + window.onigiriTemplate('</strong>sessions / day</span></div><div class="ba-as-horizontal-bars">') +
+    return window.bingsuTemplate('<section class="ba-as-card"><div class="ba-as-section-head"><div><span class="ba-as-eyebrow">Rhythm</span><h3>') + icon("timer") + window.bingsuTemplate('Session analysis</h3></div></div><div class="ba-as-mini-stats"><span><strong>') + number(session.avgSessionLength, 0) + window.bingsuTemplate('</strong>avg min</span><span><strong>') + number(session.medianSessionLength, 0) + window.bingsuTemplate('</strong>median min</span><span><strong>') + number(session.sessionsPerDay) + window.bingsuTemplate('</strong>sessions / day</span></div><div class="ba-as-horizontal-bars">') +
       dist.map(function (item) { return '<div><span>' + esc(({"6 AM - 12 PM": "06:00–12:00", "12 PM - 6 PM": "12:00–18:00", "6 PM - 12 AM": "18:00–00:00", "12 AM - 6 AM": "00:00–06:00"})[item.range] || item.range) + '</span><i><b style="width:' + (Number(item.pct || 0) / max * 100) + '%"></b></i><strong>' + number(item.pct, 0) + '%</strong></div>'; }).join("") + '</div></section>';
   }
 
@@ -197,31 +197,31 @@
     var interval = data.retentionByInterval || {};
     var labels = interval.labels || [];
     var values = interval.retention || [];
-    return window.onigiriTemplate('<section class="ba-as-card"><div class="ba-as-section-head"><div><span class="ba-as-eyebrow">Memory</span><h3>') + icon("brain") + window.onigiriTemplate('Retention by interval</h3></div></div><div class="ba-as-interval-chart">') +
+    return window.bingsuTemplate('<section class="ba-as-card"><div class="ba-as-section-head"><div><span class="ba-as-eyebrow">Memory</span><h3>') + icon("brain") + window.bingsuTemplate('Retention by interval</h3></div></div><div class="ba-as-interval-chart">') +
       labels.map(function (label, index) { var value = values[index] || 0; return '<div><strong>' + number(value) + '%</strong><i><b style="height:' + clamp(value, 0, 100) + '%"></b></i><span>' + esc(label) + '</span></div>'; }).join("") +
-      (labels.length ? "" : window.onigiriTemplate('<div class="ba-as-empty-chart">No mature reviews in this period</div>')) + '</div></section>';
+      (labels.length ? "" : window.bingsuTemplate('<div class="ba-as-empty-chart">No mature reviews in this period</div>')) + '</div></section>';
   }
 
   function renderWeeklyHeatmap(data) {
     var heat = data.weeklyHeatmap || {};
     var rows = heat.data || [];
     var peak = Math.max.apply(Math, rows.reduce(function (all, row) { return all.concat(row || []); }, []).concat([1]));
-    return window.onigiriTemplate('<section class="ba-as-card ba-as-weekly"><div class="ba-as-section-head"><div><span class="ba-as-eyebrow">Schedule</span><h3>') + icon("grid") + window.onigiriTemplate('Weekly study heatmap</h3></div></div><div class="ba-as-week-grid"><div class="ba-as-hours"><span></span><span>00</span><span>06</span><span>12</span><span>18</span><span>23</span></div>') +
+    return window.bingsuTemplate('<section class="ba-as-card ba-as-weekly"><div class="ba-as-section-head"><div><span class="ba-as-eyebrow">Schedule</span><h3>') + icon("grid") + window.bingsuTemplate('Weekly study heatmap</h3></div></div><div class="ba-as-week-grid"><div class="ba-as-hours"><span></span><span>00</span><span>06</span><span>12</span><span>18</span><span>23</span></div>') +
       rows.map(function (row, day) {
-        return '<div class="ba-as-week-row"><span>' + esc(window.onigiriText((heat.days || [])[day] || "")) + '</span>' + (row || []).map(function (value, hour) { var level = value ? Math.max(1, Math.ceil(Number(value) / peak * 4)) : 0; return '<i class="is-l' + level + '" title="' + esc(window.onigiriText((heat.days || [])[day] || "") + " " + String(hour).padStart(2, "0") + ":00 · " + number(value, 0) + window.onigiriTemplate(" " + window.onigiriText("reviews"))) + '"></i>'; }).join("") + '</div>';
+        return '<div class="ba-as-week-row"><span>' + esc(window.bingsuText((heat.days || [])[day] || "")) + '</span>' + (row || []).map(function (value, hour) { var level = value ? Math.max(1, Math.ceil(Number(value) / peak * 4)) : 0; return '<i class="is-l' + level + '" title="' + esc(window.bingsuText((heat.days || [])[day] || "") + " " + String(hour).padStart(2, "0") + ":00 · " + number(value, 0) + window.bingsuTemplate(" " + window.bingsuText("reviews"))) + '"></i>'; }).join("") + '</div>';
       }).join("") + '</div></section>';
   }
 
   function renderCollapsed() {
     root.classList.add("is-collapsed");
     root.classList.remove("has-reveal-motion", "is-loading");
-    root.innerHTML = window.onigiriTemplate('<button type="button" class="ba-as-reveal-button" data-ba-as-reveal>See Kome insights</button>');
+    root.innerHTML = window.bingsuTemplate('<button type="button" class="ba-as-reveal-button" data-ba-as-reveal>See Kome insights</button>');
     root.querySelector("[data-ba-as-reveal]").addEventListener("click", function (event) {
       var button = event.currentTarget;
       if (state.loading) return;
       state.loading = true;
       root.classList.add("is-loading");
-      button.textContent = window.onigiriText("Loading Kome insights");
+      button.textContent = window.bingsuText("Loading Kome insights");
       try { pycmd("ba:advanced-stats-reveal"); }
       catch (error) { window.__baAdvancedStatsError(String(error)); }
     });
@@ -265,15 +265,15 @@
     var error = root.getAttribute("data-error");
     if (error) {
       root.classList.remove("has-reveal-motion");
-      root.innerHTML = '<div class="ba-as-card ba-as-error">' + icon("info") + window.onigiriTemplate('<div><strong>Advanced statistics could not load</strong><span>') + esc(error) + '</span></div></div>';
+      root.innerHTML = '<div class="ba-as-card ba-as-error">' + icon("info") + window.bingsuTemplate('<div><strong>Advanced statistics could not load</strong><span>') + esc(error) + '</span></div></div>';
       return;
     }
-    root.innerHTML = window.onigiriTemplate('<header class="ba-as-header"><h2 class="ba-as-title">Things Insights</h2>') + periods() + '</header>' +
+    root.innerHTML = window.bingsuTemplate('<header class="ba-as-header"><h2 class="ba-as-title">Things Insights</h2>') + periods() + '</header>' +
       renderScores(data) + renderActivity(data) + renderMetrics(data) +
       renderTimeOfDay(data) + renderUsage(data) +
       '<div class="ba-as-two">' + renderSession(data) + renderRetention(data) + '</div>' +
       renderWeeklyHeatmap(data) +
-      '<div class="ba-as-two ba-as-tables">' + performanceTable(window.onigiriText("Performance by topic"), "book", data.topics, false) + performanceTable(window.onigiriText("Performance by tag"), "tag", data.tagPerformance, true) + '</div>';
+      '<div class="ba-as-two ba-as-tables">' + performanceTable(window.bingsuText("Performance by topic"), "book", data.topics, false) + performanceTable(window.bingsuText("Performance by tag"), "tag", data.tagPerformance, true) + '</div>';
     bind();
     prepareScrollReveals();
   }
@@ -313,7 +313,7 @@
   window.__baAdvancedStatsError = function (message) {
     state.loading = false;
     state.revealed = true;
-    root.setAttribute("data-error", message || window.onigiriText("Unknown error"));
+    root.setAttribute("data-error", message || window.bingsuText("Unknown error"));
     render();
   };
 

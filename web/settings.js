@@ -1,4 +1,4 @@
-/* Onigiri settings — WebUI front end.
+/* Bingsu settings — WebUI front end.
  *
  * Renders whatever settings_web/schema.py describes. Adding a setting should
  * never mean touching this file: add a dict to the schema, and if it needs a new
@@ -12,7 +12,7 @@
 (function () {
   "use strict";
 
-  const CTX = ONIGIRI_SETTINGS_CONTEXT || {};
+  const CTX = BINGSU_SETTINGS_CONTEXT || {};
   const PAGES = CTX.pages || [];
   const STRINGS = CTX.strings || {};
   document.documentElement.lang = CTX.heatmapLocale || "en";
@@ -309,7 +309,7 @@
       // Python resolves Sync with Anki from Anki's current mode. Repaint
       // the open settings window after the preference has been persisted.
       if (res.localization) applyLocalization(res.localization);
-      if (res.appearance && !("onigiri_theme_mode" in pending)) {
+      if (res.appearance && !("bingsu_theme_mode" in pending)) {
         CTX.dark = res.appearance.dark;
         CTX.palette = res.appearance.palette;
         CTX.accent = res.appearance.accent;
@@ -326,7 +326,7 @@
 
   function applyLocalization(context) {
     Object.assign(CTX, context);
-    window.ONIGIRI_LOCALIZATION = context.localization || window.ONIGIRI_LOCALIZATION;
+    window.BINGSU_LOCALIZATION = context.localization || window.BINGSU_LOCALIZATION;
     Object.keys(STRINGS).forEach(key => delete STRINGS[key]);
     Object.assign(STRINGS, context.strings || {});
     PAGES.splice(0, PAGES.length, ...(context.pages || []));
@@ -2176,8 +2176,8 @@
           secBlock.setAttribute("aria-hidden", simpleProfileModeActive() ? "true" : "false");
           if (secPageBg.title) secBlock.appendChild(el("div", "osw-section-title", secPageBg.title));
           const colorIds = {
-            onigiri_profile_page_bg_color1: true,
-            onigiri_profile_page_bg_color2: true
+            bingsu_profile_page_bg_color1: true,
+            bingsu_profile_page_bg_color2: true
           };
           const colorFields = el("div", "osw-profile-page-bg-colors");
           let hasColorFields = false;
@@ -2231,11 +2231,11 @@
           // picture they describe. Keeping them in the compact popup makes
           // the name and level options easy to distinguish without a tab of
           // permanently expanded controls.
-          const fFont = getField("profile_name_appearance", "onigiri_font_profile_name");
-          const fSize = getField("profile_name_appearance", "onigiri_font_size_profile_name");
+          const fFont = getField("profile_name_appearance", "bingsu_font_profile_name");
+          const fSize = getField("profile_name_appearance", "bingsu_font_size_profile_name");
           const fNameColor = getField("profile_name_appearance", "modern_menu_profile_name_color");
-          const fLevelFont = getField("profile_name_appearance", "onigiri_font_profile_level");
-          const fLevelSize = getField("profile_name_appearance", "onigiri_font_size_profile_level");
+          const fLevelFont = getField("profile_name_appearance", "bingsu_font_profile_level");
+          const fLevelSize = getField("profile_name_appearance", "bingsu_font_size_profile_level");
           const fLevelColor = getField("profile_name_appearance", "modern_menu_profile_level_color");
           const fontButton = profileFontMenuButton(
             fFont, fSize, fNameColor, fLevelFont, fLevelSize, fLevelColor
@@ -2520,22 +2520,22 @@
     const userName = values["userName"] || "USER";
     const advancedProfileFont = SETTINGS_MODE_PARITY || settingsComplexity === "advanced";
     const fontKey = advancedProfileFont
-      ? (values["onigiri_font_profile_name"] || "sync")
-      : (values["onigiri_font_main"] || "system");
+      ? (values["bingsu_font_profile_name"] || "sync")
+      : (values["bingsu_font_main"] || "system");
     const profileFontField = advancedProfileFont
-      ? fieldById["onigiri_font_profile_name"]
-      : fieldById["onigiri_font_main"];
+      ? fieldById["bingsu_font_profile_name"]
+      : fieldById["bingsu_font_main"];
     const fontOption = (profileFontField && profileFontField.options || [])
       .filter(function (o) { return o.value === fontKey; })[0];
     const fontFamily = fontOption && fontOption.family ? fontOption.family : "inherit";
     const profileFontSize = advancedProfileFont
-      ? (values["onigiri_font_size_profile_name"] || 14)
-      : (values["onigiri_font_size_main"] || 14);
+      ? (values["bingsu_font_size_profile_name"] || 14)
+      : (values["bingsu_font_size_main"] || 14);
     const levelFontKey = advancedProfileFont
-      ? (values["onigiri_font_profile_level"] || "sync")
+      ? (values["bingsu_font_profile_level"] || "sync")
       : fontKey;
     const levelFontField = advancedProfileFont
-      ? fieldById["onigiri_font_profile_level"]
+      ? fieldById["bingsu_font_profile_level"]
       : profileFontField;
     const levelFontOption = (levelFontField && levelFontField.options || [])
       .filter(function (o) { return o.value === levelFontKey; })[0];
@@ -2543,7 +2543,7 @@
       ? fontFamily
       : (levelFontOption && levelFontOption.family ? levelFontOption.family : fontFamily);
     const levelFontSize = advancedProfileFont
-      ? (values["onigiri_font_size_profile_level"] || 11)
+      ? (values["bingsu_font_size_profile_level"] || 11)
       : profileFontSize;
 
     const dynName = values["modern_menu_profile_name_dynamic_mode"] !== false;
@@ -3185,7 +3185,7 @@
 
   /* Companion colour under an icon popover's grid (e.g. Heatmap Shape's own
      "Color") — same compact slot shape as the deck browser's Edit Icon modal
-     (web/icon_modal.js: .onigiri-icon-color-*), not the full-size field row
+     (web/icon_modal.js: .bingsu-icon-color-*), not the full-size field row
      renderColor/renderColorPair use everywhere else on the page. Still reads
      and writes through imageTargets/imageValue, so a field's existing light/
      dark linking (Dynamic Mode) behaves exactly as it does outside the
@@ -3302,10 +3302,10 @@
   }
 
   function renderIconPopupColorSlots(field) {
-    const host = el("div", "onigiri-icon-color-section osw-pairfield");
+    const host = el("div", "bingsu-icon-color-section osw-pairfield");
     host.setAttribute("data-field", field.id);
 
-    const slotsRow = el("div", "onigiri-icon-color-slots");
+    const slotsRow = el("div", "bingsu-icon-color-slots");
     host.appendChild(slotsRow);
 
     function paint() {
@@ -3321,18 +3321,18 @@
         const shown = value || fallback;
         const isDefault = !value && !!fallback;
 
-        const slot = el("button", "onigiri-icon-color-slot" + (isDefault ? " is-default" : ""));
+        const slot = el("button", "bingsu-icon-color-slot" + (isDefault ? " is-default" : ""));
         slot.type = "button";
         slot.setAttribute(
           "aria-label",
           target.role === "light" ? "Light color" : target.role === "dark" ? "Dark color" : (field.label || str("icon_color", "Icon Color"))
         );
-        const swatch = el("span", "onigiri-icon-color-swatch");
+        const swatch = el("span", "bingsu-icon-color-swatch");
         swatch.style.background = shown || "transparent";
         slot.appendChild(swatch);
 
-        const meta = el("span", "onigiri-icon-color-meta");
-        const roleRow = el("span", "onigiri-icon-color-role");
+        const meta = el("span", "bingsu-icon-color-meta");
+        const roleRow = el("span", "bingsu-icon-color-role");
         if (target.role === "light") {
           roleRow.innerHTML = OSW_SUN_ICON;
         } else if (target.role === "dark") {
@@ -3342,7 +3342,7 @@
           roleRow.appendChild(document.createTextNode(target.label));
         }
         if (target.role === "light" || target.role === "dark") meta.appendChild(roleRow);
-        meta.appendChild(el("span", "onigiri-icon-color-hex", String(shown || "").toUpperCase()));
+        meta.appendChild(el("span", "bingsu-icon-color-hex", String(shown || "").toUpperCase()));
         slot.appendChild(meta);
         slot.addEventListener("click", function () {
           bridge("osw:haptic:1");
@@ -4272,15 +4272,15 @@
     if (gallery) closeGallery();
 
     const root = el("div", "osw-gal");
-    const modal = el("section", "onigiri-icon-modal osw-iconpick-modal osw-settings-picker");
+    const modal = el("section", "bingsu-icon-modal osw-iconpick-modal osw-settings-picker");
     modal.setAttribute("role", "dialog");
     modal.setAttribute("aria-modal", "true");
     modal.setAttribute("aria-label", title);
     root.appendChild(modal);
 
-    const header = el("div", "onigiri-icon-modal-header");
-    header.appendChild(el("div", "onigiri-icon-modal-title", title));
-    const close = el("button", "onigiri-icon-modal-close");
+    const header = el("div", "bingsu-icon-modal-header");
+    header.appendChild(el("div", "bingsu-icon-modal-title", title));
+    const close = el("button", "bingsu-icon-modal-close");
     close.type = "button";
     close.setAttribute("aria-label", str("cancel", "Cancel"));
     close.innerHTML = ICON_CLOSE;
@@ -4482,7 +4482,7 @@
     let colorIndex = colors.length > 1 && CTX.dark ? 1 : 0;
     let colorPopover = null;
     const search = document.createElement("input");
-    search.className = "onigiri-icon-search osw-fontpick-search";
+    search.className = "bingsu-icon-search osw-fontpick-search";
     search.placeholder = str("search", "Search fonts");
     search.setAttribute("aria-label", str("search", "Search fonts"));
     const grid = el("div", "osw-fontpick-grid");
@@ -4491,8 +4491,8 @@
 
     // The same always-visible swatch row as the icon picker, below the list.
     // Its editor stays inside this picker, retaining the font/color drafts.
-    const colorStack = el("div", "onigiri-icon-color-stack osw-fontpick-color-stack");
-    const slotsRow = el("div", "onigiri-icon-color-slots");
+    const colorStack = el("div", "bingsu-icon-color-stack osw-fontpick-color-stack");
+    const slotsRow = el("div", "bingsu-icon-color-slots");
     colorStack.appendChild(slotsRow);
     if (colors.length) shell.modal.appendChild(colorStack);
 
@@ -4534,19 +4534,19 @@
       slotsRow.innerHTML = "";
       colors.forEach(function (target, index) {
         const shown = effectiveColor(index);
-        const slot = el("button", "onigiri-icon-color-slot" + (!drafts[target.id] ? " is-default" : ""));
+        const slot = el("button", "bingsu-icon-color-slot" + (!drafts[target.id] ? " is-default" : ""));
         slot.type = "button";
         slot.setAttribute("aria-label", target.label + " " + str("color", "Color"));
         slot.setAttribute("aria-expanded", colorPopover && index === colorIndex ? "true" : "false");
-        const swatch = el("span", "onigiri-icon-color-swatch");
+        const swatch = el("span", "bingsu-icon-color-swatch");
         swatch.style.background = cssColorToHex(shown);
         slot.appendChild(swatch);
-        const meta = el("span", "onigiri-icon-color-meta");
-        const role = el("span", "onigiri-icon-color-role");
+        const meta = el("span", "bingsu-icon-color-meta");
+        const role = el("span", "bingsu-icon-color-role");
         if (colors.length > 1) role.innerHTML = index === 1 ? OSW_MOON_ICON : OSW_SUN_ICON;
         role.appendChild(document.createTextNode(target.label));
         meta.appendChild(role);
-        meta.appendChild(el("span", "onigiri-icon-color-hex", String(cssColorToHex(shown)).toUpperCase()));
+        meta.appendChild(el("span", "bingsu-icon-color-hex", String(cssColorToHex(shown)).toUpperCase()));
         slot.appendChild(meta);
         slot.addEventListener("click", function () {
           if (colorPopover && colorIndex === index) { closeColorEditor(); return; }
@@ -4575,7 +4575,7 @@
       sample.style.color = cssColorToHex(effectiveColor(colorIndex));
       sample.style.fontFamily = designerFieldFontFamily(Object.assign({}, values, { [field.id]: selected }), field.id);
       head.appendChild(sample);
-      const close = el("button", "onigiri-icon-modal-close");
+      const close = el("button", "bingsu-icon-modal-close");
       close.type = "button";
       close.setAttribute("aria-label", str("close", "Close"));
       close.innerHTML = ICON_CLOSE;
@@ -4662,7 +4662,7 @@
   // The old chip opened a native Qt IconPickerDialog over the bridge
   // (settings/_icon_picker.py) — a second modal on top of this one, and one
   // that was opening empty. Same visual language as the deck browser's own
-  // "Edit Icon" popover (web/icon_modal.js: onigiri-icon-* classes) so the two
+  // "Edit Icon" popover (web/icon_modal.js: bingsu-icon-* classes) so the two
   // pickers read as one design, wired to this dialog's own bridge/setValue
   // instead of pycmd/a deckId.
   //
@@ -4726,44 +4726,44 @@
     const companionIds = ICON_POPUP_COMPANIONS[field.id] || [];
 
     const root = el("div", "osw-gal");
-    const modal = el("div", "onigiri-icon-modal osw-iconpick-modal");
+    const modal = el("div", "bingsu-icon-modal osw-iconpick-modal");
     root.appendChild(modal);
 
-    const header = el("div", "onigiri-icon-modal-header");
-    header.appendChild(el("div", "onigiri-icon-modal-title", field.label || str("icon", "Icon")));
-    const closeBtn = el("span", "onigiri-icon-modal-close");
+    const header = el("div", "bingsu-icon-modal-header");
+    header.appendChild(el("div", "bingsu-icon-modal-title", field.label || str("icon", "Icon")));
+    const closeBtn = el("span", "bingsu-icon-modal-close");
     closeBtn.innerHTML = ICON_CLOSE;
     closeBtn.addEventListener("click", closeIconPicker);
     header.appendChild(closeBtn);
     modal.appendChild(header);
 
-    const tabs = el("div", "onigiri-icon-tabs");
-    const iconsTab = el("span", "onigiri-icon-tab active", str("icons", "Icons"));
-    const uploadTab = el("span", "onigiri-icon-tab", str("upload", "Upload"));
+    const tabs = el("div", "bingsu-icon-tabs");
+    const iconsTab = el("span", "bingsu-icon-tab active", str("icons", "Icons"));
+    const uploadTab = el("span", "bingsu-icon-tab", str("upload", "Upload"));
     tabs.appendChild(iconsTab);
     tabs.appendChild(uploadTab);
     modal.appendChild(tabs);
 
-    const body = el("div", "onigiri-icon-body");
-    const iconsPane = el("div", "onigiri-icon-pane active");
-    const searchRow = el("div", "onigiri-icon-search-row");
+    const body = el("div", "bingsu-icon-body");
+    const iconsPane = el("div", "bingsu-icon-pane active");
+    const searchRow = el("div", "bingsu-icon-search-row");
     const search = document.createElement("input");
-    search.className = "onigiri-icon-search";
+    search.className = "bingsu-icon-search";
     search.placeholder = str("search_icons", "Search icons");
     searchRow.appendChild(search);
     iconsPane.appendChild(searchRow);
-    const gridWrap = el("div", "onigiri-icon-grid-wrap");
-    const grid = el("div", "onigiri-icon-grid");
+    const gridWrap = el("div", "bingsu-icon-grid-wrap");
+    const grid = el("div", "bingsu-icon-grid");
     gridWrap.appendChild(grid);
     iconsPane.appendChild(gridWrap);
     body.appendChild(iconsPane);
 
-    const uploadPane = el("div", "onigiri-icon-pane");
+    const uploadPane = el("div", "bingsu-icon-pane");
     [
       { label: str("upload_svg", "Upload SVG icon"), kind: "svg" },
       { label: str("upload_png", "Upload PNG image"), kind: "png" }
     ].forEach(function (opt) {
-      const btn = el("span", "onigiri-icon-upload", opt.label);
+      const btn = el("span", "bingsu-icon-upload", opt.label);
       btn.addEventListener("click", function () { runUpload(opt.kind, btn); });
       uploadPane.appendChild(btn);
     });
@@ -4777,7 +4777,7 @@
       uploadPane.classList.toggle("active", name === "upload");
       // Same rule as the deck browser's Edit Icon modal: the colour section
       // is about the icon itself, so it only makes sense next to the grid.
-      const stack = modal.querySelector(".onigiri-icon-color-stack");
+      const stack = modal.querySelector(".bingsu-icon-color-stack");
       if (stack) stack.style.display = name === "icons" ? "" : "none";
     }
     iconsTab.addEventListener("click", function () { setTab("icons"); });
@@ -4811,7 +4811,7 @@
       // directly, so the effective on/off is resolved here and stashed on
       // the shared virtual dynamic field the pair actually reads.
       if (field.id === "heatmapShape" || field.id === "heatmapStreakIcon") {
-        const widgetDynamic = designerDynamicOn(["onigiri_canvas_inset_color_theme_mode"]);
+        const widgetDynamic = designerDynamicOn(["bingsu_canvas_inset_color_theme_mode"]);
         const effectiveDynamic = values["heatmap_sync_box_effect"] !== false
           ? widgetDynamic
           : values["heatmap_dynamic"] !== false;
@@ -4825,7 +4825,7 @@
         values["heatmap_color_theme_mode"] = mode;
         values["heatmap_color_zero_theme_mode"] = mode;
       }
-      const colorStack = el("div", "onigiri-icon-color-stack");
+      const colorStack = el("div", "bingsu-icon-color-stack");
       companionIds.forEach(function (id) {
         const cf = fieldById[id];
         if (!cf) return;
@@ -4843,7 +4843,7 @@
       // the old one until the popover is reopened.
       retint: function () {
         const tint = currentTint();
-        Array.prototype.forEach.call(root.querySelectorAll(".onigiri-icon-mask"), function (node) {
+        Array.prototype.forEach.call(root.querySelectorAll(".bingsu-icon-mask"), function (node) {
           node.style.backgroundColor = tint || "";
         });
       }
@@ -4856,18 +4856,18 @@
     paintIconGrid("");
 
     function buildTile(item) {
-      const tile = el("button", "onigiri-icon-cell");
+      const tile = el("button", "bingsu-icon-cell");
       tile.type = "button";
       tile.title = iconAssetLabel(item.name);
       tile.setAttribute("data-name", item.name);
-      const thumb = el("span", "onigiri-icon-mask");
+      const thumb = el("span", "bingsu-icon-mask");
       thumb.style.webkitMaskImage = "url('" + item.url + "')";
       thumb.style.maskImage = "url('" + item.url + "')";
       const tint = currentTint();
       if (tint) thumb.style.backgroundColor = tint;
       tile.appendChild(thumb);
       if (!item.system) {
-        const del = el("span", "onigiri-icon-delete");
+        const del = el("span", "bingsu-icon-delete");
         del.innerHTML = ICON_CLOSE;
         del.addEventListener("click", function (event) {
           event.stopPropagation();
@@ -4881,12 +4881,12 @@
     }
 
     function buildNoneTile() {
-      const none = el("button", "onigiri-icon-cell onigiri-icon-cell-none");
+      const none = el("button", "bingsu-icon-cell bingsu-icon-cell-none");
       none.type = "button";
       none.title = field.defaultIcon ? str("use_default", "Use Default") : str("gallery_none", "None");
       none.setAttribute("aria-label", none.title);
       if (field.defaultIcon) {
-        const thumb = el("span", "onigiri-icon-mask");
+        const thumb = el("span", "bingsu-icon-mask");
         const url = resolveIconAssetUrl(field.defaultIcon);
         thumb.style.webkitMaskImage = "url('" + url + "')";
         thumb.style.maskImage = "url('" + url + "')";
@@ -4913,7 +4913,7 @@
 
     function assign(name) {
       setValue(field.id, name || "");
-      Array.prototype.forEach.call(grid.querySelectorAll(".onigiri-icon-cell"), function (tile) {
+      Array.prototype.forEach.call(grid.querySelectorAll(".bingsu-icon-cell"), function (tile) {
         tile.classList.toggle("selected", (tile.getAttribute("data-name") || "") === name);
       });
       // With companion colours the popover stays open — picking a shape and
@@ -6462,7 +6462,7 @@
   function designerFieldFontFamily(vals, fieldId, fallbackRoleKey) {
     const selectedFontKey = vals[fieldId] || (fallbackRoleKey ? "sync" : "system");
     const fontKey = selectedFontKey === "sync" && fallbackRoleKey
-      ? (vals["onigiri_font_" + fallbackRoleKey] || "system")
+      ? (vals["bingsu_font_" + fallbackRoleKey] || "system")
       : selectedFontKey;
     const field = fieldById[fieldId];
     let family = "";
@@ -6478,7 +6478,7 @@
      theme applies to the family only; the component's px size stays locally
      adjustable. Simple mode still uses only its three shared scales. */
   function designerFontRole(vals, roleKey, isDark, fallbackRoleKey, modeParity) {
-    const selectedFontKey = vals["onigiri_font_" + roleKey] || "sync";
+    const selectedFontKey = vals["bingsu_font_" + roleKey] || "sync";
     const componentMode = modeParity || SETTINGS_MODE_PARITY || settingsComplexity === "advanced";
     const useFallbackFamily = fallbackRoleKey && (
       !componentMode || selectedFontKey === "sync"
@@ -6488,11 +6488,11 @@
       : fallbackRoleKey;
     return {
       family: useFallbackFamily
-        ? designerFieldFontFamily(vals, "onigiri_font_" + fallbackRoleKey)
-        : designerFieldFontFamily(vals, "onigiri_font_" + roleKey, fallbackRoleKey),
-      size: Number(vals["onigiri_font_size_" + sizeRoleKey]) || 14,
-      customColor: fontFieldColor(vals, "onigiri_font_" + roleKey, isDark),
-      color: fontFieldColor(vals, "onigiri_font_" + roleKey, isDark) || designerPairValue(
+        ? designerFieldFontFamily(vals, "bingsu_font_" + fallbackRoleKey)
+        : designerFieldFontFamily(vals, "bingsu_font_" + roleKey, fallbackRoleKey),
+      size: Number(vals["bingsu_font_size_" + sizeRoleKey]) || 14,
+      customColor: fontFieldColor(vals, "bingsu_font_" + roleKey, isDark),
+      color: fontFieldColor(vals, "bingsu_font_" + roleKey, isDark) || designerPairValue(
         vals, "font_color_light_" + (fallbackRoleKey || roleKey),
         "font_color_dark_" + (fallbackRoleKey || roleKey),
         "font_color_" + (fallbackRoleKey || roleKey) + "_theme_mode", isDark
@@ -6596,14 +6596,14 @@
     stage.style.padding = "0";
     designerPaintBackdrop(stage, vals, isDark);
 
-    const boxColor = designerPairValue(vals, "widget_box_color_light", "widget_box_color_dark", "onigiri_canvas_inset_color_theme_mode", isDark);
-    const borderColor = designerPairValue(vals, "widget_border_color_light", "widget_border_color_dark", "onigiri_canvas_inset_color_theme_mode", isDark);
+    const boxColor = designerPairValue(vals, "widget_box_color_light", "widget_box_color_dark", "bingsu_canvas_inset_color_theme_mode", isDark);
+    const borderColor = designerPairValue(vals, "widget_border_color_light", "widget_border_color_dark", "bingsu_canvas_inset_color_theme_mode", isDark);
 
     const holder = el("div", "osw-preview-stage-center");
     const card = el("div", "osw-preview-glass-card");
     const style = designerGlassCardStyle(
-      vals, isDark, "onigiri_canvas_inset_effect_opacity", "onigiri_canvas_inset_effect_blur",
-      "onigiri_canvas_inset_border_radius", "onigiri_canvas_inset_border_width", boxColor, borderColor
+      vals, isDark, "bingsu_canvas_inset_effect_opacity", "bingsu_canvas_inset_effect_blur",
+      "bingsu_canvas_inset_border_radius", "bingsu_canvas_inset_border_width", boxColor, borderColor
     );
     Object.keys(style).forEach(function (key) { card.style[key] = style[key]; });
 
@@ -6646,19 +6646,19 @@
     }
 
     const boxColor = synced
-      ? designerPairValue(vals, "widget_box_color_light", "widget_box_color_dark", "onigiri_canvas_inset_color_theme_mode", isDark)
+      ? designerPairValue(vals, "widget_box_color_light", "widget_box_color_dark", "bingsu_canvas_inset_color_theme_mode", isDark)
       : hashiColor("box_bg", "#ffffff", "#2c2c2c");
     const borderColor = synced
-      ? designerPairValue(vals, "widget_border_color_light", "widget_border_color_dark", "onigiri_canvas_inset_color_theme_mode", isDark)
+      ? designerPairValue(vals, "widget_border_color_light", "widget_border_color_dark", "bingsu_canvas_inset_color_theme_mode", isDark)
       : hashiColor("box_border", "#e0e0e0", "#424242");
     const cardColor = hashiColor("card_bg", "#f5f5f5", "#363636");
     const titleColor = hashiColor("title", "#212121", "#f0f0f0");
     const excerptColor = hashiColor("excerpt", "#757575", "#9c9c9c");
     const accentColor = hashiColor("accent", "#0077C8", "#4da3e8");
-    const opacityKey = synced ? "onigiri_canvas_inset_effect_opacity" : "hashi_widget_opacity";
-    const blurKey = synced ? "onigiri_canvas_inset_effect_blur" : "hashi_widget_blur";
-    const radiusKey = synced ? "onigiri_canvas_inset_border_radius" : "hashi_widget_radius";
-    const strokeKey = synced ? "onigiri_canvas_inset_border_width" : "hashi_widget_stroke";
+    const opacityKey = synced ? "bingsu_canvas_inset_effect_opacity" : "hashi_widget_opacity";
+    const blurKey = synced ? "bingsu_canvas_inset_effect_blur" : "hashi_widget_blur";
+    const radiusKey = synced ? "bingsu_canvas_inset_border_radius" : "hashi_widget_radius";
+    const strokeKey = synced ? "bingsu_canvas_inset_border_width" : "hashi_widget_stroke";
     const blur = Math.max(0, Math.min(100, Number(vals[blurKey] || 0)));
     const opacity = Math.max(0, Math.min(100, Number(vals[opacityKey] == null ? 100 : vals[opacityKey])));
     const radius = Math.max(0, Math.min(60, Number(vals[radiusKey] || 0)));
@@ -6674,7 +6674,7 @@
     widget.style.width = "min(500px, 100%)";
     widget.style.height = "100%";
     widget.style.minHeight = "0";
-    widget.style.setProperty("--onigiri-widget-pad", "19.6px");
+    widget.style.setProperty("--bingsu-widget-pad", "19.6px");
     widget.style.setProperty("--hashiw-box-bg", rgba(boxColor, boxAlpha));
     widget.style.setProperty("--hashiw-box-border", borderColor);
     widget.style.setProperty("--hashiw-box-radius", radius + "px");
@@ -6694,7 +6694,7 @@
     const single = (vals["hashi_widget_mode"] || "gallery") === "single";
     widget.classList.add(single ? "is-single" : "is-gallery");
 
-    const head = el("div", "onigiri-widget-head");
+    const head = el("div", "bingsu-widget-head");
     const heading = el("h3", "", str("hashi_notes_title", "Hashi Notes"));
     head.appendChild(heading);
 
@@ -6770,19 +6770,19 @@
     const boxColor = synced
       ? designerPairValue(
           vals, "widget_box_color_light", "widget_box_color_dark",
-          "onigiri_canvas_inset_color_theme_mode", isDark
+          "bingsu_canvas_inset_color_theme_mode", isDark
         ) || (isDark ? "#2c2c2c" : "#ffffff")
       : prepColor("box_bg", "#ffffff", "#2c2c2c");
     const borderColor = synced
       ? designerPairValue(
           vals, "widget_border_color_light", "widget_border_color_dark",
-          "onigiri_canvas_inset_color_theme_mode", isDark
+          "bingsu_canvas_inset_color_theme_mode", isDark
         ) || (isDark ? "#424242" : "#e0e0e0")
       : prepColor("box_border", "#e0e0e0", "#424242");
-    const opacityKey = synced ? "onigiri_canvas_inset_effect_opacity" : "prep_widget_opacity";
-    const blurKey = synced ? "onigiri_canvas_inset_effect_blur" : "prep_widget_blur";
-    const radiusKey = synced ? "onigiri_canvas_inset_border_radius" : "prep_widget_radius";
-    const strokeKey = synced ? "onigiri_canvas_inset_border_width" : "prep_widget_stroke";
+    const opacityKey = synced ? "bingsu_canvas_inset_effect_opacity" : "prep_widget_opacity";
+    const blurKey = synced ? "bingsu_canvas_inset_effect_blur" : "prep_widget_blur";
+    const radiusKey = synced ? "bingsu_canvas_inset_border_radius" : "prep_widget_radius";
+    const strokeKey = synced ? "bingsu_canvas_inset_border_width" : "prep_widget_stroke";
     const blur = Math.max(0, Math.min(100, Number(vals[blurKey] || 0)));
     const opacity = Math.max(0, Math.min(100, Number(vals[opacityKey] == null ? 100 : vals[opacityKey])));
     const radius = Math.max(0, Math.min(60, Number(vals[radiusKey] == null ? 20 : vals[radiusKey])));
@@ -6793,14 +6793,14 @@
     widget.style.width = "min(560px, 100%)";
     widget.style.height = "100%";
     widget.style.minHeight = "0";
-    widget.style.setProperty("--onigiri-widget-pad", "19.6px");
+    widget.style.setProperty("--bingsu-widget-pad", "19.6px");
     widget.style.setProperty("--prep-fs", String(Math.max(60, Math.min(160, Number(vals["prep_widget_font_scale"] || 100))) / 100));
     widget.style.setProperty("--prepw-box-bg", rgba(boxColor, alpha));
     widget.style.setProperty("--prepw-box-border", borderColor);
     widget.style.setProperty("--prepw-box-radius", radius + "px");
     widget.style.setProperty("--prepw-box-stroke", stroke + "px");
     widget.style.setProperty("--prepw-box-blur", ((blur / 100) * 20).toFixed(1) + "px");
-    const head = el("div", "onigiri-widget-head");
+    const head = el("div", "bingsu-widget-head");
     head.appendChild(el("h3", "", str("prep_widget_title", "Study Plans")));
     widget.appendChild(head);
     const cards = el("div", "prep-plan-cards");
@@ -7027,21 +7027,21 @@
   // the bounded preview screen.
 
   /* The reviewer header's button chips as patcher.py draws them: the
-     --onigiri-box-effect-* vars, which are the Widget Color and Effect fields
+     --bingsu-box-effect-* vars, which are the Widget Color and Effect fields
      plus the palette's own --fg. Mini notifications live inside that row, so
      the row has to be there for the preview to mean anything. */
   function notifHeaderButtonStyle(vals, isDark) {
     const boxColor = designerPairValue(
       vals, "widget_box_color_light", "widget_box_color_dark",
-      "onigiri_canvas_inset_color_theme_mode", isDark
+      "bingsu_canvas_inset_color_theme_mode", isDark
     );
     const borderColor = designerPairValue(
       vals, "widget_border_color_light", "widget_border_color_dark",
-      "onigiri_canvas_inset_color_theme_mode", isDark
+      "bingsu_canvas_inset_color_theme_mode", isDark
     );
     const style = designerGlassCardStyle(
-      vals, isDark, "onigiri_canvas_inset_effect_opacity", "onigiri_canvas_inset_effect_blur",
-      "onigiri_canvas_inset_border_radius", "onigiri_canvas_inset_border_width",
+      vals, isDark, "bingsu_canvas_inset_effect_opacity", "bingsu_canvas_inset_effect_blur",
+      "bingsu_canvas_inset_border_radius", "bingsu_canvas_inset_border_width",
       boxColor || (isDark ? "#2c2c2c" : "#ffffff"),
       borderColor || (isDark ? "#3a3a3a" : "#d9d9d9")
     );
@@ -7051,7 +7051,7 @@
   }
 
   function createLiveNotificationElement(payload, mini) {
-    const notifications = window.OnigiriNotifications;
+    const notifications = window.BingsuNotifications;
     if (!notifications || typeof notifications.createElement !== "function") return null;
     const card = notifications.createElement(payload, mini ? "mini" : "classic");
     card.classList.add("is-visible");
@@ -7068,7 +7068,7 @@
       buttons.appendChild(chip);
     });
     buttons.style.setProperty(
-      "--onigiri-box-effect-radius", btnStyle.borderRadius || "8px"
+      "--bingsu-box-effect-radius", btnStyle.borderRadius || "8px"
     );
     header.appendChild(buttons);
     return { header: header, buttons: buttons };
@@ -7097,7 +7097,7 @@
     }
 
     const card = createLiveNotificationElement(payload, mini);
-    const notificationInk = fontFieldColor(vals, "onigiri_font_notifications", isDark);
+    const notificationInk = fontFieldColor(vals, "bingsu_font_notifications", isDark);
     if (card && notificationInk) card.style.setProperty("color", notificationInk, "important");
     if (card && mini && headerButtons) {
       headerButtons.appendChild(card);
@@ -7137,12 +7137,12 @@
   function statsWidgetsEffectValues(vals, isDark) {
     if (vals["swidget_sync_box_effect"]) {
       return {
-        blur: vals["onigiri_canvas_inset_effect_blur"],
-        opacity: vals["onigiri_canvas_inset_effect_opacity"],
-        radius: vals["onigiri_canvas_inset_border_radius"],
-        stroke: vals["onigiri_canvas_inset_border_width"],
-        boxBg: designerPairValue(vals, "widget_box_color_light", "widget_box_color_dark", "onigiri_canvas_inset_color_theme_mode", isDark),
-        boxBorder: designerPairValue(vals, "widget_border_color_light", "widget_border_color_dark", "onigiri_canvas_inset_color_theme_mode", isDark)
+        blur: vals["bingsu_canvas_inset_effect_blur"],
+        opacity: vals["bingsu_canvas_inset_effect_opacity"],
+        radius: vals["bingsu_canvas_inset_border_radius"],
+        stroke: vals["bingsu_canvas_inset_border_width"],
+        boxBg: designerPairValue(vals, "widget_box_color_light", "widget_box_color_dark", "bingsu_canvas_inset_color_theme_mode", isDark),
+        boxBorder: designerPairValue(vals, "widget_border_color_light", "widget_border_color_dark", "bingsu_canvas_inset_color_theme_mode", isDark)
       };
     }
     return {
@@ -7223,7 +7223,7 @@
   }
 
   /* Same markup and the same CSS the menu uses (_stats_widget_card_html in
-     onigiri_renderer.py + the marked block of menu.css), driven by the same
+     bingsu_renderer.py + the marked block of menu.css), driven by the same
      --swidget-* variables patcher.generate_dynamic_css emits. Changing a colour
      here therefore changes the preview exactly the way it changes the menu. */
   /* Colour lookup with the same rule the real CSS generator uses: with Dynamic
@@ -7256,9 +7256,9 @@
     const widgetRoleSize = function (role, fallback) {
       if (!SETTINGS_MODE_PARITY && settingsComplexity !== "advanced") {
         const baseRole = role === "widget_title" ? "small_title" : "main";
-        return Math.max(8, Math.min(72, Number(vals["onigiri_font_size_" + baseRole]) || fallback));
+        return Math.max(8, Math.min(72, Number(vals["bingsu_font_size_" + baseRole]) || fallback));
       }
-      return Math.max(8, Math.min(72, Number(vals["onigiri_font_size_" + role]) || fallback));
+      return Math.max(8, Math.min(72, Number(vals["bingsu_font_size_" + role]) || fallback));
     };
     const labelSize = (SETTINGS_MODE_PARITY || settingsComplexity === "advanced") && vals["swidget_label_size_sync"] === false
       ? Math.max(8, Math.min(72, Number(vals["swidget_label_size"]) || 15))
@@ -7291,9 +7291,9 @@
       "--swidget-value-color": fontFieldColor(vals, "swidget_value_font", isDark) || swidgetColor(vals, "value", isDark, "#212121", "#f0f0f0"),
       "--swidget-value-size": valueSize.toFixed(2) + "px",
       "--swidget-number-size": numberSize.toFixed(2) + "px",
-      // Same base gutter as menu.css's --onigiri-widget-pad (before the user's
+      // Same base gutter as menu.css's --bingsu-widget-pad (before the user's
       // pad scale, which the dialog does not expose).
-      "--onigiri-widget-pad": "14px",
+      "--bingsu-widget-pad": "14px",
       // Stars have their own editable colours — see the .star rules in the
       // marked menu.css block.
       "--star-color": "currentColor",
@@ -7408,7 +7408,7 @@
 
     ["studied", "time", "pace", "retention"].forEach(function (key) {
       const demo = SW_DEMO[key];
-      const card = el("div", "stat-card onigiri-stat-card is-" + design + (design === "expressive" && !showWash ? " no-wash" : "") + " " + key + "-card");
+      const card = el("div", "stat-card bingsu-stat-card is-" + design + (design === "expressive" && !showWash ? " no-wash" : "") + " " + key + "-card");
       card.setAttribute("data-stat", key);
 
       let head = "<h3>" + demo.label + "</h3>";
@@ -7482,10 +7482,10 @@
   function deckStatsEffectValues(vals, isDark) {
     if (vals["dstats_sync_box_effect"]) {
       return {
-        blur: vals["onigiri_canvas_inset_effect_blur"], opacity: vals["onigiri_canvas_inset_effect_opacity"],
-        radius: vals["onigiri_canvas_inset_border_radius"], stroke: vals["onigiri_canvas_inset_border_width"],
-        boxBg: designerPairValue(vals, "widget_box_color_light", "widget_box_color_dark", "onigiri_canvas_inset_color_theme_mode", isDark),
-        boxBorder: designerPairValue(vals, "widget_border_color_light", "widget_border_color_dark", "onigiri_canvas_inset_color_theme_mode", isDark)
+        blur: vals["bingsu_canvas_inset_effect_blur"], opacity: vals["bingsu_canvas_inset_effect_opacity"],
+        radius: vals["bingsu_canvas_inset_border_radius"], stroke: vals["bingsu_canvas_inset_border_width"],
+        boxBg: designerPairValue(vals, "widget_box_color_light", "widget_box_color_dark", "bingsu_canvas_inset_color_theme_mode", isDark),
+        boxBorder: designerPairValue(vals, "widget_border_color_light", "widget_border_color_dark", "bingsu_canvas_inset_color_theme_mode", isDark)
       };
     }
     // designerPairValue's "no theme_mode_field" branch defaults to linked
@@ -7719,7 +7719,7 @@
       "--stats-box-stroke: " + Math.max(0, Number(eff.stroke || 0)) + "px",
       "--stats-box-blur: " + ((blurPx / 100) * 20).toFixed(2) + "px",
       "--stats-in-progress-color: " + inProgressColor, "--stats-mastered-color: " + masteredColor,
-      "--onigiri-widget-pad: 14px"
+      "--bingsu-widget-pad: 14px"
     ].join("; ");
 
     const grouped_view_html =
@@ -7732,7 +7732,7 @@
     if (isDark) wrap.classList.add("night-mode");
     wrap.innerHTML =
       '<div class="learner-stats-widget" data-active-view="' + dstatsActiveView + '" data-chart-type="' + (isFull ? "full" : "minimal") + '" style="' + widgetStyle + '">' +
-        '<div class="learner-stats-header"><div class="learner-stats-header-row onigiri-widget-head">' +
+        '<div class="learner-stats-header"><div class="learner-stats-header-row bingsu-widget-head">' +
           "<h3>" + str("lstats_title", "Stats") + "</h3>" +
           '<div class="learner-stats-header-controls">' + dstatsSwitcherHtml() +
             '<div class="learner-stats-deck-trigger">' +
@@ -7959,7 +7959,7 @@
   }
 
   function sizeHeatmapPreview(wrap, vals) {
-    const layout = vals["onigiriWidgetLayout"] || {};
+    const layout = vals["bingsuWidgetLayout"] || {};
     const placed = (layout.grid || {}).heatmap || {};
     const columnWidth = Math.max(200, Math.min(340, Number(layout.grid_width) || 250));
     const rowHeight = Math.max(120, Math.min(320, Number(layout.widget_height) || 150));
@@ -7978,7 +7978,7 @@
   // into an empty box and a Python restart is not required for web-only edits.
   let heatmapRendererPromise = null;
   function ensureHeatmapRenderer() {
-    if (window.OnigiriHeatmap && typeof window.OnigiriHeatmap.render === "function") {
+    if (window.BingsuHeatmap && typeof window.BingsuHeatmap.render === "function") {
       return Promise.resolve();
     }
     if (heatmapRendererPromise) return heatmapRendererPromise;
@@ -7986,7 +7986,7 @@
       const script = document.createElement("script");
       script.src = (CTX.addonBase || "") + "web/heatmap.js?settings-preview=1";
       script.onload = function () {
-        if (window.OnigiriHeatmap && typeof window.OnigiriHeatmap.render === "function") resolve();
+        if (window.BingsuHeatmap && typeof window.BingsuHeatmap.render === "function") resolve();
         else reject(new Error("Heatmap renderer did not initialize"));
       };
       script.onerror = function () { reject(new Error("Heatmap renderer could not be loaded")); };
@@ -8001,10 +8001,10 @@
   function heatmapEffectValues(vals, isDark) {
     if (vals["heatmap_sync_box_effect"] !== false) {
       return {
-        blur: vals["onigiri_canvas_inset_effect_blur"], opacity: vals["onigiri_canvas_inset_effect_opacity"],
-        radius: vals["onigiri_canvas_inset_border_radius"], stroke: vals["onigiri_canvas_inset_border_width"],
-        boxBg: designerPairValue(vals, "widget_box_color_light", "widget_box_color_dark", "onigiri_canvas_inset_color_theme_mode", isDark),
-        boxBorder: designerPairValue(vals, "widget_border_color_light", "widget_border_color_dark", "onigiri_canvas_inset_color_theme_mode", isDark)
+        blur: vals["bingsu_canvas_inset_effect_blur"], opacity: vals["bingsu_canvas_inset_effect_opacity"],
+        radius: vals["bingsu_canvas_inset_border_radius"], stroke: vals["bingsu_canvas_inset_border_width"],
+        boxBg: designerPairValue(vals, "widget_box_color_light", "widget_box_color_dark", "bingsu_canvas_inset_color_theme_mode", isDark),
+        boxBorder: designerPairValue(vals, "widget_border_color_light", "widget_border_color_dark", "bingsu_canvas_inset_color_theme_mode", isDark)
       };
     }
     return {
@@ -8014,7 +8014,7 @@
     };
   }
 
-  // The production heatmap inherits these tokens from Anki's active Onigiri
+  // The production heatmap inherits these tokens from Anki's active Bingsu
   // palette. The settings dialog has a separate chrome palette, so publish
   // the saved theme values explicitly instead of approximating them with
   // preview-only colours. This keeps header-right (streak, navigation, and
@@ -8061,10 +8061,10 @@
     container.style.setProperty("--border", themeVars.border);
     container.style.setProperty("--canvas-inset", eff.boxBg || (isDark ? "#2c2c2c" : "#ffffff"));
     container.style.setProperty("--accent-color", themeVars.accent);
-    container.style.setProperty("--onigiri-tooltip-bg",
+    container.style.setProperty("--bingsu-tooltip-bg",
       mixColors(isDark ? "#000000" : "#ffffff", eff.boxBg || (isDark ? "#2c2c2c" : "#ffffff"), 0.20));
-    container.style.setProperty("--onigiri-tooltip-fg", themeVars.fg);
-    container.style.setProperty("--onigiri-tooltip-border", themeVars.border);
+    container.style.setProperty("--bingsu-tooltip-fg", themeVars.fg);
+    container.style.setProperty("--bingsu-tooltip-border", themeVars.border);
 
     // Dynamic Mode off: the light entry stands in for both themes, same rule
     // patcher.py's _generate_heatmap_colors applies for the real widget.
@@ -8099,7 +8099,7 @@
         8,
         Math.min(
           72,
-          Number(vals["onigiri_font_size_" + sizeRoleKey]) || fallbackSize
+          Number(vals["bingsu_font_size_" + sizeRoleKey]) || fallbackSize
         )
       );
       return role;
@@ -8126,7 +8126,7 @@
   }
 
   PREVIEW_PAINTERS.heatmap = function (stage, vals, isDark) {
-    if (!window.OnigiriHeatmap || typeof window.OnigiriHeatmap.render !== "function") {
+    if (!window.BingsuHeatmap || typeof window.BingsuHeatmap.render !== "function") {
       stage.innerHTML = "";
       const loading = el("div", "osw-preview-stage-center");
       loading.appendChild(el("div", "osw-preview-heatmap-loading", str("loading", "Loading…")));
@@ -8169,7 +8169,7 @@
     wrap.classList.add(isDark ? "night-mode" : "light-mode");
 
     const container = document.createElement("div");
-    container.id = "onigiri-heatmap-container";
+    container.id = "bingsu-heatmap-container";
     wrap.appendChild(container);
     holder.appendChild(wrap);
     stage.appendChild(holder);
@@ -8178,7 +8178,7 @@
     // renderDesignerPreview builds this card before its caller mounts it.
     // Pass the node itself so the production renderer can populate it now;
     // its requestAnimationFrame reflow measures the final mounted box.
-    window.OnigiriHeatmap.render(
+    window.BingsuHeatmap.render(
       container, HEATMAP_PREVIEW_DATA, previewConfig
     );
     heatmapPaintCosmetics(container, vals, isDark);
@@ -8220,10 +8220,10 @@
   function ovstyleEffectValues(vals, isDark) {
     if (vals["ovstyle_sync_box_effect"]) {
       return {
-        blur: vals["onigiri_canvas_inset_effect_blur"], opacity: vals["onigiri_canvas_inset_effect_opacity"],
-        radius: vals["onigiri_canvas_inset_border_radius"], stroke: vals["onigiri_canvas_inset_border_width"],
-        boxBg: designerPairValue(vals, "widget_box_color_light", "widget_box_color_dark", "onigiri_canvas_inset_color_theme_mode", isDark),
-        boxBorder: designerPairValue(vals, "widget_border_color_light", "widget_border_color_dark", "onigiri_canvas_inset_color_theme_mode", isDark)
+        blur: vals["bingsu_canvas_inset_effect_blur"], opacity: vals["bingsu_canvas_inset_effect_opacity"],
+        radius: vals["bingsu_canvas_inset_border_radius"], stroke: vals["bingsu_canvas_inset_border_width"],
+        boxBg: designerPairValue(vals, "widget_box_color_light", "widget_box_color_dark", "bingsu_canvas_inset_color_theme_mode", isDark),
+        boxBorder: designerPairValue(vals, "widget_border_color_light", "widget_border_color_dark", "bingsu_canvas_inset_color_theme_mode", isDark)
       };
     }
     return {
@@ -8333,12 +8333,12 @@
 
     const textColor = designerPairValue(vals, "font_color_light_main", "font_color_dark_main", "font_color_main_theme_mode", isDark) ||
       (isDark ? "#f4f4f5" : "#202124");
-    const mainFontSize = ovstyleNumber(vals["onigiri_font_size_main"], 14, 8, 72);
+    const mainFontSize = ovstyleNumber(vals["bingsu_font_size_main"], 14, 8, 72);
     const mainFont = ovstyleFontStack(
-      "onigiri_font_main",
+      "bingsu_font_main",
       "'Poppins', -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif"
     );
-    const subtleFont = ovstyleFontStack("onigiri_font_subtle", mainFont);
+    const subtleFont = ovstyleFontStack("bingsu_font_subtle", mainFont);
     const profileType = vals["modern_menu_profile_type"] || "bar";
     const showProfileBar = vals["show_overview_profile_bar"] !== false && profileType === "bar";
     const showCongratsProfileBar = vals["show_congrats_profile_bar"] !== false && profileType === "bar";
@@ -8423,7 +8423,7 @@
       ["congrats_title", ".osw-preview-ovstyle-congrats-title, .osw-preview-ovstyle-congrats-message"],
       ["congrats_text", ".osw-preview-ovstyle-congrats .osw-preview-ovstyle-action-button"]
     ].forEach(function (entry) {
-      const ink = fontFieldColor(vals, "onigiri_font_" + entry[0], isDark);
+      const ink = fontFieldColor(vals, "bingsu_font_" + entry[0], isDark);
       if (ink) wrap.querySelectorAll(entry[1]).forEach(function (node) { node.style.color = ink; });
     });
     holder.appendChild(wrap);
@@ -8478,7 +8478,7 @@
       return designerBgSourceState(vals, isDark, REVIEWER_BG_KEYS);
     }
     // "color" / "image_color": this section's own single-image source (no
-    // light/dark image split — onigiri_reviewer_bottom_bar_bg_image is one key).
+    // light/dark image split — bingsu_reviewer_bottom_bar_bg_image is one key).
     return {
       color: designerPairValue(vals, "bbar_bg_color_light", "bbar_bg_color_dark", "bbar_bg_color_theme_mode", isDark) ||
         (isDark ? "#2C2C2C" : "#f2f2f2"),
@@ -8555,13 +8555,13 @@
     let size = parseFloat(style.fontSize) || 14;
     const context = document.createElement("canvas").getContext("2d");
     if (!context) return;
-    const label = btn.querySelector(".onigiri-answer-label").textContent;
+    const label = btn.querySelector(".bingsu-answer-label").textContent;
     while (size > 8) {
       context.font = `600 ${size}px ${style.fontFamily}`;
       if (context.measureText(label).width <= available) break;
       size = Math.max(8, size - .5);
     }
-    btn.style.setProperty("--onigiri-fixed-answer-label-size", size + "px");
+    btn.style.setProperty("--bingsu-fixed-answer-label-size", size + "px");
   }
 
   function bbarButtonBorder(node, vals, family, suffix, enabled) {
@@ -8613,8 +8613,8 @@
   }
 
   PREVIEW_PAINTERS.reviewer_bottom_bar = function (stage, vals, isDark) {
-    const stateChanged = stage.__onigiriBbarMode !== bbarActiveMode;
-    stage.__onigiriBbarMode = bbarActiveMode;
+    const stateChanged = stage.__bingsuBbarMode !== bbarActiveMode;
+    stage.__bingsuBbarMode = bbarActiveMode;
     stage.innerHTML = "";
     stage.style.padding = "0";
     paintResolvedBackdropState(stage, bbarBackgroundState(vals, isDark));
@@ -8633,22 +8633,22 @@
     if (customEnabled && stattxtMode === "fixed") barHeight = Math.max(barHeight, fixed.height + 24);
 
     const standaloneTimer = timerPos === "out" || bbarActiveMode === "answer";
-    const timerPill = el("div", "osw-preview-bbar-timer" + (standaloneTimer ? " is-out" : " onigiri-timer-pill"), "0:07");
+    const timerPill = el("div", "osw-preview-bbar-timer" + (standaloneTimer ? " is-out" : " bingsu-timer-pill"), "0:07");
     timerPill.style.background = vals["bbar_timer_bg_" + suffix] || (isDark ? "#3a3a3a" : "#e5e5e5");
     timerPill.style.color = vals["bbar_timer_text_" + suffix] || (isDark ? "#e0e0e0" : "#2c2c2c");
 
     const bar = el("div", "osw-preview-bbar-bar");
     bar.style.containerType = "inline-size";
-    bar.classList.toggle("onigiri-bbar-fixed", customEnabled && stattxtMode === "fixed");
-    bar.classList.toggle("onigiri-bbar-fixed-question",
+    bar.classList.toggle("bingsu-bbar-fixed", customEnabled && stattxtMode === "fixed");
+    bar.classList.toggle("bingsu-bbar-fixed-question",
       customEnabled && stattxtMode === "fixed" && bbarActiveMode === "pre_answer");
     bar.style.height = barHeight + "px";
     bar.style.padding = "6px 0 18px";
     stage.style.minHeight = Math.max(120, barHeight) + "px";
-    bar.style.setProperty("--onigiri-bbar-fixed-padding", fixed.padding + "px");
-    bar.style.setProperty("--onigiri-bbar-count-height", fixed.countHeight + "px");
-    bar.style.setProperty("--onigiri-bbar-fixed-height", fixed.height + "px");
-    bar.style.setProperty("--onigiri-bbar-font-size", reviewerFont.size + "px");
+    bar.style.setProperty("--bingsu-bbar-fixed-padding", fixed.padding + "px");
+    bar.style.setProperty("--bingsu-bbar-count-height", fixed.countHeight + "px");
+    bar.style.setProperty("--bingsu-bbar-fixed-height", fixed.height + "px");
+    bar.style.setProperty("--bingsu-bbar-font-size", reviewerFont.size + "px");
     const rightSide = bbarSideColumns(
       bar, vals, suffix, timerPos, timerPos !== "off" && standaloneTimer ? timerPill : null, customEnabled
     );
@@ -8665,9 +8665,9 @@
         const intervalColor = vals["bbar_interval_text_" + suffix] || (isDark ? "#aaaaaa" : "#666666");
         interval.style.color = intervalColor.toLowerCase() === (isDark ? "#aaaaaa" : "#666666") ? "inherit" : intervalColor;
         const btn = el("button", "osw-preview-bbar-btn");
-        btn.setAttribute("data-onigiri-ease", String(["again", "hard", "good", "easy"].indexOf(key) + 1));
+        btn.setAttribute("data-bingsu-ease", String(["again", "hard", "good", "easy"].indexOf(key) + 1));
         btn.classList.toggle("is-fixed", stattxtMode === "fixed");
-        interval.classList.add("onigiri-answer-hover-number");
+        interval.classList.add("bingsu-answer-hover-number");
         btn.type = "button";
         btn.style.background = customEnabled
           ? (vals["bbar_" + key + "_bg_" + suffix] || "#cccccc")
@@ -8679,7 +8679,7 @@
         btn.style.padding = padding + "px 15px";
         btn.style.minHeight = btnHeight + "px";
         bbarButtonBorder(btn, vals, key, suffix, customEnabled);
-        btn.appendChild(el("span", "osw-preview-bbar-label onigiri-answer-label", str(key, spec[1])));
+        btn.appendChild(el("span", "osw-preview-bbar-label bingsu-answer-label", str(key, spec[1])));
         if (stattxtMode !== "off") btn.appendChild(interval);
         cell.appendChild(btn);
         buttons.appendChild(cell);
@@ -8688,7 +8688,7 @@
       bar.appendChild(rightSide);
     } else {
       const otherBtn = el("button", "osw-preview-bbar-btn osw-preview-bbar-btn-other osw-preview-bbar-show" +
-        (customEnabled ? " onigiri-show-answer-btn onigiri-has-pre-answer-counts is-" + stattxtMode : " is-off"));
+        (customEnabled ? " bingsu-show-answer-btn bingsu-has-pre-answer-counts is-" + stattxtMode : " is-off"));
       otherBtn.type = "button";
       otherBtn.style.background = customEnabled
         ? (vals["bbar_show_answer_bg_" + suffix] || (isDark ? "#3a3a3a" : "#ffffff"))
@@ -8706,10 +8706,10 @@
         vals["bbar_show_answer_hover_text_" + suffix] || (isDark ? "#3a3a3a" : "#f0f0f0")
       );
 
-      const counts = el("div", "osw-preview-bbar-counts onigiri-pre-answer-counts");
+      const counts = el("div", "osw-preview-bbar-counts bingsu-pre-answer-counts");
       [["new_bubble", "new_text", "12"], ["learn_bubble", "learn_text", "4"], ["review_bubble", "review_text", "23"]]
         .forEach(function (spec) {
-          const pill = el("span", "osw-preview-bbar-count-pill onigiri-count-pill" +
+          const pill = el("span", "osw-preview-bbar-count-pill bingsu-count-pill" +
             (spec[0] === "learn_bubble" ? " is-current-card" : ""), spec[2]);
           pill.style.background = vals["ovstyle_color_" + spec[0] + "_" + suffix] || "#888888";
           pill.style.color = vals["ovstyle_color_" + spec[1] + "_" + suffix] || "#ffffff";
@@ -8718,7 +8718,7 @@
 
       if (customEnabled && timerPos === "left") counts.insertBefore(timerPill, counts.firstChild);
       if (customEnabled && timerPos === "right") counts.appendChild(timerPill);
-      otherBtn.appendChild(el("span", "osw-preview-bbar-label onigiri-show-answer-label", str("show_answer", "Show Answer")));
+      otherBtn.appendChild(el("span", "osw-preview-bbar-label bingsu-show-answer-label", str("show_answer", "Show Answer")));
       if (customEnabled && stattxtMode !== "off") otherBtn.appendChild(counts);
       if (customEnabled && (stattxtMode === "fixed" || stattxtMode === "inverted")) {
         otherBtn.style.background = bbarStatsBarBg(vals, isDark, suffix);
@@ -8745,11 +8745,11 @@
     });
     stage.appendChild(bar);
     if (customEnabled && stattxtMode === "fixed" && bbarActiveMode === "answer") {
-      bar.querySelectorAll("button[data-onigiri-ease]").forEach(bbarFitFixedAnswerLabel);
+      bar.querySelectorAll("button[data-bingsu-ease]").forEach(bbarFitFixedAnswerLabel);
     }
     if (customEnabled && stattxtMode === "fixed" && stateChanged) {
-      const primary = bar.querySelector(".onigiri-show-answer-btn,.osw-preview-bbar-buttons");
-      if (primary) primary.classList.add("onigiri-bbar-enter");
+      const primary = bar.querySelector(".bingsu-show-answer-btn,.osw-preview-bbar-buttons");
+      if (primary) primary.classList.add("bingsu-bbar-enter");
     }
 
     if (!customEnabled) {
@@ -9444,11 +9444,11 @@
     let stroke;
     if (sync) {
       color = designerPairValue(vals, "widget_box_color_light", "widget_box_color_dark",
-                                "onigiri_canvas_inset_color_theme_mode", isDark);
-      blur = designerNum(vals["onigiri_canvas_inset_effect_blur"], 0);
-      opacity = designerNum(vals["onigiri_canvas_inset_effect_opacity"], 100);
-      radius = designerNum(vals["onigiri_canvas_inset_border_radius"], 20);
-      stroke = designerNum(vals["onigiri_canvas_inset_border_width"], 1);
+                                "bingsu_canvas_inset_color_theme_mode", isDark);
+      blur = designerNum(vals["bingsu_canvas_inset_effect_blur"], 0);
+      opacity = designerNum(vals["bingsu_canvas_inset_effect_opacity"], 100);
+      radius = designerNum(vals["bingsu_canvas_inset_border_radius"], 20);
+      stroke = designerNum(vals["bingsu_canvas_inset_border_width"], 1);
     } else {
       color = designerPairValue(vals, "modern_menu_sidebar_bg_color_light",
                                 "modern_menu_sidebar_bg_color_dark",
@@ -9488,17 +9488,17 @@
     let backdropBlur = matchesWidgets ? blur * 0.2 : 0;
     if (bgMode === "main") {
       image = "";
-      const effect = vals["onigiri_sidebar_main_bg_effect_mode"] || "opaque";
+      const effect = vals["bingsu_sidebar_main_bg_effect_mode"] || "opaque";
       if (effect === "glassmorphism") {
-        const intensity = designerNum(vals["onigiri_sidebar_main_bg_effect_intensity"], 50);
+        const intensity = designerNum(vals["bingsu_sidebar_main_bg_effect_intensity"], 50);
         backdropBlur = (intensity / 100) * 15;
         color = "rgba(" + (isDark ? "0, 0, 0, " : "255, 255, 255, ") +
                 ((intensity / 100) * 0.3).toFixed(3) + ")";
       } else {
-        const intensity = designerNum(vals["onigiri_sidebar_opaque_tint_intensity"], 30);
-        const tint = designerPairValue(vals, "onigiri_sidebar_opaque_tint_color_light",
-                                       "onigiri_sidebar_opaque_tint_color_dark",
-                                       "onigiri_sidebar_opaque_tint_color_theme_mode", isDark)
+        const intensity = designerNum(vals["bingsu_sidebar_opaque_tint_intensity"], 30);
+        const tint = designerPairValue(vals, "bingsu_sidebar_opaque_tint_color_light",
+                                       "bingsu_sidebar_opaque_tint_color_dark",
+                                       "bingsu_sidebar_opaque_tint_color_theme_mode", isDark)
                      || (isDark ? "#1D1D1D" : "#FFFFFF");
         color = rgba(tint, intensity / 100);
       }
@@ -9517,12 +9517,12 @@
       margin: designerNum(vals["modern_menu_sidebar_margin"], 10),
       position: vals["modern_menu_sidebar_position"] || "left",
       borderColor: designerPairValue(vals, "widget_border_color_light", "widget_border_color_dark",
-                                     "onigiri_canvas_inset_color_theme_mode", isDark)
+                                     "bingsu_canvas_inset_color_theme_mode", isDark)
                    || (isDark ? "#424242" : "#e0e0e0"),
       isDark: isDark,
       fg: designerFontRole(vals, "main", isDark).color,
       iconColor: designerPairValue(vals, "sb_icon_color_light", "sb_icon_color_dark",
-                                   "onigiri_sidebar_deck_colors_theme_mode", isDark)
+                                   "bingsu_sidebar_deck_colors_theme_mode", isDark)
                  || (isDark ? "#E0E0E0" : "#333333")
     };
   }
@@ -9934,15 +9934,15 @@
 
   function designerDeckRows(host, vals, spec, isDark, markerList) {
     const listBg = designerPairValue(vals, "sb_deck_list_bg_light", "sb_deck_list_bg_dark",
-                                     "onigiri_sidebar_deck_colors_theme_mode", isDark);
+                                     "bingsu_sidebar_deck_colors_theme_mode", isDark);
     const highlightBg = designerPairValue(vals, "sb_highlight_bg_light", "sb_highlight_bg_dark",
-                                          "onigiri_sidebar_deck_colors_theme_mode", isDark)
+                                          "bingsu_sidebar_deck_colors_theme_mode", isDark)
                         || (isDark ? "#3c3c3c" : "#eeeeee");
     const highlightFg = designerPairValue(vals, "sb_highlight_fg_light", "sb_highlight_fg_dark",
-                                          "onigiri_sidebar_deck_colors_theme_mode", isDark);
+                                          "bingsu_sidebar_deck_colors_theme_mode", isDark);
     const filteredColor = designerPairValue(vals, "sb_icon_color_filtered_light",
                                             "sb_icon_color_filtered_dark",
-                                            "onigiri_sidebar_deck_colors_theme_mode", isDark)
+                                            "bingsu_sidebar_deck_colors_theme_mode", isDark)
                           || "#0077C8";
     const iconSize = designerNum(vals["modern_menu_icon_size_deck_folder"], 20);
     const collapseSize = designerNum(vals["modern_menu_icon_size_collapse"], 12);
@@ -10096,7 +10096,7 @@
   }
 
   function paintThemeSidebar(stage, vals, isDark) {
-    if (vals.onigiri_ui_theme === "shima") {
+    if (vals.bingsu_ui_theme === "shima") {
       paintShimaDeckIsland(stage, vals, isDark);
       return;
     }
@@ -10126,7 +10126,7 @@
   function organizeClampSpan(raw, spec, isRow) {
     const minSpan = (spec && spec.minSpan) || [1, 1];
     const maxSpan = (spec && spec.maxSpan) || [4, 4];
-    const defaultSpan = (spec && spec.defaultSpan) || (spec && spec.kind === "onigiri" ? [1, 1] : [2, 1]);
+    const defaultSpan = (spec && spec.defaultSpan) || (spec && spec.kind === "bingsu" ? [1, 1] : [2, 1]);
     const mn = isRow ? minSpan[0] : minSpan[1];
     const mx = isRow ? maxSpan[0] : maxSpan[1];
     let v = Number(raw);
@@ -10180,7 +10180,7 @@
   }
 
   function renderWidgetGrid(section) {
-    const F_ONI = "onigiriWidgetLayout";
+    const F_ONI = "bingsuWidgetLayout";
     const F_EXT = "externalWidgetLayout";
     const F_ROWS = "unifiedGridRows";
 
@@ -10201,9 +10201,9 @@
       }) : null;
     widgetGridTileRadiusObserver = tileRadiusObserver;
 
-    const catalogue = CTX.organizeCatalogue || { onigiri: [], external: [] };
+    const catalogue = CTX.organizeCatalogue || { bingsu: [], external: [] };
     const specsByWid = {};
-    catalogue.onigiri.forEach(function (o) { specsByWid[o.wid] = Object.assign({ kind: "onigiri" }, o); });
+    catalogue.bingsu.forEach(function (o) { specsByWid[o.wid] = Object.assign({ kind: "bingsu" }, o); });
     catalogue.external.forEach(function (o) { specsByWid[o.wid] = Object.assign({}, o); });
 
     // Deck Stats is intentionally repeatable. Its copies retain the base
@@ -10284,7 +10284,7 @@
         const spec = specForWid(t.wid);
         if (!spec) return;
         const pos = t.row * state.cols + t.col;
-        if (spec.kind === "onigiri") {
+        if (spec.kind === "bingsu") {
           const entry = { pos: pos, row: t.rowSpan, col: t.colSpan, display_name: t.displayName };
           if (t.wid === "restaurant_level") entry.orientation = t.orientation || "horizontal";
           if (t.wid === "ready_to_go") entry.design = t.design || "squares";
@@ -10294,7 +10294,7 @@
         }
       });
       const oniArchive = {};
-      catalogue.onigiri.forEach(function (o) { if (!oniGrid[o.wid]) oniArchive[o.wid] = { display_name: o.name }; });
+      catalogue.bingsu.forEach(function (o) { if (!oniGrid[o.wid]) oniArchive[o.wid] = { display_name: o.name }; });
       const extArchive = {};
       catalogue.external.forEach(function (o) { if (!extGrid[o.wid]) extArchive[o.wid] = { display_name: o.name }; });
 
@@ -10332,7 +10332,7 @@
     // is painted. That keeps placement, multi-select and resize interactions
     // faithful while making the thing being arranged look like the menu it
     // will become.
-    const WIDGET_DYNAMIC_KEY = "onigiri_canvas_inset_color_theme_mode";
+    const WIDGET_DYNAMIC_KEY = "bingsu_canvas_inset_color_theme_mode";
     let previewMode = CTX.dark ? "dark" : "light";
     let canvas = null;
     let displayedMenuBackground = null;
@@ -10365,9 +10365,9 @@
         WIDGET_DYNAMIC_KEY, isDark
       ) || (isDark ? "#424242" : "#e0e0e0");
       const glass = designerGlassCardStyle(
-        values, isDark, "onigiri_canvas_inset_effect_opacity",
-        "onigiri_canvas_inset_effect_blur", "onigiri_canvas_inset_border_radius",
-        "onigiri_canvas_inset_border_width", boxColor, borderColor
+        values, isDark, "bingsu_canvas_inset_effect_opacity",
+        "bingsu_canvas_inset_effect_blur", "bingsu_canvas_inset_border_radius",
+        "bingsu_canvas_inset_border_width", boxColor, borderColor
       );
       const textRole = designerFontRole(values, "widget_small", isDark, "main");
       const previewText = textRole.color || (isDark ? "#f4f4f5" : "#202124");
@@ -10428,7 +10428,7 @@
         const titleFont = designerFontRole(values, "dashboard_title", isDark, "subtle");
         phrase.style.fontFamily = titleFont.family || "inherit";
         phrase.style.color = titleFont.color || previewText;
-        phrase.style.fontSize = Math.max(8, Math.min(72, Number(values.onigiri_font_size_dashboard_title) || 20)) * 0.6 + "px";
+        phrase.style.fontSize = Math.max(8, Math.min(72, Number(values.bingsu_font_size_dashboard_title) || 20)) * 0.6 + "px";
       }
 
       const backdrop = canvas.querySelector(".osw-organize-preview-backdrop");
@@ -10553,8 +10553,8 @@
     previewResetBtn.appendChild(resetIcon);
     installResetHold(previewResetBtn, function () {
       [
-        "onigiri_canvas_inset_effect_blur", "onigiri_canvas_inset_effect_opacity",
-        "onigiri_canvas_inset_border_radius", "onigiri_canvas_inset_border_width",
+        "bingsu_canvas_inset_effect_blur", "bingsu_canvas_inset_effect_opacity",
+        "bingsu_canvas_inset_border_radius", "bingsu_canvas_inset_border_width",
         "widget_box_color_light", "widget_box_color_dark",
         "widget_border_color_light", "widget_border_color_dark", WIDGET_DYNAMIC_KEY
       ].forEach(function (fieldId) {
@@ -10842,7 +10842,7 @@
         const spec = specForWid(t.wid);
         if (!spec) return;
         const tile = el("div", "osw-organize-tile" +
-          (spec.kind !== "onigiri" ? " is-external" : "") +
+          (spec.kind !== "bingsu" ? " is-external" : "") +
           (selectedWids.has(t.wid) ? " is-selected" : ""));
         tile.setAttribute("data-wid", t.wid);
         tile.style.gridColumn = (t.col + 1) + " / span " + t.colSpan;
@@ -10883,7 +10883,7 @@
         wireTileDrag(tile, t);
         // Touch has no right-click: mobile.js turns a long press on this
         // attribute into the contextmenu event below.
-        tile.setAttribute("data-onigiri-longpress", "1");
+        tile.setAttribute("data-bingsu-longpress", "1");
         tile.addEventListener("contextmenu", function (event) {
           event.preventDefault();
           openTileMenu(t, spec, event.clientX, event.clientY);
@@ -11281,8 +11281,8 @@
         const menuTitleFields = SETTINGS_MODE_PARITY || settingsComplexity === "advanced"
           ? [
             "modern_menu_statsTitle",
-            "onigiri_font_dashboard_title",
-            "onigiri_font_size_dashboard_title",
+            "bingsu_font_dashboard_title",
+            "bingsu_font_size_dashboard_title",
             "modern_menu_title_alignment",
             "modern_menu_title_background_enabled",
             "modern_menu_title_sync_widgets",
@@ -11376,7 +11376,7 @@
     function openWidgetGallery() {
       const placed = {};
       state.tiles.forEach(function (t) { placed[t.wid] = true; });
-      const oniAvail = catalogue.onigiri.filter(function (o) {
+      const oniAvail = catalogue.bingsu.filter(function (o) {
         return isRepeatableSpec(o) || !placed[o.wid];
       });
 
@@ -11484,7 +11484,7 @@
         sec.appendChild(grid);
         body.appendChild(sec);
       }
-      section_(str("gallery_onigiri", "Bingsu Widgets"), oniAvail, false);
+      section_(str("gallery_bingsu", "Bingsu Widgets"), oniAvail, false);
       section_(str("gallery_external", "External Add-ons"), extAvail, true);
 
       root.addEventListener("mousedown", function (event) { if (event.target === root && root.parentNode) root.parentNode.removeChild(root); });
@@ -11796,7 +11796,7 @@
       const more = managed(now.more);
       const archived = managed(now.archived);
       // Anything the schema knows about that the stored layout mentions nowhere
-      // (a button added by a later Onigiri version) is shown as archived rather
+      // (a button added by a later Bingsu version) is shown as archived rather
       // than vanishing from the editor.
       (field.options || []).forEach(function (option) {
         if (visible.indexOf(option.value) === -1 &&
@@ -12607,44 +12607,44 @@
 
   /* The Onigimon widget as the deck browser draws it: a coloured scene with the
      companion on it, fused to the stats panel underneath. Mirrors
-     gamification/onigimon.py's `.onigimon-card` and onigiri_renderer.py's
+     gamification/onigimon.py's `.onigimon-card` and bingsu_renderer.py's
      `.onigimon-top` / `.onigimon-bottom` rules. */
   PREVIEW_PAINTERS.onigimon_scene = function (stage, vals, isDark) {
     const synced = !!vals.g_onigimon_sync_widget_colors;
     const widgetBoxColor = designerPairValue(
       vals, "widget_box_color_light", "widget_box_color_dark",
-      "onigiri_canvas_inset_color_theme_mode", isDark
+      "bingsu_canvas_inset_color_theme_mode", isDark
     ) || (isDark ? "#2c2c2c" : "#ffffff");
     const widgetBorderColor = designerPairValue(
       vals, "widget_border_color_light", "widget_border_color_dark",
-      "onigiri_canvas_inset_color_theme_mode", isDark
+      "bingsu_canvas_inset_color_theme_mode", isDark
     ) || (isDark ? "#424242" : "#e0e0e0");
     const widgetRadius = Math.max(
       0,
       Math.min(
         60,
-        vals.onigiri_canvas_inset_border_radius == null || vals.onigiri_canvas_inset_border_radius === ""
+        vals.bingsu_canvas_inset_border_radius == null || vals.bingsu_canvas_inset_border_radius === ""
           ? 20
-          : designerNum(vals.onigiri_canvas_inset_border_radius, 20)
+          : designerNum(vals.bingsu_canvas_inset_border_radius, 20)
       )
     );
     const widgetStroke = Math.max(
       0,
       Math.min(
         10,
-        vals.onigiri_canvas_inset_border_width == null || vals.onigiri_canvas_inset_border_width === ""
+        vals.bingsu_canvas_inset_border_width == null || vals.bingsu_canvas_inset_border_width === ""
           ? 1
-          : designerNum(vals.onigiri_canvas_inset_border_width, 1)
+          : designerNum(vals.bingsu_canvas_inset_border_width, 1)
       )
     );
-    const widgetBlur = Math.max(0, Math.min(100, designerNum(vals.onigiri_canvas_inset_effect_blur, 0)));
+    const widgetBlur = Math.max(0, Math.min(100, designerNum(vals.bingsu_canvas_inset_effect_blur, 0)));
     const widgetOpacity = Math.max(
       0,
       Math.min(
         100,
-        vals.onigiri_canvas_inset_effect_opacity == null || vals.onigiri_canvas_inset_effect_opacity === ""
+        vals.bingsu_canvas_inset_effect_opacity == null || vals.bingsu_canvas_inset_effect_opacity === ""
           ? 100
-          : designerNum(vals.onigiri_canvas_inset_effect_opacity, 100)
+          : designerNum(vals.bingsu_canvas_inset_effect_opacity, 100)
       )
     );
     const widgetAlpha = Math.min(widgetOpacity / 100, widgetBlur > 0 ? 0.62 : 1);
@@ -12932,7 +12932,7 @@
     const cardMock = el("div", "osw-onihud-mock-card");
     cardMock.appendChild(el("div", "osw-onihud-mock-word", "おにぎり"));
     cardMock.appendChild(el("div", "osw-onihud-mock-line"));
-    cardMock.appendChild(el("div", "osw-onihud-mock-sub", "rice ball · onigiri"));
+    cardMock.appendChild(el("div", "osw-onihud-mock-sub", "rice ball · bingsu"));
     frame.appendChild(cardMock);
 
     // HUD mount area (reserves scale-aware clearance so HUD never overlaps mock card or bottom bar)
@@ -13418,21 +13418,21 @@
     host.appendChild(previewCol);
 
     function updatePreview() {
-      const fontKey = values["onigiri_font_" + roleKey] || "sync";
+      const fontKey = values["bingsu_font_" + roleKey] || "sync";
       const colorRoleKey = fallbackRoleKey || roleKey;
       const lightColor = values["font_color_light_" + colorRoleKey] || "#1f2933";
       const darkColor = values["font_color_dark_" + colorRoleKey] || "#f4f4f5";
 
-      const fontField = fieldById["onigiri_font_" + roleKey];
+      const fontField = fieldById["bingsu_font_" + roleKey];
       const resolvedFontKey = fontKey === "sync" && fallbackRoleKey
-        ? (values["onigiri_font_" + fallbackRoleKey] || "system")
+        ? (values["bingsu_font_" + fallbackRoleKey] || "system")
         : fontKey;
       // In Advanced mode family sync and component size are independent. The
       // Simple UI never renders these component cards and continues to use
       // the three shared typography scales.
       const fontSize = SETTINGS_MODE_PARITY || settingsComplexity === "advanced"
-        ? (values["onigiri_font_size_" + roleKey] || 14)
-        : (values["onigiri_font_size_" + fallbackRoleKey] || 14);
+        ? (values["bingsu_font_size_" + roleKey] || 14)
+        : (values["bingsu_font_size_" + fallbackRoleKey] || 14);
       let family = "";
       if (fontField && fontField.options) {
         const opt = fontField.options.filter(function (o) { return o.value === resolvedFontKey; })[0];
@@ -13441,7 +13441,7 @@
       if (!family && resolvedFontKey !== "system") family = resolvedFontKey;
 
       const isLight = currentPreviewMode === "light";
-      const color = fontFieldColor(values, "onigiri_font_" + roleKey, !isLight) || (isLight ? lightColor : darkColor);
+      const color = fontFieldColor(values, "bingsu_font_" + roleKey, !isLight) || (isLight ? lightColor : darkColor);
 
       card.setAttribute("data-preview-mode", currentPreviewMode);
 
@@ -13684,7 +13684,7 @@
           '</svg>';
       } else if (option.value === "classic") {
         const iconUrl = (CTX.iconAssets || {})["system:onigiri.svg"] || "";
-        decoration.classList.add("is-onigiri");
+        decoration.classList.add("is-bingsu");
         decoration.style.setProperty(
           "--osw-theme-style-decoration-image", "url(" + iconUrl + ")"
         );
@@ -13865,7 +13865,7 @@
     let analytics = asset.analyticsHtml || "";
     if (!analytics) {
       analytics = '<section class="ba-practice"><div class="ba-analytics">' +
-        window.onigiriTemplate('<section class="ba-review-chart"><div class="ba-analytics-head"><span>Weekly reviews</span><strong>915<small> total</small></strong></div>') +
+        window.bingsuTemplate('<section class="ba-review-chart"><div class="ba-analytics-head"><span>Weekly reviews</span><strong>915<small> total</small></strong></div>') +
         '<svg class="ba-review-chart-svg" viewBox="0 0 640 150" preserveAspectRatio="none"><path d="M12,116 L90,104 L170,108 L250,80 L330,88 L410,58 L500,66 L628,24 L628,116 L12,116 Z" class="ba-chart-area"></path><path d="M12,116 L90,104 L170,108 L250,80 L330,88 L410,58 L500,66 L628,24" class="ba-chart-line"></path></svg></section>' +
         '<section class="ba-heatmap-card"><div class="rf-heatmap"><div class="rf-hm-head"><span class="rf-hm-title">' + escapeCopy(str('kome_review_activity')) + '</span><span class="rf-hm-stats"><b>42</b> ' + escapeCopy(str('today')) + ' · ' + escapeCopy(str('kome_streak_days').replace('{n}', '8')) + '</span></div></div></section>' +
       '</div></section>';
@@ -13903,10 +13903,10 @@
     dynamicCtl.appendChild(dynamicBtn);
     headControls.appendChild(dynamicCtl);
 
-    let previewMode = values.onigiri_theme_mode === "dark" || values.onigiri_theme_mode === "light"
-      ? values.onigiri_theme_mode
+    let previewMode = values.bingsu_theme_mode === "dark" || values.bingsu_theme_mode === "light"
+      ? values.bingsu_theme_mode
       : (CTX.dark ? "dark" : "light");
-    let lastThemeMode = values.onigiri_theme_mode;
+    let lastThemeMode = values.bingsu_theme_mode;
     let lastEffectiveDark = !!CTX.dark;
     const modeBtn = el("button", "osw-profile-preview-toggle-btn osw-designer-preview-toggle-btn");
     modeBtn.type = "button";
@@ -13945,7 +13945,7 @@
     requestAnimationFrame(syncScale);
 
     function syncHeader() {
-      const dynamic = values.onigiri_theme_mode === "system";
+      const dynamic = values.bingsu_theme_mode === "system";
       dynamicTrack.classList.toggle("is-on", dynamic);
       dynamicBtn.setAttribute("aria-pressed", dynamic ? "true" : "false");
       modeBtn.innerHTML = previewMode === "dark" ? OSW_SUN_ICON : OSW_MOON_ICON;
@@ -13984,27 +13984,27 @@
 
     dynamicBtn.addEventListener("click", function () {
       bridge("osw:haptic:1");
-      setValue("onigiri_theme_mode", values.onigiri_theme_mode === "system" ? previewMode : "system");
+      setValue("bingsu_theme_mode", values.bingsu_theme_mode === "system" ? previewMode : "system");
     });
     modeBtn.addEventListener("click", function () {
       bridge("osw:haptic:1");
       previewMode = previewMode === "dark" ? "light" : "dark";
-      if (values.onigiri_theme_mode !== "system") {
-        setValue("onigiri_theme_mode", previewMode);
+      if (values.bingsu_theme_mode !== "system") {
+        setValue("bingsu_theme_mode", previewMode);
       } else {
         paint(true);
       }
     });
 
     host.__refreshThingsPreview = function () {
-      if (values.onigiri_theme_mode === "light" || values.onigiri_theme_mode === "dark") {
-        previewMode = values.onigiri_theme_mode;
-      } else if (lastThemeMode !== values.onigiri_theme_mode || lastEffectiveDark !== !!CTX.dark) {
+      if (values.bingsu_theme_mode === "light" || values.bingsu_theme_mode === "dark") {
+        previewMode = values.bingsu_theme_mode;
+      } else if (lastThemeMode !== values.bingsu_theme_mode || lastEffectiveDark !== !!CTX.dark) {
         // Switching back to Sync with Anki resets the preview to Anki's mode.
         // Manual preview toggles remain available while that mode is stable.
         previewMode = CTX.dark ? "dark" : "light";
       }
-      lastThemeMode = values.onigiri_theme_mode;
+      lastThemeMode = values.bingsu_theme_mode;
       lastEffectiveDark = !!CTX.dark;
       paint(false);
     };
@@ -14245,7 +14245,7 @@
       // Touch screens (iPhone/iPad): a 3 s hold fights scrolling and iOS's
       // own long-press. A tap picks the theme (checkmark) and an Apply bar
       // at the bottom applies it.
-      if (window.OnigiriMobile && window.OnigiriMobile.isTouch()) {
+      if (window.BingsuMobile && window.BingsuMobile.isTouch()) {
         tile.classList.add("is-tap-to-pick");
         tile.addEventListener("click", function (event) {
           if (isDeleteControl(event.target) || tile.classList.contains("is-confirming")) return;
@@ -15141,7 +15141,7 @@
     } catch (err) {
       // One section's bug should never blank the whole page — the rest of
       // Main menu (or any other multi-section page) still needs to work.
-      console.error("[Onigiri] settings_web: section '" + section.id + "' (" + section.layout + ") failed to render:", err);
+      console.error("[Bingsu] settings_web: section '" + section.id + "' (" + section.layout + ") failed to render:", err);
       block.appendChild(el("div", "osw-note", "⚠ " + section.id + ": " + (err && err.message ? err.message : String(err))));
     }
     return block;
@@ -15224,13 +15224,13 @@
         // lives outside renderWidgetGrid because the header action can be
         // used while any Main Menu tab is selected.
         if (isMainMenuReset) {
-          const layoutField = fieldById.onigiriWidgetLayout || {};
+          const layoutField = fieldById.bingsuWidgetLayout || {};
           const baseLayout = layoutField.default && typeof layoutField.default === "object"
             ? JSON.parse(JSON.stringify(layoutField.default))
             : {};
-          const catalogue = CTX.organizeCatalogue || { onigiri: [] };
+          const catalogue = CTX.organizeCatalogue || { bingsu: [] };
           const specsByWid = {};
-          catalogue.onigiri.forEach(function (spec) { specsByWid[spec.wid] = spec; });
+          catalogue.bingsu.forEach(function (spec) { specsByWid[spec.wid] = spec; });
           const columns = Number(baseLayout.column_count) || 4;
           const tiles = [];
           const grid = {};
@@ -15250,12 +15250,12 @@
             };
           });
           const archive = {};
-          catalogue.onigiri.forEach(function (spec) {
+          catalogue.bingsu.forEach(function (spec) {
             if (!grid[spec.wid]) archive[spec.wid] = { display_name: spec.name };
           });
           baseLayout.grid = grid;
           baseLayout.archive = archive;
-          setValue("onigiriWidgetLayout", baseLayout, { silent: true, skipCascade: true });
+          setValue("bingsuWidgetLayout", baseLayout, { silent: true, skipCascade: true });
         }
         activeTabByPage[page.id] = sections[0].id;
         mount(sections[0].id);
@@ -15695,7 +15695,7 @@
     node.textContent = "";
     if (simpleNotice) {
       const logo = el("img", "osw-toast-logo");
-      logo.src = CTX.addonBase + "system_files/onigiri_mini_logo.svg";
+      logo.src = CTX.addonBase + "system_files/bingsu_mini_logo.svg";
       logo.alt = "";
       logo.setAttribute("aria-hidden", "true");
       node.appendChild(logo);
@@ -15841,7 +15841,7 @@
   setStatus("idle");
   if (currentPage) showPage(currentPage);
 
-  window.onigiriSettings = {
+  window.bingsuSettings = {
     showPage: showPage,
     toast: toast,
     setGridBackground: function (background) {

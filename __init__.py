@@ -50,23 +50,31 @@ def _storage_integrity_check():
             # Later profile loaders may recover settings/game files too.
             notices = messages + safe_storage.take_notices()
             if notices:
-                from .ui_kit.onigiri_notifications import notify_warning
+                from .ui_kit.bingsu_notifications import notify_warning
 
-                notify_warning("\n\n".join(notices), title=tr("onigiri_storage_notice"), blocking=False)
+                notify_warning("\n\n".join(notices), title=tr("bingsu_storage_notice"), blocking=False)
 
         # Finish Anki's profile hooks before presenting UI. The warning uses
         # open(), so it cannot run a nested event loop during initialization.
         QTimer.singleShot(0, show_storage_notices)
     except Exception as e:
-        print(f"[Onigiri] storage integrity check failed: {e}")
+        print(f"[Bingsu] storage integrity check failed: {e}")
 
 
 # Register before importing any module that may register a profile loader.
+def _carry_over_onigiri_names():
+    """First hook on profile open: bring data saved under the Onigiri names across."""
+    from .core import legacy_names
+    legacy_names.migrate_all(mw.col)
+    legacy_names.migrate_decks(mw.col)
+
+
+gui_hooks.profile_did_open.append(_carry_over_onigiri_names)
 gui_hooks.profile_did_open.append(_storage_integrity_check)
 
 from .core.translations import tr
 from aqt.deckbrowser import DeckBrowser
-from .rendering import onigiri_renderer
+from .rendering import bingsu_renderer
 from .rendering import shima_theme
 from aqt.reviewer import Reviewer
 from aqt.overview import Overview
@@ -84,7 +92,7 @@ from .api import bento as bento_api
 from .integrations import fsrs_helper_integration
 from .rendering import learner_stats_widget
 from .integrations import mac_titlebar
-from .core.sync import onigiri_sync
+from .core.sync import bingsu_sync
 
 addon_path = os.path.dirname(__file__)
 addon_package = mw.addonManager.addonFromModule(__name__)
@@ -109,14 +117,14 @@ def _load_things_theme():
         return module
     except Exception as exc:
         _things_theme_load_failed = True
-        print(f"[Onigiri] Kome unavailable; using Classic: {exc}")
+        print(f"[Bingsu] Kome unavailable; using Classic: {exc}")
         return None
 
 
 def _things_theme_selected(conf=None):
     conf = conf if isinstance(conf, dict) else config.get_config_readonly()
     return (
-        conf.get("onigiri_ui_theme", "classic") == "things3"
+        conf.get("bingsu_ui_theme", "classic") == "things3"
         and _load_things_theme() is not None
     )
 
@@ -124,25 +132,25 @@ def _things_theme_selected(conf=None):
 def _shima_theme_selected(conf=None):
     """Whether the deck-only Shima main menu is active."""
     conf = conf if isinstance(conf, dict) else config.get_config_readonly()
-    return conf.get("onigiri_ui_theme", "classic") == "shima"
+    return conf.get("bingsu_ui_theme", "classic") == "shima"
 
 # Make addon_path available to other modules
 sys.modules[__name__].addon_path = addon_path
 
 def generate_notification_position_css_text(conf):
     """Generates CSS text for notification positioning logic."""
-    if conf.get("onigiri_reviewer_notification_mode", "classic") == "mini":
+    if conf.get("bingsu_reviewer_notification_mode", "classic") == "mini":
         return ""
         
-    pos = conf.get("onigiri_reviewer_notification_position", "top-right")
+    pos = conf.get("bingsu_reviewer_notification_position", "top-right")
     
-    css = ".onigiri-notification-stack { "
+    css = ".bingsu-notification-stack { "
     
     # Defaults (resetting properties that might conflict)
     css += "top: auto; bottom: auto; left: auto; right: auto; transform: none; "
     
     # Base top offset calculation: Header Offset + 20px padding
-    top_offset = "calc(var(--onigiri-reviewer-header-offset, 0px) + 5px)"
+    top_offset = "calc(var(--bingsu-reviewer-header-offset, 0px) + 5px)"
     
     if pos == "top-left":
         css += f"top: {top_offset}; left: 20px; align-items: flex-start; flex-direction: column; "
@@ -171,28 +179,28 @@ def generate_notification_position_css(conf):
 def notification_duration_script(conf):
     """Injects the global notification duration chosen in settings."""
     try:
-        duration = int(conf.get("onigiri_notification_duration_ms", 5200))
+        duration = int(conf.get("bingsu_notification_duration_ms", 5200))
     except (TypeError, ValueError):
         duration = 5200
     duration = max(1000, min(30000, duration))
-    return f"<script>window.onigiriNotificationDuration = {duration};</script>"
+    return f"<script>window.bingsuNotificationDuration = {duration};</script>"
 
 
 def quiet_state_change_css() -> str:
     """Briefly suppress page-level motion while Anki swaps webview screens."""
     return """
     <script>
-        document.documentElement.classList.add('onigiri-state-settling');
+        document.documentElement.classList.add('bingsu-state-settling');
         window.setTimeout(function() {
-            document.documentElement.classList.remove('onigiri-state-settling');
+            document.documentElement.classList.remove('bingsu-state-settling');
         }, 260);
     </script>
-    <style id="onigiri-quiet-state-change">
-        html.onigiri-state-settling,
-        html.onigiri-state-settling body,
-        html.onigiri-state-settling * ,
-        html.onigiri-state-settling *::before,
-        html.onigiri-state-settling *::after {
+    <style id="bingsu-quiet-state-change">
+        html.bingsu-state-settling,
+        html.bingsu-state-settling body,
+        html.bingsu-state-settling * ,
+        html.bingsu-state-settling *::before,
+        html.bingsu-state-settling *::after {
             transition-duration: 0.001ms !important;
             transition-delay: 0s !important;
             animation-duration: 0.001ms !important;
@@ -246,7 +254,7 @@ def inject_menu_files(web_content, context):
         try:
             return generator()
         except Exception as exc:
-            print(f"Onigiri: could not generate {label}: {exc}")
+            print(f"Bingsu: could not generate {label}: {exc}")
             return ""
 
     is_deck_browser = isinstance(context, DeckBrowser)
@@ -263,9 +271,9 @@ def inject_menu_files(web_content, context):
         _load_things_theme().on_webview_will_set_content(web_content, context)
         return
     # Anki's styles select palettes by night-mode classes. Apply the shared
-    # override only to Onigiri's surfaces; the reviewer card retains its own
+    # override only to Bingsu's surfaces; the reviewer card retains its own
     # Anki mode and card-template styling. System mode leaves Anki in control.
-    forced_mode = str(conf.get("onigiriThemeMode", "system")).lower()
+    forced_mode = str(conf.get("bingsuThemeMode", "system")).lower()
     if forced_mode in {"light", "dark"} and (
         is_deck_browser or is_overview or is_top_toolbar
         or is_bottom_toolbar or is_reviewer_bottom_bar
@@ -300,8 +308,8 @@ def inject_menu_files(web_content, context):
         }})();
         </script>
         """
-    # Inject global Onigiri CSS only for deck browser and overview.
-    # The reviewer card webview owns Anki's question/answer element; Onigiri
+    # Inject global Bingsu CSS only for deck browser and overview.
+    # The reviewer card webview owns Anki's question/answer element; Bingsu
     # must not inject CSS, JS, or DOM there so card templates remain untouched.
     if is_deck_browser or is_overview:
         web_content.head += quiet_state_change_css()
@@ -320,46 +328,46 @@ def inject_menu_files(web_content, context):
             web_content.head += f"""
             <script>
             window.addEventListener("DOMContentLoaded", function() {{
-                if (document.getElementById("onigiri-welcome-overlay")) return;
+                if (document.getElementById("bingsu-welcome-overlay")) return;
                 
                 const style = document.createElement("style");
-                style.id = "onigiri-welcome-style";
+                style.id = "bingsu-welcome-style";
                 style.innerHTML = `
                     @font-face {{
-                        font-family: 'OnigiriPoppins';
+                        font-family: 'BingsuPoppins';
                         src: url('/_addons/{addon_package}/system_files/fonts/system_fonts/Poppins/Poppins-Regular.ttf');
                         font-weight: 400;
                     }}
                     @font-face {{
-                        font-family: 'OnigiriPoppins';
+                        font-family: 'BingsuPoppins';
                         src: url('/_addons/{addon_package}/system_files/fonts/system_fonts/Poppins/Poppins-Medium.ttf');
                         font-weight: 500 900;
                     }}
-                    #onigiri-welcome-overlay {{
+                    #bingsu-welcome-overlay {{
                         position: fixed; inset: 0; z-index: 2147483647;
                         display: flex; flex-direction: column; align-items: center; justify-content: center;
                         backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
                         background: rgba(0, 0, 0, 0.55);
                         color: white;
-                        font-family: 'OnigiriPoppins', -apple-system, BlinkMacSystemFont, sans-serif;
+                        font-family: 'BingsuPoppins', -apple-system, BlinkMacSystemFont, sans-serif;
                         opacity: 0; transition: opacity 0.4s ease;
                     }}
-                    #onigiri-welcome-overlay .btn-continue {{
+                    #bingsu-welcome-overlay .btn-continue {{
                         margin-top: 36px; padding: 16px 48px; font-size: 21px; font-weight: 700;
-                        font-family: 'OnigiriPoppins', sans-serif; color: #123034; background: white;
+                        font-family: 'BingsuPoppins', sans-serif; color: #123034; background: white;
                         border: none; border-radius: 40px; cursor: pointer;
                         box-shadow: 0 4px 12px rgba(0,0,0,0.2); transition: transform 0.2s, box-shadow 0.2s;
                     }}
-                    #onigiri-welcome-overlay .btn-continue:hover {{
+                    #bingsu-welcome-overlay .btn-continue:hover {{
                         transform: scale(1.05); box-shadow: 0 6px 16px rgba(0,0,0,0.3);
                     }}
                 `;
                 document.head.appendChild(style);
 
                 const overlay = document.createElement("div");
-                overlay.id = "onigiri-welcome-overlay";
+                overlay.id = "bingsu-welcome-overlay";
                 overlay.innerHTML = `
-                    <img src="/_addons/{addon_package}/system_files/onigiri_logo.png" style="width: 290px; height: auto; margin-bottom: 32px; filter: drop-shadow(0 6px 16px rgba(0,0,0,0.3));" />
+                    <img src="/_addons/{addon_package}/system_files/bingsu_logo.png" style="width: 290px; height: auto; margin-bottom: 32px; filter: drop-shadow(0 6px 16px rgba(0,0,0,0.3));" />
                     <h1 style="margin: 0 0 20px 0; font-size: 49px; font-weight: 700; text-shadow: 0 2px 6px rgba(0,0,0,0.5);">Welcome!</h1>
                     <p style="margin: 0; font-size: 26px; font-weight: 500; text-shadow: 0 1px 4px rgba(0,0,0,0.5);">Proceed to Settings to start customizing</p>
                     <button class="btn-continue">Continue</button>
@@ -370,9 +378,9 @@ def inject_menu_files(web_content, context):
                     overlay.style.opacity = "0";
                     setTimeout(() => {{
                         overlay.remove();
-                        const s = document.getElementById("onigiri-welcome-style");
+                        const s = document.getElementById("bingsu-welcome-style");
                         if (s) s.remove();
-                        pycmd("onigiri_welcome_dismissed");
+                        pycmd("bingsu_welcome_dismissed");
                     }}, 400);
                 }});
                 
@@ -389,10 +397,10 @@ def inject_menu_files(web_content, context):
         # Install this before external web assets execute so every context is
         # tracked without requiring changes to the other add-on.
         graphics_lifecycle_script = """
-        <script id="onigiri-webgl-context-lifecycle">
+        <script id="bingsu-webgl-context-lifecycle">
         (function () {
-            if (window.__onigiriWebGLTrackerInstalled) return;
-            window.__onigiriWebGLTrackerInstalled = true;
+            if (window.__bingsuWebGLTrackerInstalled) return;
+            window.__bingsuWebGLTrackerInstalled = true;
 
             const originalGetContext = HTMLCanvasElement.prototype.getContext;
             const trackedContexts = new Set();
@@ -404,7 +412,7 @@ def inject_menu_files(web_content, context):
                 return context;
             };
 
-            window.__onigiriReleasePageGraphics = function () {
+            window.__bingsuReleasePageGraphics = function () {
                 trackedContexts.forEach(function (context) {
                     try {
                         const extension = context.getExtension('WEBGL_lose_context');
@@ -418,8 +426,8 @@ def inject_menu_files(web_content, context):
                 });
             };
 
-            window.addEventListener('pagehide', window.__onigiriReleasePageGraphics, { once: true });
-            window.addEventListener('beforeunload', window.__onigiriReleasePageGraphics, { once: true });
+            window.addEventListener('pagehide', window.__bingsuReleasePageGraphics, { once: true });
+            window.addEventListener('beforeunload', window.__bingsuReleasePageGraphics, { once: true });
         })();
         </script>
         """
@@ -458,7 +466,7 @@ def inject_menu_files(web_content, context):
         if not is_shima:
             web_content.head += f'<link rel="stylesheet" href="{web_assets_root}/notifications.css">'
             web_content.head += notification_duration_script(conf)
-        # Must precede the scripts below: they read window.ONIGIRI_STRINGS.
+        # Must precede the scripts below: they read window.BINGSU_STRINGS.
         web_content.head += webview_handlers.webview_strings_script()
         if not is_shima:
             web_content.head += f'<script src="{versioned_web_asset("injector.js")}"></script>'
@@ -478,13 +486,13 @@ def inject_menu_files(web_content, context):
         web_content.head += mac_titlebar.inset_css("deck_browser")
 
         # Inject heatmap data for robust rendering
-        if not is_shima and "heatmap" in conf.get("onigiriWidgetLayout", {}).get("grid", {}):
+        if not is_shima and "heatmap" in conf.get("bingsuWidgetLayout", {}).get("grid", {}):
             try:
                 h_data, h_conf = heatmap.get_heatmap_and_config()
                 web_content.head += f"""
                 <script>
-                    window.onigiriHeatmapData = {json.dumps(h_data)};
-                    window.onigiriHeatmapConfig = {json.dumps(h_conf)};
+                    window.bingsuHeatmapData = {json.dumps(h_data)};
+                    window.bingsuHeatmapConfig = {json.dumps(h_conf)};
                 </script>
                 """
             except Exception:
@@ -498,7 +506,7 @@ def inject_menu_files(web_content, context):
         web_content.head += f'<script src="{versioned_web_asset("reviewer_flags.js")}"></script>'
         web_content.head += reviewer_more_menu.reviewer_head_assets(addon_package, conf)
         web_content.head += f'<script src="{versioned_web_asset("reviewer_more_menu.js")}"></script>'
-        silent_notifs = "true" if conf.get("onigiri_reviewer_silent_notifications", False) else "false"
+        silent_notifs = "true" if conf.get("bingsu_reviewer_silent_notifications", False) else "false"
         patcher.set_main_webview_background_color(patcher._reviewer_base_bg_color(conf))
         web_content.head += notification_duration_script(conf)
         web_content.head += patcher.generate_reviewer_background_css(addon_path)
@@ -507,27 +515,27 @@ def inject_menu_files(web_content, context):
             conf, include_overview_class=False
         )
         reviewer_shadow_css = (
-            patcher.generate_scoped_main_font_css(addon_package, "#onigiri-reviewer-header")
+            patcher.generate_scoped_main_font_css(addon_package, "#bingsu-reviewer-header")
             + patcher.generate_box_effect_button_vars_css(
                 conf,
-                selector="#onigiri-reviewer-header",
-                night_selector=":host(.night-mode) #onigiri-reviewer-header",
+                selector="#bingsu-reviewer-header",
+                night_selector=":host(.night-mode) #bingsu-reviewer-header",
             )
             + top_bar_css
         )
         reviewer_shadow_css = reviewer_shadow_css.replace(
-            ".night_mode #onigiri-reviewer-header",
-            ":host(.night-mode) #onigiri-reviewer-header",
+            ".night_mode #bingsu-reviewer-header",
+            ":host(.night-mode) #bingsu-reviewer-header",
         ).replace(
-            ".night_mode .onigiri-island-shell",
-            ":host(.night-mode) .onigiri-island-shell",
+            ".night_mode .bingsu-island-shell",
+            ":host(.night-mode) .bingsu-island-shell",
         )
         # Chromium resolves document fonts for the shadow header, but ignores
         # @font-face declarations inside the shadow tree. Register faces in
         # the head while keeping typography selectors isolated in the shadow.
         font_faces = re.findall(r"@font-face\s*\{[^{}]*\}", reviewer_shadow_css)
         if font_faces:
-            web_content.head += '<style id="onigiri-reviewer-font-faces">' + "\n".join(font_faces) + '</style>'
+            web_content.head += '<style id="bingsu-reviewer-font-faces">' + "\n".join(font_faces) + '</style>'
             reviewer_shadow_css = re.sub(r"@font-face\s*\{[^{}]*\}", "", reviewer_shadow_css)
         notification_css_text = ""
         try:
@@ -537,19 +545,19 @@ def inject_menu_files(web_content, context):
         except Exception:
             pass
             
-        reviewer_shadow_css += f"\n<style id=\"onigiri-notification-shadow-css\">\n{notification_css_text}\n</style>"
+        reviewer_shadow_css += f"\n<style id=\"bingsu-notification-shadow-css\">\n{notification_css_text}\n</style>"
         
         js_injector = f"""
         <script>
-            window.onigiriIsReviewerCardWebview = true;
-            window.onigiriReviewerDockMode = {json.dumps(dock_mode)};
-            window.onigiriSilentNotifications = {silent_notifs};
-            window.onigiriNotificationCssText = {json.dumps(notification_css_text)};
-            window.onigiriNotificationPositionCssText = {json.dumps(generate_notification_position_css_text(conf))};
-            window.onigiriNotificationMode = {json.dumps(conf.get("onigiri_reviewer_notification_mode", "classic"))};
+            window.bingsuIsReviewerCardWebview = true;
+            window.bingsuReviewerDockMode = {json.dumps(dock_mode)};
+            window.bingsuSilentNotifications = {silent_notifs};
+            window.bingsuNotificationCssText = {json.dumps(notification_css_text)};
+            window.bingsuNotificationPositionCssText = {json.dumps(generate_notification_position_css_text(conf))};
+            window.bingsuNotificationMode = {json.dumps(conf.get("bingsu_reviewer_notification_mode", "classic"))};
 
             document.addEventListener('DOMContentLoaded', function() {{
-                const hostId = 'onigiri-reviewer-ui-host';
+                const hostId = 'bingsu-reviewer-ui-host';
                 const topBarHtml = {json.dumps(top_bar_html)};
                 const topBarCss = {json.dumps(reviewer_shadow_css)};
 
@@ -595,10 +603,10 @@ def inject_menu_files(web_content, context):
                     }}
                     const host = ensureHost();
                     const shadow = host.shadowRoot || host.attachShadow({{ mode: 'open' }});
-                    let headerEl = shadow.getElementById('onigiri-reviewer-header');
+                    let headerEl = shadow.getElementById('bingsu-reviewer-header');
                     if (!headerEl) {{
                         shadow.innerHTML = `
-                            <style id="onigiri-reviewer-shadow-host-style">
+                            <style id="bingsu-reviewer-shadow-host-style">
                                 :host {{
                                     all: initial;
                                     position: fixed !important;
@@ -612,9 +620,9 @@ def inject_menu_files(web_content, context):
                             ${{topBarCss}}
                             ${{topBarHtml}}
                         `;
-                        headerEl = shadow.getElementById('onigiri-reviewer-header');
-                        if (window.OnigiriReviewerDock && typeof window.OnigiriReviewerDock.mount === 'function') {{
-                            window.OnigiriReviewerDock.mount(shadow);
+                        headerEl = shadow.getElementById('bingsu-reviewer-header');
+                        if (window.BingsuReviewerDock && typeof window.BingsuReviewerDock.mount === 'function') {{
+                            window.BingsuReviewerDock.mount(shadow);
                         }}
                     }}
                     return headerEl;
@@ -628,7 +636,7 @@ def inject_menu_files(web_content, context):
                 const updateHeaderOffset = () => {{
                     const host = document.getElementById(hostId);
                     const shadow = host && host.shadowRoot;
-                    const header = shadow && shadow.getElementById('onigiri-reviewer-header');
+                    const header = shadow && shadow.getElementById('bingsu-reviewer-header');
                     if (!header) {{
                         return;
                     }}
@@ -636,26 +644,26 @@ def inject_menu_files(web_content, context):
                     const marginTop = parseFloat(styles.marginTop) || 0;
                     const marginBottom = parseFloat(styles.marginBottom) || 0;
                     const offset = header.offsetHeight + marginTop + marginBottom;
-                    window.onigiriReviewerHeaderOffsetPx = Math.ceil(offset);
-                    window.dispatchEvent(new CustomEvent('onigiri-reviewer-header-offset', {{
-                        detail: {{ offset: window.onigiriReviewerHeaderOffsetPx }}
+                    window.bingsuReviewerHeaderOffsetPx = Math.ceil(offset);
+                    window.dispatchEvent(new CustomEvent('bingsu-reviewer-header-offset', {{
+                        detail: {{ offset: window.bingsuReviewerHeaderOffsetPx }}
                     }}));
-                    applyQaOffset(window.onigiriReviewerHeaderOffsetPx);
+                    applyQaOffset(window.bingsuReviewerHeaderOffsetPx);
                 }};
-                window.onigiriRefreshReviewerHeaderOffset = updateHeaderOffset;
+                window.bingsuRefreshReviewerHeaderOffset = updateHeaderOffset;
 
                 const applyQaOffset = (offset) => {{
                     const qa = document.getElementById('qa');
                     if (!qa) {{
                         return;
                     }}
-                    if (!qa.dataset.onigiriBaseMarginTop) {{
+                    if (!qa.dataset.bingsuBaseMarginTop) {{
                         const marginTop = parseFloat(window.getComputedStyle(qa).marginTop) || 0;
-                        qa.dataset.onigiriBaseMarginTop = `${{marginTop}}px`;
+                        qa.dataset.bingsuBaseMarginTop = `${{marginTop}}px`;
                     }}
                     qa.style.setProperty(
                         'margin-top',
-                        `calc(${{qa.dataset.onigiriBaseMarginTop}} + ${{Math.max(0, offset)}}px)`,
+                        `calc(${{qa.dataset.bingsuBaseMarginTop}} + ${{Math.max(0, offset)}}px)`,
                         'important'
                     );
                 }};
@@ -686,7 +694,7 @@ def inject_menu_files(web_content, context):
                 }}
 
                 const qaObserver = new MutationObserver(() => {{
-                    applyQaOffset(window.onigiriReviewerHeaderOffsetPx || 0);
+                    applyQaOffset(window.bingsuReviewerHeaderOffsetPx || 0);
                 }});
                 if (document.body) {{
                     qaObserver.observe(document.body, {{ childList: true, subtree: true }});
@@ -705,7 +713,7 @@ def inject_menu_files(web_content, context):
                     onigimon_hud.ensure_ankimon_hooks()
                 web_content.head += onigimon_hud.reviewer_head_assets(addon_package, conf)
         except Exception as exc:
-            print(f"Onigiri: Error initializing Onigimon Reviewer HUD assets: {exc}")
+            print(f"Bingsu: Error initializing Onigimon Reviewer HUD assets: {exc}")
     elif is_overview:
         from .rendering import reviewer_dock
 
@@ -720,7 +728,7 @@ def inject_menu_files(web_content, context):
         web_content.head += top_bar_css
         web_content.head += stylesheet_link("overview.css")
         web_content.head += stylesheet_link("overview_stats.css")
-        web_content.head += f"<script>window.onigiriReviewerDockMode = {json.dumps(dock_mode)};</script>"
+        web_content.head += f"<script>window.bingsuReviewerDockMode = {json.dumps(dock_mode)};</script>"
         web_content.head += f'<script src="{versioned_web_asset("reviewer_dock.js")}"></script>'
         web_content.head += f'<script src="{web_assets_root}/notifications.js"></script>'
         web_content.head += mac_titlebar.inset_css("page")
@@ -778,7 +786,7 @@ def initialize_enabled_gamification_hooks():
 
             focus_dango.setup_focus_dango()
     except Exception as e:
-        print(f"Onigiri: Error initializing enabled gamification hooks: {e}")
+        print(f"Bingsu: Error initializing enabled gamification hooks: {e}")
 
 
 def verify_coin_integrity():
@@ -787,7 +795,7 @@ def verify_coin_integrity():
         import hashlib
 
         def generate_coin_token(coins: int) -> str:
-            data = f"{coins}:onigiri_secret_salt_2024"
+            data = f"{coins}:bingsu_secret_salt_2024"
             return hashlib.sha256(data.encode()).hexdigest()
 
         def verify_coin_data(coins: int, token: str) -> bool:
@@ -815,7 +823,7 @@ def verify_coin_integrity():
                 
                 if security_token is None:
                     # First time - generate token
-                    print("[ONIGIRI SECURITY] Generating initial security token")
+                    print("[BINGSU SECURITY] Generating initial security token")
                     security_token = generate_coin_token(coins)
                     restaurant_data['_security_token'] = security_token
                     safe_storage.atomic_write_json(gamification_file, data)
@@ -826,7 +834,7 @@ def verify_coin_integrity():
                     safe_storage.backup_before_upgrade()
                     restaurant_data['_security_token'] = generate_coin_token(coins)
                     safe_storage.atomic_write_json(gamification_file, data)
-                    print("[Onigiri] Refreshed the legacy coin checksum; balance preserved")
+                    print("[Bingsu] Refreshed the legacy coin checksum; balance preserved")
                 else:
                     # Token is valid - ensure config.json does NOT have coins
                     # Check RAW config to see if it exists on disk
@@ -835,7 +843,7 @@ def verify_coin_integrity():
                     
                     if raw_conf and 'achievements' in raw_conf and 'restaurant_level' in raw_conf['achievements']:
                         if 'taiyaki_coins' in raw_conf['achievements']['restaurant_level']:
-                            print("[ONIGIRI SECURITY] Removing taiyaki_coins from config.json (cleanup)")
+                            print("[BINGSU SECURITY] Removing taiyaki_coins from config.json (cleanup)")
                             # We use config.get_config() to get the clean version (which already strips it)
                             # and then save that to overwrite the dirty file.
                             conf = config.get_config()
@@ -852,7 +860,7 @@ def verify_coin_integrity():
                         # This is optional but good for consistency
                         pass
     except Exception as e:
-        print(f"[ONIGIRI SECURITY] Error verifying coin integrity: {e}")
+        print(f"[BINGSU SECURITY] Error verifying coin integrity: {e}")
 
 
 def apply_full_hide_mode():
@@ -896,7 +904,7 @@ def setup_global_hooks():
     install_settings_shortcut()
     from .rendering import reviewer_more_menu
     reviewer_more_menu.install_reviewer_more_menu_override()
-    menu_buttons.setup_onigiri_menu(addon_path)
+    menu_buttons.setup_bingsu_menu(addon_path)
     
     # Install the toolbar bridge AFTER other addons have loaded their hooks
     sidebar_api.ensure_capture_hook_is_last()
@@ -918,7 +926,7 @@ def migrate_nook_level_names():
             rl_conf["name"] = "Nook Level"
             needs_write = True
 
-        rl_tile = conf.get("onigiriWidgetLayout", {}).get("grid", {}).get("restaurant_level")
+        rl_tile = conf.get("bingsuWidgetLayout", {}).get("grid", {}).get("restaurant_level")
         if isinstance(rl_tile, dict) and rl_tile.get("display_name") == "Restaurant Level":
             rl_tile["display_name"] = "Nook Level"
             needs_write = True
@@ -938,7 +946,7 @@ def migrate_nook_level_names():
                     rl_state["name"] = "Nook Level"
                     safe_storage.atomic_write_json(gam_path, gam_data)
     except Exception as e:
-        print(f"[Onigiri] Nook Level name migration skipped: {e}")
+        print(f"[Bingsu] Nook Level name migration skipped: {e}")
 
 
 def migrate_sidebar_slideshow_mode():
@@ -955,7 +963,7 @@ def migrate_sidebar_slideshow_mode():
             "image_color" if first_image else "color",
         )
     except Exception as exc:
-        print(f"[Onigiri] Sidebar slideshow migration skipped: {exc}")
+        print(f"[Bingsu] Sidebar slideshow migration skipped: {exc}")
 
 
 def migrate_profile_level_color_default():
@@ -965,20 +973,20 @@ def migrate_profile_level_color_default():
     also be a deliberate user choice, and seed only collections without a color.
     """
     try:
-        marker = "_onigiri_profile_level_color_default_migrated"
+        marker = "_bingsu_profile_level_color_default_migrated"
         if config.get_collection_config(marker, False):
             return
         current = config.get_collection_config(
-            "onigiri_profile_level_bar_custom_color", ""
+            "bingsu_profile_level_bar_custom_color", ""
         )
         if not current:
             config.set_collection_config(
-                "onigiri_profile_level_bar_custom_color",
+                "bingsu_profile_level_bar_custom_color",
                 config.DEFAULT_PROFILE_LEVEL_COLOR,
             )
         config.set_collection_config(marker, True)
     except Exception as exc:
-        print(f"[Onigiri] Profile Level color migration skipped: {exc}")
+        print(f"[Bingsu] Profile Level color migration skipped: {exc}")
 
 
 def on_profile_did_open():
@@ -992,7 +1000,7 @@ def on_profile_did_open():
         from .ui_kit.fonts import register_poppins_qt
         register_poppins_qt(addon_path)
     except Exception as e:
-        print(f"[Onigiri] Could not register Poppins fonts: {e}")
+        print(f"[Bingsu] Could not register Poppins fonts: {e}")
 
     migrate_nook_level_names()
     migrate_sidebar_slideshow_mode()
@@ -1029,7 +1037,7 @@ def on_profile_did_open():
     QTimer.singleShot(1200, bento_api.ensure_bento_shortcut)
 
     # Check for sync conflicts on startup
-    if onigiri_sync.is_enabled():
+    if bingsu_sync.is_enabled():
         QTimer.singleShot(1000, on_sync_did_finish)
 
     # Show birthday popup if it's the user's birthday (requires mw.col)
@@ -1040,7 +1048,7 @@ def on_profile_did_open():
         try:
             birthday_dialog.maybe_show_birthday_popup()
         except Exception as e:
-            print(f"[Onigiri] Could not show birthday popup: {e}")
+            print(f"[Bingsu] Could not show birthday popup: {e}")
 
     QTimer.singleShot(6500, maybe_show_birthday_popup)
 
@@ -1061,7 +1069,7 @@ def on_profile_did_open():
 # --- INITIALIZATION ---
 
 # Move UI patching to top-level so it happens during module load.
-# This ensures Onigiri's hooks and wraps are established before other add-ons
+# This ensures Bingsu's hooks and wraps are established before other add-ons
 # might overwrite them, and prevents unstyled flashes.
 # NOTE: patch_congrats_page is safe to run here as it doesn't access mw.col immediately.
 patcher.patch_congrats_page()
@@ -1081,14 +1089,14 @@ def _render_selected_deck_browser(deck_browser, *args, **kwargs):
 
         ready_to_go.restore_internal_cards(deck_browser.mw.col)
     except Exception as exc:
-        print(f"Onigiri: could not restore Ready-to-go cards: {exc}")
+        print(f"Bingsu: could not restore Ready-to-go cards: {exc}")
 
     conf = config.get_config_readonly()
     if _things_theme_selected(conf):
         return _anki_render_page(deck_browser, *args, **kwargs)
     if _shima_theme_selected(conf):
         return shima_theme.render_deck_browser(deck_browser, *args, **kwargs)
-    return onigiri_renderer.render_onigiri_deck_browser(
+    return bingsu_renderer.render_bingsu_deck_browser(
         deck_browser, *args, **kwargs
     )
 
@@ -1097,7 +1105,7 @@ def _render_selected_deck_node(deck_browser, *args, **kwargs):
     conf = config.get_config_readonly()
     if _things_theme_selected(conf):
         return _anki_render_deck_node(deck_browser, *args, **kwargs)
-    return patcher._onigiri_render_deck_node(deck_browser, *args, **kwargs)
+    return patcher._bingsu_render_deck_node(deck_browser, *args, **kwargs)
 
 
 DeckBrowser._renderPage = _render_selected_deck_browser
@@ -1115,11 +1123,11 @@ def on_deck_browser_did_render(deck_browser: DeckBrowser):
         patcher._update_toolbar_visibility(mw.state, mw.state)
     except Exception:
         pass
-    grid_layout = conf.get("onigiriWidgetLayout", {}).get("grid", {})
+    grid_layout = conf.get("bingsuWidgetLayout", {}).get("grid", {})
     if "heatmap" in grid_layout:
         # Data is now injected via globals in inject_menu_files for reliability.
         # This call handles refreshes or dynamic layout changes.
-        deck_browser.web.eval("if (window.OnigiriHeatmap && typeof window.OnigiriHeatmap.autoRender === 'function') { window.OnigiriHeatmap.autoRender(); }")
+        deck_browser.web.eval("if (window.BingsuHeatmap && typeof window.BingsuHeatmap.autoRender === 'function') { window.BingsuHeatmap.autoRender(); }")
     
     # Update sync status indicator
     update_sync_status_indicator()
@@ -1141,7 +1149,7 @@ def on_things_js_message(handled, message, context):
     return _load_things_theme()._on_js_message(handled, message, context)
 
 def update_sync_status_indicator():
-    """Updates the sync status indicator in the Onigiri menu."""
+    """Updates the sync status indicator in the Bingsu menu."""
     try:
         # Only the deck list shows the indicator: this ran on every
         # collection operation, including each card answer, with two DB
@@ -1156,16 +1164,16 @@ def update_sync_status_indicator():
         pass
 
 def on_sync_will_start():
-    """Called before Anki syncs - pack Onigiri data."""
+    """Called before Anki syncs - pack Bingsu data."""
     update_sync_status_indicator()
     # Game state writes are queued off the reviewer's hot path; the zip must
     # not pick up a stale copy of them.
     try:
         safe_storage.flush_pending()
     except Exception as e:
-        print(f"[Onigiri] storage flush failed: {e}")
-    if onigiri_sync.is_enabled():
-        onigiri_sync.pack_user_files()
+        print(f"[Bingsu] storage flush failed: {e}")
+    if bingsu_sync.is_enabled():
+        bingsu_sync.pack_user_files()
 
 def _full_home_refresh_after_sync():
     """Deck-list updates after a sync are partial (decks/tree_updater.py):
@@ -1175,14 +1183,14 @@ def _full_home_refresh_after_sync():
         if mw.state == "deckBrowser" and mw.deckBrowser and mw.col:
             mw.deckBrowser.refresh()
     except Exception as e:
-        print(f"Onigiri: home refresh after sync failed: {e}")
+        print(f"Bingsu: home refresh after sync failed: {e}")
 
 
 def on_sync_did_finish():
-    """Called after Anki sync finishes - check for new Onigiri data."""
+    """Called after Anki sync finishes - check for new Bingsu data."""
     update_sync_status_indicator()
     try:
-        from .rendering import onigiri_renderer as _renderer
+        from .rendering import bingsu_renderer as _renderer
 
         _renderer._DASHBOARD_STATS_CACHE.clear()
         from .rendering import heatmap as _heatmap
@@ -1191,27 +1199,27 @@ def on_sync_did_finish():
     except Exception:
         pass
     QTimer.singleShot(300, _full_home_refresh_after_sync)
-    if not onigiri_sync.is_enabled():
+    if not bingsu_sync.is_enabled():
         return
 
-    conflict = onigiri_sync.check_conflict()
+    conflict = bingsu_sync.check_conflict()
     if conflict == 'cloud_newer':
         from .dialogs.sync_ui import show_sync_conflict_dialog
 
         # Cloud data is newer, ask user what to do
         choice = show_sync_conflict_dialog(mw)
         if choice == 'cloud':
-            onigiri_sync.unpack_user_files()
-            # Reload Onigiri modules or notify user to restart? For now, just tool tip
-            from .ui_kit.onigiri_notifications import notify_info as showInfo
+            bingsu_sync.unpack_user_files()
+            # Reload Bingsu modules or notify user to restart? For now, just tool tip
+            from .ui_kit.bingsu_notifications import notify_info as showInfo
             showInfo(tr("sync_data_updated"))
         elif choice == 'local':
             # User wants to keep local, so pack it again to set as definitive
-            onigiri_sync.pack_user_files(force=True)
+            bingsu_sync.pack_user_files(force=True)
     elif conflict == 'local_newer':
         # This shouldn't happen immediately after sync unless something is weird
         # but we can pack just in case
-        onigiri_sync.pack_user_files()
+        bingsu_sync.pack_user_files()
 
 def on_state_change(new_state, old_state):
     """Called when Anki's state changes - update sync indicator."""
@@ -1221,11 +1229,11 @@ def on_state_change(new_state, old_state):
     try:
         safe_storage.flush_pending()
     except Exception as e:
-        print(f"[Onigiri] storage flush failed: {e}")
+        print(f"[Bingsu] storage flush failed: {e}")
       
 def on_deck_browser_will_show(deck_browser: DeckBrowser):
     """
-    Ensures that Onigiri takes control of external hooks at the last possible moment,
+    Ensures that Bingsu takes control of external hooks at the last possible moment,
     right before the deck browser is displayed for the first time. This guarantees
     that other add-ons have had time to register their hooks.
     """
@@ -1252,11 +1260,11 @@ def _storage_mirror_on_close():
     try:
         safe_storage.flush_pending()
     except Exception as e:
-        print(f"[Onigiri] storage flush failed: {e}")
+        print(f"[Bingsu] storage flush failed: {e}")
     try:
         safe_storage.mirror_all()
     except Exception as e:
-        print(f"[Onigiri] storage mirror failed: {e}")
+        print(f"[Bingsu] storage mirror failed: {e}")
 
 
 # Card Adding / Editing Dim Effect logic
@@ -1285,7 +1293,7 @@ def _is_card_editing_active() -> bool:
     return len(_active_card_editors) > 0
 
 def _apply_card_editing_dim(dimmed: bool):
-    js = f"if (window.OnigiriEngine && typeof window.OnigiriEngine.setCardEditingDim === 'function') {{ window.OnigiriEngine.setCardEditingDim({'true' if dimmed else 'false'}); }} else {{ document.body.classList.toggle('is-card-editing', {'true' if dimmed else 'false'}); }}"
+    js = f"if (window.BingsuEngine && typeof window.BingsuEngine.setCardEditingDim === 'function') {{ window.BingsuEngine.setCardEditingDim({'true' if dimmed else 'false'}); }} else {{ document.body.classList.toggle('is-card-editing', {'true' if dimmed else 'false'}); }}"
     for attr in ('web',):
         if hasattr(mw, attr) and getattr(mw, attr):
             try:
@@ -1400,17 +1408,17 @@ gui_hooks.webview_will_set_content.append(inject_menu_files)
 
 _SCREEN_STATE: dict = {}
 
-_ONIGIRI_PAGE_CONTEXTS = {
+_BINGSU_PAGE_CONTEXTS = {
     "DeckBrowser", "Overview", "Reviewer", "ReviewerBottomBar", "BottomBar",
     "DeckBrowserBottomBar", "OverviewBottomBar", "TopToolbar", "Toolbar",
 }
 
 
-def _is_onigiri_page(context) -> bool:
+def _is_bingsu_page(context) -> bool:
     if context is None:
         return False
     cls = type(context)
-    return cls.__name__ in _ONIGIRI_PAGE_CONTEXTS or cls.__module__.startswith(__name__)
+    return cls.__name__ in _BINGSU_PAGE_CONTEXTS or cls.__module__.startswith(__name__)
 
 
 def inject_mobile_assets(web_content, context):
@@ -1421,25 +1429,25 @@ def inject_mobile_assets(web_content, context):
     wins over Bingsu's desktop styles. Runs after inject_menu_files and also
     covers the Kome theme, which returns early there.
     """
-    from .core import platform as onigiri_platform
+    from .core import platform as bingsu_platform
 
-    classes = onigiri_platform.body_classes()
-    if classes and _is_onigiri_page(context):
-        # Onigiri's own screens get the app treatment (no text selection,
+    classes = bingsu_platform.body_classes()
+    if classes and _is_bingsu_page(context):
+        # Bingsu's own screens get the app treatment (no text selection,
         # no sticky hover, edge colours); other add-ons' pages don't.
-        classes += " onigiri-app"
+        classes += " bingsu-app"
         screen = {"DeckBrowser": "decks", "Overview": "overview", "Reviewer": "review"}.get(type(context).__name__)
         if screen:
-            classes += f" onigiri-screen-{screen}"
+            classes += f" bingsu-screen-{screen}"
             # Tapping a deck slides its overview in from the right; going
             # back slides the deck list in from the left. Python knows the
             # screen before this one. Studying is not animated.
             previous = _SCREEN_STATE.get("last")
             _SCREEN_STATE["last"] = screen
             if (previous, screen) == ("decks", "overview"):
-                classes += " onigiri-enter-forward"
+                classes += " bingsu-enter-forward"
             elif (previous, screen) == ("overview", "decks"):
-                classes += " onigiri-enter-back"
+                classes += " bingsu-enter-back"
     boot = ""
     if classes:
         boot = (
@@ -1459,8 +1467,8 @@ gui_hooks.webview_will_set_content.append(inject_mobile_assets)
 
 
 def _on_native_cmd(handled, cmd, context):
-    """onigiri_native:* from web/mobile.js (edge colour, haptics, bounce)."""
-    if isinstance(cmd, str) and cmd.startswith("onigiri_native:"):
+    """bingsu_native:* from web/mobile.js (edge colour, haptics, bounce)."""
+    if isinstance(cmd, str) and cmd.startswith("bingsu_native:"):
         from .core import ios_native
 
         ios_native.handle_command(cmd, context)

@@ -1,4 +1,4 @@
-"""macOS-only: dissolve Anki's window title bar into the Onigiri canvas.
+"""macOS-only: dissolve Anki's window title bar into the Bingsu canvas.
 
 Qt 6.9+ owns the expanded content area through ExpandedClientAreaHint and
 NoTitleBarBackgroundHint. Use those flags so Qt's Cocoa platform plugin can
@@ -18,7 +18,7 @@ The title bar itself still exists, so dragging, resizing, double-click-to-zoom
 and the close/minimise/zoom buttons keep working -- the traffic lights simply
 float over Bingsu's background. Because that strip stays a window-drag region,
 the web pages reserve `TITLEBAR_INSET` points at the top (see `inset_css`) so no
-Onigiri button ends up underneath it.
+Bingsu button ends up underneath it.
 
 Everything here is a no-op off macOS.
 """
@@ -30,7 +30,7 @@ import sys
 
 from aqt import mw
 
-# Points reserved at the top of every Onigiri page for the floating traffic
+# Points reserved at the top of every Bingsu page for the floating traffic
 # lights. macOS lays them out inside a 28pt title bar.
 TITLEBAR_INSET = 28
 
@@ -74,7 +74,7 @@ def _runtime():
         lib.object_getClassName.argtypes = [ctypes.c_void_p]
         _objc = lib
     except Exception as exc:
-        print(f"[Onigiri] macOS title bar: objc runtime unavailable: {exc}")
+        print(f"[Bingsu] macOS title bar: objc runtime unavailable: {exc}")
         _objc_failed = True
     return _objc
 
@@ -176,7 +176,7 @@ def _set_titlebar_decoration_hidden(window, hidden: bool) -> None:
                     _send(ctypes.c_void_p(child), "setHidden:", ctypes.c_bool(bool(hidden)),
                           argtypes=[ctypes.c_bool], restype=None)
     except Exception as exc:
-        print(f"[Onigiri] macOS title bar: decoration line left alone: {exc}")
+        print(f"[Bingsu] macOS title bar: decoration line left alone: {exc}")
 
 
 def _set_safe_area_respected(widget, respected: bool) -> None:
@@ -196,7 +196,7 @@ def _set_safe_area_respected(widget, respected: bool) -> None:
             layout.invalidate()
             layout.activate()
     except Exception as exc:
-        print(f"[Onigiri] macOS title bar: safe-area margins unchanged: {exc}")
+        print(f"[Bingsu] macOS title bar: safe-area margins unchanged: {exc}")
 
 
 def _set_qt_titlebar_flags(widget, enabled: bool) -> bool:
@@ -280,7 +280,7 @@ def apply(enabled: bool, widget=None) -> bool:
         _set_safe_area_respected(target, not enabled)
         return True
     except Exception as exc:
-        print(f"[Onigiri] macOS title bar: could not update the window: {exc}")
+        print(f"[Bingsu] macOS title bar: could not update the window: {exc}")
         return False
 
 
@@ -343,19 +343,19 @@ def inset_css(context_kind: str = "page") -> str:
     if context_kind == "deck_browser":
         rules += """
         .container.modern-main-menu {
-            padding-top: var(--onigiri-mac-titlebar-inset) !important;
+            padding-top: var(--bingsu-mac-titlebar-inset) !important;
             box-sizing: border-box !important;
         }
         /* Stacked layout sizes the sidebar against the full viewport; without
            this it would run past the bottom by exactly the inset. */
-        .container.modern-main-menu.onigiri-cycle-stacked .sidebar-left {
-            max-height: calc(100vh - 30px - var(--onigiri-mac-titlebar-inset)) !important;
+        .container.modern-main-menu.bingsu-cycle-stacked .sidebar-left {
+            max-height: calc(100vh - 30px - var(--bingsu-mac-titlebar-inset)) !important;
         }
         """
     elif context_kind == "toolbar":
         rules += """
         body {
-            padding-top: var(--onigiri-mac-titlebar-inset) !important;
+            padding-top: var(--bingsu-mac-titlebar-inset) !important;
             box-sizing: border-box !important;
         }
         """
@@ -363,13 +363,13 @@ def inset_css(context_kind: str = "page") -> str:
         rules += """
         .ba-side {
             padding-top: calc(
-                var(--onigiri-mac-titlebar-inset) + 12px
+                var(--bingsu-mac-titlebar-inset) + 12px
             ) !important;
         }
         """
     return f"""
-    <style id="onigiri-mac-titlebar-inset">
-        :root {{ --onigiri-mac-titlebar-inset: {TITLEBAR_INSET}px; }}
+    <style id="bingsu-mac-titlebar-inset">
+        :root {{ --bingsu-mac-titlebar-inset: {TITLEBAR_INSET}px; }}
         {rules}
     </style>
     """

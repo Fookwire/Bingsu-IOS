@@ -24,7 +24,7 @@ class HashiNotesFontSizeTests(unittest.TestCase):
                                   for target in node.targets))
         roles = ast.literal_eval(assignment.value)
         selectors = roles["widget_small"]["selectors"]
-        self.assertIn(".onigiri-widget-container", selectors)
+        self.assertIn(".bingsu-widget-container", selectors)
         self.assertFalse(any("hashi-widget-" in selector for selector in selectors))
 
     def test_widget_uses_exact_configured_pixels(self):

@@ -1,12 +1,12 @@
 """
-Prep Station — Study Planner for Onigiri
+Prep Station — Study Planner for Bingsu
 
 Storage model (mirrors Hashi Notes):
   1. mw.col.conf[PREP_STATION_CONF_KEY] — source of truth. Lives inside
      collection.anki2, so it syncs via AnkiWeb collection sync (unlike
      config.json, which is local-only to this profile/computer).
   2. user_files/prep_station/plans.json — local mirror. Rides the existing
-     Onigiri media-zip sync (sync.py), so plans are also safe on disk.
+     Bingsu media-zip sync (sync.py), so plans are also safe on disk.
 """
 
 from __future__ import annotations
@@ -42,10 +42,10 @@ from ..core.translations import tr, current_locale
 
 _dialog: "PrepStationDialog | None" = None
 
-PREP_STATION_CONF_KEY = "onigiri_prep_station_plans"
-PREP_STATION_SUSPENDED_KEY = "onigiri_prep_station_include_suspended"
-PREP_STATION_CHART_NUMBERS_KEY = "onigiri_prep_station_chart_numbers"
-PREP_STATION_WEEK_START_KEY = "onigiri_prep_station_week_start"
+PREP_STATION_CONF_KEY = "bingsu_prep_station_plans"
+PREP_STATION_SUSPENDED_KEY = "bingsu_prep_station_include_suspended"
+PREP_STATION_CHART_NUMBERS_KEY = "bingsu_prep_station_chart_numbers"
+PREP_STATION_WEEK_START_KEY = "bingsu_prep_station_week_start"
 PREP_THUMBNAIL_DIR = "prep_station_thumbnails"
 
 # revlog.type / RevlogEntry.ReviewKind values used for actual card answers.
@@ -140,7 +140,7 @@ def _get_deck_options() -> list[dict]:
         from .prep_station_ui import deck_icon_value
 
         decks = sorted(mw.col.decks.all_names_and_ids(), key=lambda item: item.name.casefold())
-        custom_icons = mw.col.conf.get("onigiri_custom_deck_icons", {}) or {}
+        custom_icons = mw.col.conf.get("bingsu_custom_deck_icons", {}) or {}
         names = {deck.name for deck in decks}
         options = []
         for deck in decks:
@@ -388,7 +388,7 @@ def _weekday_label(day: date) -> str:
     return current_locale().dayName(day.isoweekday(), QLocale.FormatType.ShortFormat)
 
 
-PREP_STATION_WIDGET_FONT_KEY = "onigiri_prep_station_widget_font_scale"
+PREP_STATION_WIDGET_FONT_KEY = "bingsu_prep_station_widget_font_scale"
 
 
 def _widget_font_scale() -> float:
@@ -1073,7 +1073,7 @@ def render_widget_html(slot_count: int = 4) -> str:
     if not active_plans:
         return f"""
 <div class="prep-station-widget"{font_style} onclick="pycmd('openPrepStation')">
-  <div class="onigiri-widget-head">
+  <div class="bingsu-widget-head">
     <h3>{widget_title}</h3>
   </div>
   <div class="prep-widget-empty">{html.escape(tr("prep_no_active_plans"))}</div>
@@ -1145,7 +1145,7 @@ def render_widget_html(slot_count: int = 4) -> str:
 
     return f"""
 <div class="prep-station-widget"{font_style} onclick="pycmd('openPrepStation')">
-  <div class="onigiri-widget-head">
+  <div class="bingsu-widget-head">
     <h3>{widget_title}</h3>
   </div>
   <div class="prep-plan-cards" style="grid-template-columns: repeat({slot_count}, 1fr);">

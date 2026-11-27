@@ -2,7 +2,7 @@
 (function () {
   function text(value) {
     const copy = String(value == null ? "" : value);
-    const literals = (window.ONIGIRI_LOCALIZATION || {}).literals || {};
+    const literals = (window.BINGSU_LOCALIZATION || {}).literals || {};
     const key = copy.trim();
     return Object.prototype.hasOwnProperty.call(literals, key)
       ? copy.replace(key, literals[key]) : copy;
@@ -12,8 +12,8 @@
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
     })[character]);
   }
-  window.onigiriText = text;
-  window.onigiriTemplate = function (source) {
+  window.bingsuText = text;
+  window.bingsuTemplate = function (source) {
     return String(source).replace(/(^|>)([^<>]+)(?=<|$)/g, (match, prefix, value) => {
       const translated = text(value);
       return translated === value ? match : prefix + escape(translated);

@@ -547,7 +547,7 @@ body::before {
   margin: 36px auto 0;
 }
 /* Reference-inspired two-card analytics row: weekly review volume
-   beside the contribution heatmap. Both use the active Onigiri palette. */
+   beside the contribution heatmap. Both use the active Bingsu palette. */
 .ba-analytics {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);

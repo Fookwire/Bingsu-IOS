@@ -18,11 +18,11 @@ by responsibility:
 | `settings_web/` | Settings schema, state, rendering and commands |
 | `things_theme/`, `things_stats/` | Kome and its statistics |
 | `web/` | Webview HTML, CSS and JavaScript |
-| `system_files/` | Bundled artwork, fonts, icons, sounds and the Onigiri logo |
+| `system_files/` | Bundled artwork, fonts, icons, sounds and the Bingsu logo |
 | `tools/`, `tests/`, `docs/` | Maintenance utilities, regression checks and setup documentation |
 
 The root retains Anki's `config.json`, `manifest.json` and `meta.json`, the
-existing `onigiri_layout.json`, the README, license, and `sidebar_api.py` as a
+existing `bingsu_layout.json`, the README, license, and `sidebar_api.py` as a
 compatibility entry point for the public Sidebar API.
 
 Saved profile data continues to use the original root-level `user_files/`
@@ -37,5 +37,5 @@ the existing startup order and hook registration.
 
 The database setup guides are available here:
 
-- [Communications](ONIGIRI_DATABASE_COMMUNICATIONS_SETUP.md)
-- [Developer Nooks](ONIGIRI_DATABASE_DEV_SHOPS_SETUP.md)
+- [Communications](BINGSU_DATABASE_COMMUNICATIONS_SETUP.md)
+- [Developer Nooks](BINGSU_DATABASE_DEV_SHOPS_SETUP.md)
