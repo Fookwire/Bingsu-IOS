@@ -1277,7 +1277,7 @@ def handle_webview_cmd(handled: Tuple[bool, Any], cmd: str, context) -> Tuple[bo
             # Helper's Delay Overdue action, with this exact deck ID.
             try:
                 from ..core.platform import IS_MOBILE
-            except ImportError:
+            except Exception:
                 IS_MOBILE = False
 
             if IS_MOBILE:
