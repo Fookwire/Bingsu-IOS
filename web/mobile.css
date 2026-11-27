@@ -2643,3 +2643,35 @@ html.onigiri-phone .onigiri-sidebar-profile .onigiri-sidebar-profile-back {
     color: #fff !important;
     top: calc(3px + var(--onigiri-safe-top, 0px)) !important;
 }
+
+/* ------------------------------------------------------------------------- */
+/* Anki's note editor on phones (audit THM-02)                                */
+/* ------------------------------------------------------------------------- */
+/* A dense, wrapping row of ~20pt icons: one row that scrolls sideways, with
+   44pt targets. Field text keeps the note type's own font and size. */
+html.onigiri-phone .editor-toolbar .button-toolbar {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+}
+
+html.onigiri-phone .editor-toolbar .button-toolbar::-webkit-scrollbar {
+    display: none;
+}
+
+html.onigiri-phone .editor-toolbar .button-toolbar > * {
+    flex: 0 0 auto !important;
+}
+
+html.onigiri-phone .editor-toolbar button {
+    min-width: 44px !important;
+    min-height: 44px !important;
+}
+
+html.onigiri-phone .editor-field .label-name,
+html.onigiri-phone .field-container .label-name {
+    font-size: 15px !important;
+}

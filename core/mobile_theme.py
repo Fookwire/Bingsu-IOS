@@ -145,6 +145,82 @@ def refresh():
     paint_initial_edges()
 
 
+# ── Toasts (audit INT-02) ─────────────────────────────────────────────────────
+# Anki's tooltip is a desktop label at the bottom-left of the active window:
+# on a phone it sat over the tab bar and caught the taps meant for it. Kioku
+# already routes every tooltip through aqt.utils._kioku_fit_tooltip; Onigiri
+# wraps that hook so the label is themed, centred above the tab bar and lets
+# taps through. Anki's own timing and text are unchanged.
+
+TOAST_BOTTOM_GAP = 112  # pt above the bottom of the screen (tab bar + margin)
+
+
+def style_toast(label):
+    if label is None:
+        return False
+    try:
+        from aqt.qt import QFrame, Qt
+
+        t = tokens()
+        label.setFrameStyle(QFrame.Shape.NoFrame)
+        label.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
+        label.setStyleSheet(
+            "QLabel { background-color: %s; color: %s; border: 1px solid %s;"
+            " border-radius: 14px; font-size: 15px; padding: 2px 6px; }"
+            % (t["raised"], t["text"], t["separator"])
+        )
+        screen = label.screen().availableGeometry() if label.screen() else None
+        if screen is None:
+            return True
+        label.adjustSize()
+        width = min(label.sizeHint().width(), screen.width() - 32)
+        if width < label.sizeHint().width():
+            label.setWordWrap(True)
+        height = label.heightForWidth(width) if label.wordWrap() else label.sizeHint().height()
+        label.resize(width, height)
+        x = screen.left() + (screen.width() - width) // 2
+        y = screen.top() + screen.height() - height - TOAST_BOTTOM_GAP
+        label.move(x, max(screen.top() + 8, y))
+        return True
+    except Exception as exc:
+        print(f"Onigiri iOS: toast style failed: {exc}")
+        return False
+
+
+def install_toast():
+    if not active():
+        return False
+    try:
+        import aqt.utils as utils
+
+        if getattr(utils, "_onigiri_toast", False):
+            return True
+        original_fit = getattr(utils, "_kioku_fit_tooltip", None)
+        if original_fit is not None:
+            def fit(label):
+                try:
+                    original_fit(label)
+                finally:
+                    style_toast(label)
+
+            utils._kioku_fit_tooltip = fit
+        else:
+            # Not Kioku (a desktop preview with ONIGIRI_FORCE_MOBILE): wrap the
+            # module function, which covers callers that go through aqt.utils.
+            original_tooltip = utils.tooltip
+
+            def tooltip(*args, **kwargs):
+                original_tooltip(*args, **kwargs)
+                style_toast(getattr(utils, "_tooltipLabel", None))
+
+            utils.tooltip = tooltip
+        utils._onigiri_toast = True
+        return True
+    except Exception as exc:
+        print(f"Onigiri iOS: toast install failed: {exc}")
+        return False
+
+
 _installed = {"done": False}
 
 
@@ -165,3 +241,19 @@ def install():
 
     gui_hooks.profile_did_open.append(later)
     gui_hooks.theme_did_change.append(later)
+    install_toast()
+    try:
+        gui_hooks.editor_did_init.append(_one_dismiss_for_editor)
+    except Exception:
+        pass
+
+
+def _one_dismiss_for_editor(editor):
+    """Edit Current had both Kioku's "Back" bar and its own Close button:
+    keep Close, drop Kioku's bar (audit THM-02). Add and Browse keep theirs."""
+    try:
+        window = getattr(editor, "parentWindow", None)
+        if window is not None and type(window).__name__ == "EditCurrent":
+            window.setProperty("kioku_hide_titlebar", True)
+    except Exception:
+        pass

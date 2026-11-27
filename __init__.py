@@ -42,11 +42,24 @@ def _storage_integrity_check():
         config.invalidate_config_cache()
         collection = mw.col
 
+        attempts = {"n": 0}
+
         def show_storage_notices():
             # A queued callback must not show the previous profile's warning
             # if the collection was closed or switched before it ran.
             if collection is None or mw.col is not collection or not mw.pm or mw.pm.name != profile_name:
                 return
+            # Phones: don't stack this dialog on top of the launch sync's
+            # progress window; wait until it is done (audit INT-03).
+            try:
+                from .core.platform import IS_MOBILE as _mobile
+
+                if _mobile and attempts["n"] < 60 and mw.progress.busy():
+                    attempts["n"] += 1
+                    QTimer.singleShot(700, show_storage_notices)
+                    return
+            except Exception:
+                pass
             # Later profile loaders may recover settings/game files too.
             notices = messages + safe_storage.take_notices()
             if notices:

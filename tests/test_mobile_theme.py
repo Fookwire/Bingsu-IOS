@@ -61,6 +61,8 @@ class MobileThemeTests(unittest.TestCase):
             self.assertFalse(self.mt.paint_initial_edges())
             self.mt.install()
             self.assertFalse(self.mt._installed["done"])
+            self.assertFalse(self.mt.install_toast())
+            self.assertFalse(self.mt.style_toast(None))
 
 
 if __name__ == "__main__":
