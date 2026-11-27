@@ -2493,6 +2493,7 @@ html.onigiri-phone #deck-list-header .deck-header-btn .icon,
 html.onigiri-phone #deck-list-header .deck-header-btn [style*="mask-image"] {
     width: 21px !important;
     height: 21px !important;
+    flex: 0 0 21px !important;
 }
 
 html.onigiri-phone #deck-list-header .deck-header-btn [style*="mask-image"],
@@ -2503,4 +2504,106 @@ html.onigiri-phone #deck-list-header .deck-header-btn .icon {
 html.onigiri-phone #deck-list-header .onigiri-select-toggle {
     font-size: 17px !important;
     font-weight: 500;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Deck list quick actions on phones (audit NAV-02)                           */
+/* ------------------------------------------------------------------------- */
+html.onigiri-phone #onigiri-home-toolbar-btn.onigiri-replaced {
+    display: none !important;
+}
+
+#onigiri-quick-actions {
+    display: none;
+}
+
+html.onigiri-phone #onigiri-quick-actions {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    margin: 4px 0 10px;
+}
+
+html.onigiri-phone #onigiri-quick-actions .onigiri-quick-action {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 56px;
+    padding: 6px 4px;
+    border: 0;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--accent-color, #0a84ff) 12%, transparent);
+    color: var(--accent-color, var(--fg));
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html.onigiri-phone #onigiri-quick-actions svg {
+    width: 21px;
+    height: 21px;
+}
+
+/* Sync status dot (rendering/templates.py SyncStatusManager adds .sync-needed). */
+html.onigiri-phone #onigiri-quick-actions .action-sync.sync-needed::after {
+    content: "";
+    position: absolute;
+    top: 8px;
+    right: calc(50% - 18px);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ff453a;
+}
+
+html.onigiri-phone #onigiri-quick-actions .action-sync.is-syncing svg {
+    animation: onigiri-spin 1s linear infinite;
+}
+
+@keyframes onigiri-spin { to { transform: rotate(360deg); } }
+
+/* Menu page: titled groups. */
+#onigiri-app-menu .oam-group-title {
+    margin: 22px 16px 6px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    opacity: 0.6;
+}
+
+#onigiri-app-menu .oam-group-title:first-child {
+    margin-top: 4px;
+}
+
+#onigiri-app-menu .oam-group-title + .oam-group {
+    margin-top: 0 !important;
+}
+
+/* Titled action sheets with separated groups (audit NAV-01). */
+.onigiri-quick-menu .onigiri-sheet-title {
+    padding: 4px 16px 10px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    opacity: 0.6;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.onigiri-quick-menu .onigiri-sheet-sep {
+    height: 8px;
+    margin: 4px 0;
+    border-top: 1px solid rgba(127, 127, 127, 0.2);
+}
+
+/* Edit mode: the header's Done is the only one (audit INT-07); the bottom
+   bar holds Actions and the selection count. */
+html.onigiri-touch #onigiri-edit-toolbar button[data-act="done"] {
+    display: none !important;
 }

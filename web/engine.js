@@ -1658,8 +1658,8 @@ window.OnigiriEngine = {
 
         [
             { label: ONIGIRI_T('sort_default_order', 'Default order'), icon: 'sort_default', mode: 'default' },
-            { label: ONIGIRI_T('sort_a_to_z', 'A to Z'), icon: 'sort_custom', mode: 'alphabetical_az' },
-            { label: ONIGIRI_T('sort_z_to_a', 'Z to A'), icon: 'sort_custom', mode: 'alphabetical_za' },
+            { label: ONIGIRI_T('sort_a_to_z', 'A to Z'), icon: 'sort_az', mode: 'alphabetical_az' },
+            { label: ONIGIRI_T('sort_z_to_a', 'Z to A'), icon: 'sort_za', mode: 'alphabetical_za' },
             { label: ONIGIRI_T('sort_most_due', 'Most due'), icon: 'sort_most_reviews', mode: 'most_due' },
             { label: ONIGIRI_T('sort_most_new', 'Most new'), icon: 'sort_most_new', mode: 'most_new' },
             { label: ONIGIRI_T('sort_most_reviews', 'Most reviews'), icon: 'stats', mode: 'most_reviews' },

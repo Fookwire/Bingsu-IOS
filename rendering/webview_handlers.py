@@ -581,12 +581,121 @@ def show_menu_page(menu, title: str = "", context=None, keep=None) -> bool:
         return False
 
 
+# The Menu tab, grouped by task instead of File / Edit / View / Tools / Help
+# (audit NAV-03, NAV-04). Entries are Anki's own QActions (mw.form.<name>),
+# matched by identity, never by their translated text. Everything else in
+# the menu bar (add-on entries in Tools, add-on menus, the Onigiri menu)
+# still appears, under "More" or as its own menu, so nothing is lost.
+_MENU_GROUPS = (
+    ("settings", "Settings", ("actionPreferences",)),
+    ("study", "Study", ("actionStudyDeck", "actionCreateFiltered", "actionUndo", "actionRedo")),
+    ("library", "Library", ("actionImport", "actionExport", "action_create_backup",
+                            "action_open_backup", "actionSwitchProfile")),
+    ("maintenance", "Maintenance", ("actionFullDatabaseCheck", "actionCheckMediaDatabase",
+                                    "actionEmptyCards", "actionNoteTypes")),
+    ("addons", "Add-ons", ("actionAdd_ons", "action_check_for_updates")),
+    ("help", "Help", ("actionDocumentation", "actionDonate", "actionAbout")),
+    ("advanced", "Advanced", ("actionFullScreen", "actionZoomIn", "actionZoomOut",
+                              "actionResetZoom", "actionExit")),
+)
+
+
+def _action_entry(action):
+    aid = str(len(_APP_MENU_ACTIONS) + 1)
+    _APP_MENU_ACTIONS[aid] = action
+    entry = {"t": _menu_text(action), "id": aid, "en": bool(action.isEnabled())}
+    if action.isCheckable():
+        entry["chk"] = bool(action.isChecked())
+    return entry
+
+
+def _grouped_menu_tree(menubar) -> list:
+    form = getattr(mw, "form", None)
+    placed = set()
+    groups = {}
+    for key, _title, names in _MENU_GROUPS:
+        rows = []
+        for name in names:
+            action = getattr(form, name, None)
+            if action is None or not action.isVisible():
+                continue
+            placed.add(id(action))
+            rows.append(_action_entry(action))
+        groups[key] = rows
+
+    # The Onigiri menu's own Settings entry joins Anki's Preferences.
+    onigiri_rows, extra_menus, extra_rows = [], [], []
+    for top in menubar.actions():
+        menu = top.menu()
+        if menu is None or not top.isVisible():
+            continue
+        title = _menu_text(top)
+        if title in ("Onigiri",) or menu.objectName() == "onigiri_menu":
+            onigiri_rows = _menu_tree(menu)
+            continue
+        for action in menu.actions():
+            if action.isSeparator() or not action.isVisible() or id(action) in placed:
+                continue
+            sub = action.menu()
+            if sub is not None:
+                try:
+                    sub.aboutToShow.emit()
+                except Exception:
+                    pass
+                children = _menu_tree(sub)
+                if children:
+                    extra_menus.append({"t": _menu_text(action), "sub": children})
+                continue
+            extra_rows.append(_action_entry(action))
+
+    from ..core.translations import tr
+
+    tree = []
+    titles = {
+        "settings": tr("settings", "Settings"), "study": tr("study", "Study"),
+        "library": "Library", "maintenance": "Maintenance",
+        "addons": tr("addons", "Add-ons"), "help": tr("help", "Help"),
+        "advanced": "Advanced",
+    }
+    for key, _title, _names in _MENU_GROUPS:
+        rows = list(groups.get(key) or [])
+        if key == "settings" and onigiri_rows:
+            rows.append({"t": "Onigiri", "sub": onigiri_rows})
+        if key == "library" and getattr(mw, "state", "") == "deckBrowser":
+            # Deck-list page commands that used to live only in the house sheet.
+            rows[0:0] = [
+                {"t": tr("create_deck", "Create Deck"), "cmd": "onigiri_create_deck"},
+                {"t": tr("get_shared", "Get Shared"), "cmd": "shared"},
+            ]
+        if key == "advanced" and extra_rows + extra_menus:
+            tree.append({"head": tr("more", "More")})
+            tree.extend(extra_rows + extra_menus)
+        if rows:
+            tree.append({"head": titles.get(key, _title)})
+            tree.extend(rows)
+    return tree
+
+
 def show_app_menu(context=None) -> None:
-    """Anki's menus (File, Edit, View, Tools, Help, Onigiri) as a full-screen
-    page: on iPhone/iPad the desktop menu row is hidden."""
+    """Anki's menus as a full-screen page grouped by task (Library,
+    Maintenance, ...): on iPhone/iPad the desktop menu row is hidden."""
     menubar = getattr(getattr(mw, "form", None), "menubar", None) or mw.menuBar()
     if menubar is None:
         return
+    try:
+        _APP_MENU_ACTIONS.clear()
+        _APP_MENU_ACTIONS["__keep"] = (menubar, None)
+        tree = _grouped_menu_tree(menubar)
+        if tree:
+            web = getattr(context, "web", None) or mw.web
+            payload = json.dumps({"title": "", "items": tree})
+            web.eval(
+                "(function(){if(window.OnigiriMobile&&OnigiriMobile.showAppMenu){OnigiriMobile.showAppMenu(%s);}"
+                "else{pycmd('onigiri_app_menu_popup');}})();" % payload
+            )
+            return
+    except Exception as exc:
+        print(f"Onigiri: grouped menu failed, using the plain one: {exc}")
     if not show_menu_page(menubar, "", context):
         _show_app_menu_popup()
 

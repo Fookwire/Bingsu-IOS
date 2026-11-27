@@ -461,6 +461,10 @@
 
     // --- Deck list: "more" buttons and Select mode -------------------------------
 
+    var TOOLS_SVG = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+        '<rect x="4" y="4" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.5"/>' +
+        '<rect x="4" y="13.5" width="6.5" height="6.5" rx="1.5"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.5"/></svg>';
+
     var MORE_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">' +
         '<circle cx="5" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/>' +
         '<circle cx="19" cy="12" r="2" fill="currentColor"/></svg>';
@@ -751,11 +755,24 @@
         };
     }
 
-    function showActionSheet(elements, anchor) {
+    function showActionSheet(elements, anchor, title) {
         closeMenus();
         var menu = document.createElement('div');
         menu.className = 'onigiri-quick-menu onigiri-action-sheet';
+        if (title) {
+            // Every sheet says what it is about (audit NAV-01).
+            var head = document.createElement('div');
+            head.className = 'onigiri-sheet-title';
+            head.textContent = title;
+            menu.appendChild(head);
+        }
         elements.forEach(function (entry) {
+            if (entry && entry.sep) {
+                var sep = document.createElement('div');
+                sep.className = 'onigiri-sheet-sep';
+                menu.appendChild(sep);
+                return;
+            }
             var item = entry && entry.run ? entry : elementItem(entry);
             if (!item.label) return;
             var row = document.createElement('div');
@@ -941,8 +958,11 @@
         var more = document.createElement('button');
         more.type = 'button';
         more.className = 'onigiri-nav-more';
-        more.setAttribute('aria-label', t('more', 'More'));
-        more.innerHTML = MORE_SVG;
+        // The reviewer has its own card-actions ⋯ at the bottom; this one is
+        // the study tools (Add, Browse, Hashi Notes, ...), so it gets a
+        // different glyph and a titled sheet (audit NAV-01).
+        more.setAttribute('aria-label', isReviewer ? t('study_tools', 'Study Tools') : t('more', 'More'));
+        more.innerHTML = isReviewer ? TOOLS_SVG : MORE_SVG;
         more.addEventListener('click', function (event) {
             event.stopPropagation();
             var items = headerButtons().filter(function (el) {
@@ -950,7 +970,17 @@
                 var cmd = el.getAttribute('onclick') || '';
                 return cmd.indexOf("pycmd('decks')") < 0;
             });
-            showActionSheet(items, more);
+            if (isReviewer) {
+                showActionSheet(items, more, t('study_tools', 'Study Tools'));
+                return;
+            }
+            // Overview: this deck's own actions first, then the app's.
+            var deckActions = Array.prototype.slice.call(document.querySelectorAll(
+                '.overview-bottom-actions .overview-button:not(#onigiri-reveal-btn)'));
+            var titleEl = document.querySelector('.overview-title, .overview-header h1, h1, h2');
+            var deckName = titleEl ? titleEl.textContent.trim() : '';
+            showActionSheet(deckActions.length ? deckActions.concat([{ sep: true }], items) : items,
+                more, deckName || t('more', 'More'));
         });
         nav.appendChild(back);
         nav.appendChild(more);
@@ -1140,6 +1170,15 @@
             var group = null;
             level.items.forEach(function (item) {
                 if (item.sep) { group = null; return; }
+                if (item.head) {
+                    // A titled group ("Library", "Maintenance", ...).
+                    var head = document.createElement('div');
+                    head.className = 'oam-group-title';
+                    head.textContent = item.head;
+                    list.appendChild(head);
+                    group = null;
+                    return;
+                }
                 if (!group) {
                     group = document.createElement('div');
                     group.className = 'oam-group';
@@ -1167,7 +1206,8 @@
                     if (item.en === false) return;
                     haptic('light');
                     closeAppMenu();
-                    try { pycmd('onigiri_app_menu_run:' + item.id); } catch (e) {}
+                    // A page command (Create Deck, Get Shared) or a menu action.
+                    try { pycmd(item.cmd ? item.cmd : 'onigiri_app_menu_run:' + item.id); } catch (e) {}
                 });
                 group.appendChild(row);
             });
@@ -1261,6 +1301,42 @@
     var HOME_SVG = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="7" height="7" rx="1.8"/><rect x="13" y="4" width="7" height="7" rx="1.8"/><rect x="4" y="13" width="7" height="7" rx="1.8"/><rect x="13" y="13" width="7" height="7" rx="1.8"/></svg>';
 
     var MENU_SVG = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14"/></svg>';
+
+    // --- Deck list: Add / Browse / Stats / Sync always in reach (audit NAV-02) --
+    // With the sidebar actions "archived", Anki's most used actions sat behind
+    // a small house icon that collided with the Home tab. On phones they get a
+    // labelled row under the deck list header instead; the rest of that sheet
+    // (Create Deck, Import, Settings, games…) lives on the Menu tab.
+    var QUICK_ICONS = {
+        add: '<path d="M12 5v14M5 12h14"/>',
+        browse: '<rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 9.5h18M8 4v16"/>',
+        stats: '<path d="M5 20V11M12 20V5M19 20v-7"/>',
+        sync: '<path d="M20 11a8 8 0 0 0-14.6-4.4L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.6 4.4L20 16"/><path d="M20 20v-4h-4"/>'
+    };
+
+    function addQuickActions() {
+        if (!root.classList.contains('onigiri-phone')) return;
+        var home = document.getElementById('onigiri-home-toolbar-btn');
+        var header = document.getElementById('deck-list-header');
+        if (!home || !header || document.getElementById('onigiri-quick-actions')) return;
+        var row = document.createElement('div');
+        row.id = 'onigiri-quick-actions';
+        row.setAttribute('role', 'toolbar');
+        [['add', 'add', t('add', 'Add')], ['browse', 'browse', t('browse', 'Browse')],
+         ['stats', 'stats', t('stats', 'Stats')], ['sync', 'sync', t('sync', 'Sync')]].forEach(function (spec) {
+            var b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'onigiri-quick-action' + (spec[0] === 'sync' ? ' action-sync' : '');
+            b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+                QUICK_ICONS[spec[0]] + '</svg><span>' + spec[2] + '</span>';
+            b.addEventListener('click', function () {
+                if (typeof pycmd === 'function') pycmd(spec[1]);
+            });
+            row.appendChild(b);
+        });
+        header.parentNode.insertBefore(row, header.nextSibling);
+        home.classList.add('onigiri-replaced');
+    }
 
     function addPhoneTabs() {
         // Classic/Shima home (.modern-main-menu) or the Kome theme (.ba-side).
@@ -1461,6 +1537,7 @@
         nativeCmd('ready');
         setupSettingsDrillDown();
         watchSegments();
+        addQuickActions();
         addPhoneTabs();
         addSelectToggle();
         decorateDeckRows();
@@ -1468,6 +1545,8 @@
         watchProfile();
         setupNavBar();
         setupEdgeSwipe();
+        // injector.js adds the house button after load
+        [0, 300, 1200].forEach(function (ms) { setTimeout(addQuickActions, ms); });
         if (root.classList.contains('onigiri-touch')) {
             setupActionTiles();
             titleCaseHeader();

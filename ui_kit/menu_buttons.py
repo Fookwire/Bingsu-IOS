@@ -219,6 +219,7 @@ def setup_onigiri_menu(addon_path):
 
     # Create the top-level menu with the Onigiri icon
     onigiri_menu = QMenu(tr("onigiri_menu"), mw)
+    onigiri_menu.setObjectName("onigiri_menu")
 
     # Create Gamification submenu
     gamification_menu = QMenu(tr("gamification"), mw)
