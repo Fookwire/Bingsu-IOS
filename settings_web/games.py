@@ -293,7 +293,7 @@ def _gamification_page():
                 "layout": "games_gallery",
                 "description": tr(
                     "select_games_desc",
-                    "Every game Onigiri ships with. Open one to set it up.",
+                    "Every game Bingsu ships with. Open one to set it up.",
                 ),
                 "cards": _game_cards(),
                 "fields": [],
@@ -793,7 +793,7 @@ def _onigimon_page():
                 "description": tr(
                     "onigimon_reviewer_hud_desc",
                     "Replace Ankimon's reviewer HUD and battle popups with a minimal "
-                    "Onigimon bar and Onigiri-aligned notifications. Turn off to restore "
+                    "Onigimon bar and Bingsu-aligned notifications. Turn off to restore "
                     "Ankimon's default HUD.",
                 ),
                 "fields": [
@@ -808,7 +808,7 @@ def _onigimon_page():
                         desc=tr(
                             "onigimon_reviewer_hud_desc",
                             "Replace Ankimon's reviewer HUD and battle popups with a minimal "
-                            "Onigimon bar and Onigiri-aligned notifications. Turn off to restore "
+                            "Onigimon bar and Bingsu-aligned notifications. Turn off to restore "
                             "Ankimon's default HUD.",
                         ),
                     ),

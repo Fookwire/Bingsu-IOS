@@ -402,7 +402,7 @@ COLLAPSED_ACTIONS = {
     "gamification": (
         "openGamificationSettings",
         "onigiri_games",
-        "Onigiri Games",
+        "Bingsu Games",
     ),
     "more": ("", "more", "More"),
     "get_shared": ("shared", "get_shared", "Get Shared"),
@@ -3982,7 +3982,7 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
         }}
 
         /* Optional Main Menu Widgets color sync: card surface, border, and text
-           follow Onigiri's shared widget variables while keeping any configured
+           follow Bingsu's shared widget variables while keeping any configured
            scenario or custom image above the synced backdrop. */
         .onigimon-card.onigimon-sync-widgets {{
             background: var(--onigiri-box-effect-bg, var(--canvas-inset, #ffffff));

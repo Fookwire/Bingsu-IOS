@@ -118,7 +118,7 @@ def get_notification_style(theme: str = "light") -> dict:
 
     These values mirror ``web/notifications.css``.  Keeping them behind the
     Bento API lets native widgets, such as controller feedback, match
-    Onigiri's notifications without importing its web implementation.
+    Bingsu's notifications without importing its web implementation.
     """
     dark = str(theme).lower() in ("dark", "death")
     accent = "#4da3e8" if dark else "#0077C8"
@@ -185,7 +185,7 @@ def ensure_bento_shortcut() -> Optional[QAction]:
                 return action
     if menu.actions():
         menu.addSeparator()
-    action = QAction("Onigiri Settings", mw)
+    action = QAction("Bingsu Settings", mw)
     action.setProperty("bento_marker", marker)
     action.triggered.connect(lambda: open_settings(0))
     menu.addAction(action)

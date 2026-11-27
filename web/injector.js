@@ -124,7 +124,7 @@
             { id: 'stats', cmd: 'stats', title: T('stats', 'Stats') },
             { id: 'sync', cmd: 'sync', title: T('sync', 'Sync') },
             { id: 'settings', cmd: 'openOnigiriSettings', title: T('settings', 'Settings') },
-            { id: 'gamification', cmd: 'openGamificationSettings', title: T('onigiri_games', 'Onigiri Games') },
+            { id: 'gamification', cmd: 'openGamificationSettings', title: T('onigiri_games', 'Bingsu Games') },
             { id: 'more', cmd: null, title: T('more', 'More') },
             { id: 'get_shared', cmd: 'shared', title: T('get_shared', 'Get Shared') },
             { id: 'create_deck', cmd: 'onigiri_create_deck', title: T('create_deck', 'Create Deck') },

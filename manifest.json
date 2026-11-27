@@ -1,8 +1,8 @@
 {
-  "name": "Onigiri for iOS (Kioku)",
+  "name": "Bingsu for iOS (Kioku)",
   "package": "onigiri_ios",
   "author": "PeaceMonk (iOS fork)",
-  "version": "2.0.3-Bento-ios.21",
+  "version": "2.0.3-Bento-ios.22",
   "homepage": "",
   "conflicts": ["1011095603"]
 }

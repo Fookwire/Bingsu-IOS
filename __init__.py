@@ -806,7 +806,7 @@ def verify_coin_integrity():
             # "no progress" on the next launch.
             safe_storage.flush_pending(gamification_file)
             data = safe_storage.read_json(
-                gamification_file, default={}, label="Your Onigiri progress"
+                gamification_file, default={}, label="Your Bingsu progress"
             ) or {}
             if data:
                 restaurant_data = data.setdefault('restaurant_level', {})
@@ -931,7 +931,7 @@ def migrate_nook_level_names():
             gam_path = os.path.join(addon_path, "user_files", f"gamification_{profile_name}.json")
             if os.path.exists(gam_path):
                 gam_data = safe_storage.read_json(
-                    gam_path, default={}, label="Your Onigiri progress"
+                    gam_path, default={}, label="Your Bingsu progress"
                 )
                 rl_state = gam_data.get("restaurant_level")
                 if isinstance(rl_state, dict) and rl_state.get("name") == "Restaurant Level":
@@ -1418,7 +1418,7 @@ def inject_mobile_assets(web_content, context):
 
     mobile.js goes first in <head> so the <html> layout classes exist before
     the body is parsed (no desktop-layout flash); mobile.css goes last so it
-    wins over Onigiri's desktop styles. Runs after inject_menu_files and also
+    wins over Bingsu's desktop styles. Runs after inject_menu_files and also
     covers the Kome theme, which returns early there.
     """
     from .core import platform as onigiri_platform

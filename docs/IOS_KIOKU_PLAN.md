@@ -165,7 +165,7 @@ Each opens its own `AnkiWebView` dialog with `set_bridge_command`: `nook_web_ui:
 
 ## Status (implemented on this branch)
 
-Install: build with `python3 tools/build_addon.py /path/Onigiri-iOS.ankiaddon`, copy the file to the iPhone/iPad (Files app), then in Kioku use **Tools › Add-ons › Install from file…** and restart Kioku.
+Install: build with `python3 tools/build_addon.py /path/Bingsu-iOS.ankiaddon`, copy the file to the iPhone/iPad (Files app), then in Kioku use **Tools › Add-ons › Install from file…** and restart Kioku.
 
 The fork installs as its own add-on, `onigiri_ios`, with no AnkiWeb id. Anki's update check can't replace it with the desktop build, and it declares a conflict with `1011095603` so the two never run together.
 

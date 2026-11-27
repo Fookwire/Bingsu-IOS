@@ -59,11 +59,11 @@ app=QtWidgets.QApplication.instance() or QtWidgets.QApplication([])
 notifications=load('warning_audit.ui_kit.onigiri_notifications',ROOT/'ui_kit/onigiri_notifications.py')
 for dark in (False,True):
  theme.theme_manager.night_mode=dark
- dialog=notifications.OnigiriInfoDialog('Onigiri could not back up your collection settings. Your saved settings were not changed.\n\nDetails: bad argument type for built-in operation',title='Backup and recovery')
+ dialog=notifications.OnigiriInfoDialog('Bingsu could not back up your collection settings. Your saved settings were not changed.\n\nDetails: bad argument type for built-in operation',title='Backup and recovery')
  dialog.show();app.processEvents()
- assert dialog.windowTitle()=='Onigiri · Backup and recovery'
+ assert dialog.windowTitle()=='Bingsu · Backup and recovery'
  icon=dialog.findChild(QtWidgets.QLabel,'onigiriInfoIcon');assert not icon.pixmap().isNull()
- assert dialog.findChild(QtWidgets.QLabel,'onigiriInfoTitle').text().startswith('Onigiri')
+ assert dialog.findChild(QtWidgets.QLabel,'onigiriInfoTitle').text().startswith('Bingsu')
  path=f'/tmp/onigiri-warning-preview-{ "dark" if dark else "light"}.png';assert dialog.grab().save(path)
  dialog.findChild(QtWidgets.QPushButton,'onigiriInfoOk').click();assert dialog.result()==QtWidgets.QDialog.DialogCode.Accepted
  long=notifications.OnigiriInfoDialog('\n\n'.join(['Arquivo / folder: ' + 'very-long-name-'*20]*12),title='Aviso')
@@ -71,7 +71,7 @@ for dark in (False,True):
  scroll=long.findChild(QtWidgets.QScrollArea);assert scroll.verticalScrollBar().maximum()>0
  assert long.height()<=app.primaryScreen().availableGeometry().height()*.8
  long.reject()
- box=QtWidgets.QMessageBox();notifications.brand_message_box(box,'Aviso');assert box.text()=='Onigiri · Aviso' and not box.iconPixmap().isNull()
+ box=QtWidgets.QMessageBox();notifications.brand_message_box(box,'Aviso');assert box.text()=='Bingsu · Aviso' and not box.iconPixmap().isNull()
  print(f'PASS: native {"dark" if dark else "light"} logo, title, OK, scroll, confirmation branding; screenshot {path}')
 with patch.object(notifications,'_native_show_info') as show:
  notifications.notify_warning('Saved data needs attention', title='Warning', gamification=True)
@@ -82,7 +82,7 @@ seen=[]
 with patch.object(notifications, 'OnigiriInfoDialog', side_effect=RuntimeError('dialog unavailable')):
  with patch.object(notifications.QMessageBox, 'exec', lambda box: seen.append((box.text(), box.informativeText(), box.iconPixmap().isNull()))):
   notifications._native_show_info('Keep these technical details', title='Warning')
-assert seen == [('Onigiri · Warning', 'Keep these technical details', False)]
+assert seen == [('Bingsu · Warning', 'Keep these technical details', False)]
 print('PASS: fallback retains the Onigiri name, logo, and warning details.')
 
 # Demonstrate the startup ordering defect using Qt's real nested event loop.
@@ -117,7 +117,7 @@ with patch.object(notifications.OnigiriInfoDialog,'exec',side_effect=AssertionEr
   assert events==['remaining profile hook','timer']
   assert len(notifications._open_info_dialogs)==1
   dialog=next(iter(notifications._open_info_dialogs))
-  assert dialog.isVisible() and dialog.windowTitle()=='Onigiri · Backup and recovery'
+  assert dialog.isVisible() and dialog.windowTitle()=='Bingsu · Backup and recovery'
   dialog.findChild(QtWidgets.QPushButton,'onigiriInfoOk').click()
   assert not notifications._open_info_dialogs
   assert dialog.result()==QtWidgets.QDialog.DialogCode.Accepted

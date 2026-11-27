@@ -114,7 +114,7 @@
           );
       const copy = document.createElement('p');
       copy.textContent = hasSynced
-        ? t('communications_empty_body', 'Sync to check for updates from the Onigiri team.')
+        ? t('communications_empty_body', 'Sync to check for updates from the Bingsu team.')
         : t(
             data.isSyncing ? 'communications_first_sync_body' : 'communications_first_sync_failed_body',
             data.isSyncing

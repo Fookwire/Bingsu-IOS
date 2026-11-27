@@ -17,7 +17,7 @@ def render_deck_browser(deck_browser: DeckBrowser, reuse: bool = False) -> None:
     """Render only the centered deck island on the main menu.
 
     Shima deliberately does not execute the dashboard-widget hooks. The deck
-    tree still goes through Onigiri's normal renderer, so custom icons, counts,
+    tree still goes through Bingsu's normal renderer, so custom icons, counts,
     context menus, searching, sorting, and drag ordering keep working.
     """
     del reuse

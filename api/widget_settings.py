@@ -3,7 +3,7 @@
 The Bento add-ons intentionally keep their own configuration and rendering
 code.  This module owns only the settings chrome and value plumbing: the same
 rail/panel/card hierarchy, automatic saving, and production-rendered preview
-contract used by Onigiri's main settings window.
+contract used by Bingsu's main settings window.
 
 Integrations subclass :class:`BentoSettingsDialog`, pass a small page schema,
 and provide a preview callback.  The callback receives the in-progress config,

@@ -22,7 +22,7 @@
 
 /* Kioku's phone CSS (kioku/webscripts.py PHONE_CSS) turns any table holding
    .decktd into a `display:block; width:fit-content` scroll box, with its cells
-   capped at `100vw - 13em`. That suits Anki's own deck table, but Onigiri's
+   capped at `100vw - 13em`. That suits Anki's own deck table, but Bingsu's
    rows are flex rows: they collapsed to ~30px and the deck list looked empty. */
 html #deck-list-container table.deck-table,
 html #deck-list-container table.deck-table.kioku-decks {
@@ -46,7 +46,7 @@ html #deck-list-container table.deck-table td {
 }
 
 /* Kioku gives the deck-list page body side margins (meant for Anki's own
-   deck list); Onigiri's layout manages its own gutters. */
+   deck list); Bingsu's layout manages its own gutters. */
 html body:has(.modern-main-menu) {
     margin-left: 0 !important;
     margin-right: 0 !important;
@@ -609,7 +609,7 @@ html.onigiri-sheet-open tr.deck.ctx-row-active {
 /* ------------------------------------------------------------------------- */
 
 /* Kioku pads <html> by the bottom safe area (home indicator) and the side
-   ones in landscape. Onigiri's home is 100vh tall, so its bottom ran under
+   ones in landscape. Bingsu's home is 100vh tall, so its bottom ran under
    the home indicator and the screen's rounded corners: subtract the pad. */
 html.onigiri-touch body:has(.modern-main-menu),
 html.onigiri-touch body:has(.modern-main-menu) .container.modern-main-menu {

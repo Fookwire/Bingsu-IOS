@@ -1,24 +1,27 @@
 <p align="center">
-  <img src=".github/Header.svg" alt="Onigiri header" width="100%">
+  <img src=".github/Header.svg" alt="Bingsu header" width="100%">
 </p>
 
 <h1 align="center">
-	Onigiri
+	Bingsu
 </h1>
 
-Onigiri is an Anki add-on that transforms the standard interface into a modern, highly customizable dashboard. Make your study space your own with personalized themes and layouts, then add a little fun to your reviews with three mini-games, Pokémon companions, levels, and hexagon islands to build.
+Bingsu is an Anki add-on that turns Anki into a modern, customizable dashboard and makes it feel at home on iPhone and iPad through [Kioku](https://github.com/krmanik/kioku). It keeps all of Anki's scheduling, FSRS, review history and sync untouched.
 
-The name comes from *onigiri* (お握り), also called *omusubi* (おむすび): a Japanese rice ball. Just as a rice ball provides energy, Onigiri aims to give you an extra boost to come back to your flashcards, one review at a time.
+Bingsu is a fork of [Onigiri](https://github.com/thepeacemonk/Onigiri) by PeaceMonk, released under the same GPL-3.0 licence. The original desktop add-on is on [AnkiWeb](https://ankiweb.net/shared/info/1011095603) (code `1011095603`); please support its author.
 
-### Get started
+### Install on iPhone / iPad (Kioku)
 
-Install Onigiri from [AnkiWeb](https://ankiweb.net/shared/info/1011095603):
+1. Download [`dist/Bingsu-iOS.ankiaddon`](https://github.com/Fookwire/Onigiri_IOS/raw/claude/practical-ritchie-w20lag/dist/Bingsu-iOS.ankiaddon).
+2. In Kioku open **Tools › Add-ons › Install from file…** and pick it.
+3. Fully restart Kioku.
 
-1. Open Anki and go to **Tools → Add-ons → Get Add-ons…**
-2. Enter the add-on code **`1011095603`**.
-3. Confirm the installation and restart Anki.
+Updating from an earlier build keeps your settings and data.
 
-You can also browse the [GitHub releases](https://github.com/thepeacemonk/Onigiri/releases) for release notes and downloadable builds.
+## About Onigiri, the original project
+
+The text below is the original author's, kept for credit. "Onigiri" here refers to the upstream add-on that Bingsu is based on.
+
 
 ### How it started
 
@@ -76,7 +79,7 @@ For updates, previews, theme sharing, and conversations with other users, join t
 
 <a href="https://discord.gg/6kdG6tX5Mz">
 <p align="center">
-  <img src=".github/discord.svg" alt="Onigiri header" width="100%">
+  <img src=".github/discord.svg" alt="Bingsu header" width="100%">
 </p>
 </a>
 
@@ -100,7 +103,7 @@ Onigiri takes ongoing time and care to maintain. If it has made your study routi
  </picture>
 </a>
 
-## Onigiri previews
+## Bingsu previews
 
 <p align="center">
   <img src=".github/slide_1.svg" alt="Slide 1" width="100%">
@@ -132,6 +135,6 @@ Onigiri takes ongoing time and care to maintain. If it has made your study routi
 
 <a href="https://github.com/thepeacemonk/Onigiri/issues">
 <p align="center">
-  <img src=".github/report_bugs.svg" alt="Onigiri header" width="100%">
+  <img src=".github/report_bugs.svg" alt="Bingsu header" width="100%">
 </p>
 </a>

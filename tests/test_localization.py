@@ -123,8 +123,8 @@ class LocalizationTests(unittest.TestCase):
         storage = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(storage)
         self.settings["language"] = "English (Default)"
-        original = "Your Onigiri progress was restored from backup file."
-        storage._note(original, key="storage_restored", label="Your Onigiri progress", source="backup file")
+        original = "Your Bingsu progress was restored from backup file."
+        storage._note(original, key="storage_restored", label="Your Bingsu progress", source="backup file")
         self.settings["language"] = "Português (Brasil)"
         expected = self.translations.TRANSLATIONS["pt-BR"]
         self.assertEqual(storage.take_notices(), [expected["storage_restored"].format(

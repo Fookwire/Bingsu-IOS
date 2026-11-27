@@ -1407,7 +1407,7 @@ def _open_settings() -> None:
     except Exception as e:
         try:
             from ..ui_kit.onigiri_notifications import notify_warning as showWarning
-            showWarning(f"Onigiri Kome settings: {e}")
+            showWarning(f"Bingsu Kome settings: {e}")
         except Exception:
             pass
 
@@ -3625,7 +3625,7 @@ def _add_tools_menu_action() -> None:
     except Exception as e:
         try:
             from ..ui_kit.onigiri_notifications import notify_warning as showWarning
-            showWarning(f"Onigiri: failed to register settings shortcut: {e}")
+            showWarning(f"Bingsu: failed to register settings shortcut: {e}")
         except Exception:
             pass
 

@@ -1,4 +1,4 @@
-# iPhone audit of Onigiri on Kioku (builds 2.0.3-Bento-ios.15 to .21)
+# iPhone audit of Bingsu (formerly Onigiri) on Kioku (builds 2.0.3-Bento-ios.15 to .21)
 
 Method: a read of the add-on's Python and web code, Kioku's sources, and the
 history of earlier builds, then fixes, each checked in headless Anki with

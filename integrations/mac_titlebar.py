@@ -16,7 +16,7 @@ and then set:
 
 The title bar itself still exists, so dragging, resizing, double-click-to-zoom
 and the close/minimise/zoom buttons keep working -- the traffic lights simply
-float over Onigiri's background. Because that strip stays a window-drag region,
+float over Bingsu's background. Because that strip stays a window-drag region,
 the web pages reserve `TITLEBAR_INSET` points at the top (see `inset_css`) so no
 Onigiri button ends up underneath it.
 

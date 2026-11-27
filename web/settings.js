@@ -4515,7 +4515,7 @@
         cell.type = "button";
         cell.setAttribute("aria-pressed", option.value === selected ? "true" : "false");
         const name = el("span", "osw-fontpick-name", option.label || option.value);
-        const sample = el("span", "osw-fontpick-sample", "Onigiri");
+        const sample = el("span", "osw-fontpick-sample", "Bingsu");
         if (option.family) sample.style.fontFamily = option.family;
         const ink = drafts[(colors[CTX.dark && colors.length > 1 ? 1 : 0] || {}).id];
         if (ink) sample.style.color = cssColorToHex(ink);
@@ -4570,7 +4570,7 @@
       colorPopover.setAttribute("role", "group");
       colorPopover.setAttribute("aria-label", target.label + " " + str("color", "Color"));
       const head = el("div", "osw-fontpick-color-head");
-      const sample = el("span", "osw-fontpick-color-sample", "Onigiri");
+      const sample = el("span", "osw-fontpick-color-sample", "Bingsu");
       sample.style.background = (colors.length > 1 ? colorIndex === 1 : CTX.dark) ? "#202020" : "#f7f7f6";
       sample.style.color = cssColorToHex(effectiveColor(colorIndex));
       sample.style.fontFamily = designerFieldFontFamily(Object.assign({}, values, { [field.id]: selected }), field.id);
@@ -7121,7 +7121,7 @@
 
   PREVIEW_PAINTERS.notification = function (stage, vals, isDark) {
     paintLiveNotification(stage, vals, isDark, {
-      name: str("notif_preview_title", "Onigiri"),
+      name: str("notif_preview_title", "Bingsu"),
       description: str("notif_preview_desc", "Level 4 reached — nice work!"),
       icon: "On"
     });
@@ -11438,7 +11438,7 @@
             const multiplicity = isRepeatableSpec(spec)
               ? str("multiple_instances_allowed", "Multiple instances allowed") + " • "
               : "";
-            subText = multiplicity + "Onigiri Widget • " + defaultSpan[1] + "×" + defaultSpan[0];
+            subText = multiplicity + "Bingsu Widget • " + defaultSpan[1] + "×" + defaultSpan[0];
           }
 
           const content = el("div", "osw-organize-gallery-item-content");
@@ -11484,7 +11484,7 @@
         sec.appendChild(grid);
         body.appendChild(sec);
       }
-      section_(str("gallery_onigiri", "Onigiri Widgets"), oniAvail, false);
+      section_(str("gallery_onigiri", "Bingsu Widgets"), oniAvail, false);
       section_(str("gallery_external", "External Add-ons"), extAvail, true);
 
       root.addEventListener("mousedown", function (event) { if (event.target === root && root.parentNode) root.parentNode.removeChild(root); });
@@ -15765,7 +15765,7 @@
         settingsComplexity = mode;
         applySettingsComplexity(true);
         if (mode === "simple") {
-          toast(str("simple_mode_notice", "Simple Mode hides some Onigiri customization options. Switch to Advanced to see them all."), { simpleNotice: true });
+          toast(str("simple_mode_notice", "Simple Mode hides some Bingsu customization options. Switch to Advanced to see them all."), { simpleNotice: true });
         } else {
           const notice = document.getElementById("oswToast");
           if (notice && notice.classList.contains("is-simple-notice")) {

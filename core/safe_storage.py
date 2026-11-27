@@ -107,7 +107,7 @@ def backup_before_upgrade(shared_config=None):
                 if not atomic_write_json(collection_path, data, mirror=False):
                     return None
             except Exception as exc:
-                _note(f"Onigiri could not back up your collection settings. Your saved settings were not changed. Details: {exc}",
+                _note(f"Bingsu could not back up your collection settings. Your saved settings were not changed. Details: {exc}",
                       key="storage_collection_backup_error", error=str(exc))
                 return None
     if os.path.exists(target):
@@ -443,7 +443,7 @@ def read_json(path, default=None, label=None, validator=None):
         _quarantine(path)
         _note(
             f"{label} was damaged and no backup could be read. "
-            "Onigiri fell back to defaults; the damaged file was kept as .corrupt.",
+            "Bingsu fell back to defaults; the damaged file was kept as .corrupt.",
             key="storage_damaged", label=label,
         )
     return copy.deepcopy(default) if default is not None else {}
@@ -667,7 +667,7 @@ def _known_profiles():
 
 def adopt_orphaned_profile_files(current_profile):
     """
-    Renaming an Anki profile leaves ``settings_<old>.json`` behind and Onigiri
+    Renaming an Anki profile leaves ``settings_<old>.json`` behind and Bingsu
     starts from defaults under the new name. If exactly one leftover file
     belongs to a profile Anki no longer knows about, it is that rename - so
     carry it over instead of letting the user think the update ate it.
@@ -737,7 +737,7 @@ def run_startup_check(profile_name=None):
     adopted = adopt_orphaned_profile_files(profile_name)
     if adopted:
         messages.append(
-            "Your Anki profile appears to have been renamed. Onigiri carried "
+            "Your Anki profile appears to have been renamed. Bingsu carried "
             f"your settings over from: {', '.join(adopted)}"
         )
 
@@ -745,7 +745,7 @@ def run_startup_check(profile_name=None):
         restored = restore_from_mirror()
         if restored:
             messages.append(
-                f"Onigiri's data folder was empty, so {restored} file(s) were "
+                f"Bingsu's data folder was empty, so {restored} file(s) were "
                 "restored from the backup kept outside the add-on folder. This "
                 "usually means the add-on was reinstalled by hand instead of "
                 "through Anki's updater."
@@ -765,7 +765,7 @@ def run_startup_check(profile_name=None):
         messages[0] = _notice_copy("storage_profile_renamed", messages[0],
                                   {"profiles": ", ".join(adopted)})
     for index, message in enumerate(messages):
-        if message.startswith("Onigiri's data folder was empty"):
+        if message.startswith("Bingsu's data folder was empty"):
             messages[index] = _notice_copy("storage_folder_restored", message,
                                           {"amount": restored})
         elif message.startswith("Anki left an unfinished"):

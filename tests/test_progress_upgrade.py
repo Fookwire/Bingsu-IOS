@@ -464,7 +464,7 @@ class ProgressUpgradeTests(unittest.TestCase):
         with patch.object(self.mw.col, 'all_config', side_effect=RuntimeError('read unavailable')):
             self.assertIsNone(self.storage.backup_before_upgrade())
         self.assertFalse(list(Path(self.storage.external_backup_dir()).glob('before_progress_upgrade_v2_*.json')))
-        self.assertIn('Onigiri', self.storage.take_notices()[0])
+        self.assertIn('Bingsu', self.storage.take_notices()[0])
         self.assertIsNotNone(self.storage.backup_before_upgrade())
         self.assertEqual(self.mw.col.all_config(), values)
 

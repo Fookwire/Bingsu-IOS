@@ -124,7 +124,7 @@ class GamificationData:
 
         try:
             data = safe_storage.read_json(
-                data_path, default={}, label="Your Onigiri progress"
+                data_path, default={}, label="Your Bingsu progress"
             )
             if not isinstance(data, dict) or not data:
                 return
@@ -220,7 +220,7 @@ class GamificationData:
             final_data = dict(pending)
         elif os.path.exists(data_path):
             final_data = safe_storage.read_json(
-                data_path, default={}, label="Your Onigiri progress"
+                data_path, default={}, label="Your Bingsu progress"
             ) or {}
 
         # Preserve legacy nested metadata as well as top-level extension keys.

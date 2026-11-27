@@ -17,7 +17,7 @@ def get_translated_labels():
 
     These used to be a hardcoded English/Vietnamese pair keyed off Anki's
     `defaultLang`, so every other language fell back to English and the widget
-    ignored Onigiri's language selector. Now it follows `tr()` like the rest of
+    ignored Bingsu's language selector. Now it follows `tr()` like the rest of
     the UI; the second argument is only a safety net if a key ever goes missing.
     """
     from ..core.translations import tr
@@ -47,7 +47,7 @@ def get_translated_labels():
         "save": tr("save", "Save"),
         "cancel": tr("cancel", "Cancel"),
         "close": tr("close", "Close"),
-        "preparing": tr("lstats_preparing", "Preparing your Onigiri"),
+        "preparing": tr("lstats_preparing", "Preparing your Bingsu"),
         "view_switcher": tr("lstats_view_switcher", "Stats view"),
         # Deck-picker modal, styled after the Create New Deck dialog.
         "picker_title": tr("lstats_picker_title", "Select Deck"),

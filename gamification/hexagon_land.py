@@ -382,7 +382,7 @@ INHABITANT_ITEMS = {
         "cost": {"coins": 15},
         "unlock_lands": 15,
         "offset": {"x": 20, "y": -12, "w": 26},
-        "group": "Onigiri Fam",
+        "group": "Bingsu Fam",
     },
     "mochi_inhabitant": {
         "label": "Mochi",
@@ -390,7 +390,7 @@ INHABITANT_ITEMS = {
         "cost": {"coins": 15},
         "unlock_lands": 15,
         "offset": {"x": 20, "y": -12, "w": 26},
-        "group": "Onigiri Fam",
+        "group": "Bingsu Fam",
     },
     "nigiri_inhabitant": {
         "label": "Nigiri",
@@ -398,15 +398,15 @@ INHABITANT_ITEMS = {
         "cost": {"coins": 15},
         "unlock_lands": 15,
         "offset": {"x": 20, "y": -12, "w": 26},
-        "group": "Onigiri Fam",
+        "group": "Bingsu Fam",
     },
     "onigi_alien": {
-        "label": "Onigiri San",
+        "label": "Bingsu San",
         "sprite": "onigiri_san.svg",
         "cost": {"coins": 15},
         "unlock_lands": 15,
         "offset": {"x": 20, "y": -12, "w": 26},
-        "group": "Onigiri Fam",
+        "group": "Bingsu Fam",
     },
     "pikachu_inhabitant": {
         "label": "Pikachu",
@@ -414,7 +414,7 @@ INHABITANT_ITEMS = {
         "cost": {"coins": 15},
         "unlock_lands": 15,
         "offset": {"x": 20, "y": -12, "w": 26},
-        "group": "Onigiri Fam",
+        "group": "Bingsu Fam",
     },
 }
 

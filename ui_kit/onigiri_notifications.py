@@ -118,7 +118,7 @@ _FALLBACK_JS = r"""
       content.style.cssText = 'display:grid;gap:2px;min-width:0;';
       if (centered) content.style.justifyItems = 'center';
       var title = document.createElement('p');
-      title.textContent = data.name || 'Onigiri';
+      title.textContent = data.name || 'Bingsu';
       title.style.cssText = 'margin:0;font-size:15px;font-weight:700;line-height:1.25;';
       var desc = document.createElement('p');
       desc.textContent = data.description || '';
@@ -259,10 +259,10 @@ def _info_dialog_icon_pixmap(color: str = "", size: int = 36) -> QPixmap:
 
 def _branded_title(title: str = "") -> str:
     title = str(title or "").strip()
-    return title if title.startswith("Onigiri") else (f"Onigiri · {title}" if title else "Onigiri")
+    return title if title.startswith("Bingsu") else (f"Bingsu · {title}" if title else "Bingsu")
 
 
-def brand_message_box(box, title: str = "Onigiri") -> None:
+def brand_message_box(box, title: str = "Bingsu") -> None:
     """Also brand native fallback and confirmation dialogs."""
     palette = _info_dialog_palette()
     box.setWindowTitle(_branded_title(title))
@@ -288,7 +288,7 @@ def brand_message_box(box, title: str = "Onigiri") -> None:
 
 
 class OnigiriInfoDialog(QDialog):
-    def __init__(self, message: str, title: str = "Onigiri", parent: Any = None):
+    def __init__(self, message: str, title: str = "Bingsu", parent: Any = None):
         super().__init__(parent)
         title = _branded_title(title)
         self.setWindowTitle(title)
@@ -376,10 +376,10 @@ class OnigiriInfoDialog(QDialog):
         icon.setObjectName("onigiriInfoIcon")
         icon.setFixedSize(42, 42)
         icon.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        icon.setAccessibleName("Onigiri")
+        icon.setAccessibleName("Bingsu")
         icon_pixmap = logo
         if icon_pixmap.isNull():
-            icon.setText("Onigiri")
+            icon.setText("Bingsu")
         else:
             icon.setPixmap(icon_pixmap)
         content.addWidget(icon, 0, Qt.AlignmentFlag.AlignTop)
@@ -388,7 +388,7 @@ class OnigiriInfoDialog(QDialog):
         text_stack.setContentsMargins(0, 0, 0, 0)
         text_stack.setSpacing(6)
 
-        title_label = QLabel(title or "Onigiri")
+        title_label = QLabel(title or "Bingsu")
         title_label.setObjectName("onigiriInfoTitle")
         title_label.setWordWrap(True)
         text_stack.addWidget(title_label)
@@ -446,7 +446,7 @@ def _open_info_dialog(dialog) -> None:
         raise
 
 
-def _native_show_info(message: str, title: str = "Onigiri", parent: Any = None,
+def _native_show_info(message: str, title: str = "Bingsu", parent: Any = None,
                       blocking: bool = True) -> None:
     title = _branded_title(title)
     try:
@@ -486,7 +486,7 @@ def _addon_package() -> str:
 def notification_script(
     message: str,
     *args: Any,
-    title: str = "Onigiri",
+    title: str = "Bingsu",
     variant: str = "onigiri",
     icon: str = "On",
     icon_image: str = "",
@@ -519,7 +519,7 @@ def notification_script(
 def notify(
     message: str,
     *args: Any,
-    title: str = "Onigiri",
+    title: str = "Bingsu",
     context: Any = None,
     variant: str = "onigiri",
     icon: str = "On",
@@ -562,7 +562,7 @@ def notify(
             print(f"Onigiri: Could not show custom notification: {exc}")
 
 
-def notify_info(message: str, *args: Any, context: Optional[Any] = None, title: str = "Onigiri", **kwargs: Any) -> None:
+def notify_info(message: str, *args: Any, context: Optional[Any] = None, title: str = "Bingsu", **kwargs: Any) -> None:
     if kwargs.get("gamification"):
         notify(message, title=title, context=context, **kwargs)
         return

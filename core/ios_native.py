@@ -6,7 +6,7 @@ make Onigiri feel like an iOS app rather than a web page in a desktop shell:
 
 * **Menu row.** Anki's File/Edit/View/Tools/Help row (``mw.form.menubar``)
   stays hidden on iPhones, and on iPads where iPadOS 26 puts the same menus
-  in the system menu bar. The menus open from Onigiri's Menu button
+  in the system menu bar. The menus open from Bingsu's Menu button
   (``webview_handlers.show_app_menu``). Add-on config
   ``ios_show_menu_row: true`` brings the row back.
 * **Edges.** The strips under the status bar and the home indicator are the
@@ -420,7 +420,7 @@ def _after_main_window() -> None:
 
 def flush_on_background(state) -> None:
     """iOS suspends a backgrounded app and may then kill it without any
-    close event: game progress still waiting in Onigiri's write queue (Nook
+    close event: game progress still waiting in Bingsu's write queue (Nook
     XP, Onigimon; written ~1.5 s after an answer) was lost. Write it now."""
     try:
         from aqt.qt import Qt

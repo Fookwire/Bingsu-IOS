@@ -399,7 +399,7 @@
     if (!data.hideTitle) {
       const title = document.createElement("p");
       title.className = "onigiri-island-notice-title";
-      title.textContent = data.name || "Onigiri";
+      title.textContent = data.name || "Bingsu";
       copy.appendChild(title);
     }
     if (data.description) {

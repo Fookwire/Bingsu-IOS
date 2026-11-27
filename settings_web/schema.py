@@ -242,7 +242,7 @@ def _modes_page():
             "level": 1,
             "label": tr("mode_focus", "Focus"),
             "desc": tr("hide_anki_bars", "Hide Anki's bars"),
-            "notes": [tr("replaces_top_bar", ""), tr("best_onigiri_experience", "The best Onigiri experience")],
+            "notes": [tr("replaces_top_bar", ""), tr("best_onigiri_experience", "The best Bingsu experience")],
             "icon": "mode-focus-eye.svg",
             "bind": {"kind": "config", "key": "hideNativeHeaderAndBottomBar"},
             "default": True,
@@ -1207,7 +1207,7 @@ def _themes_page():
         "group": "general",
         "description": tr(
             "themes_description",
-            "Choose the visual system for Onigiri, then tune its appearance.",
+            "Choose the visual system for Bingsu, then tune its appearance.",
         ),
         "sections": [
             {
@@ -1233,10 +1233,10 @@ def _themes_page():
                     "options": [
                         {
                             "value": "classic",
-                            "label": tr("theme_classic", "Onigiri"),
+                            "label": tr("theme_classic", "Bingsu"),
                             "sub": tr(
                                 "theme_classic_desc",
-                                "Onigiri's flexible widget dashboard",
+                                "Bingsu's flexible widget dashboard",
                             ),
                         },
                         {
@@ -1269,7 +1269,7 @@ def _themes_page():
                     "desc": tr(
                         "theme_mode_desc",
                         "Follow Anki's light/dark mode or choose a fixed mode "
-                        "for Onigiri.",
+                        "for Bingsu.",
                     ),
                     # One shared preference for every visual style. Keep the
                     # existing config key so saved Kome preferences carry over.
@@ -3363,7 +3363,7 @@ def _reviewer_flags_section():
         "description_in_tab": True,
         "description": tr(
             "reviewer_flags_desc",
-            "Choose an icon for each flag in the reviewer. Icons keep the flag's color. Use Default restores Onigiri's flag icon.",
+            "Choose an icon for each flag in the reviewer. Icons keep the flag's color. Use Default restores Bingsu's flag icon.",
         ),
         "fields": [
             {

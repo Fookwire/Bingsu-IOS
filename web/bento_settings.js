@@ -145,8 +145,8 @@
     statusNode.dataset.connected = String(connected);
     iconNode.dataset.icon = connected ? "circle-check" : "circle-alert";
     $("bwsBridgeLabel").textContent = connected
-      ? window.onigiriText("Onigiri installed · Bento bridge active") + (C.onigiriVersion ? " · v" + C.onigiriVersion : "")
-      : window.onigiriText("Onigiri not detected");
+      ? window.onigiriText("Bingsu installed · Bento bridge active") + (C.onigiriVersion ? " · v" + C.onigiriVersion : "")
+      : window.onigiriText("Bingsu not detected");
     installIcons(statusNode);
 
     var footprint = $("bwsFootprint");

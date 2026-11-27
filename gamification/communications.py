@@ -40,11 +40,11 @@ def _logo_markup() -> str:
             svg = logo_file.read()
         return svg.replace(
             "<svg ",
-            '<svg class="brand-logo" role="img" aria-label="Onigiri" ',
+            '<svg class="brand-logo" role="img" aria-label="Bingsu" ',
             1,
         )
     except OSError:
-        return '<span class="brand-logo-fallback" aria-label="Onigiri">Onigiri</span>'
+        return '<span class="brand-logo-fallback" aria-label="Bingsu">Bingsu</span>'
 
 
 def _profile_name() -> str:

@@ -211,7 +211,7 @@ def _show_welcome_message():
 
 def setup_onigiri_menu(addon_path):
     """
-    Creates and adds the 'Onigiri' top-level menu to Anki's main window.
+    Creates and adds the 'Bingsu' top-level menu to Anki's main window.
     This menu will contain actions for general settings, profile settings, and viewing the profile.
     """
     global _addon_path, _study_tool_actions, _study_tools_menu, _pomodoro_shortcut

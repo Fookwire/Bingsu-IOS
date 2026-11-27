@@ -152,7 +152,7 @@ def themed_asset(get, base_key, is_dark, dynamic_key=None, default=""):
 # Default settings for the add-on
 DEFAULTS = {
     "userName": "USER",
-    "statsTitle": "Welcome to Onigiri!",
+    "statsTitle": "Welcome to Bingsu!",
     "studyNowText": "Study Now",
     "hideWelcomeMessage": False,
     "hideAllDeckCounts": False,
@@ -1209,7 +1209,7 @@ def _place_external_widgets(layout_conf, external_grid_conf):
 
     External add-ons commonly add their first widget at position zero. That
     was safe when Anki rendered their ``content.stats`` below the deck list,
-    but it overlaps Onigiri's title card in the unified CSS grid. Preserve a
+    but it overlaps Bingsu's title card in the unified CSS grid. Preserve a
     valid user placement and move only conflicting external entries to the
     first available run of cells. This also handles two add-ons choosing the
     same default position during startup.
@@ -1390,7 +1390,7 @@ def _build_config():
     loaded_from_file = False
     if settings_path:
         user_config = safe_storage.read_json(
-            settings_path, default={}, label="Your Onigiri settings"
+            settings_path, default={}, label="Your Bingsu settings"
         )
         raw, valid = safe_storage._try_load(settings_path)
         loaded_from_file = bool(user_config) or (valid and isinstance(raw, dict))
@@ -1648,7 +1648,7 @@ def _build_config():
                 except OSError as exc:
                     print(f"Could not adopt legacy Onigiri progress: {exc}")
                     return clean_config
-        game_data = safe_storage.read_json(game_path, default={}, label="Your Onigiri progress")
+        game_data = safe_storage.read_json(game_path, default={}, label="Your Bingsu progress")
         game_restaurant = game_data.setdefault("restaurant_level", {})
         if "taiyaki_coins" not in game_restaurant:
             game_restaurant["taiyaki_coins"] = legacy_restaurant["taiyaki_coins"]

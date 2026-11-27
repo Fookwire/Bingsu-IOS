@@ -606,7 +606,7 @@ class SettingsWebDialog(QDialog):
                 current or "system",
                 self.addon_path,
                 host,
-                sample_text="Onigiri",
+                sample_text="Bingsu",
                 title=tr("fonts", "Fonts"),
                 accent_color=picker_accent,
             )
@@ -669,7 +669,7 @@ class SettingsWebDialog(QDialog):
         return "ok"
 
     def _cmd_bugs(self, _arg):
-        openLink("https://github.com/thepeacemonk/Onigiri")
+        openLink("https://github.com/Fookwire/Onigiri_IOS")
         return "ok"
 
     def _cmd_link(self, arg):

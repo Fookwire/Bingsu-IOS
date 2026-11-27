@@ -22,7 +22,7 @@
     restaurants: [t('restaurants_header', 'Restaurants'), t('store_desc_restaurants', 'Give your study space a new flavor.')],
     evolutions: [t('evolutions_header', 'Sushi Evolutions'), t('store_desc_evolutions', 'Grow the original Onigiri Stand into something extraordinary.')],
     shops: [t('shops_header', 'Shops'), t('store_desc_shops', 'Special destinations for your Nook.')],
-    devs: [t('devs_header', 'Developers'), t('store_desc_devs', 'An homage to everyone who helped build Onigiri.')],
+    devs: [t('devs_header', 'Developers'), t('store_desc_devs', 'An homage to everyone who helped build Bingsu.')],
   });
   function applyI18n(root) {
     root.querySelectorAll('[data-i18n-text]').forEach(el => { const v = S()[el.dataset.i18nText]; if (v) el.textContent = v; });

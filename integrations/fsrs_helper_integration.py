@@ -3,7 +3,7 @@ Optional integration with FSRS4Anki Helper
 (https://github.com/open-spaced-repetition/fsrs4anki-helper).
 
 FSRS4Anki Helper builds its own submenu under Anki's Tools menu
-(`menu_for_helper`) instead of adding a top-toolbar link, so Onigiri's
+(`menu_for_helper`) instead of adding a top-toolbar link, so Bingsu's
 generic toolbar-capture path in `api/sidebar.py` never sees it. This module
 detects the addon and, if present, registers a sidebar entry that reuses
 FSRS4Anki Helper's live Tools-menu QMenu as a popup.

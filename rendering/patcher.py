@@ -8222,7 +8222,7 @@ def on_reviewer_did_answer_card(reviewer, card, ease):
 def _onigiri_render_deck_node(self, node, ctx) -> str:
     """
     A patched version of DeckBrowser._render_deck_node that creates the
-    HTML structure Onigiri's CSS and JS expect (e.g., td.collapse-cell).
+    HTML structure Bingsu's CSS and JS expect (e.g., td.collapse-cell).
     """
     buf = []  # Use a list for efficient string building
 

@@ -149,7 +149,7 @@ The same rules apply. The sidebar stays (`clamp(300px, 40vw, 420px)`), menus are
 3. **Overview and reviewer:** 4E.
 4. **Settings:** 4F.
 5. **Widgets and Profile:** 4D, plus the Studied/Time fix.
-6. Package `2.0.3-Bento-ios.2` as `dist/Onigiri-iOS.ankiaddon`, with a GitHub download link.
+6. Package `2.0.3-Bento-ios.2` as `dist/Bingsu-iOS.ankiaddon`, with a GitHub download link.
 
 Each step is pushed separately, so you can test on the phone between steps.
 

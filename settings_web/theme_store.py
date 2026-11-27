@@ -672,7 +672,7 @@ def export_theme(store, name, parent=None):
     from ..core.platform import save_file
 
     save_path = save_file(
-        parent, "Save Theme As", os.path.join(user_themes_dir(), suggested), "Onigiri Theme Files (*.onigiri)", ".onigiri"
+        parent, "Save Theme As", os.path.join(user_themes_dir(), suggested), "Bingsu Theme Files (*.onigiri)", ".onigiri"
     )
     if not save_path:
         return None, None
@@ -696,7 +696,7 @@ def import_theme(parent=None):
 
     from ..core.platform import pick_files
 
-    picked = pick_files(parent, "Import Theme", "Onigiri Theme Files (*.onigiri)")
+    picked = pick_files(parent, "Import Theme", "Bingsu Theme Files (*.onigiri)")
     filepath = picked[0] if picked else ""
     if not filepath:
         return None, None

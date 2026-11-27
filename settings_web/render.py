@@ -189,7 +189,7 @@ def _strings():
     out["advanced"] = tr("settings_advanced", "Advanced")
     out["simple_mode_notice"] = tr(
         "settings_web_simple_mode_notice",
-        "Simple Mode hides some Onigiri customization options. Switch to Advanced to see them all.",
+        "Simple Mode hides some Bingsu customization options. Switch to Advanced to see them all.",
     )
     # Languages page.
     out["lang_preview"] = tr("settings_web_lang_preview", "Preview")
@@ -378,15 +378,15 @@ def _strings():
     out["bento_not_found"] = tr("settings_web_bento_not_found", "Not found")
     out["bento_detected_desc"] = tr(
         "settings_web_bento_detected_desc",
-        "Available as an Onigiri mini-game/widget. Its native controls are surfaced here.",
+        "Available as an Bingsu mini-game/widget. Its native controls are surfaced here.",
     )
     out["bento_missing_desc"] = tr(
         "settings_web_bento_missing_desc",
-        "Install and enable this add-on to embed it as an Onigiri mini-game.",
+        "Install and enable this add-on to embed it as an Bingsu mini-game.",
     )
     # Notification preview: one generic toast, so the stage shows the shape the
     # games actually use rather than any one game's copy.
-    out["notif_preview_title"] = tr("notif_preview_title", "Onigiri")
+    out["notif_preview_title"] = tr("notif_preview_title", "Bingsu")
     out["notif_preview_desc"] = tr("notif_preview_desc", "Level 4 reached — nice work!")
     out["notif_preview_silent"] = tr("notif_preview_silent", "Silent mode: nothing is shown")
     out["settings"] = tr("settings", "Settings")
