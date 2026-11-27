@@ -2987,3 +2987,63 @@ html.onigiri-phone .stat-card .stat-nodata {
     opacity: 0.8;
 }
 
+
+
+/* Sheets with their own content: the Rename field and the description
+   (audit 3, R3-09, R3-33). */
+html.onigiri-phone .onigiri-form-sheet {
+    padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+}
+
+html.onigiri-phone .onigiri-form-sheet .onigiri-sheet-input {
+    display: block;
+    box-sizing: border-box;
+    width: calc(100% - 32px);
+    margin: 4px 16px 12px;
+    min-height: 48px;
+    padding: 0 14px;
+    border: 1px solid var(--onigiri-surface-line, rgba(127, 127, 127, 0.35)) !important;
+    border-radius: 12px;
+    background: var(--onigiri-surface-fill, var(--highlight-bg, rgba(127, 127, 127, 0.1))) !important;
+    color: var(--onigiri-surface-ink, var(--fg, inherit)) !important;
+    font: inherit;
+    font-size: 17px; /* 16px or more: iOS does not zoom the page */
+    -webkit-appearance: none;
+    appearance: none;
+    user-select: text;
+    -webkit-user-select: text;
+}
+
+html.onigiri-phone .onigiri-form-sheet .onigiri-sheet-primary {
+    display: block;
+    box-sizing: border-box;
+    width: calc(100% - 32px);
+    margin: 0 16px;
+    min-height: 50px;
+    border: 0 !important;
+    border-radius: 12px;
+    background: var(--onigiri-accent, var(--accent-color, #0a84ff)) !important;
+    color: var(--onigiri-on-accent, #fff) !important;
+    box-shadow: none !important;
+    font: inherit;
+    font-size: 17px;
+    font-weight: 600;
+    text-transform: none;
+}
+
+html.onigiri-phone .onigiri-form-sheet .onigiri-sheet-body {
+    box-sizing: border-box;
+    max-height: 46vh;
+    overflow-y: auto;
+    margin: 0 16px 14px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: var(--onigiri-surface-fill, rgba(127, 127, 127, 0.1));
+    color: var(--onigiri-surface-ink, var(--fg, inherit));
+    font-size: 16px;
+    line-height: 1.45;
+    text-align: left;
+    overscroll-behavior: contain;
+    user-select: text;
+    -webkit-user-select: text;
+}

@@ -756,6 +756,15 @@ def _overview_deck_action(action: str) -> None:
             from aqt.exporting import ExportDialog
 
             ExportDialog(mw, did=did)
+        elif action.startswith("rename_to:"):
+            # the phone's Rename sheet sends the new name (audit 3, R3-09):
+            # the same undoable operation as the desktop prompt below
+            from aqt.operations.deck import rename_deck
+
+            old = mw.col.decks.get(did)["name"]
+            new = unquote(action.split(":", 1)[1]).strip()
+            if new and new != old:
+                rename_deck(parent=mw, deck_id=did, new_name=new).run_in_background()
         elif action == "rename":
             from aqt import tr as anki_tr
             from aqt.operations.deck import rename_deck

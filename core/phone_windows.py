@@ -270,6 +270,186 @@ def _stack_wide_rows(window: Any) -> None:
         pass
 
 
+def _make_toggle_filter():
+    from aqt.qt import QEvent, QObject
+
+    class ToggleLabelSync(QObject):
+        """Keeps the wrapped label's enabled/visible state with its check box."""
+
+        def __init__(self, box: Any, label: Any) -> None:
+            super().__init__(box)
+            self._label = label
+
+        def eventFilter(self, obj: Any, event: Any) -> bool:
+            try:
+                kind = event.type()
+                if kind == QEvent.Type.EnabledChange:
+                    self._label.setEnabled(obj.isEnabled())
+                elif kind == QEvent.Type.Hide:
+                    self._label.hide()
+                elif kind == QEvent.Type.Show:
+                    self._label.show()
+            except RuntimeError:
+                pass
+            return False
+
+    return ToggleLabelSync
+
+
+def _find_layout_slot(widget: Any):
+    """(layout, index) of the layout that holds `widget`, or (None, -1)."""
+    try:
+        from aqt.qt import QLayout
+
+        parent = widget.parentWidget()
+        candidates = ([parent.layout()] if parent is not None and parent.layout() else []) + (
+            parent.findChildren(QLayout) if parent is not None else []
+        )
+        for layout in candidates:
+            index = layout.indexOf(widget)
+            if index >= 0:
+                return layout, index
+    except Exception:
+        pass
+    return None, -1
+
+
+def _wrap_toggle_text(widget: Any) -> bool:
+    """A check box or radio button cannot wrap its text, so a long label is as
+    wide as its sentence and pushes the whole page off the screen (audit 3,
+    R3-02). Move the text into a word-wrapping label beside the box. The
+    widget itself stays (Anki reads and connects it), tapping the label
+    toggles it, and the tooltip, enabled and visible state follow it."""
+    try:
+        from aqt.qt import QGridLayout, QBoxLayout, QHBoxLayout, QLabel, QSizePolicy, Qt
+
+        text = widget.text()
+        if not text or widget.property("onigiri_wrapped"):
+            return False
+        layout, index = _find_layout_slot(widget)
+        if layout is None:
+            return False
+        label = QLabel(text, widget.parentWidget())
+        label.setWordWrap(True)
+        label.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
+        label.setMinimumWidth(0)
+        label.setToolTip(widget.toolTip())
+        label.setBuddy(widget)
+        label.setEnabled(widget.isEnabled())
+        label.setVisible(widget.isVisibleTo(widget.parentWidget()))
+        label.setCursor(Qt.CursorShape.PointingHandCursor)
+        label.mousePressEvent = lambda _e, w=widget: w.click() if w.isEnabled() else None
+        widget.setText("")
+        widget.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Preferred)
+        row = QHBoxLayout()
+        row.setContentsMargins(0, 0, 0, 0)
+        row.setSpacing(8)
+        if isinstance(layout, QGridLayout):
+            r, c, rs, cs = layout.getItemPosition(index)
+            layout.removeWidget(widget)
+            row.addWidget(widget, 0)
+            row.addWidget(label, 1)
+            layout.addLayout(row, r, c, rs, cs)
+        elif isinstance(layout, QBoxLayout):
+            layout.removeWidget(widget)
+            row.addWidget(widget, 0)
+            row.addWidget(label, 1)
+            layout.insertLayout(index, row)
+        else:
+            label.deleteLater()
+            widget.setText(text)
+            return False
+        widget.setProperty("onigiri_wrapped", True)
+        widget.installEventFilter(_make_toggle_filter()(widget, label))
+        return True
+    except Exception as exc:  # noqa: BLE001
+        _log(f"wrap toggle: {exc}")
+        return False
+
+
+def _wrap_long_toggles(window: Any, margin: int = 80) -> int:
+    """Wrap the text of every check box / radio button wider than the screen."""
+    count = 0
+    try:
+        from aqt.qt import QCheckBox, QRadioButton
+
+        limit = _avail_width() - margin
+        for box in window.findChildren(QCheckBox) + window.findChildren(QRadioButton):
+            try:
+                if box.sizeHint().width() > limit and _wrap_toggle_text(box):
+                    count += 1
+            except Exception:
+                continue
+    except Exception:
+        pass
+    return count
+
+
+def _shrinkable_inputs(window: Any) -> None:
+    """Spin boxes, combo boxes and line edits may shrink below their sizeHint."""
+    try:
+        from aqt.qt import QComboBox, QLineEdit, QSizePolicy, QSpinBox, QDoubleSpinBox
+
+        for kind in (QSpinBox, QDoubleSpinBox, QComboBox, QLineEdit):
+            for widget in window.findChildren(kind):
+                try:
+                    widget.setMinimumWidth(0)
+                    policy = widget.sizePolicy()
+                    policy.setHorizontalPolicy(QSizePolicy.Policy.Preferred)
+                    widget.setSizePolicy(policy)
+                except Exception:
+                    continue
+    except Exception:
+        pass
+
+
+def _cap_page_widths(window: Any) -> None:
+    """A tab page may never be wider than the screen: Kioku's scroll pages
+    pan sideways by touch when it is (audit 3, R3-02). Caps follow the page's
+    viewport; without Kioku (tests) the tab pages themselves are capped."""
+    try:
+        from aqt.qt import QEvent, QObject, QScrollArea, QScroller, QScrollerProperties, QTabWidget
+
+        class Cap(QObject):
+            def __init__(self, area: Any) -> None:
+                super().__init__(area)
+                self._area = area
+
+            def eventFilter(self, obj: Any, event: Any) -> bool:
+                try:
+                    if event.type() == QEvent.Type.Resize:
+                        inner = self._area.widget()
+                        if inner is not None:
+                            inner.setMaximumWidth(max(0, self._area.viewport().width()))
+                except RuntimeError:
+                    pass
+                return False
+
+        for area in window.findChildren(QScrollArea):
+            inner = area.widget()
+            if inner is None:
+                continue
+            cap = Cap(area)
+            area.viewport().installEventFilter(cap)
+            inner.setMaximumWidth(max(0, area.viewport().width()))
+            try:
+                scroller = QScroller.scroller(area.viewport())
+                props = scroller.scrollerProperties()
+                props.setScrollMetric(
+                    QScrollerProperties.ScrollMetric.HorizontalOvershootPolicy,
+                    QScrollerProperties.OvershootPolicy.OvershootAlwaysOff,
+                )
+                scroller.setScrollerProperties(props)
+            except Exception:
+                pass
+        avail = _avail_width() - 16
+        for tabs in window.findChildren(QTabWidget):
+            for i in range(tabs.count()):
+                tabs.widget(i).setMaximumWidth(avail)
+    except Exception as exc:  # noqa: BLE001
+        _log(f"cap pages: {exc}")
+
+
 # ── adapters ──────────────────────────────────────────────────────────────────
 
 
@@ -433,6 +613,98 @@ def adapt_add_cards(window: Any) -> None:
 
     layout = window.form.horizontalLayout
     layout.setDirection(QBoxLayout.Direction.TopToBottom)  # R2-10: stacked, full width
+    # The primary action looks like one (audit 3, R3-15): accent fill, finger height.
+    try:
+        from aqt.qt import QSizePolicy
+
+        from . import mobile_theme
+
+        t = mobile_theme.tokens()
+        add = window.addButton
+        add.setStyleSheet(
+            "QPushButton { background: %s; color: %s; border: none; border-radius: 10px;"
+            " font-weight: bold; padding: 0 24px; }"
+            " QPushButton:pressed { background: %s; }" % (t["accent"], t["on_accent"], t["text"])
+        )
+        add.setMinimumHeight(TOUCH_ROW)
+        add.setMinimumWidth(160)
+        add.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+    except Exception as exc:  # noqa: BLE001
+        _log(f"add button: {exc}")
+
+
+def _short_title(window: Any, key: str, fallback: str) -> None:
+    """Kioku's bar cuts a long title at both ends: a short one (audit 3, R3-14)."""
+    try:
+        from ..core.translations import tr  # type: ignore
+    except Exception:
+        try:
+            from .translations import tr
+        except Exception:
+            tr = lambda k, d=None: d  # noqa: E731
+    try:
+        window.setWindowTitle(tr(key, fallback))
+    except Exception:
+        pass
+
+
+def adapt_field_dialog(dialog: Any) -> None:
+    """Fields (audit 3, R3-14): the list above its buttons, options that wrap."""
+    from aqt.qt import QBoxLayout
+
+    _short_title(dialog, "window_fields", "Fields")
+    _touch_sizes(dialog)
+    _relax_widths(dialog)
+    _shrinkable_inputs(dialog)
+    try:
+        dialog.form.horizontalLayout.setDirection(QBoxLayout.Direction.TopToBottom)
+    except Exception:
+        pass
+    _wrap_long_toggles(dialog)
+    _stack_wide_rows(dialog)
+
+
+def adapt_card_layout(dialog: Any) -> None:
+    """Card Types (audit 3, R3-14): editor above preview instead of side by
+    side, the Front/Back/Styling switch fitting the width."""
+    from aqt.qt import QPushButton, QRadioButton, QSizePolicy, Qt
+
+    _short_title(dialog, "window_card_types", "Card Types")
+    _touch_sizes(dialog)
+    try:
+        dialog.mainArea.setOrientation(Qt.Orientation.Vertical)
+    except Exception:
+        pass
+    _relax_widths(dialog)
+    _shrinkable_inputs(dialog)
+    try:
+        tform = dialog.tform
+        for name in ("front_button", "back_button", "style_button"):
+            button = getattr(tform, name, None)
+            if button is not None:
+                button.setMinimumWidth(0)
+                button.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+    except Exception:
+        pass
+    for button in dialog.findChildren(QPushButton):
+        try:
+            button.setMinimumWidth(0)
+        except Exception:
+            pass
+    _wrap_long_toggles(dialog)
+    _stack_wide_rows(dialog)
+
+
+def adapt_get_text(dialog: Any) -> None:
+    """Anki's one-line prompts (rename, new name): finger-sized, full width."""
+    _touch_sizes(dialog)
+    try:
+        dialog.setMinimumWidth(0)
+        edit = dialog.l
+        edit.setMinimumHeight(TOUCH_ROW)
+        edit.setMinimumWidth(0)
+    except Exception:
+        pass
 
 
 def adapt_deck_options(dialog: Any) -> None:
@@ -462,8 +734,11 @@ def adapt_custom_study(dialog: Any) -> None:
 def adapt_preferences(dialog: Any) -> None:
     _touch_sizes(dialog)
     _relax_widths(dialog)
+    _shrinkable_inputs(dialog)
+    _wrap_long_toggles(dialog)
     _stack_wide_rows(dialog)
     _backup_note(dialog)
+    _cap_page_widths(dialog)
 
 
 def _backup_note(dialog: Any) -> None:
@@ -494,6 +769,9 @@ ADAPTERS: dict[str, Callable[[Any], None]] = {
     "StudyDeck": adapt_study_deck,
     "CustomStudy": adapt_custom_study,
     "Preferences": adapt_preferences,
+    "FieldDialog": adapt_field_dialog,
+    "CardLayout": adapt_card_layout,
+    "GetTextDialog": adapt_get_text,
 }
 
 

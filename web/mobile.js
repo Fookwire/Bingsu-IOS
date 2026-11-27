@@ -823,6 +823,98 @@
         reportSheet(true);
     }
 
+    // A sheet with its own content (a text field, a description) instead of rows.
+    // Same container as the action sheets: backdrop, handle, swipe and Cancel
+    // come from enhanceSheet (audit 3, R3-09, R3-33).
+    function mountFormSheet(menu, anchor) {
+        var rect = anchor ? anchor.getBoundingClientRect() : { left: window.innerWidth - 20, bottom: 50 };
+        if (window.OnigiriEngine && OnigiriEngine.positionMenu) {
+            OnigiriEngine.positionMenu(menu, rect.left, rect.bottom);
+        } else {
+            menu.classList.add('is-sheet');
+            document.body.appendChild(menu);
+        }
+        reportSheet(true);
+    }
+
+    function formSheet(title) {
+        closeMenus();
+        var menu = document.createElement('div');
+        menu.className = 'onigiri-quick-menu onigiri-action-sheet onigiri-form-sheet';
+        if (title) {
+            var head = document.createElement('div');
+            head.className = 'onigiri-sheet-title';
+            head.textContent = title;
+            menu.appendChild(head);
+        }
+        return menu;
+    }
+
+    function sheetPrimaryButton(label, onClick) {
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'onigiri-sheet-primary';
+        btn.textContent = label;
+        btn.addEventListener('click', function (event) {
+            event.stopPropagation();
+            onClick();
+        });
+        return btn;
+    }
+
+    function showRenameSheet(anchor, currentName) {
+        var menu = formSheet(t('rename_deck_title', 'Rename Deck'));
+        var input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'onigiri-sheet-input';
+        input.value = currentName || '';
+        input.setAttribute('autocapitalize', 'sentences');
+        input.setAttribute('autocomplete', 'off');
+        input.setAttribute('enterkeyhint', 'done');
+        function submit() {
+            var name = input.value.trim();
+            closeMenus();
+            if (name && name !== currentName) {
+                try { if (window.pycmd) window.pycmd('onigiri_overview_menu:rename_to:' + encodeURIComponent(name)); } catch (e) {}
+            }
+        }
+        input.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') { event.preventDefault(); submit(); }
+        });
+        menu.appendChild(input);
+        menu.appendChild(sheetPrimaryButton(t('rename_action', 'Rename'), submit));
+        mountFormSheet(menu, anchor);
+        // the person just chose Rename: the keyboard is what they want
+        setTimeout(function () { try { input.focus(); input.select(); } catch (e) {} }, 60);
+    }
+
+    // The overview's Description button: show what the description says first,
+    // and edit from there (Anki's editor opens straight on a desktop layout).
+    function setupDescriptionSheet() {
+        if (!root.classList.contains('onigiri-screen-overview') || document.documentElement.dataset.onigiriDescSheet) return;
+        document.documentElement.dataset.onigiriDescSheet = '1';
+        document.addEventListener('click', function (event) {
+            var btn = event.target.closest && event.target.closest('a.onigiri-overview-action-description');
+            if (!btn) return;
+            var desc = document.querySelector('.description');
+            var text = desc ? desc.textContent.trim() : '';
+            if (!desc || !text) return; // nothing written yet: the editor, as before
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            var titleEl = document.querySelector('.overview-title, .overview-header h1, h1, h2');
+            var menu = formSheet((titleEl ? titleEl.textContent.trim() : '') || t('description', 'Description'));
+            var body = document.createElement('div');
+            body.className = 'onigiri-sheet-body';
+            body.innerHTML = desc.innerHTML;
+            menu.appendChild(body);
+            menu.appendChild(sheetPrimaryButton(t('description_edit', 'Edit description'), function () {
+                closeMenus();
+                try { if (window.pycmd) window.pycmd('description'); } catch (e) {}
+            }));
+            mountFormSheet(menu, null);
+        }, true);
+    }
+
     // --- Home: action tiles ------------------------------------------------------------
     // Phones show one row of five tiles: the first four actions and More.
     // Settings, Onigiri Games and the old More fly-out (Get Shared, Create
@@ -1019,7 +1111,11 @@
                 };
             }
             showActionSheet([
-                deckRow(t('rename_deck_title', 'Rename Deck'), RENAME_SVG, 'rename'),
+                (function () {
+                    var row = deckRow(t('rename_deck_title', 'Rename Deck'), RENAME_SVG, 'rename');
+                    row.run = function () { showRenameSheet(more, deckName); };
+                    return row;
+                })(),
                 deckRow(t('ctx_deck_options', 'Deck Options'), OPTIONS_SVG, 'options'),
                 deckRow(t('ctx_export_deck', 'Export Deck'), EXPORT_SVG, 'export'),
             ], more, deckName || t('more', 'More'));
@@ -1635,6 +1731,7 @@
         watchProfile();
         setupNavBar();
         setupEdgeSwipe();
+        setupDescriptionSheet();
         // injector.js adds the house button after load
         [0, 300, 1200].forEach(function (ms) { setTimeout(addQuickActions, ms); });
         if (root.classList.contains('onigiri-touch')) {

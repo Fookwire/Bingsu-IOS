@@ -52,9 +52,14 @@ class PhoneWindowsTests(unittest.TestCase):
         self.assertTrue(self.pw.layout_needs_stacking(360, 390))  # inside the 32pt margin
 
     def test_adapters_registered_by_class_name(self):
-        for name in ("Browser", "AddCards", "DeckOptionsDialog", "StudyDeck", "CustomStudy", "Preferences"):
+        for name in ("Browser", "AddCards", "DeckOptionsDialog", "StudyDeck", "CustomStudy", "Preferences",
+                     "FieldDialog", "CardLayout", "GetTextDialog"):
             self.assertIn(name, self.pw.ADAPTERS)
             self.assertTrue(callable(self.pw.ADAPTERS[name]))
+
+    def test_paint_only_windows_are_named(self):
+        for name in ("NewEditCurrent", "BrowserPreviewer", "CardLayout"):
+            self.assertIn(name, self.pw.PAINT_ONLY)
 
     def test_install_is_a_noop_off_a_phone(self):
         self.platform.IS_MOBILE = False

@@ -333,7 +333,11 @@ def nav_background_style_tag():
     if not active():
         return ""
     try:
-        return '<style id="onigiri-nav-bg">:root{--onigiri-nav-bg:%s}</style>' % tokens()["background"]
+        t = tokens()
+        return (
+            '<style id="onigiri-nav-bg">:root{--onigiri-nav-bg:%s;--onigiri-accent:%s;--onigiri-on-accent:%s}</style>'
+            % (t["background"], t["accent"], t["on_accent"])
+        )
     except Exception:
         return ""
 
