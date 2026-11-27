@@ -1524,7 +1524,7 @@ def _render_body_slideshow_background_css(style_id, image_urls, interval_seconds
             }}
 
             if (images.length > 1) {{
-                setInterval(updateBackground, interval);
+                setInterval(function() {{ if (!document.hidden) updateBackground(); }}, interval);
             }}
         }})();
     </script>
@@ -3067,7 +3067,7 @@ def generate_deck_browser_backgrounds(addon_path):
                     
                     // Start slideshow only if there are multiple images
                     if (images.length > 1) {{
-                        setInterval(updateBackground, interval);
+                        setInterval(function() {{ if (!document.hidden) updateBackground(); }}, interval);
                     }}
                 }})();
             </script>
@@ -3322,7 +3322,7 @@ def generate_deck_browser_backgrounds(addon_path):
                         }}
 
                         if (images.length > 1) {{
-                            setInterval(updateSidebarBackground, interval);
+                            setInterval(function() {{ if (!document.hidden) updateSidebarBackground(); }}, interval);
                         }}
                     }})();
                 </script>
@@ -9900,17 +9900,53 @@ def generate_reviewer_buttons_css(conf):
                     window[name] = render;
                 });
             }
+            function hooksInstalled() {
+                return ['showQuestion', 'showAnswer'].every(name =>
+                    window[name] && window[name].__onigiriBottomBarRender);
+            }
             function refresh() {
                 installRenderHooks();
                 classifyButtons();
             }
+            // DOM changes outside showQuestion/showAnswer (add-ons, Anki's
+            // timer) still restyle the bar, coalesced to one pass per frame.
+            // This used to be a 100 ms setInterval for the whole study
+            // session (layout reads and canvas text measuring ten times a
+            // second); now the bar is only refreshed when something changed.
+            let framePending = false;
             const observer = new MutationObserver(() => {
-                if (!renderDepth) classifyButtons();
+                if (renderDepth || framePending) return;
+                framePending = true;
+                requestAnimationFrame(() => {
+                    framePending = false;
+                    if (!renderDepth) classifyButtons();
+                });
             });
             observer.observe(document.documentElement, { childList: true, subtree: true });
             refresh();
             document.addEventListener('DOMContentLoaded', refresh, { once: true });
-            setInterval(refresh, 100);
+            // Anki defines showQuestion/showAnswer in a later script: poll
+            // only until they are wrapped (at most a few seconds).
+            let hookTries = 0;
+            const hookTimer = setInterval(() => {
+                if (hooksInstalled() || ++hookTries > 50) {
+                    clearInterval(hookTimer);
+                    if (hooksInstalled()) classifyButtons();
+                    return;
+                }
+                refresh();
+            }, 100);
+            // Rotation / split view: the answer buttons are re-fitted.
+            let resizeTimer = null;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    // the first measured width is cached per button: forget it
+                    document.querySelectorAll('#outer button').forEach(b =>
+                        b.style.removeProperty('--onigiri-answer-button-width'));
+                    classifyButtons();
+                }, 120);
+            }, { passive: true });
         })();
         </script>
         """
@@ -9932,7 +9968,7 @@ def generate_reviewer_buttons_css(conf):
         }
         function start() {
             stripBottomBarTitles();
-            setInterval(stripBottomBarTitles, 500);
+            // the observer below sees every new title; no polling needed
             if (document.body) {
                 const observer = new MutationObserver(stripBottomBarTitles);
                 observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['title'] });

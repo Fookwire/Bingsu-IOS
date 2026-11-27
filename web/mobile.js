@@ -1179,9 +1179,16 @@
         });
     }
 
+    var homeRevealed = false;
+
     function applyTab(tab) {
         var previous = currentTab;
         currentTab = tab;
+        if (tab === 'home' && !homeRevealed && previous) {
+            homeRevealed = true;
+            root.classList.add('onigiri-reveal-home');
+            setTimeout(function () { root.classList.remove('onigiri-reveal-home'); }, 800);
+        }
         if (previous && previous !== tab && root.classList.contains('onigiri-phone')) {
             slidePane(tab, TAB_ORDER[tab] > TAB_ORDER[previous] ? 'right' : 'left');
         }
@@ -1194,11 +1201,9 @@
             });
         }
         try { sessionStorage.setItem(TAB_KEY, tab); } catch (e) {}
-        // Widgets measure themselves (heatmap, grids): let them reflow now
-        // that they are visible.
-        setTimeout(function () {
-            try { window.dispatchEvent(new Event('resize')); } catch (e) {}
-        }, 0);
+        // Widgets that measure themselves (heatmap, grid) have ResizeObservers
+        // and reflow when their pane becomes visible. A fake window resize
+        // here woke every resize listener in the page during the slide.
     }
 
     var DECKS_SVG = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="7" width="16" height="13" rx="2.5"/><path d="M7 4h10"/></svg>';
@@ -1341,6 +1346,11 @@
         document.addEventListener('DOMContentLoaded', onReady);
     } else {
         onReady();
+    }
+    // deck rows ease in once when the page is drawn
+    if (root.classList.contains('onigiri-screen-decks') && root.classList.contains('onigiri-touch')) {
+        root.classList.add('onigiri-first-paint');
+        setTimeout(function () { root.classList.remove('onigiri-first-paint'); }, 900);
     }
     window.addEventListener('load', function () {
         stripHover();

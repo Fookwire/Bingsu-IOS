@@ -598,6 +598,10 @@ def close_menu(from_js: bool = False, immediate: bool = False) -> None:
     _is_open = False
     _remove_dismiss_filter()
     _cleanup_qmenu()
+    if immediate and not was_open:
+        # Every card shown, answered or left calls this: with the menu closed
+        # there is nothing to tell the two web views (it was 4 evals a card).
+        return
     if was_open or not from_js:
         _sync_bottom_button_state(False)
     if not from_js and mw is not None:

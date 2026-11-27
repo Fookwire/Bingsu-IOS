@@ -5,12 +5,12 @@
 (function () {
     // This function is now globally accessible so the engine can call it.
     window.updateDeckLayouts = function () {
-        document.querySelectorAll('.deck-table .decktd').forEach(cell => {
-            cell.classList.remove('is-cramped');
-            if (cell.scrollWidth > cell.clientWidth) {
-                cell.classList.add('is-cramped');
-            }
-        });
+        // All writes, then all reads, then all writes: removing the class
+        // and reading scrollWidth row by row forced one layout per deck.
+        const cells = Array.from(document.querySelectorAll('.deck-table .decktd'));
+        cells.forEach(cell => cell.classList.remove('is-cramped'));
+        const cramped = cells.filter(cell => cell.scrollWidth > cell.clientWidth);
+        cramped.forEach(cell => cell.classList.add('is-cramped'));
     }
 
     function T(key, fallback) {

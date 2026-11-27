@@ -1143,6 +1143,11 @@ def on_things_js_message(handled, message, context):
 def update_sync_status_indicator():
     """Updates the sync status indicator in the Onigiri menu."""
     try:
+        # Only the deck list shows the indicator: this ran on every
+        # collection operation, including each card answer, with two DB
+        # queries and an eval into a page that isn't on screen.
+        if getattr(mw, "state", None) != "deckBrowser":
+            return
         sync_status = patcher.get_sync_status()
         # Update in deck browser
         if hasattr(mw, 'deckBrowser') and hasattr(mw.deckBrowser, 'web') and mw.deckBrowser.web:
