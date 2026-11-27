@@ -288,6 +288,7 @@ def _modes_page():
         {
             "id": "fullHideMode",
             "type": "mode_card",
+            "desktop_only": True,
             "label": tr("mode_full", "Full"),
             "desc": tr("hide_top_menu_bar", ""),
             "notes": [
@@ -407,6 +408,7 @@ def _sync_page():
                 {
                     "id": "ankiweb_sync_preset",
                     "type": "choice",
+                    "show_when": {"field": "ankiweb_sync_enabled", "values": [True]},
                     "advanced": True,
                     "label": tr("sync_what", "What should sync?"),
                     "desc": tr(
@@ -471,6 +473,8 @@ def _sync_page():
         }, {
             "id": "sync_categories",
             "advanced_only": True,
+            # Only meaningful while Onigiri sync is on (audit SET-01).
+            "show_when": {"field": "ankiweb_sync_enabled", "values": [True]},
             "title": tr("sync_categories", "Sync categories"),
             "description": tr(
                 "sync_categories_desc",
@@ -4731,6 +4735,7 @@ def _sidebar_background_section():
         fields=[
             {
                 "id": "modern_menu_sidebar_position",
+                "desktop_only": True,
                 "type": "choice",
                 "label": tr("sidebar_position", "Sidebar position"),
                 "bind": {"kind": "col", "key": "modern_menu_sidebar_position"},
@@ -4743,6 +4748,7 @@ def _sidebar_background_section():
             },
             {
                 "id": "modern_menu_sidebar_width_pinned",
+                "desktop_only": True,
                 "type": "toggle",
                 "label": tr("pin_sidebar_width", "Pin sidebar width"),
                 "desc": tr(
@@ -6094,7 +6100,34 @@ def build_pages():
     ] + game_pages
     _attach_font_colors(source_pages)
     gallery = _gallery_page(source_pages)
-    return source_pages[:5] + [gallery] + source_pages[5:]
+    pages = source_pages[:5] + [gallery] + source_pages[5:]
+    try:
+        from ..core.platform import IS_MOBILE
+    except Exception:
+        IS_MOBILE = False
+    if IS_MOBILE:
+        _adapt_for_phone(pages)
+    return pages
+
+
+def _adapt_for_phone(pages):
+    """iPhone/iPad (Kioku): leave out controls that only do something on a
+    desktop (window chrome, sidebar placement and resizing) and the "restart
+    Anki" notes. Only the controls go; their stored values are untouched, so a
+    desktop that syncs the same settings keeps them."""
+    restart = tr("restart_anki_note", "")
+    for page in pages:
+        if page.get("id") == "sidebar":
+            page["title"] = tr("deck_list", "Deck list")
+        for section in page.get("sections") or []:
+            fields = section.get("fields")
+            if isinstance(fields, list):
+                section["fields"] = [
+                    f for f in fields if not (isinstance(f, dict) and f.get("desktop_only"))
+                ]
+                for f in section["fields"]:
+                    if isinstance(f, dict) and isinstance(f.get("notes"), list) and restart:
+                        f["notes"] = [n for n in f["notes"] if n != restart]
 
 
 NAV_GROUPS = [

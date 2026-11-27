@@ -516,6 +516,8 @@ def _nook_page():
             },
             {
                 "id": "nook_visibility",
+                # Only meaningful while Nook Level is on (audit SET-04).
+                "show_when": {"field": "g_nook_enabled", "values": [True]},
                 "title": tr("notifications_visibility", "Notifications & Visibility"),
                 "layout": "nook_visibility",
                 "fields": [
@@ -529,6 +531,8 @@ def _nook_page():
             },
             {
                 "id": "nook_difficulty",
+                # Only meaningful while Nook Level is on (audit SET-04).
+                "show_when": {"field": "g_nook_enabled", "values": [True]},
                 "title": tr("difficulty_level", "Difficulty"),
                 "fields": [
                     _note(
@@ -586,13 +590,13 @@ def _nook_page():
                 "title": tr("reset_progress_title", "Reset progress"),
                 "fields": [
                     _action("g_nook_reset_progress", tr("reset_restaurant_level", ""),
-                            tr("reset", "Reset"), "nook_reset_progress", neutral=True,
+                            tr("reset", "Reset"), "nook_reset_progress", danger=True,
                             hold_to_confirm=True, button_icon="reset"),
                     _action("g_nook_reset_coins", tr("reset_coins", ""),
-                            tr("reset", "Reset"), "nook_reset_coins", neutral=True,
+                            tr("reset", "Reset"), "nook_reset_coins", danger=True,
                             hold_to_confirm=True, button_icon="reset"),
                     _action("g_nook_reset_purchases", tr("reset_purchases", ""),
-                            tr("reset", "Reset"), "nook_reset_purchases", neutral=True,
+                            tr("reset", "Reset"), "nook_reset_purchases", danger=True,
                             hold_to_confirm=True, button_icon="reset"),
                 ],
             },

@@ -1164,6 +1164,7 @@ def build_context(store, pages, initial_page=None):
         "dark": dark,
         "accent": accent_color(),
         "palette": palette(dark),
+        "currentThemeColors": _current_theme_colors(),
         "strings": _strings(),
         "nav": nav,
         "pages": serialized_pages,
@@ -1342,3 +1343,22 @@ def render(store, pages, initial_page=None):
         .replace("/*__ONIGIRI_SETTINGS_CONTEXT__*/null", safe_json(context))
         .replace("/*__ONIGIRI_BOOT_BACKGROUND__*/", boot_background)
     )
+
+
+
+def _current_theme_colors():
+    """The saved palette's identifying colours, so the Themes page can mark
+    the theme in use (same keys as settings.js themeColors)."""
+    try:
+        from ..core import config as _config
+        colors = (_config.get_config_readonly() or {}).get("colors") or {}
+        light = colors.get("light") or {}
+        dark = colors.get("dark") or {}
+        return {
+            "lightBg": light.get("--bg") or "#ffffff",
+            "darkBg": dark.get("--bg") or "#1a1a1a",
+            "lightAccent": light.get("--accent-color") or "#8a8a8a",
+            "darkAccent": dark.get("--accent-color") or "#8a8a8a",
+        }
+    except Exception:
+        return None

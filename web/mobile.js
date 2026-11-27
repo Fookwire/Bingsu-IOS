@@ -1304,6 +1304,66 @@
 
     var BACK_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>';
 
+    // --- Settings on phones: segmented choices that do not fit become a list --
+    // Equal-width segments cut long labels mid-word ("Custor", "Righ"). After
+    // each render, a control whose options still overflow is shown as a
+    // vertical list instead (CSS .is-list).
+    function fitSegments() {
+        if (!root.classList.contains('onigiri-phone')) return;
+        document.querySelectorAll('.osw-shell .osw-segmented-control').forEach(function (ctl) {
+            if (ctl.closest('.osw-subtabs') || !ctl.offsetParent) return;
+            ctl.classList.remove('is-list');
+            var tooWide = ctl.scrollWidth > ctl.clientWidth + 1;
+            if (!tooWide) {
+                var buttons = ctl.querySelectorAll(':scope > .osw-segment-btn');
+                for (var i = 0; i < buttons.length && !tooWide; i++) {
+                    var b = buttons[i];
+                    var label = b.querySelector('.osw-segment-label') || b;
+                    if (b.scrollWidth > b.clientWidth + 1 || label.scrollWidth > label.clientWidth + 1) tooWide = true;
+                    // A label that had to wrap onto three lines is also too cramped.
+                    else if (b.clientHeight > 58) tooWide = true;
+                }
+            }
+            if (tooWide) ctl.classList.add('is-list');
+        });
+    }
+
+    // Pomodoro Sound listed "Start tone" and "End tone" twice: as pickers and
+    // again as Preview rows. On phones the preview's play button moves onto
+    // the picker's row and the extra row goes away (the button keeps its own
+    // handler, so it still plays the tone).
+    function mergeToneRows() {
+        [['pomodoro_start_sound', 'pomodoro_test_start_sound_action'],
+         ['pomodoro_end_sound', 'pomodoro_test_end_sound_action']].forEach(function (pair) {
+            var pick = document.querySelector('[data-field-host="' + pair[0] + '"]');
+            var test = document.querySelector('[data-field-host="' + pair[1] + '"]');
+            if (!pick || !test || test.dataset.onigiriMerged) return;
+            var btn = test.querySelector('button');
+            if (!btn) return;
+            var holder = pick.querySelector('.osw-row-control') || pick;
+            btn.classList.add('onigiri-tone-play');
+            btn.setAttribute('aria-label', (btn.textContent || '').trim() || 'Preview');
+            holder.appendChild(btn);
+            test.dataset.onigiriMerged = '1';
+            test.style.display = 'none';
+        });
+    }
+
+    function watchSegments() {
+        var shell = document.querySelector('.osw-shell');
+        if (!shell || shell.dataset.onigiriSegWatch || !window.MutationObserver) return;
+        shell.dataset.onigiriSegWatch = '1';
+        var pending = false;
+        var schedule = function () {
+            if (pending) return;
+            pending = true;
+            requestAnimationFrame(function () { pending = false; fitSegments(); mergeToneRows(); });
+        };
+        new MutationObserver(schedule).observe(shell, { childList: true, subtree: true });
+        window.addEventListener('resize', schedule);
+        schedule();
+    }
+
     function setupSettingsDrillDown() {
         var shell = document.querySelector('.osw-shell');
         if (!shell || shell.dataset.onigiriDrill) return;
@@ -1400,6 +1460,7 @@
         paintEdges();
         nativeCmd('ready');
         setupSettingsDrillDown();
+        watchSegments();
         addPhoneTabs();
         addSelectToggle();
         decorateDeckRows();
@@ -1467,5 +1528,6 @@
         haptic: haptic,
         paintEdges: paintEdges,
         findOverflow: findOverflow,
+        fitSegments: fitSegments,
     };
 })();

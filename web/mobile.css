@@ -1498,7 +1498,11 @@ html.onigiri-phone .osw-shell .osw-segment-btn:not(.osw-subtabs *) {
 
 html.onigiri-phone .osw-shell .osw-segment-btn:not(.osw-subtabs *) .osw-segment-label {
     white-space: normal !important;
-    overflow-wrap: anywhere;
+    /* Whole words only: "anywhere" split labels mid-word ("Class / ic"). A
+       control whose words still do not fit becomes a list (.is-list, set by
+       mobile.js fitSegments). */
+    overflow-wrap: normal;
+    word-break: normal;
 }
 
 /* Rows of action chips wrap under their title. */
@@ -2229,4 +2233,222 @@ html.onigiri-touch .onigiri-quick-menu {
 .onigiri-quick-menu input,
 .onigiri-quick-menu .quick-menu-item {
     font-family: inherit;
+}
+
+
+/* ------------------------------------------------------------------------- */
+/* Settings on phones: rows, controls and cards that fit 375-430pt (audit    */
+/* LAY-03/04/05/08, THM-05, ACC-03)                                          */
+/* ------------------------------------------------------------------------- */
+
+/* A row whose control is a segmented choice, a text field or a select puts
+   the control on its own full-width line under the label. */
+html.onigiri-phone .osw-shell .osw-row:has(.osw-segmented-control, .osw-text-input, select),
+html.onigiri-phone .osw-shell :has(> .osw-segmented-control):not(.osw-subtabs) {
+    flex-wrap: wrap !important;
+    row-gap: 10px;
+}
+
+html.onigiri-phone .osw-shell .osw-row-control:has(.osw-segmented-control, .osw-text-input, select) {
+    flex: 1 1 100% !important;
+    min-width: 0 !important;
+    max-width: 100%;
+}
+
+html.onigiri-phone .osw-shell .osw-segmented-control:not(.osw-subtabs *),
+html.onigiri-phone .osw-shell .osw-row-control .osw-text-input,
+html.onigiri-phone .osw-shell .osw-row-control select {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box;
+}
+
+/* Too many or too long options for one line: a vertical list of choices. */
+html.onigiri-phone .osw-shell .osw-segmented-control.is-list {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 2px;
+}
+
+html.onigiri-phone .osw-shell .osw-segmented-control.is-list > .osw-segment-btn {
+    flex: 0 0 auto !important;
+    justify-content: flex-start !important;
+    text-align: left;
+    min-height: 40px;
+    padding: 8px 12px !important;
+    font-size: 14px !important;
+}
+
+/* Labels and titles that were cut off wrap instead. */
+html.onigiri-phone .osw-shell .osw-slider-title,
+html.onigiri-phone .osw-shell .osw-imgslot-name,
+html.onigiri-phone .osw-shell .osw-imgslot-role {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    min-width: 0;
+}
+
+html.onigiri-phone .osw-shell .osw-color-card-name {
+    white-space: normal !important;
+    text-overflow: clip !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-height: 1.25;
+}
+
+/* Organize Widgets: the action buttons each take a full row. */
+html.onigiri-phone .osw-shell .osw-organize-actions {
+    flex-wrap: wrap !important;
+    max-width: 100% !important;
+    gap: 8px !important;
+}
+
+html.onigiri-phone .osw-shell .osw-organize-actions > * {
+    flex: 1 1 100% !important;
+    min-height: 44px;
+    margin: 0 !important;
+    justify-content: center;
+}
+
+/* Previews never push the page wider than the screen. */
+html.onigiri-phone .osw-shell .osw-preview-stage-center,
+html.onigiri-phone .osw-shell .osw-preview-ovstyle-canvas {
+    max-width: 100% !important;
+    overflow: hidden;
+}
+
+/* Colour pickers: one column of full-width light/dark swatch rows. */
+html.onigiri-phone .osw-shell .osw-deck-color-grid,
+html.onigiri-phone .osw-shell .osw-designer-deck > .osw-deck-color-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+}
+
+/* iOS switch: 51x31 capsule with a visible off track. */
+html.onigiri-phone .osw-shell .osw-switch {
+    width: 51px;
+    height: 31px;
+    border-radius: 16px;
+    background: var(--osw-switch-off, rgba(120, 120, 128, 0.32));
+}
+
+html.onigiri-phone .osw-shell .osw-switch::after {
+    top: 2px;
+    left: 2px;
+    width: 27px;
+    height: 27px;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18), 0 0 0 0.5px rgba(0, 0, 0, 0.04);
+}
+
+html.onigiri-phone .osw-shell .osw-switch.is-on {
+    background: var(--osw-accent);
+}
+
+html.onigiri-phone .osw-shell .osw-switch.is-on::after {
+    transform: translateX(20px);
+}
+
+/* Sub-page tabs keep their labels on phones and scroll sideways. */
+html.onigiri-phone .osw-shell .osw-subtabs.is-icons .osw-subtab-label {
+    display: inline !important;
+}
+
+html.onigiri-phone .osw-shell .osw-subtabs .osw-subtab {
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+}
+
+/* Settings rows: at least 44pt. */
+html.onigiri-phone .osw-shell .osw-row {
+    min-height: 44px;
+    box-sizing: border-box;
+}
+
+/* Organize Widgets (Main Menu) on phones: number chips two per row, every
+   slider full width with its label above, alignment on its own line. */
+html.onigiri-phone .osw-shell .osw-organize-group {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px !important;
+    flex: 1 1 100% !important;
+}
+
+html.onigiri-phone .osw-shell .osw-organize-ctl {
+    height: auto !important;
+    min-height: 44px;
+    min-width: 0;
+}
+
+html.onigiri-phone .osw-shell .osw-organize-ctl-label {
+    white-space: normal !important;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+html.onigiri-phone .osw-shell .osw-organize-row {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+}
+
+html.onigiri-phone .osw-shell .osw-organize-row > .osw-organize-ctl {
+    flex: 1 1 100% !important;
+    flex-wrap: wrap;
+    padding: 8px 10px !important;
+    background: var(--osw-inset);
+}
+
+html.onigiri-phone .osw-shell .osw-organize-row > .osw-organize-ctl .osw-segmented-control {
+    flex: 1 1 100% !important;
+}
+
+html.onigiri-phone .osw-shell .osw-widget-effect-compact-effects,
+html.onigiri-phone .osw-shell .osw-widget-effect-compact-colors {
+    grid-template-columns: minmax(0, 1fr) !important;
+}
+
+html.onigiri-phone .osw-shell .osw-widget-effect-compact .osw-slider-card,
+html.onigiri-phone .osw-shell .osw-widget-layout-compact .osw-slider-card {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    row-gap: 6px;
+}
+
+html.onigiri-phone .osw-shell .osw-widget-effect-compact .osw-slider-track,
+html.onigiri-phone .osw-shell .osw-widget-layout-compact .osw-slider-track {
+    grid-column: 1 / -1;
+    height: 36px !important;
+}
+
+html.onigiri-phone .osw-shell .osw-widget-layout-compact .osw-segmented-wrap {
+    grid-template-columns: minmax(0, 1fr) !important;
+}
+
+/* The page-level "Restore Default" chip beside the tabs keeps its full label;
+   the tab strip moves to its own line and scrolls. */
+html.onigiri-phone .osw-shell .osw-page-head-row .osw-profile-reset-btn {
+    flex: 0 0 auto !important;
+    max-width: none !important;
+    width: auto !important;
+    overflow: visible !important;
+}
+
+html.onigiri-phone .osw-shell .osw-page-head-row .osw-subtabs {
+    flex: 1 1 100% !important;
+    min-width: 0;
+}
+
+/* Themes on phones: three per row, smaller swatches, the theme in use checked. */
+html.onigiri-phone .osw-shell .osw-theme-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+}
+
+/* Pomodoro: the tone preview button sits on its picker's row. */
+html.onigiri-phone .osw-shell .onigiri-tone-play {
+    flex: 0 0 auto !important;
+    min-width: 44px;
+    min-height: 40px;
 }

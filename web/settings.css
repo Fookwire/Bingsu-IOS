@@ -12440,3 +12440,17 @@ html body .osw-organize-menu :is(
 .osw-onihud-reviewer.is-dark .osw-onihud-mock-cta {
   background: rgba(255, 255, 255, 0.08);
 }
+
+/* A profile tab that does not apply to the current style stays visible, dimmed. */
+.osw-subtab.is-unavailable { opacity: 0.4; }
+
+/* The theme whose colours are in use. */
+.osw-theme-tile.is-current .osw-theme-name::after {
+  content: " \2713";
+  color: var(--osw-accent);
+  font-weight: 700;
+}
+.osw-theme-tile.is-current .osw-theme-art-wrap {
+  box-shadow: 0 0 0 2px var(--osw-accent);
+  border-radius: 16px;
+}

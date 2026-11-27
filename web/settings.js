@@ -1108,6 +1108,7 @@
       }
       preview.appendChild(list);
       hero.appendChild(preview);
+      ref.preview = preview;
     }
 
     host.appendChild(hero);
@@ -1126,6 +1127,12 @@
       ref.badge.classList.toggle("is-active", isActive);
 
       const pairs = option.preview || [];
+      // English is the source language: its preview only repeated each word
+      // ("Save → Save").
+      if (ref.preview) {
+        const isSource = /^en\b/i.test(String(option.code || option.value || ""));
+        ref.preview.style.display = isSource ? "none" : "";
+      }
       ref.slots.forEach(function (slot, index) {
         const pair = pairs[index];
         if (!pair) {
@@ -2016,7 +2023,22 @@
       syncProfileTabs = function (typeOverride) {
         const showBg = (typeOverride || values["modern_menu_profile_type"] || "bar") === "bar";
         const bgBtn = tabBtnById["background"];
-        if (bgBtn) bgBtn.classList.toggle("is-hidden", !showBg);
+        if (bgBtn) {
+          // Kept in place (dimmed) rather than removed, so the strip does not
+          // reflow as if something broke; a tap explains why it is off.
+          bgBtn.classList.toggle("is-unavailable", !showBg);
+          bgBtn.setAttribute("aria-disabled", showBg ? "false" : "true");
+          bgBtn.title = showBg ? "" : str("profile_bg_bar_only", "Background applies to the Bar style");
+          if (!bgBtn.__unavailableGuard) {
+            bgBtn.__unavailableGuard = true;
+            bgBtn.addEventListener("click", function (event) {
+              if (!bgBtn.classList.contains("is-unavailable")) return;
+              event.preventDefault();
+              event.stopImmediatePropagation();
+              toast(str("profile_bg_bar_only", "Background applies to the Bar style"));
+            }, true);
+          }
+        }
         if (!showBg && activeProfileTab === "background") activateProfileTab("picture");
       };
 
@@ -14161,6 +14183,11 @@
       tile.type = "button";
 
       const colors = themeColors(theme);
+      // The theme whose colours are the ones in use gets a check mark.
+      const cur = CTX.currentThemeColors;
+      if (cur && ["lightBg", "darkBg", "lightAccent", "darkAccent"].every(function (k) {
+        return String(cur[k] || "").toLowerCase() === String(colors[k] || "").toLowerCase();
+      })) tile.classList.add("is-current");
       const wrap = el("span", "osw-theme-art-wrap");
       // The hover "shuffle": two more of the theme's own colors peeking out
       // from behind the swatch, not plain neutral cards — same reasoning as
@@ -14271,6 +14298,9 @@
           if (res.accent) CTX.accent = res.accent;
           applyTheme();
           applyThemeRefresh(res.refresh, res.preview);
+          document.querySelectorAll(".osw-theme-tile.is-current").forEach(function (t) { t.classList.remove("is-current"); });
+          tile.classList.add("is-current");
+          CTX.currentThemeColors = { lightBg: colors.lightBg, darkBg: colors.darkBg, lightAccent: colors.lightAccent, darkAccent: colors.darkAccent };
           toast(str("theme_applied_toast", "Theme applied:") + " " + theme.name);
         });
       }
@@ -15354,6 +15384,9 @@
       // compact threshold: all destinations keep their Lucide glyphs, while
       // the selected destination retains its label.
       tabsWrap.classList.remove("is-icons");
+      // Phones: labels always; the strip scrolls sideways instead (an
+      // icon-only strip left most destinations as bare glyphs).
+      if (document.documentElement.classList.contains("onigiri-phone")) return;
       if (strip.scrollWidth > tabsWrap.clientWidth + 1) {
         tabsWrap.classList.add("is-icons");
       }
