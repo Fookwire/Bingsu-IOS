@@ -977,6 +977,42 @@
         });
     }
 
+    // The pill showed as an empty filled bar after a sync (audit 3, R3-13): its
+    // name colour can come from the theme before the accent behind it has been
+    // applied, so the contrast fix has to run again once styles settle, and the
+    // bar is not drawn until its content is ready (or 1.5 s have passed).
+    function settleProfilePill() {
+        var bars = document.querySelectorAll('.profile-bar');
+        if (!bars.length || !root.classList.contains('onigiri-phone')) return;
+        bars.forEach(function (bar) { bar.classList.add('onigiri-pill-pending'); });
+        var finish = function () {
+            fixProfileContrast();
+            document.querySelectorAll('.profile-bar').forEach(function (bar) {
+                bar.classList.remove('onigiri-pill-pending');
+            });
+        };
+        var pics = Array.prototype.slice.call(document.querySelectorAll('.profile-bar img'));
+        pics.forEach(function (img) {
+            // a picture that cannot load must not leave a hole
+            img.addEventListener('error', function () { img.style.display = 'none'; });
+        });
+        var waiting = pics.filter(function (img) { return !img.complete; });
+        var done = false;
+        var once = function () { if (done) return; done = true; finish(); };
+        if (!waiting.length) requestAnimationFrame(function () { requestAnimationFrame(once); });
+        else {
+            var left = waiting.length;
+            waiting.forEach(function (img) {
+                var one = function () { if (--left <= 0) once(); };
+                img.addEventListener('load', one, { once: true });
+                img.addEventListener('error', one, { once: true });
+            });
+        }
+        setTimeout(once, 1500);
+        [300, 1200, 3000].forEach(function (ms) { setTimeout(fixProfileContrast, ms); });
+        window.addEventListener('load', function () { setTimeout(fixProfileContrast, 50); });
+    }
+
     // --- Home: "Decks" as a large title -------------------------------------------------
 
     function titleCaseHeader() {
@@ -1134,17 +1170,24 @@
             }
         }, { passive: true });
         hideHeaderButtonsInShadow();
+        var tries = 0;
         function toolsButtonVisibility() {
-            // No Hashi Notes, Pomodoro or add-on buttons: nothing to open.
-            if (isReviewer) more.style.display = studyToolButtons().length ? '' : 'none';
+            // No Hashi Notes, Pomodoro or add-on buttons: nothing to open. The
+            // wrench is shown until the header has mounted and proves there are
+            // none (it used to appear and vanish while the header loaded, audit 3
+            // R3-32), or the tries run out.
+            if (!isReviewer) return;
+            var has = studyToolButtons().length > 0;
+            var mounted = headerButtons().length > 0;
+            more.style.display = !has && (mounted || tries >= 20) ? 'none' : '';
         }
         toolsButtonVisibility();
         // the reviewer mounts its header after load
-        var tries = 0;
         var timer = setInterval(function () {
             hideHeaderButtonsInShadow();
+            tries++;
             toolsButtonVisibility();
-            if (++tries > 20) clearInterval(timer);
+            if (tries > 20) clearInterval(timer);
         }, 250);
     }
 
@@ -1550,9 +1593,12 @@
         if (syncBtn && window.MutationObserver) {
             var paintSync = function () {
                 var needed = syncBtn.classList.contains('sync-needed');
+                // while Anki syncs, the button says so (audit 3, R3-12)
+                var syncing = syncBtn.classList.contains('is-syncing');
                 var caption = syncBtn.querySelector('span');
-                if (caption) caption.textContent = needed ? t('sync_needed', 'To sync') : t('sync', 'Sync');
-                syncBtn.setAttribute('aria-label', needed ? t('sync_changes_to_sync', 'Sync: changes to sync') : t('sync', 'Sync'));
+                var text = syncing ? t('sync_in_progress', 'Syncing…') : needed ? t('sync_needed', 'To sync') : t('sync', 'Sync');
+                if (caption) caption.textContent = text;
+                syncBtn.setAttribute('aria-label', syncing ? text : needed ? t('sync_changes_to_sync', 'Sync: changes to sync') : t('sync', 'Sync'));
             };
             new MutationObserver(paintSync).observe(syncBtn, { attributes: true, attributeFilter: ['class'] });
             paintSync();
@@ -1806,6 +1852,7 @@
             setupActionTiles();
             titleCaseHeader();
             fixProfileContrast();
+            settleProfilePill();
         }
         // Kome builds its sidebar after load: add the tabs once it appears.
         if (!document.getElementById('onigiri-phone-tabs') && typeof MutationObserver !== 'undefined' && document.body) {

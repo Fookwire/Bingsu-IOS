@@ -340,3 +340,24 @@ Needs the phone: Preferences Review and Syncing tabs (the sideways pan), Fields 
 - **R3-28 add-on widgets** sit in a themed card (CSS only; the widget's own colours are untouched).
 Checked: unit tests at the known 87 failures, Settings sweep at 375/393/430 (50 pages now, because the reset chip no longer counts as a tab; 0 off-screen, all at the top), hidden-row probe 0, answer test (review log +1, reps +1, undo available, no tracebacks).
 Needs the phone: the card-actions sheet length and scrolling, the Menu tab, the profile sheet closing, tab strips and Restore Default, the add-on card.
+
+### Phase 5 (build 1.1.0-beta.11), done in emulation
+- **R3-11 welcome screen once:** on a phone the flag that shows the welcome overlay is cleared the first time the overlay is put on a page (it was only cleared by tapping Continue, so every re-render, a sync for one, brought it back, or hid it behind the sync dialog). The Menu's "Welcome message" still shows it again; desktop is unchanged. Checked: flag True → False after the first render.
+- **R3-12 sync in place:** the Sync tile's caption reads "Syncing…" while Anki syncs (the page already toggled `is-syncing`; the icon spins). Anki's own progress dialog is not changed (sync code is not touched). Checked: caption "Sync" → "Syncing…" → "Sync".
+- **R3-13 empty profile pill:** cause not confirmed. Found: the pill's name colour comes from the theme and can equal the accent behind it (the recording's beige on beige), and the contrast fix ran once, possibly before styles settled. Now the fix runs again as styles settle (0.3, 1.2 and 3 s and on load), the pill is not drawn until its picture has loaded or 1.5 s have passed, and a picture that fails to load is hidden. Not verified on the phone.
+- **R3-23 Year view:** a month label cut by the left edge is hidden (it read as a broken word); the others stay. Checked: "Aug" at -11pt hidden, Sep to Dec shown. Not done: sizing the Activity card to its content. The phone widget grid uses fixed row heights (`engine.js reflowWidgetGrid`) and changing row spans risks overlapping the next widget; left as it is.
+- **R3-30 one time format on phones:** Home's Time card and the profile sheet's Today row both say "19 s", "12.5 min", "1h 5m" (Home was "0.2 min" under a minute). Desktop is unchanged. Tests: `tests/test_study_time_format.py`.
+- **R3-32 reviewer top bar:** the wrench starts visible and hides only once the header has mounted with no tools (or after the tries), so it no longer flickers; with nothing done yet the progress chip shows its count without an empty track.
+Checked: unit tests at the known 87 failures, Settings sweep at 375/393/430 (0 off-screen), answer test (review log +1, reps +1, undo available, no tracebacks).
+Needs the phone: the welcome screen once, the Syncing caption, the profile pill after a sync, the Year label, the Time card and Today row, the reviewer top bar.
+
+### Out of scope for audit 3 (recorded, not done)
+- **Kioku-owned:** the form bar above the keyboard (R3-25), the sync password shown in clear text (R2-33), the black launch screen, the stretched frame (R3-29, should disappear with the sidebar layer), title elision.
+- **Decided earlier:** a rebuilt Browse list (and its menu bar grouped into ⋯), a "Desktop options" group in Preferences, the "Onigiri Ready" decks, a single button system, naming beyond the Appearance title, the Statistics footer.
+- **Not done in this round:** sizing the Home Activity card to its content (R3-23, second half), drag-to-dismiss for the profile sheet.
+
+### Final pass (audit 3)
+- Unit tests: 87 known failures, none new (tests added: `test_gallery_hint.py`, `test_study_time_format.py`, plus cases in `test_mobile_theme.py`, `test_ios_native.py`, `test_phone_windows.py`).
+- Settings overflow sweep at 375, 393 and 430pt: 50 pages (the reset chip is no longer a tab), 0 off-screen, every page at the top; hidden-row probe 0.
+- Answer test after every phase: review log +1, reps +1, undo available, no tracebacks.
+- Everything ran in headless Anki 26.09.4 with Chromium and no Kioku: **nothing here is confirmed on the phone.** First look in the next recording: Menu → Help's version line (which Kioku, and whether it has the single header).

@@ -21311,6 +21311,7 @@ window_fields|Fields|Campos|Campos|字段|フィールド|Champs|필드|Felder
 window_card_types|Card Types|Tipos de cartão|Tipos de tarjeta|卡片类型|カードタイプ|Types de cartes|카드 유형|Kartentypen
 rename_action|Rename|Renomear|Renombrar|重命名|名前を変更|Renommer|이름 변경|Umbenennen
 description_edit|Edit description|Editar descrição|Editar descripción|编辑描述|説明を編集|Modifier la description|설명 편집|Beschreibung bearbeiten
+sync_in_progress|Syncing…|Sincronizando…|Sincronizando…|正在同步…|同期中…|Synchronisation…|동기화 중…|Synchronisiere…
 """
 
 ALIASES = {

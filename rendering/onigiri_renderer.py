@@ -1275,9 +1275,15 @@ def _profile_study_summary_html(sidebar_conf):
                 from ..core.platform import IS_MOBILE as _phone
             except Exception:
                 _phone = False
-            if _phone and int(seconds or 0) < 60:
-                # Home says "0 s" under a minute; the same here (audit 2, R2-37)
-                duration = f"{int(seconds or 0)} {tr('seconds_unit', 's')}"
+            if _phone:
+                # The same writing as Home's Time card: "19 s", "12.5 min",
+                # "1h 5m" (audit 2, R2-37; audit 3, R3-30). Inline: tests load
+                # this function on its own.
+                secs = max(0, int(seconds or 0))
+                if secs < 60:
+                    duration = f"{secs} {tr('seconds_unit', 's')}"
+                elif secs < 3600:
+                    duration = f"{secs / 60:.1f} {tr('minutes_unit', 'min')}"
             rows = ((tr("profile_sidebar_reviews", "Reviews"), f"{reviews:,}"),
                     (tr("profile_sidebar_study_time", "Study Time"), duration),
                     (tr("profile_sidebar_streak", "Study Streak"), f'{streak} {tr("profile_sidebar_days", "days")}'))
@@ -1986,6 +1992,20 @@ def _no_data_wording() -> bool:
         return False
 
 
+def _format_study_time(seconds, seconds_unit="s", minutes_unit="min"):
+    """One way to write study time on a phone (audit 3, R3-30): "19 s" under a
+    minute, "12.5 min" under an hour, "1h 5m" from an hour. Returns (value,
+    unit); the unit is empty when it is part of the value."""
+    seconds = max(0.0, float(seconds or 0))
+    if seconds < 60:
+        return f"{int(seconds)}", seconds_unit
+    minutes = seconds / 60
+    if minutes < 60:
+        return f"{minutes:.1f}", minutes_unit
+    whole = int(minutes)
+    return f"{whole // 60}h {whole % 60}m", ""
+
+
 def _get_onigiri_retention_html(row_span: int = 1, col_span: int = 1) -> str:
     # Query retention directly (fast index on id)
     total_reviews, correct_reviews = mw.col.db.first(
@@ -2404,8 +2424,10 @@ def render_onigiri_deck_browser(self: DeckBrowser, reuse: bool = False) -> None:
             "time", tr("time"),
             # Under a minute, whole seconds: "0.2 min" reads oddly, and the
             # profile sheet already says "0m".
-            (f"{int(time_today_seconds)}" if time_today_seconds < 60 else f"{time_today_minutes:.1f}"),
-            (tr("seconds_unit") if time_today_seconds < 60 else tr("minutes_unit")),
+            (_format_study_time(time_today_seconds, tr("seconds_unit"), tr("minutes_unit"))[0] if _no_data_wording()
+             else (f"{int(time_today_seconds)}" if time_today_seconds < 60 else f"{time_today_minutes:.1f}")),
+            (_format_study_time(time_today_seconds, tr("seconds_unit"), tr("minutes_unit"))[1] if _no_data_wording()
+             else (tr("seconds_unit") if time_today_seconds < 60 else tr("minutes_unit"))),
             series=_stats_widget_weekly_series().get("time"),
             row_span=rs, col_span=cs,
         ),

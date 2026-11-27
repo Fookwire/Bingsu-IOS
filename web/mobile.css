@@ -3120,3 +3120,13 @@ html.onigiri-phone .osw-shell .osw-subtabs-strip.is-scrollable.is-at-end:not(.is
 html.onigiri-phone .osw-shell .osw-designer-preview-stage.is-empty {
     display: none !important;
 }
+
+
+/* The profile pill is drawn once its content is ready (audit 3, R3-13). */
+html.onigiri-phone .profile-bar.onigiri-pill-pending {
+    opacity: 0;
+}
+
+html.onigiri-phone .profile-bar {
+    transition: opacity 0.18s ease;
+}
