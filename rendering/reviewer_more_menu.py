@@ -202,6 +202,16 @@ def reviewer_head_assets(addon_package: str, conf: dict[str, Any]) -> str:
     except Exception:
         pass
     css_text += mobile_theme_css()
+    try:
+        from ..core.platform import IS_MOBILE
+
+        if IS_MOBILE:
+            # A row touched during a scroll (Delete Note) kept its red :hover.
+            from ..core.touch_css import hover_only
+
+            css_text = hover_only(css_text)
+    except Exception:
+        pass
     return f"<script>window.onigiriMoreMenuCssText = {json.dumps(css_text)};</script>"
 
 

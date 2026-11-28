@@ -748,7 +748,16 @@ def inject_menu_files(web_content, context):
 
         patcher.apply_reviewer_bottom_bar_height(conf)
         web_content.head += patcher.generate_reviewer_bottom_bar_background_css(addon_path)
-        web_content.head += patcher.generate_reviewer_buttons_css(conf)
+        buttons_css = patcher.generate_reviewer_buttons_css(conf)
+        from .core import platform as onigiri_platform
+
+        if onigiri_platform.IS_MOBILE:
+            # iOS keeps :hover on the last tapped spot: the next "Show Answer"
+            # lost its label and the More button stayed highlighted.
+            from .core.touch_css import hover_only_html
+
+            buttons_css = hover_only_html(buttons_css)
+        web_content.head += buttons_css
         web_content.head += patcher.generate_reviewer_font_css(addon_package)
         web_content.head += reviewer_more_menu.bottom_bar_assets()
     elif (is_top_toolbar or is_bottom_toolbar):

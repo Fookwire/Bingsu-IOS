@@ -3095,3 +3095,21 @@ html.onigiri-phone .onigiri-deck-progress-details[open] > summary::after {
 html.onigiri-phone #deck-list-container tr.deck.is-deck .deck-info > span:has(> span.collapse:only-child) {
     display: none !important;
 }
+
+/* Flag and mark markers (simulator test 1, S-05). Anki pins #_flag to the top
+   right and #_mark (the star) to the top left: on the phone reviewer those are
+   the corners of the top bar, so the flag was drawn over the Study Tools
+   button and the star over Back. Put both just under the bar (top 10px +
+   44px high) instead. */
+html.onigiri-phone.onigiri-screen-review.onigiri-has-phone-nav #_flag {
+    top: calc(10px + 44px + 4px) !important;
+    right: calc(10px + var(--onigiri-safe-right)) !important;
+}
+
+html.onigiri-phone.onigiri-screen-review.onigiri-has-phone-nav #_mark {
+    position: fixed !important;
+    top: calc(10px + 44px + 10px) !important;
+    left: calc(14px + var(--onigiri-safe-left)) !important;
+    right: auto !important;
+    z-index: 8000;
+}

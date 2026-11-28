@@ -1169,7 +1169,9 @@ window.OnigiriEngine = {
 
     /** Processes a list of new nodes, classifying icons and adding styles. */
     processNewNodes: function (nodes) {
-        nodes.forEach(node => {
+        // Callers pass a NodeList, MutationRecord.addedNodes or an
+        // HTMLCollection (tableBody.children), which has no forEach.
+        Array.prototype.forEach.call(nodes || [], node => {
             if (node.nodeType !== Node.ELEMENT_NODE) return;
 
             const elementsToProcess = [];

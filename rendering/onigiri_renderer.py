@@ -2007,7 +2007,17 @@ def _get_onigiri_retention_html(row_span: int = 1, col_span: int = 1) -> str:
     if no_data:
         # Nothing reviewed yet today is not a 0% result with five faint stars
         # (audit 2, R2-35): a dash and a line saying so.
-        star_rating_html = f'<div class="stat-nodata">{html.escape(tr("nothing_studied_yet_today"), quote=False)}</div>'
+        # Retention only counts review cards: after learning-only study the
+        # card said "Nothing studied" next to "Studied 3 cards".
+        try:
+            studied_today = bool(mw.col.db.scalar(
+                "select 1 from revlog where id > ? limit 1",
+                (mw.col.sched.day_cutoff - 86400) * 1000,
+            ))
+        except Exception:
+            studied_today = False
+        nodata_key = "no_reviews_yet_today" if studied_today else "nothing_studied_yet_today"
+        star_rating_html = f'<div class="stat-nodata">{html.escape(tr(nodata_key), quote=False)}</div>'
     elif _stats_widget_stars_shown():
         star_html = "".join(_stats_widget_star_html(i >= stars) for i in range(5))
         star_rating_html = f'<div class="star-rating">{star_html}</div>'

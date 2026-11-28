@@ -4253,7 +4253,7 @@ _PROGRESS_LABELS = ("fraction", "percent", "remaining", "done", "none")
 # the "today" scope starts from. Reset whenever the reviewer is (re-)entered or
 # the studied deck changes; `mw` is single-collection, so a plain module global
 # is the right amount of machinery here.
-_progress_session = {"key": None, "answered": 0, "today_base": 0}
+_progress_session = {"key": None, "answered": 0, "today_base": 0, "revlog_ids": []}
 
 # Settings are read once per reviewer entry and reused for every card. The
 # answer path must not touch the config store (see the 2026-08-19 lag fix).
@@ -4381,6 +4381,7 @@ def reset_reviewer_progress_session(force=False):
     settings = _reviewer_progress_settings()
     _progress_session["key"] = key
     _progress_session["answered"] = 0
+    _progress_session["revlog_ids"] = []
     _progress_session["today_base"] = (
         _reviews_logged_today(col) if settings["scope"] == "today" else 0
     )
@@ -4403,7 +4404,7 @@ def _reviewer_progress_counts():
     data["left"] = data["new"] + data["learn"] + data["review"]
 
     settings = _reviewer_progress_settings()
-    done = _progress_session["answered"]
+    done = _session_answers_still_logged(col)
     if settings["scope"] == "today":
         done += _progress_session["today_base"]
     data["done"] = max(0, int(done))
@@ -4857,6 +4858,29 @@ def _on_reviewer_progress_state_change(new_state, old_state):
 
 def _on_reviewer_progress_answered(reviewer, card, ease):
     _progress_session["answered"] += 1
+    # Remember the review-log entry this answer wrote, so an Undo (which
+    # deletes it) also takes it out of the "done" count.
+    try:
+        rid = mw.col.db.scalar("select max(id) from revlog where cid = ?", card.id)
+        if rid:
+            _progress_session["revlog_ids"].append(int(rid))
+    except Exception:
+        pass
+
+
+def _session_answers_still_logged(col):
+    """Answers this session whose review-log entry still exists (Undo removes it).
+
+    Falls back to the plain counter if the entries cannot be looked up."""
+    ids = _progress_session.get("revlog_ids") or []
+    if not ids:
+        return _progress_session["answered"]
+    try:
+        placeholders = ",".join("?" * len(ids))
+        kept = col.db.scalar(f"select count() from revlog where id in ({placeholders})", *ids)
+        return max(0, int(kept or 0))
+    except Exception:
+        return _progress_session["answered"]
 
 
 def _on_reviewer_progress_show_question(card):

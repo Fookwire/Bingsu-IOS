@@ -12,7 +12,9 @@ from aqt.qt import (
     QColor,
     QDialog,
     QFileDialog,
+    QHBoxLayout,
     QLabel,
+    QPushButton,
     Qt,
     QTimer,
     QVBoxLayout,
@@ -27,6 +29,11 @@ from . import gallery, render, schema, side_effects, theme_store
 from .store import Store
 
 BRIDGE_PREFIX = "osw:"
+
+# How long the page may take to finish its boot handshake before the window
+# shows its error state. A phone (and the iOS Simulator) can take well over
+# 5 s for the first load; a page that finishes later still replaces the error.
+LOAD_WATCHDOG_MS = 15000
 
 # The native picker accepts Qt colour names, while several CSS-facing add-on
 # settings store translucent colours as ``rgba(r, g, b, alpha)``. Convert that
@@ -104,6 +111,7 @@ class SettingsWebDialog(QDialog):
         self._initial_page = self._resolve_initial_page(initial_page)
         self._page_ready = False
         self._startup_failed = False
+        self._error_panel = None
         self._closed = False
 
         self.setWindowTitle(tr("settings_title"))
@@ -167,13 +175,14 @@ class SettingsWebDialog(QDialog):
         page_html = render.render(
             self.store, self.pages, initial_page=self._initial_page
         )
+        self._page_html = page_html
         # Do not leave a broken script as an invisible, apparently unresponsive
         # command. A native error surface is guaranteed to replace the webview if
         # the page does not complete its boot handshake.
         self._load_watchdog = QTimer(self)
         self._load_watchdog.setSingleShot(True)
         self._load_watchdog.timeout.connect(self._show_load_error)
-        self._load_watchdog.start(5000)
+        self._load_watchdog.start(LOAD_WATCHDOG_MS)
         # context=self: Onigiri's own window, so it gets the iPhone treatment
         # (no sticky hover, press feedback, no text selection on labels)
         self.web.stdHtml(page_html, context=self)
@@ -264,8 +273,11 @@ class SettingsWebDialog(QDialog):
             return None
 
     def _on_load_finished(self, ok):
-        """Verify the synchronous WebUI boot after Chromium finishes loading."""
-        if self._closed or self._page_ready or self._startup_failed:
+        """Verify the synchronous WebUI boot after Chromium finishes loading.
+
+        Also runs when the page finishes after the watchdog already showed the
+        error state: a slow first load then still opens Settings."""
+        if self._closed or self._page_ready:
             return
         if not ok:
             self._show_load_error()
@@ -279,13 +291,14 @@ class SettingsWebDialog(QDialog):
         )
 
     def _on_boot_checked(self, ready):
-        if self._closed or self._page_ready or self._startup_failed:
+        if self._closed or self._page_ready:
             return
         if not ready:
             self._show_load_error()
             return
         self._page_ready = True
         self._load_watchdog.stop()
+        self._clear_load_error()
         # Leave the JavaScript result callback before showing a top-level window.
         # Chromium has already completed the DOM build at this point.
         QTimer.singleShot(0, self._reveal)
@@ -362,25 +375,83 @@ class SettingsWebDialog(QDialog):
         if self._closed or self._page_ready:
             return
         self._startup_failed = True
+        if self._error_panel is not None:
+            return
         self.web.hide()
         palette = render.palette(render.is_dark())
-        message = QLabel(
-            tr("settings_load_error"),
-            self,
-        )
-        message.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        message.setWordWrap(True)
-        message.setStyleSheet(
-            "QLabel {"
+        # The page's own Done is part of the page, and on phones Kioku's Back
+        # bar is hidden for this window: the error state needs its own way out
+        # (and a retry, since the usual cause is a slow first load).
+        panel = QWidget(self)
+        panel.setObjectName("oswLoadError")
+        panel.setStyleSheet(
+            "QWidget#oswLoadError {"
             f"background: {palette['outer']};"
+            "}"
+            "QLabel {"
             f"color: {palette['fg']};"
-            "font-size: 15px; padding: 48px;"
+            "font-size: 15px; padding: 48px 32px 16px 32px;"
+            "background: transparent;"
+            "}"
+            "QPushButton {"
+            "min-height: 44px; padding: 0 22px; border-radius: 12px;"
+            "font-size: 16px;"
             "}"
         )
-        self._layout.addWidget(message, 1)
+        box = QVBoxLayout(panel)
+        box.setContentsMargins(0, 0, 0, 32)
+        box.addStretch(1)
+        message = QLabel(tr("settings_load_error"), panel)
+        message.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        message.setWordWrap(True)
+        box.addWidget(message)
+        row = QHBoxLayout()
+        row.addStretch(1)
+        retry = QPushButton(tr("settings_try_again"), panel)
+        retry.clicked.connect(self._retry_load)
+        close = QPushButton(tr("close"), panel)
+        close.clicked.connect(self.close)
+        row.addWidget(retry)
+        row.addSpacing(12)
+        row.addWidget(close)
+        row.addStretch(1)
+        box.addLayout(row)
+        box.addStretch(1)
+        self._error_panel = panel
+        self._layout.addWidget(panel, 1)
         self.show()
         self.raise_()
         self.activateWindow()
+
+    def _clear_load_error(self):
+        """The page finished after all: drop the error state, show Settings."""
+        self._startup_failed = False
+        panel, self._error_panel = self._error_panel, None
+        if panel is not None:
+            panel.hide()
+            panel.deleteLater()
+        self.web.show()
+
+    def _retry_load(self):
+        """Check the page again (it is often ready by now); reload it if not."""
+        if self._closed or self._page_ready:
+            return
+
+        def checked(ready):
+            if self._closed or self._page_ready:
+                return
+            if ready:
+                self._on_boot_checked(True)
+                return
+            self._clear_load_error()
+            self._load_watchdog.start(LOAD_WATCHDOG_MS)
+            self.web.stdHtml(self._page_html, context=self)
+
+        self.web.page().runJavaScript(
+            "Boolean(document.documentElement.classList.contains('osw-ready') "
+            "&& window.onigiriSettings)",
+            checked,
+        )
 
     def _cmd_patch(self, arg):
         """Auto-save: apply and persist a small patch as the user edits.
