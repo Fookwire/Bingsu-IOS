@@ -885,6 +885,9 @@ class SettingsWebDialog(QDialog):
             if IS_MOBILE:
                 from ..core import mobile_theme
 
+                # Anki's windows, its pages and Kioku's bar take the same
+                # mode as Onigiri (plan v2, T1); then the Qt palette follows.
+                QTimer.singleShot(0, mobile_theme.reapply_mode)
                 QTimer.singleShot(0, mobile_theme.refresh)
         except Exception:
             pass

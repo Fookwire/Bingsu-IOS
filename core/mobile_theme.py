@@ -337,10 +337,90 @@ def install_toast():
 _installed = {"done": False}
 
 
+# ── One light/dark mode (plan v2, T1) ─────────────────────────────────────────
+# Onigiri's own "Color mode" (onigiriThemeMode: system/light/dark) used to apply
+# to Onigiri's pages only. Anki kept deciding the mode for the Qt windows, its
+# own pages (Deck Options, Statistics, the editor) and the stylesheet Kioku's
+# "Back" bar is painted with; on iOS "follow system" means the phone's setting
+# (Kioku replaces aqt.theme.get_linux_dark_mode). A forced Onigiri mode that
+# differed from the phone's gave light pages under dark chrome, or the reverse.
+# On phones Anki's mode now *is* Onigiri's mode. Nothing is written to Anki's
+# profile: only what Anki computes in memory changes, and "system" passes
+# Anki's own answer straight through.
+
+
+def forced_mode(conf=None):
+    """True/False when Onigiri forces dark/light, None when it follows Anki."""
+    try:
+        if not isinstance(conf, dict):
+            from . import config
+
+            conf = config.get_config_readonly() or {}
+        mode = str(conf.get("onigiriThemeMode", "system")).lower()
+    except Exception:
+        return None
+    if mode in {"dark", "night", "night_mode"}:
+        return True
+    if mode in {"light", "day", "day_mode"}:
+        return False
+    return None
+
+
+def bridged_night_mode(original, conf=None):
+    """Anki's night-mode decision with Onigiri's forced mode taking precedence.
+    `original` is Anki's own _determine_night_mode. Pure apart from those two."""
+    forced = forced_mode(conf)
+    if forced is not None:
+        return forced
+    return bool(original())
+
+
+def install_mode_bridge(manager=None):
+    """Wrap theme_manager._determine_night_mode on phones. Idempotent."""
+    if not active():
+        return False
+    try:
+        if manager is None:
+            from aqt.theme import theme_manager as manager
+        if getattr(manager, "_onigiri_mode_bridge", False):
+            return True
+        original = manager._determine_night_mode
+
+        def determine():
+            try:
+                return bridged_night_mode(original)
+            except Exception:
+                return original()
+
+        manager._determine_night_mode = determine
+        manager._onigiri_mode_bridge = True
+        return True
+    except Exception as exc:
+        print(f"Onigiri iOS: mode bridge failed: {exc}")
+        return False
+
+
+def reapply_mode():
+    """After Onigiri's Color mode changed: let Anki re-apply its style now
+    (Anki also polls every couple of seconds, which would catch it too). Anki
+    returns early when nothing changed, and fires theme_did_change when it did."""
+    if not active():
+        return False
+    try:
+        from aqt.theme import theme_manager
+
+        theme_manager.apply_style()
+        return True
+    except Exception as exc:
+        print(f"Onigiri iOS: re-applying the mode failed: {exc}")
+        return False
+
+
 def install():
     if not active() or _installed["done"]:
         return
     _installed["done"] = True
+    install_mode_bridge()
     from aqt import gui_hooks
 
     def later():

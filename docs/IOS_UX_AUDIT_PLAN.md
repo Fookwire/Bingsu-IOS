@@ -293,3 +293,21 @@ Needs the phone: the Year scroller (touch scrolling inside the Home scroller) an
 - Card answered in the harness after the last change: review log +1, reps +1, undo available, no tracebacks.
 - Anki windows opened in the harness (Browse, Add, Choose Deck, Custom Study, Preferences, Deck Options, Statistics): adapted, no tracebacks.
 - Everything above ran in headless Anki 26.09.4 with Chromium and no Kioku: **nothing is confirmed on the phone yet.** Update Kioku to v0.2.12 or newer first (the single Settings header needs it).
+
+---
+
+## Progress (audit 3, plan v2)
+The v1 builds (beta.7 to beta.11) were reverted (`6a0ee6b`) after they broke theming on the phone. Plan: `docs/IOS_AUDIT3_PLAN_v2.md`, theming foundation first.
+
+### T1, one light/dark mode (build 1.1.0-beta.12), done in emulation
+- **Cause found:** Onigiri's Color mode (Sync with Anki / Light / Dark) applied to Onigiri's pages only. Anki kept deciding the mode for its Qt windows, its own pages and the stylesheet Kioku's "‹ Back" bar is painted with. On iOS that is the phone's setting, through Kioku. A forced Onigiri mode different from the phone's gave light pages under dark chrome, or the reverse.
+- **Change:** on phones `core/mobile_theme.install_mode_bridge()` wraps Anki's `theme_manager._determine_night_mode`: a forced Onigiri mode wins; "Sync with Anki" passes Anki's own answer through unchanged. Nothing is written to Anki's profile (its Theme preference is untouched). Changing the Color mode in Settings asks Anki to re-apply its style at once; Anki's own two-second check would also pick it up. Desktop is not wrapped.
+- **Checked in the harness**, for all six combinations of Anki Light/Dark × Onigiri Light/Dark/Sync:
+  - Anki's mode equals Onigiri's every time;
+  - a stand-in Kioku bar's Back button reads 6.0:1 (light) and 11.3:1 (dark) against its bar;
+  - with Anki on Light and Onigiri on Dark, Deck Options opens in night mode.
+
+  Tests: `tests/test_mode_bridge.py`. Unit tests at the known 87 failures, Settings sweep 0 off-screen, answer test passed, no tracebacks.
+- **Needs the phone:**
+  - Onigiri Light with the iPhone in Dark, and Onigiri Dark with the iPhone in Light: the Back bar, Preferences, Browse, Deck Options, the editor and Pomodoro should all match Onigiri's pages.
+  - "Sync with Anki" follows the iPhone, including when you switch the iPhone's appearance while the app is open.
