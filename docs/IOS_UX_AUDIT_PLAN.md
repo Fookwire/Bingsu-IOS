@@ -322,3 +322,6 @@ From the five dark-mode screenshots of beta.12. Phone only, no new colours: ever
 - **P6 Deck details:** a centred, outlined, 44pt button with a chevron that turns when it opens; it still opens and closes the details.
 Checked: unit tests at the known 87 failures, answer test (review log +1, reps +1, undo available, no tracebacks), screenshots in dark (deck list, Edit mode, sub-decks, overview) and a light smoke screenshot.
 Needs the phone (dark mode): corners and outlines in WebKit, Edit mode and drag-to-reorder, the Home top, the Deck details button.
+
+### Part P follow-up (build 1.1.0-beta.14)
+- Deck icons and names start at the card's edge: a top-level deck with no sub-decks no longer reserves the empty 24pt slot for an expand arrow. In Edit mode they move right to make room for the selection circle (+32pt). Decks with sub-decks keep their arrow in that slot, and sub-decks keep their indent. Checked: leaf decks 35 → 11pt from the card edge, 43pt in Edit mode; screenshots in dark.

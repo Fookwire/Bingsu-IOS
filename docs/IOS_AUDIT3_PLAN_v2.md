@@ -64,7 +64,7 @@ You test in dark mode only, and light mode doesn't matter for now.
   - No `setStyleSheet` for colour on individual Anki or Kioku widgets.
   - No timers to re-apply colour.
   - Every colour change is verified in dark mode on two dark themes, plus a light-mode smoke check (see Verification).
-- **Releases:** one step = one commit = one build (`harness/build.sh 1.1.0-beta.N`). T1 shipped as beta.12; Part P is beta.13; T2 continues from beta.14. Push only to `claude/practical-ritchie-w20lag`. No `main`, tag or release without asking.
+- **Releases:** one step = one commit = one build (`harness/build.sh 1.1.0-beta.N`). T1 shipped as beta.12; Part P is beta.13; T2 continues from beta.15 (beta.14 was a Part P follow-up). Push only to `claude/practical-ritchie-w20lag`. No `main`, tag or release without asking.
 - **Stop points:** after T1 and again after T3, stop and ask the user to test on the phone before continuing.
 
 ## Harness
@@ -111,7 +111,7 @@ Facts and gotchas:
   - Onigiri mode Light with the iPhone in Dark, and Dark with the iPhone in Light: Back bar, Preferences, Deck Options, Browse and the editor all match Onigiri's pages.
   - "System" follows the iPhone.
 
-### T2, one token set and one web delivery (build beta.14, after Part P)
+### T2, one token set and one web delivery (build beta.15, after Part P)
 - **`mobile_theme.tokens()` is the single source.** Keep beta.6's derivation. Do not add v1's light-mode contrast rules yet; contrast is a separate, measured step (T4).
 - **Add `token_css(dark)`:** `:root{--onigiri-bg, --onigiri-surface, --onigiri-raised, --onigiri-inset, --onigiri-separator, --onigiri-text, --onigiri-text-2, --onigiri-text-3, --onigiri-accent, --onigiri-on-accent, --onigiri-danger}` for the current mode.
   - Inject it once, from `inject_mobile_assets` in `__init__.py` (the `_anki_page_style` slot pattern), on every page Onigiri touches on mobile.
@@ -125,7 +125,7 @@ Facts and gotchas:
 - **Tests:** `token_css` contains each variable for both modes; `settings_palette` values equal tokens; no `#rrggbb` added to `mobile.css` (a test that counts them).
 - **Harness:** for each Onigiri page (deck list, overview, reviewer, Settings) in both modes, read the computed `--onigiri-bg`/`--onigiri-text` and compare with `tokens(dark)`. Screenshots at iPhone 15 on two dark themes, plus one light smoke check.
 
-### T3, one Qt delivery (build beta.15). Stop for a phone test after this.
+### T3, one Qt delivery (build beta.16). Stop for a phone test after this.
 - Remove the need for per-widget fixes by making the app-level palette and stylesheet right.
 - **If T1's findings show Anki's stylesheet paints buttons with its own colours:** append one small app-level rule block on mobile from `theme_did_change`, after Anki's `_apply_style`. Use `app.setStyleSheet(app.styleSheet() + marker + block)`, idempotent through the marker, with `QPushButton[flat="true"]` and `QWidget#kiokuTitleBar` rules from tokens. One place, re-applied only when Anki re-applies.
 - **Pomodoro, Hashi Notes, Prep Station:** on mobile, `utility_chrome_palette` gets its base surfaces from `mobile_theme.settings_palette` (one change in `rendering/theme_palette.py` or `study_tools/pomodoro.base_chrome_palette`). User custom colours still win. This is v1's `add_utility_aliases` idea and can be reused; v1's other Pomodoro colour changes cannot.

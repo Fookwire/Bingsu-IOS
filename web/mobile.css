@@ -3083,3 +3083,11 @@ html.onigiri-phone .onigiri-deck-progress-details > summary::after {
 html.onigiri-phone .onigiri-deck-progress-details[open] > summary::after {
     transform: translateY(2px) rotate(225deg);
 }
+
+/* Deck icon and name start at the card's edge (phone feedback on beta.13):
+   a top-level deck with no sub-decks reserved an empty 24pt slot for the
+   expand arrow. Decks with sub-decks keep their arrow, sub-decks keep their
+   indent, and Edit mode still moves everything right for its circle. */
+html.onigiri-phone #deck-list-container tr.deck.is-deck .deck-info > span:has(> span.collapse:only-child) {
+    display: none !important;
+}
