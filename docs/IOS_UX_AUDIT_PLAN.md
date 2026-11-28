@@ -347,3 +347,6 @@ Checked: unit tests at the known 87 failures, answer test passed, no tracebacks.
 Needs the phone:
 - a 60 fps recording of opening a deck twice: the border must be there in the first still frame;
 - in the card-actions sheet: scroll if it scrolls, long-press Cancel, drag across Delete Note, ten quick Cancel taps.
+
+### Part Q follow-up (build 1.1.0-beta.16)
+At your request the card-actions panel is back to its beta.14 layout and behaviour: same rows, same order, same styles. Undone: the footer, the moved audio rows, the paired Bury/Suspend row, the three tiles, the no-selection and hover changes, and the Show Answer dimming. Only one thing changed: **Cancel is the last row of the list and scrolls with it**, instead of staying pinned on screen over the other rows (no more `position: sticky`). It also keeps its own background after a touch. Checked in the harness: Cancel is the panel's last element, below the visible area until the list is scrolled to the end, then fully visible at the bottom. Q1 (overview border) is unchanged from beta.15.

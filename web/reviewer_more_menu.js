@@ -390,68 +390,13 @@
         overscroll-behavior: contain;
       }
       .rm-grab { width: 36px; height: 5px; border-radius: 3px; background: var(--rm-border); margin: 2px auto 8px; flex: 0 0 auto; }
-      /* The sheet is a column (audit 4, Q4-02): handle, one scroller with every
-         action, and a footer with Cancel outside it. Nothing scrolls under
-         Cancel, and Cancel never moves. */
-      .rm-panel { flex-direction: column !important; overflow: hidden !important; }
-      .rm-scroll {
-        display: flex; flex-direction: column; gap: 8px;
-        flex: 1 1 auto; min-height: 0;
-        overflow-y: auto; overflow-x: hidden;
-        overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-      }
-      .rm-scroll::-webkit-scrollbar { display: none; }
-      .rm-footer {
-        flex: 0 0 auto;
-        margin: 8px -10px 0; padding: 10px 10px calc(12px + var(--onigiri-safe-bottom, 0px));
-        background: var(--rm-surface-solid);
-        border-top: 1px solid var(--rm-border);
-      }
-      .rm-panel { padding-bottom: 0 !important; }
-      .rm-cancel.rm-cancel {
-        display: flex; align-items: center; justify-content: center;
-        width: 100%; min-height: 50px; margin: 0; padding: 0 12px;
-        border-radius: 12px; border: 0;
-        background: var(--rm-elevated) !important;
-        color: var(--rm-text) !important;
-        font-size: 17px; font-weight: 600; text-align: center;
-        position: static; box-shadow: none;
-      }
-      /* Nothing in the sheet can be selected or long-pressed into a menu. */
-      #onigiri-more-menu-root, .rm-panel, .rm-panel * {
-        -webkit-user-select: none !important; user-select: none !important;
-        -webkit-touch-callout: none !important;
-      }
-      .rm-panel button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+      /* Cancel is the last row of the list and scrolls with it; it no longer
+         stays pinned over the other rows (audit 4, Q4-02). */
+      .rm-cancel { justify-content: center; text-align: center; font-weight: 600; margin-top: 10px; background: var(--rm-elevated); border-radius: 14px; }
       .rm-item-btn, .rm-quick-btn, .rm-split-row, .rm-media-btn { min-height: 44px; }
       .rm-item-btn, .rm-quick-label, .rm-split-title, .rm-media-label { font-size: 15px; }
       .rm-flag-btn { height: 44px; }
-      .rm-split-pair { display: flex; flex-direction: column; gap: 2px; }
-      .rm-split-pair.is-paired { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px; }
-      .rm-split-pair.is-paired .rm-split-row { padding: 0 0 0 8px; gap: 6px; min-height: 44px; }
-      .rm-split-pair.is-paired .rm-split-left { gap: 0; overflow: hidden; }
-      .rm-split-pair.is-paired .rm-split-left .rm-row-icon { display: none; }
-      .rm-split-pair.is-paired .rm-split-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-      .rm-split-pair.is-paired .rm-mini-pill { min-width: 46px; padding: 5px 8px; justify-content: center; }
-      .rm-split-pair + .rm-divider, .rm-undo-row + .rm-divider { display: none; }
-      .rm-tile-row { display: flex; flex-direction: column; gap: 2px; }
-      .rm-tile-row.is-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 2px 0; }
-      .rm-tile-row.is-tiles .rm-item-btn {
-        flex-direction: column; justify-content: center; gap: 4px;
-        min-height: 56px; padding: 6px 4px; text-align: center;
-        background: var(--rm-elevated); border-radius: 11px;
-      }
-      .rm-tile-row.is-tiles .rm-item-label { flex: 0 0 auto; width: 100%; text-align: center; font-size: 12.5px; overflow: hidden; }
-      .rm-tile-row.is-tiles .rm-row-icon { width: 17px; height: 17px; }
-      .rm-scroll > .rm-section { padding-top: 6px; padding-bottom: 6px; }
-      .rm-scroll > .rm-quick-grid { padding-top: 0; padding-bottom: 0; }
-      /* No hover fill on touch (iOS keeps :hover on the last touched row, which
-         left Delete Note red after a scroll). Hover rules are also limited to
-         (hover: hover) in the stylesheet; this covers a device that misreports. */
-      .rm-item-btn:not(.rm-cancel):hover, .rm-flag-btn:hover, .rm-quick-btn:hover,
-      .rm-media-btn:hover, .rm-mini-pill:hover { background: transparent; }
-      .rm-item-btn.is-danger:hover, .rm-item-btn.is-danger:active { background: transparent !important; }
+      .rm-item-btn:not(.rm-cancel):hover, .rm-flag-btn:hover, .rm-quick-btn:hover, .rm-media-btn:hover { background: transparent; }
     `;
   }
 
@@ -790,7 +735,6 @@
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "rm-item-btn" + (opts.danger ? " is-danger" : "");
-      btn.setAttribute("data-action", opts.action);
       btn.appendChild(opts.icon());
       const lbl = document.createElement("span");
       lbl.className = "rm-item-label";
@@ -1052,55 +996,12 @@
     }
 
     if (asSheet) {
-      // Audio and voice sit with the quick actions; Delete Note ends the list
-      // (audit 4, Q4-02).
-      if (quickGrid.parentNode === panel) quickGrid.after(mediaDock);
-      // Bury and Suspend share one row, each half keeping its Card / Note
-      // buttons; if a translation makes a half too wide they stack again.
-      const splitRows = Array.from(actionsSection.querySelectorAll(":scope > .rm-split-row"));
-      if (splitRows.length === 2) {
-        const pair = document.createElement("div");
-        pair.className = "rm-split-pair is-paired";
-        splitRows[0].before(pair);
-        pair.append(splitRows[0], splitRows[1]);
-        requestAnimationFrame(() => {
-          if (splitRows.some((row) => row.scrollWidth > row.clientWidth + 1)) pair.classList.remove("is-paired");
-        });
-      }
-      // Set Due Date, Reset Card and Create Copy as one row of three tiles;
-      // back to a list if a label doesn't fit its tile.
-      const trio = ["set_due", "reset_card", "create_copy"]
-        .map((act) => actionsSection.querySelector(':scope > .rm-item-btn[data-action="' + act + '"]'))
-        .filter(Boolean);
-      if (trio.length === 3) {
-        const tiles = document.createElement("div");
-        tiles.className = "rm-tile-row is-tiles";
-        trio[0].before(tiles);
-        tiles.append(...trio);
-        requestAnimationFrame(() => {
-          const tooWide = trio.some((btn) => {
-            const label = btn.querySelector(".rm-item-label");
-            return label && label.scrollWidth > label.clientWidth + 1;
-          });
-          if (tooWide) tiles.classList.remove("is-tiles");
-        });
-      }
-      // everything between the handle and the footer scrolls
-      const scroller = document.createElement("div");
-      scroller.className = "rm-scroll";
-      Array.from(panel.children).forEach((child) => {
-        if (!child.classList.contains("rm-grab")) scroller.appendChild(child);
-      });
-      panel.appendChild(scroller);
-      const footer = document.createElement("div");
-      footer.className = "rm-footer";
       const cancel = document.createElement("button");
       cancel.type = "button";
       cancel.className = "rm-item-btn rm-cancel";
       cancel.textContent = labels.cancel || "Cancel";
       cancel.addEventListener("click", () => requestClose());
-      footer.appendChild(cancel);
-      panel.appendChild(footer);
+      panel.appendChild(cancel);
     }
   }
 
