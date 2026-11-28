@@ -58,7 +58,7 @@ Its `TitleBar` (`kioku/windows.py:73`) is a plain `QWidget` with `autoFillBackgr
   - No `setStyleSheet` for colour on individual Anki or Kioku widgets.
   - No timers to re-apply colour.
   - Every colour change is verified on two themes, one light and one dark, in both modes (see Verification).
-- **Releases:** one step = one commit = one build (`harness/build.sh 1.1.0-beta.N`, continuing at beta.12). Push only to `claude/practical-ritchie-w20lag`. No `main`, tag or release without asking.
+- **Releases:** one step = one commit = one build (`harness/build.sh 1.1.0-beta.N`). T1 shipped as beta.12; Part P is beta.13; T2 continues from beta.14. Push only to `claude/practical-ritchie-w20lag`. No `main`, tag or release without asking.
 - **Stop points:** after T1 and again after T3, stop and ask the user to test on the phone before continuing.
 
 ## Harness
@@ -79,7 +79,7 @@ Facts and gotchas:
 
 ## Part T: theming foundation (do first, ship alone)
 
-### T1, one mode (build beta.12). Stop for a phone test after this.
+### T1, one mode (build beta.12). Done: shipped as `5958b69`.
 - **`core/mobile_theme.py`:** `install_mode_bridge()`, called from `install()` on mobile.
   - Wrap `aqt.theme.theme_manager._determine_night_mode`. When Onigiri's `onigiriThemeMode` is "light" or "dark", return that. When it is "system", return Anki's original result, which on iOS is Kioku's `dark_mode()`.
   - Guard against recursion: `effective_night_mode()` in "system" mode reads `theme_manager.night_mode` (the *value*, not `_determine_night_mode`), so there is no loop. Keep it that way and add a test.
@@ -105,7 +105,7 @@ Facts and gotchas:
   - Onigiri mode Light with the iPhone in Dark, and Dark with the iPhone in Light: Back bar, Preferences, Deck Options, Browse and the editor all match Onigiri's pages.
   - "System" follows the iPhone.
 
-### T2, one token set and one web delivery (build beta.13)
+### T2, one token set and one web delivery (build beta.14, after Part P)
 - **`mobile_theme.tokens()` is the single source.** Keep beta.6's derivation. Do not add v1's light-mode contrast rules yet; contrast is a separate, measured step (T4).
 - **Add `token_css(dark)`:** `:root{--onigiri-bg, --onigiri-surface, --onigiri-raised, --onigiri-inset, --onigiri-separator, --onigiri-text, --onigiri-text-2, --onigiri-text-3, --onigiri-accent, --onigiri-on-accent, --onigiri-danger}` for the current mode.
   - Inject it once, from `inject_mobile_assets` in `__init__.py` (the `_anki_page_style` slot pattern), on every page Onigiri touches on mobile.
@@ -119,7 +119,7 @@ Facts and gotchas:
 - **Tests:** `token_css` contains each variable for both modes; `settings_palette` values equal tokens; no `#rrggbb` added to `mobile.css` (a test that counts them).
 - **Harness:** for each Onigiri page (deck list, overview, reviewer, Settings) in both modes, read the computed `--onigiri-bg`/`--onigiri-text` and compare with `tokens(dark)`. Screenshots at iPhone 15 on two themes (light and dark).
 
-### T3, one Qt delivery (build beta.14). Stop for a phone test after this.
+### T3, one Qt delivery (build beta.15). Stop for a phone test after this.
 - Remove the need for per-widget fixes by making the app-level palette and stylesheet right.
 - **If T1's findings show Anki's stylesheet paints buttons with its own colours:** append one small app-level rule block on mobile from `theme_did_change`, after Anki's `_apply_style`. Use `app.setStyleSheet(app.styleSheet() + marker + block)`, idempotent through the marker, with `QPushButton[flat="true"]` and `QWidget#kiokuTitleBar` rules from tokens. One place, re-applied only when Anki re-applies.
 - **Pomodoro, Hashi Notes, Prep Station:** on mobile, `utility_chrome_palette` gets its base surfaces from `mobile_theme.settings_palette` (one change in `rendering/theme_palette.py` or `study_tools/pomodoro.base_chrome_palette`). User custom colours still win. This is v1's `add_utility_aliases` idea and can be reused; v1's other Pomodoro colour changes cannot.
@@ -127,9 +127,105 @@ Facts and gotchas:
 - **Harness:** fake Kioku bar, Preferences, Browse, Add and Pomodoro grabbed in both modes on two themes; contrast of button text over its background ≥ 4.5.
 - **Phone checklist:** Back bar in both modes, Pomodoro card, the editor opening with no grey box, Preferences and Browse in light and dark.
 
-### T4, measured contrast (build beta.15, only if the phone test shows low contrast)
+### T4, measured contrast (build beta.16, only if the phone test shows low contrast)
 - Re-introduce v1's light-mode contrast rules (R3-17) **one at a time**, each checked on every bundled light theme. Write a harness script that loops over `THEMES` and prints contrast for secondary/faint/surface/separator before and after; include its output in the commit.
 - Dark mode unchanged.
+
+---
+
+## Part P: phone feedback on beta.12 (do next, before T2)
+These come from your screenshots of beta.12 on the phone (2026-11-28, five images: Edit mode, the deck list, Menu, Home top, overview). The screenshots don't report a theming problem with T1. All five changes are phone-only layout and wording, with **no new colours**: borders and fills use variables that already exist (`--onigiri-ready-*`, `--accent-color`, `--border`, `--fg-subtle`). They ship together as **build beta.13**. T2 moves, to beta.14 and on, after it.
+
+**Shared look: "like Ready to go".** In `web/menu.css` (~1157), a Ready to go row (`.onigiri-ready-action`) is drawn with:
+- `border: var(--onigiri-ready-border-width, 1px) solid var(--onigiri-ready-border-color, var(--border))`;
+- `border-radius: var(--onigiri-ready-radius, 9px)`;
+- `background: var(--onigiri-ready-button-bg, transparent)`.
+
+Everything below reuses **these same variables**, so a theme that restyles Ready to go restyles the decks too, and the corners always match.
+
+### P1, deck rows as outlined cards (the 10:00 screenshot)
+- **Where:**
+  - `web/mobile.css`, phone block for `#deck-list-container tr.deck` (~2763 on). On phones each `tr.deck` is `display: flex`, with cells `td.decktd` (flex), `td.opts` (hidden) and `td.onigiri-row-more-cell` (flex).
+  - The table is `border-collapse: collapse`.
+- **Change**, under `html.onigiri-phone`:
+  - each `tr.deck` gets the Ready to go border, radius and background, `box-sizing: border-box`, `margin` so cards have the same gap as the Ready to go rows (`--onigiri-ready-gap`, 6px), and the same side insets as the Ready to go list. Measure both in the harness and match them.
+  - Set the table to `border-collapse: separate; border-spacing: 0`, and/or make `tbody` a flex column with `gap`. Use whichever renders the rounded border in Chromium **and** keeps `jquery-ui` drag-reorder working in Edit mode; check both.
+  - Keep row padding so the text, pills and ⋯ keep their current positions inside the card.
+  - Remove any row separator lines the phone layout draws between decks, if present; the cards replace them.
+  - Sub-decks (`is-folder` rows, expanded children): each child is its own card, indented by the existing depth indent. The expand arrow stays inside the parent's card.
+  - The "current deck" row (`tr.deck.current`) keeps its existing highlight inside its card.
+- **Accept when:**
+  - in the harness at iPhone 15, every deck row's computed `border-radius` and `border-color` equal those of `.onigiri-ready-action`;
+  - rows don't overlap;
+  - the gap between rows equals the Ready to go gap;
+  - drag-reorder in Edit mode still moves a deck (simulate it, or at least confirm the `ui-draggable` handles still receive pointer events).
+
+  Screenshot in light and dark.
+
+### P2, Edit, Search and Sort as outlined buttons (the 10:00 screenshot, your answer "Yes, outline them")
+- **Where:** `#deck-list-header .deck-header-btn` and `.onigiri-select-toggle` (the Edit/Done text button), `web/mobile.css` ~2555.
+- **Change:**
+  - give the three the same Ready to go border and radius, at least 44×44pt;
+  - keep their current icon/text colour (accent);
+  - Edit/Done keeps its text, padded to fit;
+  - in Edit mode the Done button keeps the same outline.
+- **Accept when:** all three have the Ready to go border/radius, none wraps or overflows at 375pt (iPhone SE), and the "Decks" title still fits on the same line. If it doesn't fit at 375, shrink the gap between buttons before shrinking the title.
+
+### P3, selected deck in Edit mode: a rounded outline, not a bar (the 10:04 screenshot)
+- **Cause:** `web/menu.css` ~4116 draws the selected-row look for all platforms: `tr.deck.is-multi-selected::before` is a 3px accent bar at the left, and `> td` gets a 14% accent fill.
+- **Change**, phone only (`html.onigiri-touch.onigiri-select-mode`):
+  - hide that `::before` bar;
+  - drop the per-cell fill;
+  - instead the selected row's card (from P1) gets a 2px accent border (the same radius as P1), plus optionally a faint accent fill on the whole card (`color-mix(in srgb, var(--accent-color) 12%, transparent)`), so the fill follows the rounded corners;
+  - the selection circle with its checkmark stays.
+- Desktop keeps its bar.
+- **Accept when:** in Edit mode with one deck selected, there is no `::before` bar (computed `display: none`), the row's border colour is the accent, and the corners are rounded; unselected rows keep the normal P1 border.
+
+### P4, Menu: "Appearance" goes back to "Onigiri Settings" (the 9:57 screenshot)
+- **Where:** `rendering/webview_handlers.py` ~710, in `_grouped_menu_tree`, where the Menu page relabels Onigiri's settings entry: `rows.append(dict(entry, t=tr("menu_appearance", "Appearance")))`.
+- **Change:**
+  - use the action's own label (`entry` as is, which is `tr("onigiri_settings")`, "Onigiri Settings", translated);
+  - keep its position under Settings, right after Preferences;
+  - leave the `menu_appearance` translation row in place (harmless).
+  - Since v1 was reverted, the Settings window title is already "Onigiri Settings"; keep it.
+- **Test:** update any test that asserts "Appearance" in the menu (grep `menu_appearance` in `tests/`).
+- **Accept when:** the Menu dump (`/tmp/menu_dump.py`) shows "Onigiri Settings" under Settings and no other entry changed.
+
+### P5, Home: the panel starts below the top fade (the 9:54 screenshot)
+- **Your clarification:** "move all elements down starting from the top of the card edge so they don't touch the blur; keep all spacing between the elements."
+- **Cause:** on phones `#onigiri-top-fade` (`web/mobile.css` ~1885) is a fixed 28px gradient at the very top of the page, so content dissolves into the status-bar strip as it scrolls. The deck-list panel (`.container.modern-main-menu .sidebar-left`) starts only 8px from the top (`margin: 8px 8px 0`, ~640). So at rest, its top edge and the USER pill sit under the fade.
+- **Change:**
+  - only the panel's **top margin** grows, by the fade's height (a new variable `--onigiri-top-fade-h: 28px` used by both rules, so they can't drift apart): `margin-top: calc(8px + var(--onigiri-top-fade-h))`.
+  - Padding and the gaps between pill, tiles, Decks header and rows are unchanged.
+  - Check the Kome layout (`.ba-home`/`.ba-side`), which the fade also covers; apply the same offset there if it starts under the fade.
+- **Accept when:** in the harness at iPhone 15, the panel's top edge is at least the fade's height below the top of the page; the distances pill → tiles → Decks header are unchanged (measure before and after; they must be equal); the Home tab and the overview are unaffected.
+
+### P6, overview: "Deck details" centred and clearly a button (the 9:53 screenshot)
+- **Where:**
+  - markup: `rendering/overview_stats.py` ~252, `<details class="onigiri-deck-progress-details"><summary>Deck details</summary>`;
+  - styles: `web/overview_stats.css` ~68–80.
+- **Change**, phone only (`html.onigiri-phone`), CSS only, keeping the `<details>` behaviour:
+  - the `summary` becomes a centred pill button: `display: flex; justify-content: center; align-items: center; margin: 12px auto 4px; width: fit-content; min-height: 44px; padding: 0 18px;`, with the Ready to go border/radius (or `999px` for a pill; use the Ready to go radius for consistency), text in the accent colour;
+  - hide the default marker (`list-style: none`, `::-webkit-details-marker { display: none }`) and replace it with a chevron that turns when open (`details[open] > summary::after` rotated);
+  - when open, the grid shows below, as now.
+- **Accept when:** in the harness the summary's centre x equals the card's centre x (±1pt), its height is ≥ 44pt, it has a visible border, and tapping it opens and closes the details.
+
+### Part P verification
+- `tests.sh` at 87 with the same set; `tests.test_syntax`; any Menu label test updated.
+- **Harness screenshots** at iPhone SE and iPhone 15, in **both** modes, on two themes (the harness theme plus one light theme). Screens:
+  - the deck list (rest and scrolled);
+  - Edit mode with one deck selected;
+  - the Menu page;
+  - the overview with Deck details closed and open.
+
+  Look at each one before committing.
+- Settings sweep unaffected (no Settings change); `answer_test.py` (the overview is touched).
+- Build **1.1.0-beta.13**, one commit, push to `claude/practical-ritchie-w20lag`, progress entry "Part P" in `docs/IOS_UX_AUDIT_PLAN.md`.
+- **Stop for a phone check:** deck cards and their corners vs Ready to go, the Edit/Search/Sort outlines, the Edit-mode selection outline, "Onigiri Settings" in Menu, the top of Home no longer under the fade, the Deck details button.
+
+### Part P uncertainties
+- Rounded borders on table rows that are `display: flex` inside a collapsed table: Chromium and WebKit may differ. If WebKit drops the radius on the phone, the fallback is to draw the card on `td.decktd` plus `td.onigiri-row-more-cell` as one visual box (left cell rounded on the left, right cell on the right), or to wrap the row contents. Decide after the harness check, and say which was used.
+- The Ready to go radius is a theme variable: if a theme sets it to 0, the deck cards are square too (intended: they match).
 
 ---
 
@@ -143,7 +239,7 @@ Order: non-theming items first (low risk), then theming items that now only need
 - **R3-21 "Macchiato" label:** reuse `THEME_LABELS` + `settings.js` `theme.label || theme.name` (`c6503e9`).
 - **R3-22:** `font_menu_label` through `phone_text` (`c6503e9`).
 - **R3-24:** no sort toast on phones (`c6503e9`).
-- **R3-31:** Settings window titled "Appearance" on phones (`c6503e9`).
+- **R3-31: dropped.** You asked for "Onigiri Settings" instead of "Appearance" (Part P4), so the window keeps its "Onigiri Settings" title.
 - **Not reused:** R3-07 header colour (redo in A3 with tokens) and R3-18 pressed colour (redo in A3).
 
 ### A2, Anki windows (build)
