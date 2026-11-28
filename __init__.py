@@ -1442,6 +1442,20 @@ def _anki_page_style(context):
         return ""
 
 
+def _ready_vars_style(context):
+    """Ready to go's outline variables for the phone deck list (Part P)."""
+    try:
+        from .core import platform as onigiri_platform
+
+        if not onigiri_platform.IS_MOBILE or type(context).__name__ not in ("DeckBrowser", "Overview"):
+            return ""
+        from .study_tools import ready_to_go
+
+        return ready_to_go.appearance_vars_style_tag()
+    except Exception:
+        return ""
+
+
 def inject_mobile_assets(web_content, context):
     """Touch/phone support on every page (iPhone/iPad via Kioku).
 
@@ -1482,6 +1496,7 @@ def inject_mobile_assets(web_content, context):
         + web_content.head
         + stylesheet_link("mobile.css")
         + _anki_page_style(context)
+        + _ready_vars_style(context)
     )
 
 

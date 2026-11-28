@@ -706,8 +706,9 @@ def _grouped_menu_tree(menubar) -> list:
         rows = list(groups.get(key) or [])
         if key == "settings":
             for entry in onigiri["appearance"]:
-                # Onigiri's own settings, one level up (audit 2, R2-41)
-                rows.append(dict(entry, t=tr("menu_appearance", "Appearance")))
+                # Onigiri's own settings, one level up (audit 2, R2-41), under
+                # its own name "Onigiri Settings" (phone feedback, Part P4)
+                rows.append(dict(entry))
         if key == "library" and getattr(mw, "state", "") == "deckBrowser":
             # Deck-list page commands that used to live only in the house sheet.
             rows[0:0] = [

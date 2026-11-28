@@ -311,3 +311,14 @@ The v1 builds (beta.7 to beta.11) were reverted (`6a0ee6b`) after they broke the
 - **Needs the phone:**
   - Onigiri Light with the iPhone in Dark, and Onigiri Dark with the iPhone in Light: the Back bar, Preferences, Browse, Deck Options, the editor and Pomodoro should all match Onigiri's pages.
   - "Sync with Anki" follows the iPhone, including when you switch the iPhone's appearance while the app is open.
+
+### Part P, phone feedback on beta.12 (build 1.1.0-beta.13), done in emulation
+From the five dark-mode screenshots of beta.12. Phone only, no new colours: everything is drawn with the Ready to go outline variables (border width and colour, radius, fill, gap from Ready to go's own settings, now also published on `:root` for the deck list and overview pages) and the theme's accent.
+- **P1 deck rows:** each deck is a card drawn like a Ready to go row; same radius, border colour and gap (6pt). Sub-decks are their own cards, with their content indented as before. Checked: every row's computed radius, border colour and width equal the Ready to go row's; gap 6pt both.
+- **P2 Edit / Search / Sort:** outlined the same way, 44pt. Checked at iPhone SE (320pt): all three and "Decks" on one line, nothing past the edge.
+- **P3 Edit mode:** a selected deck gets an accent outline with rounded corners and a faint accent fill; the desktop's bar at the left and the square cell fill are gone on phones. Checked: `::before` hidden, border colour = accent, radius 9pt.
+- **P4 Menu:** "Onigiri Settings" again, in place of "Appearance" (same position under Preferences).
+- **P5 Home top:** on iOS the deck-list panel starts below the 28pt top fade (`--onigiri-top-fade-h`, shared by the fade and the panel). Only its top margin changed. Checked: panel top 8 → 36pt, pill moved 28pt, pill-to-tiles gap unchanged (90pt before and after).
+- **P6 Deck details:** a centred, outlined, 44pt button with a chevron that turns when it opens; it still opens and closes the details.
+Checked: unit tests at the known 87 failures, answer test (review log +1, reps +1, undo available, no tracebacks), screenshots in dark (deck list, Edit mode, sub-decks, overview) and a light smoke screenshot.
+Needs the phone (dark mode): corners and outlines in WebKit, Edit mode and drag-to-reorder, the Home top, the Deck details button.

@@ -175,6 +175,17 @@ def _appearance_style() -> str:
     )
 
 
+def appearance_vars_style_tag() -> str:
+    """The Ready to go outline variables on :root, so the phone deck list and
+    its header buttons can be drawn with the very same border, radius, gap and
+    fill (phone feedback, plan v2 Part P). The Ready to go section keeps its
+    own inline copy; this only makes the values reachable elsewhere."""
+    try:
+        return '<style id="onigiri-ready-vars">:root{' + _appearance_style() + '}</style>'
+    except Exception:
+        return ""
+
+
 def _buttons_html(class_name: str, circles: bool = False) -> str:
     buttons = []
     for action_id, action in READY_ACTIONS.items():
