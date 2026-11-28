@@ -1280,7 +1280,9 @@ def _profile_study_summary_html(sidebar_conf):
                 duration = f"{int(seconds or 0)} {tr('seconds_unit', 's')}"
             rows = ((tr("profile_sidebar_reviews", "Reviews"), f"{reviews:,}"),
                     (tr("profile_sidebar_study_time", "Study Time"), duration),
-                    (tr("profile_sidebar_streak", "Study Streak"), f'{streak} {tr("profile_sidebar_days", "days")}'))
+                    # "1 day", not "1 days" (UI audit 5, U-10)
+                    (tr("profile_sidebar_streak", "Study Streak"),
+                     f'{streak} {tr("profile_sidebar_day", "day") if streak == 1 else tr("profile_sidebar_days", "days")}'))
             details = ''.join(f'<div class="onigiri-sidebar-profile-summary-row onigiri-sidebar-profile-summary-row-count"><dt>{html.escape(label)}</dt><dd>{html.escape(value)}</dd></div>' for label, value in rows)
             sections.append(f'<section class="onigiri-sidebar-profile-today"><div class="onigiri-sidebar-profile-chart-head"><h3>{html.escape(tr("profile_sidebar_today", "Today"))}</h3></div><dl>{details}</dl></section>')
         except Exception as exc:

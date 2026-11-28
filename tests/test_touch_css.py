@@ -18,9 +18,17 @@ class HoverOnlyTest(unittest.TestCase):
         self.assertIn("@media (hover: hover) {#outer button:hover .x { opacity: 0; }}", out)
         self.assertIn("b { c: d }", out)
 
-    def test_selector_list_with_hover_is_wrapped_whole(self):
+    def test_selector_list_keeps_non_hover_selectors(self):
         css = ".a, .b:hover { x: 1 }"
-        self.assertEqual(touch_css.hover_only(css), "@media (hover: hover) {.a, .b:hover { x: 1 }}")
+        self.assertEqual(touch_css.hover_only(css), ".a { x: 1 }@media (hover: hover) {.b:hover { x: 1 }}")
+
+    def test_all_hover_selector_list_is_wrapped(self):
+        css = ".a:hover, .b:hover { x: 1 }"
+        self.assertEqual(touch_css.hover_only(css), "@media (hover: hover) {.a:hover, .b:hover { x: 1 }}")
+
+    def test_commas_inside_is_do_not_split(self):
+        css = ":is(.a, .b):hover, .c { x: 1 }"
+        self.assertEqual(touch_css.hover_only(css), ".c { x: 1 }@media (hover: hover) {:is(.a, .b):hover { x: 1 }}")
 
     def test_at_blocks_and_comments_pass_through(self):
         css = "/* :hover in a comment */ @media (max-width: 9px) { .a:hover { x: 1 } } .b { y: 2 }"

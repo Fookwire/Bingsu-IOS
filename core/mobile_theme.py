@@ -238,6 +238,37 @@ def anki_page_style_tag(context):
         return ""
 
 
+# The note editor (Edit, Add) is height: 100% of the page, but while the
+# keyboard is up only the visual viewport above it is visible, so iOS scrolled
+# the whole page to reach the field and pushed the Fields / Cards / B I U
+# toolbar off the top (UI audit 5, U-03). Fit the page to the visible area
+# instead; the fields below scroll inside the editor as usual.
+EDITOR_FIT_JS = """
+(function () {
+    if (window.__onigiriEditorFit) return;
+    window.__onigiriEditorFit = true;
+    var vv = window.visualViewport;
+    if (!vv) return;
+    var html = document.documentElement;
+    function fit() {
+        var visible = Math.round(vv.height);
+        var full = window.innerHeight || html.clientHeight;
+        var value = visible > 0 && visible < full - 1 ? visible + 'px' : '';
+        if (html.style.height !== value) {
+            html.style.height = value;
+            if (document.body) document.body.style.height = value;
+        }
+        var scroller = document.scrollingElement || html;
+        if (scroller.scrollTop) scroller.scrollTop = 0;
+    }
+    vv.addEventListener('resize', fit);
+    vv.addEventListener('scroll', fit);
+    window.addEventListener('scroll', fit, { passive: true });
+    fit();
+})();
+"""
+
+
 def inject_anki_page_theme(webview):
     """webview_did_inject_style_into_page: theme Anki's own pages on phones."""
     if not active():
@@ -254,6 +285,8 @@ def inject_anki_page_theme(webview):
             "s.textContent=%s;})();" % json.dumps(anki_page_css())
         )
         webview.eval(js)
+        if kind == "EDITOR":
+            webview.eval(EDITOR_FIT_JS)
     except Exception as exc:
         print(f"Onigiri iOS: Anki page theme failed: {exc}")
 
@@ -443,6 +476,22 @@ def install():
         gui_hooks.editor_did_init.append(_one_dismiss_for_editor)
     except Exception:
         pass
+    try:
+        gui_hooks.editor_did_load_note.append(_fit_editor_to_keyboard)
+    except Exception:
+        pass
+
+
+def _fit_editor_to_keyboard(editor):
+    """editor_did_load_note: the editor page is ready now. The style hook runs
+    earlier, before Anki's editor page exists, so EDITOR_FIT_JS sent from there
+    alone was lost (UI audit 5, U-03). The script runs once per page."""
+    try:
+        web = getattr(editor, "web", None)
+        if web is not None:
+            web.eval(EDITOR_FIT_JS)
+    except Exception as exc:
+        print(f"Onigiri iOS: editor fit failed: {exc}")
 
 
 def _one_dismiss_for_editor(editor):

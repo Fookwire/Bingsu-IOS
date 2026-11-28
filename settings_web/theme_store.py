@@ -287,7 +287,9 @@ def _apply_palette_surfaces(cfg, collection, palettes):
         "modern_menu_sidebar_bg_mode": "custom",
         "modern_menu_sidebar_bg_type": "color",
         "modern_menu_sidebar_bg_color_theme_mode": "separate",
-        "modern_menu_profile_bg_mode": "color",
+        # "accent", not "color": the Profile Bar Background control has no
+        # "color" option (both draw the accent colour), UI audit 5, U-07.
+        "modern_menu_profile_bg_mode": "accent",
         "modern_menu_profile_bg_dynamic_mode": True,
         "modern_menu_profile_picture_dynamic_mode": True,
         "modern_menu_profile_name_dynamic_mode": True,

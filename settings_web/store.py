@@ -103,6 +103,11 @@ class Store:
 
     def _read_bound(self, bind, default):
         value = self._read_raw(bind, default)
+        # A stored value the control has no option for (an older spelling)
+        # shows as the option it renders as, so one segment is selected.
+        aliases = bind.get("aliases")
+        if aliases and isinstance(value, str) and value in aliases:
+            value = aliases[value]
         asset_dir = bind.get("asset_dir")
         if asset_dir and isinstance(value, str) and value:
             return os.path.basename(value)

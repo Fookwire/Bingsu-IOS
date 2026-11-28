@@ -307,6 +307,13 @@ window.OnigiriHeatmap = window.OnigiriHeatmap || {};
             // count, a second tap on the same day opens it in the browser.
             if (cell && window.OnigiriMobile && OnigiriMobile.isTouch() && !cell.classList.contains('is-tip-open')) {
                 document.querySelectorAll('.heatmap-day-cell.is-tip-open').forEach(c => c.classList.remove('is-tip-open'));
+                // Near a screen edge the centred tooltip ran off it ("0
+                // reviews on Friday, Nov…", UI audit 5, U-04): anchor it to
+                // the cell's side that faces the middle instead.
+                const rect = cell.getBoundingClientRect();
+                const mid = rect.left + rect.width / 2;
+                const width = window.innerWidth || document.documentElement.clientWidth || 0;
+                cell.dataset.tipEdge = mid > width * 0.62 ? 'right' : (mid < width * 0.38 ? 'left' : '');
                 cell.classList.add('is-tip-open');
                 return;
             }

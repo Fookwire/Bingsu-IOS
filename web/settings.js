@@ -1732,7 +1732,11 @@
       stopEvent(event);
       const shouldReset = isReady;
       cancelHold();
-      if (!shouldReset) return;
+      if (!shouldReset) {
+        // A short tap did nothing and said nothing (UI audit 5, U-09).
+        toast(str("hold_to_confirm", "Hold for 3 seconds to continue"));
+        return;
+      }
       bridge("osw:haptic:2");
       action(event);
     }
@@ -13365,6 +13369,10 @@
       [str("immersion_off", "Off")].concat(fields.map(function (f) { return f.label; })).forEach(function (name, i) {
         const b = el("button", "osw-ladder-stop", name);
         b.type = "button";
+        // Centred on the same x as the track's stop for this level, not
+        // spread evenly, which left them off their ticks (UI audit 5, U-05).
+        const level = i === 0 ? 0 : fields[i - 1].level;
+        b.style.left = stopExpr((level / maxLevel) * 100);
         b.addEventListener("click", function (ev) { ev.stopPropagation(); setLevel(i); });
         // the slider's own pointer handling must not start a drag from a label
         b.addEventListener("pointerdown", function (ev) { ev.stopPropagation(); });

@@ -214,6 +214,11 @@
     // stylesheets (`:not(:hover)` always holds then, so it is just removed).
 
     function hasMousePointer() {
+        // Phones: the primary input decides. WebKit reports any-hover /
+        // any-pointer: fine on iPhones too (the iOS Simulator always, devices
+        // with a pointer accessibility setting), and hover then stuck after
+        // every tap on the deck list, sheets and Settings (UI audit 5, U-02).
+        if (root.classList.contains('onigiri-phone')) return !mq('(hover: none)');
         return mq('(any-hover: hover)') || mq('(any-pointer: fine)');
     }
 
@@ -1585,6 +1590,9 @@
         // Opening a page (nav item or search result) shows it full width.
         shell.addEventListener('click', function (event) {
             if (event.target.closest('[data-nav-item], .osw-search-results [data-page], .osw-search-result')) {
+                // A result clears the query (settings.js openSearchRecord)
+                // without an input event: leave search mode here.
+                root.classList.remove('onigiri-settings-searching');
                 root.classList.add('onigiri-settings-page');
                 // showPage() reset the scroll while .osw-main was still hidden,
                 // and WebKit ignores scroll positions on hidden elements, so a
@@ -1603,8 +1611,12 @@
         });
         var search = shell.querySelector('.osw-search input');
         if (search) {
+            // While there is a query the results show under the search box,
+            // on the list screen (mobile.css .onigiri-settings-searching).
+            // Switching to the page screen on the first letter hid the box
+            // and dropped the rest of the typing (UI audit 5, U-01).
             search.addEventListener('input', function () {
-                if (search.value.trim()) root.classList.add('onigiri-settings-page');
+                root.classList.toggle('onigiri-settings-searching', !!search.value.trim());
             });
         }
     }
@@ -1633,8 +1645,23 @@
             : 'initial-scale=' + z + ', minimum-scale=' + z + ', maximum-scale=' + z + ', user-scalable=no';
     }
 
+    // Study Now: the reviewer takes a few seconds to appear, and the button
+    // only looked pressed meanwhile (a second tap was possible). Show that it
+    // is starting; the page is replaced when the reviewer opens (UI audit 5,
+    // U-08). Lifted after a while in case Anki stayed on this screen.
+    function setupStudyLaunch() {
+        if (!root.classList.contains('onigiri-touch')) return;
+        document.addEventListener('click', function (event) {
+            var button = event.target && event.target.closest && event.target.closest('#study');
+            if (!button || button.classList.contains('onigiri-launching')) return;
+            button.classList.add('onigiri-launching');
+            setTimeout(function () { button.classList.remove('onigiri-launching'); }, 12000);
+        }, true);
+    }
+
     function onReady() {
         updateClasses();
+        setupStudyLaunch();
         lockZoom();
         stripHover();
         watchStylesheets();

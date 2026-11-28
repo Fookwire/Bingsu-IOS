@@ -1123,7 +1123,10 @@ def _profile_page():
                         "id": "modern_menu_profile_bg_mode",
                         "type": "choice",
                         "label": tr("bg_mode", "Background Mode"),
-                        "bind": {"kind": "col", "key": "modern_menu_profile_bg_mode"},
+                        # Theme resets used to save "color", which the profile
+                        # bar draws as the accent colour (UI audit 5, U-07).
+                        "bind": {"kind": "col", "key": "modern_menu_profile_bg_mode",
+                                 "aliases": {"color": "accent"}},
                         "default": "image",
                         "options": [
                             {"value": "image", "label": tr("image", "Image")},

@@ -20803,6 +20803,7 @@ profile_sidebar_reviews|Reviews|Revisões|Repasos|复习|復習|Révisions|복�
 profile_sidebar_study_time|Study Time|Tempo de estudo|Tiempo de estudio|学习时间|学習時間|Temps d’étude|학습 시간|Lernzeit
 profile_sidebar_streak|Study Streak|Sequência de estudo|Racha de estudio|连续学习|連続学習|Série d’étude|연속 학습|Lernserie
 profile_sidebar_days|days|dias|días|天|日|jours|일|Tage
+profile_sidebar_day|day|dia|día|天|日|jour|일|Tag
 prep_apply_color|Apply|Aplicar|Aplicar|应用|適用|Appliquer|적용|Anwenden
 prep_current_mature_legend|Mature now|Maduros agora|Maduras ahora|当前成熟卡片|現在の成熟カード|Matures maintenant|현재 성숙 카드|Jetzt reif
 prep_daily_result|reviews / day|revisões / dia|repasos / día|次复习／天|復習／日|révisions / jour|복습 / 일|Wiederholungen / Tag

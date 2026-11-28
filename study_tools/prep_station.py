@@ -375,8 +375,25 @@ def _week_starts_on() -> str:
     return value if value in ("monday", "sunday") else "monday"
 
 
+def _rollover_hours() -> int:
+    """Hour at which Anki's study day starts (Preferences › Next day starts at)."""
+    try:
+        return max(0, min(23, int(mw.col.get_config("rollover", 4))))
+    except Exception:
+        return 4
+
+
+def _study_today() -> date:
+    """Today in Anki's sense: before the rollover hour it is still yesterday.
+
+    The weekly chart counted reviews by calendar day, so a 1 AM session
+    showed on the next day here while the activity grid (Anki's day) kept it
+    on the day before (UI audit 5, U-10)."""
+    return (datetime.now() - timedelta(hours=_rollover_hours())).date()
+
+
 def _week_days():
-    today = date.today()
+    today = _study_today()
     # date.weekday(): Monday = 0 … Sunday = 6.
     offset = today.weekday() if _week_starts_on() == "monday" else (today.weekday() + 1) % 7
     first = today - timedelta(days=offset)
@@ -531,7 +548,7 @@ def _attach_week_progress(plan: dict) -> dict:
     counts, labels = week_data["counts"], week_data["labels"]
     pace = plan.get("_pace") or {}
     days = _week_days()
-    today = date.today()
+    today = _study_today()
     elapsed = min(7, max(1, (today - days[0]).days + 1)) if days else 1
     reviewed = sum(counts[:elapsed])
     target = pace.get("required_per_day")
@@ -596,8 +613,9 @@ def _weekly_review_data(deck_names: list | None = None) -> dict:
 
     series = {name: [] for name, _ in REVIEW_KINDS}
     values = {kind: name for name, kind in REVIEW_KINDS}
+    rollover = _rollover_hours()
     for day in _week_days():
-        start_dt = datetime(day.year, day.month, day.day)
+        start_dt = datetime(day.year, day.month, day.day) + timedelta(hours=rollover)
         start_ms = int(start_dt.timestamp() * 1000)
         end_ms = start_ms + 86400000
         day_counts = {name: 0 for name, _ in REVIEW_KINDS}
@@ -822,7 +840,7 @@ def _web_context() -> dict:
     week_data = _weekly_review_data()
     palette = _web_palette()
     week_days = _week_days()
-    elapsed = min(7, max(1, (date.today() - week_days[0]).days + 1)) if week_days else 1
+    elapsed = min(7, max(1, (_study_today() - week_days[0]).days + 1)) if week_days else 1
     return {
         "dark": _is_dark_mode(),
         "accent": palette["accent"],

@@ -453,6 +453,7 @@ html.onigiri-touch .onigiri-quick-menu .quick-menu-group.is-open > .quick-menu-a
 
 
 .onigiri-quick-menu.is-sheet .onigiri-sheet-grabber {
+    position: relative;
     touch-action: none;
     width: 36px;
     height: 5px;
@@ -461,12 +462,16 @@ html.onigiri-touch .onigiri-quick-menu .quick-menu-group.is-open > .quick-menu-a
     background: var(--onigiri-surface-line, rgba(127, 127, 127, 0.5));
 }
 
-/* Grab handle area also starts the swipe. */
+/* Grab handle area also starts the swipe. Positioned, not a negative
+   margin: that margin collapsed into the handle's own and lifted the handle
+   half out of the sheet (UI audit 5, U-06). */
 .onigiri-quick-menu.is-sheet .onigiri-sheet-grabber::before {
     content: "";
-    display: block;
+    position: absolute;
+    top: -10px;
+    left: -60px;
+    right: -60px;
     height: 24px;
-    margin: -10px -60px 0;
 }
 
 html.onigiri-touch .onigiri-quick-menu.is-sheet .quick-menu-item {
@@ -1083,6 +1088,36 @@ html.onigiri-phone:not(.onigiri-settings-page) .osw-shell .osw-main {
 
 html.onigiri-phone.onigiri-settings-page .osw-shell .osw-rail {
     display: none;
+}
+
+/* Searching (UI audit 5, U-01): the list screen keeps its title and search
+   box, and the results take the place of the groups below it. */
+html.onigiri-phone.onigiri-settings-searching:not(.onigiri-settings-page) .osw-shell {
+    flex-direction: column;
+}
+
+html.onigiri-phone.onigiri-settings-searching:not(.onigiri-settings-page) .osw-shell .osw-rail {
+    flex: 0 0 auto;
+    overflow: visible;
+    padding-bottom: 0;
+}
+
+html.onigiri-phone.onigiri-settings-searching:not(.onigiri-settings-page) .osw-shell :is(.osw-complexity, .osw-nav, .osw-rail-bottom, #oswNavEmpty) {
+    display: none !important;
+}
+
+html.onigiri-phone.onigiri-settings-searching:not(.onigiri-settings-page) .osw-shell .osw-main {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+html.onigiri-phone.onigiri-settings-searching:not(.onigiri-settings-page) .osw-shell .osw-page-head {
+    padding-top: 2px;
+}
+
+html.onigiri-phone.onigiri-settings-searching:not(.onigiri-settings-page) .osw-shell :is(.onigiri-settings-back, #oswPageTitle, #oswPageTabs) {
+    display: none !important;
 }
 
 html.onigiri-phone .osw-shell .osw-rail-top {
@@ -2865,18 +2900,20 @@ html.onigiri-phone .osw-shell .osw-ladder-caption {
 }
 
 html.onigiri-phone .osw-shell .osw-ladder-stops {
-    display: flex;
-    justify-content: space-between;
-    gap: 4px;
+    position: relative;
+    height: 36px;
     margin-top: 10px;
     grid-column: 1 / -1;
 }
 
+/* Each name is centred on its stop (settings.js sets left). */
 html.onigiri-phone .osw-shell .osw-ladder-stop {
-    flex: 1 1 0;
-    min-width: 0;
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    min-width: 44px;
     min-height: 36px;
-    padding: 0 2px;
+    padding: 0 4px;
     border: 0;
     background: none;
     color: var(--osw-fg-muted);
@@ -3112,4 +3149,47 @@ html.onigiri-phone.onigiri-screen-review.onigiri-has-phone-nav #_mark {
     left: calc(14px + var(--onigiri-safe-left)) !important;
     right: auto !important;
     z-index: 8000;
+}
+
+/* ------------------------------------------------------------------------- */
+/* UI audit 5                                                                 */
+/* ------------------------------------------------------------------------- */
+
+/* Activity grid: a tapped day's tooltip stays on screen near the edges
+   (U-04; heatmap.js sets data-tip-edge when the tip opens). */
+html.onigiri-touch .heatmap-day-cell.is-tip-open[data-tip-edge="right"]::after {
+    left: auto !important;
+    right: 0 !important;
+    transform: none !important;
+}
+
+html.onigiri-touch .heatmap-day-cell.is-tip-open[data-tip-edge="left"]::after {
+    left: 0 !important;
+    right: auto !important;
+    transform: none !important;
+}
+
+/* Study Now: a spinner while the reviewer loads, and no second tap (U-08). */
+html.onigiri-touch #study.onigiri-launching {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.85;
+}
+
+html.onigiri-touch #study.onigiri-launching::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 18px;
+    width: 16px;
+    height: 16px;
+    margin-top: -8px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    animation: onigiri-launch-spin 0.7s linear infinite;
+}
+
+@keyframes onigiri-launch-spin {
+    to { transform: rotate(360deg); }
 }

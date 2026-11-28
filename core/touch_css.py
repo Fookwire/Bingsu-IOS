@@ -7,8 +7,10 @@ highlighted, a destructive row staying red after a scroll passed over it.
 
 ``hover_only(css)`` wraps every top-level rule whose selector uses ``:hover``
 in ``@media (hover: hover)``, so it applies only where a real pointer can
-hover. Everything else (including rules already inside @-blocks) is returned
-unchanged. Used for phones only; desktop CSS is not touched.
+hover. In a selector list only the ``:hover`` selectors move there; the others
+(``.btn:focus-visible`` next to ``.btn:hover``) keep applying. Everything else
+(including rules already inside @-blocks) is returned unchanged. Used for
+phones only; desktop CSS is not touched.
 """
 
 from __future__ import annotations
@@ -77,16 +79,39 @@ def _top_level_rules(css: str):
         i = end
 
 
+def _split_selectors(selector: str):
+    """Split a selector list on top-level commas (not inside :is(), [attr])."""
+    parts, depth, start = [], 0, 0
+    for i, ch in enumerate(selector):
+        if ch in "([":
+            depth += 1
+        elif ch in ")]":
+            depth -= 1
+        elif ch == "," and depth == 0:
+            parts.append(selector[start:i])
+            start = i + 1
+    parts.append(selector[start:])
+    return parts
+
+
 def hover_only(css: str) -> str:
     """Return ``css`` with top-level ``:hover`` rules limited to hover devices."""
     if ":hover" not in css:
         return css
     out = []
     for text, is_rule, selector in _top_level_rules(css):
-        if is_rule and ":hover" in selector:
-            out.append("@media (hover: hover) {" + text + "}")
-        else:
+        if not (is_rule and ":hover" in selector):
             out.append(text)
+            continue
+        body = text[len(selector):]
+        parts = _split_selectors(selector)
+        hover = [p.strip() for p in parts if ":hover" in p]
+        other = [p.strip() for p in parts if ":hover" not in p and p.strip()]
+        if not other:
+            out.append("@media (hover: hover) {" + text + "}")
+            continue
+        out.append(", ".join(other) + " " + body)
+        out.append("@media (hover: hover) {" + ", ".join(hover) + " " + body + "}")
     return "".join(out)
 
 
