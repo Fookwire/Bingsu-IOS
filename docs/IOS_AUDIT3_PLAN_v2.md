@@ -64,7 +64,7 @@ You test in dark mode only, and light mode doesn't matter for now.
   - No `setStyleSheet` for colour on individual Anki or Kioku widgets.
   - No timers to re-apply colour.
   - Every colour change is verified in dark mode on two dark themes, plus a light-mode smoke check (see Verification).
-- **Releases:** one step = one commit = one build (`harness/build.sh 1.1.0-beta.N`). T1 shipped as beta.12; Part P is beta.13; T2 continues from beta.15 (beta.14 was a Part P follow-up). Push only to `claude/practical-ritchie-w20lag`. No `main`, tag or release without asking.
+- **Releases:** one step = one commit = one build (`harness/build.sh 1.1.0-beta.N`). T1 shipped as beta.12; Part P is beta.13; beta.14 was a Part P follow-up; Part Q (audit 4) is beta.15; T2 continues from beta.16. Push only to `claude/practical-ritchie-w20lag`. No `main`, tag or release without asking.
 - **Stop points:** after T1 and again after T3, stop and ask the user to test on the phone before continuing.
 
 ## Harness
@@ -111,7 +111,7 @@ Facts and gotchas:
   - Onigiri mode Light with the iPhone in Dark, and Dark with the iPhone in Light: Back bar, Preferences, Deck Options, Browse and the editor all match Onigiri's pages.
   - "System" follows the iPhone.
 
-### T2, one token set and one web delivery (build beta.15, after Part P)
+### T2, one token set and one web delivery (build beta.16, after Parts P and Q)
 - **`mobile_theme.tokens()` is the single source.** Keep beta.6's derivation. Do not add v1's light-mode contrast rules yet; contrast is a separate, measured step (T4).
 - **Add `token_css(dark)`:** `:root{--onigiri-bg, --onigiri-surface, --onigiri-raised, --onigiri-inset, --onigiri-separator, --onigiri-text, --onigiri-text-2, --onigiri-text-3, --onigiri-accent, --onigiri-on-accent, --onigiri-danger}` for the current mode.
   - Inject it once, from `inject_mobile_assets` in `__init__.py` (the `_anki_page_style` slot pattern), on every page Onigiri touches on mobile.
@@ -125,7 +125,7 @@ Facts and gotchas:
 - **Tests:** `token_css` contains each variable for both modes; `settings_palette` values equal tokens; no `#rrggbb` added to `mobile.css` (a test that counts them).
 - **Harness:** for each Onigiri page (deck list, overview, reviewer, Settings) in both modes, read the computed `--onigiri-bg`/`--onigiri-text` and compare with `tokens(dark)`. Screenshots at iPhone 15 on two dark themes, plus one light smoke check.
 
-### T3, one Qt delivery (build beta.16). Stop for a phone test after this.
+### T3, one Qt delivery (build beta.17). Stop for a phone test after this.
 - Remove the need for per-widget fixes by making the app-level palette and stylesheet right.
 - **If T1's findings show Anki's stylesheet paints buttons with its own colours:** append one small app-level rule block on mobile from `theme_did_change`, after Anki's `_apply_style`. Use `app.setStyleSheet(app.styleSheet() + marker + block)`, idempotent through the marker, with `QPushButton[flat="true"]` and `QWidget#kiokuTitleBar` rules from tokens. One place, re-applied only when Anki re-applies.
 - **Pomodoro, Hashi Notes, Prep Station:** on mobile, `utility_chrome_palette` gets its base surfaces from `mobile_theme.settings_palette` (one change in `rendering/theme_palette.py` or `study_tools/pomodoro.base_chrome_palette`). User custom colours still win. This is v1's `add_utility_aliases` idea and can be reused; v1's other Pomodoro colour changes cannot.
@@ -139,8 +139,8 @@ Facts and gotchas:
 
 ---
 
-## Part P: phone feedback on beta.12 (do next, before T2)
-These come from your screenshots of beta.12 on the phone (2026-11-28, five images: Edit mode, the deck list, Menu, Home top, overview). The screenshots don't report a theming problem with T1. All five changes are phone-only layout and wording, with **no new colours**: borders and fills use variables that already exist (`--onigiri-ready-*`, `--accent-color`, `--border`, `--fg-subtle`). They ship together as **build beta.13**. T2 moves, to beta.14 and on, after it.
+## Part P: phone feedback on beta.12. Done: beta.13 (`774f7a1`) and beta.14 (`7ad2104`)
+These come from your screenshots of beta.12 on the phone (2026-11-28, five images: Edit mode, the deck list, Menu, Home top, overview). The screenshots don't report a theming problem with T1. All five changes are phone-only layout and wording, with **no new colours**: borders and fills use variables that already exist (`--onigiri-ready-*`, `--accent-color`, `--border`, `--fg-subtle`). They shipped together as **build beta.13**.
 
 **Shared look: "like Ready to go".** In `web/menu.css` (~1157), a Ready to go row (`.onigiri-ready-action`) is drawn with:
 - `border: var(--onigiri-ready-border-width, 1px) solid var(--onigiri-ready-border-color, var(--border))`;
@@ -235,6 +235,95 @@ Everything below reuses **these same variables**, so a theme that restyles Ready
 
 ---
 
+## Part Q: audit 4 quirks (do next, build beta.15)
+Source: `Kioku_Bingsu_Audit_4_Quirks.md` with 13 evidence frames, from two dark-mode recordings. The code was read at `7ad2104` (beta.14). The handover is copied to `docs/audit4_2026-11/` as part of this build. Both items are phone only, with no new colours, and nothing touches scheduling, review logging or the collection. This part comes before T2: T2 moves to beta.16 and T3 to beta.17.
+
+### Q1, the overview card's top border pops in 0.25 s after the slide (Q4-01)
+**Cause (timing confirmed):**
+- `web/mobile.js` `screenTransition` (~62-82) adds `onigiri-entering` two frames after load, then removes `onigiri-enter-forward`/`-back` and `onigiri-entering` 520 ms later with a fixed `setTimeout`.
+- The slide animation (`web/mobile.css` ~1976-2009, `onigiri-push-from-right/left`, 0.34 s, fill `both`) has already ended by about 0.34 s. For the last ~0.18 s the page stays in WebKit's animation layer, with `transform`/`opacity` still on `body`.
+- In that layer the card's 1px top edge is lost. When the classes go, the page repaints and the edge and crisper text appear: exactly 2 frames + 520 ms after the slide starts, on both visits.
+
+**Change:**
+1. **End the transition when the animation ends.** In `screenTransition`, listen for `animationend` on `document.body` (animation name `onigiri-push-from-right`/`-left`) and remove both classes there. Keep a fallback `setTimeout` of 34 + 120 ms past the duration, in case the event never arrives, and make sure removal runs once.
+2. **Leave nothing behind on `body`.** Change the fill from `both` to `backwards`: the start state still applies before the first frame, and nothing is held after the last. Since the classes go at `animationend`, `body` has no `transform`, `opacity` or `animation` once the slide has finished.
+3. **Whole-pixel card on phones (only if the device still shows the pop after 1–2).** The overview column is vertically centred with `margin-top/bottom: auto` (`web/mobile.css` ~2244), which can leave the card at a fractional y. On phones:
+   - draw the card's outline as `box-shadow: inset 0 0 0 var(--overview-box-stroke, 1px) var(--overview-box-border, var(--border))` with `border-color: transparent`, so the edge can't be snapped away;
+   - keep the stroke at least 1px (`max(1px, var(--overview-box-stroke))`).
+
+   This is held in reserve and not done by default, because it changes how the card is drawn.
+4. **Reduced motion unchanged:** no slide, no pop.
+
+**Accept when:**
+- **In the harness (Chromium):** after a deck is opened, the `<html>` classes are gone within one frame of `animationend`, not at 520 ms. Check with a `MutationObserver` log of `<html>` `class` changes timed against `animationend`.
+- `getComputedStyle(body).transform === 'none'` and `animationName === 'none'` right after.
+- Going back (overview → decks) behaves the same.
+
+**Needs the phone:** a 60 fps screen recording of opening a deck twice. The card's top border must be there in the first still frame, and no later frame may change.
+
+### Q2, card-actions panel: Cancel, selection, red Delete Note, length (Q4-02; supersedes A3's R3-06)
+**Causes (from the audit, verified in the code):**
+- **Cancel floats:** `web/reviewer_more_menu.js:393` gives `.rm-cancel` `position: sticky; bottom: 0`, so the rows scroll under it.
+- **Cancel is see-through:**
+  - its background is `--rm-elevated`: `rgba(255,255,255,.062)` by default, or the theme's `inset` on phones (`rendering/reviewer_more_menu.py:163`);
+  - `.rm-item-btn:hover { background: transparent }` (`:396`) also hits Cancel, and on iOS `:hover` sticks after a tap.
+- **Text selection:** the panel root has only an unprefixed `user-select: none` (`web/reviewer_more_menu.css:45`); iOS WebKit needs `-webkit-user-select`, and there is no `-webkit-touch-callout: none`.
+- **Red Delete Note while scrolling:** `.rm-item-btn.is-danger:hover` (`web/reviewer_more_menu.css:552`, one of 11 `:hover` rules) outranks the touch reset, and sticky `:hover` keeps it red.
+
+**Change** (touch path only, `asSheet` / `html.onigiri-touch`; desktop keeps its popover):
+1. **Structure.** The panel is a column: grab handle, then one scroller (`.rm-scroll`, `flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain`) holding every section, then a footer (`.rm-footer`) outside the scroller holding Cancel.
+   - `.rm-panel` on touch: `display: flex; flex-direction: column; overflow: hidden`.
+   - No `position: sticky` anywhere; nothing can pass under Cancel.
+   - Reuse v1's restructuring code from `d011da7` (`renderPanel` tail), then re-check it.
+2. **Cancel is a real button:**
+   - opaque `background: var(--rm-surface-solid)` on the footer, with a hairline `border-top: 1px solid var(--rm-border)`;
+   - Cancel itself is full width, 50pt tall, `border-radius` like the other sheets' Cancel (12px), with an opaque `--rm-elevated` fill over the solid footer, so it can never look see-through;
+   - centred 17px semibold text;
+   - `touch-action: manipulation`;
+   - closes on `click`. Add `pointerup` as well only if the device still drops taps.
+3. **No text selection or callout:**
+   - `-webkit-user-select: none; user-select: none; -webkit-touch-callout: none` on the panel root and on every button;
+   - `-webkit-tap-highlight-color: transparent` on the buttons.
+4. **No hover on touch.** Wrap every `:hover` rule in `web/reviewer_more_menu.css`, all 11 including `.is-danger:hover`, in `@media (hover: hover)`.
+   - In the touch stylesheet (`touchCssText`), drop the old `:hover { background: transparent }` override that also cleared Cancel.
+   - Pressed feedback is `:active` only, and never on `.is-danger` while the list scrolls. For `.is-danger:active`, use colour only, no red fill.
+   - Desktop hover stays as it is (desktop matches `hover: hover`).
+5. **Shorter list, so it fits on an iPhone 15 without scrolling when no add-ons add rows:**
+   - move the audio/voice dock up under the quick grid (Mark Note, Auto Advance, Options, Card Info), as in v1;
+   - make Bury and Suspend one row with two halves, each half keeping its Card/Note toggles (`renderPanel`, the actions section ~693-761);
+   - tighten touch row heights from 44pt to 44pt minimum with no extra vertical padding;
+   - put Delete Note last, set apart by the existing top border;
+   - **keep every action**; nothing is removed.
+
+   If it still doesn't fit at 393×852 (minus the safe areas and answer bar), it scrolls, and Cancel stays put either way.
+6. **Bottom bar dims while the sheet is open:** reuse v1's rule that includes `.onigiri-show-answer-btn` (`rendering/reviewer_more_menu.py` `bottom_bar_assets`, `opacity: .35 !important; pointer-events: none !important`).
+
+**Tests:** keep `tests/test_reviewer_more_menu.py` green. Update the button count only if a button really changes (none should).
+
+**Accept when (in the harness, touch emulation, iPhone 15, dark mode):**
+- Cancel is the last child of `.rm-panel` and is not inside `.rm-scroll`.
+- Nothing in the computed styles of Cancel or its footer is `sticky`.
+- The footer's background alpha is 1.
+- No element inside the panel computes `user-select` other than `none`.
+- After `pointerdown`/`pointerup` on Delete Note followed by a scroll, its background is not the danger colour.
+- With no add-on items, `.rm-scroll` `scrollHeight <= clientHeight` at 393×852. If it doesn't fit, say by how much.
+- `answer_test.py` passes.
+- Screenshots, dark: open, scrolled to the end, and with an add-on row added.
+
+**Needs the phone:**
+- scroll the list fully: nothing passes under or over Cancel;
+- long-press Cancel: no selection, and releasing closes the panel;
+- drag across Delete Note: it doesn't turn red;
+- ten quick Cancel taps close the panel every time.
+
+### Part Q verification and release
+- `tests.sh` at 87 with the same set; `node --check` on the changed JS; `answer_test.py`.
+- Copy the handover to `docs/audit4_2026-11/` (the markdown and `evidence/`; it holds no private frames).
+- Build **1.1.0-beta.15**, one commit, push to the branch, progress entry "Part Q" in `docs/IOS_UX_AUDIT_PLAN.md`.
+- **Stop for your phone check** (both items above) before T2.
+
+---
+
 ## Part A: audit-3 items on top of the foundation
 Order: non-theming items first (low risk), then theming items that now only need tokens. "Reuse" means: take the hunk from the named reverted commit, re-read it, adapt it to the T-foundation, re-test it.
 
@@ -256,7 +345,7 @@ Order: non-theming items first (low risk), then theming items that now only need
 - **R3-33 Description sheet:** reuse `setupDescriptionSheet` (`f025549`), CSS on tokens.
 
 ### A3, sheets, navigation and colour details (build)
-- **R3-06 card-actions panel:** reuse the `.rm-scroll` column, Cancel outside the scroller, the media dock moved up, the touch hover/active reset and the dim rule incl. `.onigiri-show-answer-btn` (`d011da7`). Its colours come from `--rm-*`, which T2 maps to tokens.
+- **R3-06 card-actions panel:** done in Part Q2 (audit 4, Q4-02).
 - **R3-10 Menu as a tab:** reuse (`d011da7`).
 - **R3-27 profile sheet close:** reuse the closing class and `#onigiri-profile-dim` element (not `body::after`) (`d011da7`).
 - **R3-19 tab strips and Restore Default at the page end:** reuse (`d011da7`). Restart the harness after editing `settings.js`.
