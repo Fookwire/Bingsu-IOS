@@ -44,6 +44,12 @@ Its `TitleBar` (`kioku/windows.py:73`) is a plain `QWidget` with `autoFillBackgr
 4. **One delivery to Qt:** palette (and at most one small app-level stylesheet addition) applied once, from `theme_did_change`, after Anki has applied its own. No per-widget colour stylesheets, no timers.
 5. **Desktop untouched.** Everything is gated by `IS_MOBILE`.
 
+## Priority: dark mode (your decision, 2026-11-28)
+You test in dark mode only, and light mode doesn't matter for now.
+- **Dark mode** is the acceptance target for every step: screenshots, contrast checks and phone checklists are done in dark.
+- **Light mode** gets a quick check only, to make sure a change doesn't break it outright (no unreadable text, no missing elements). Nothing is tuned for it.
+- **T4 (light-mode contrast) is out of scope** until you ask for light mode again.
+
 ## Ground rules (unchanged, plus theming rules)
 - **Data and logic:**
   - Do not change scheduling, FSRS, review logging, sync, the collection schema, deck names, theme keys, file formats or stored config values.
@@ -57,7 +63,7 @@ Its `TitleBar` (`kioku/windows.py:73`) is a plain `QWidget` with `autoFillBackgr
   - No new hex literals in phone code; use tokens or variables.
   - No `setStyleSheet` for colour on individual Anki or Kioku widgets.
   - No timers to re-apply colour.
-  - Every colour change is verified on two themes, one light and one dark, in both modes (see Verification).
+  - Every colour change is verified in dark mode on two dark themes, plus a light-mode smoke check (see Verification).
 - **Releases:** one step = one commit = one build (`harness/build.sh 1.1.0-beta.N`). T1 shipped as beta.12; Part P is beta.13; T2 continues from beta.14. Push only to `claude/practical-ritchie-w20lag`. No `main`, tag or release without asking.
 - **Stop points:** after T1 and again after T3, stop and ask the user to test on the phone before continuing.
 
@@ -117,7 +123,7 @@ Facts and gotchas:
   - make `anki_page_css` read tokens (it already does), with no new Bootstrap overrides yet.
 - **Replace the ~30 hex literals in `web/mobile.css`** with `--onigiri-*` variables, keeping each fallback. List each replacement in the commit message.
 - **Tests:** `token_css` contains each variable for both modes; `settings_palette` values equal tokens; no `#rrggbb` added to `mobile.css` (a test that counts them).
-- **Harness:** for each Onigiri page (deck list, overview, reviewer, Settings) in both modes, read the computed `--onigiri-bg`/`--onigiri-text` and compare with `tokens(dark)`. Screenshots at iPhone 15 on two themes (light and dark).
+- **Harness:** for each Onigiri page (deck list, overview, reviewer, Settings) in both modes, read the computed `--onigiri-bg`/`--onigiri-text` and compare with `tokens(dark)`. Screenshots at iPhone 15 on two dark themes, plus one light smoke check.
 
 ### T3, one Qt delivery (build beta.15). Stop for a phone test after this.
 - Remove the need for per-widget fixes by making the app-level palette and stylesheet right.
@@ -125,9 +131,9 @@ Facts and gotchas:
 - **Pomodoro, Hashi Notes, Prep Station:** on mobile, `utility_chrome_palette` gets its base surfaces from `mobile_theme.settings_palette` (one change in `rendering/theme_palette.py` or `study_tools/pomodoro.base_chrome_palette`). User custom colours still win. This is v1's `add_utility_aliases` idea and can be reused; v1's other Pomodoro colour changes cannot.
 - **Paint-before-first-frame** (R3-26, grey editor placeholder): v1's `PAINT_ONLY` + `paint_window` in `core/phone_windows.py` may be reused; it sets only the web-view background colour from tokens.
 - **Harness:** fake Kioku bar, Preferences, Browse, Add and Pomodoro grabbed in both modes on two themes; contrast of button text over its background ≥ 4.5.
-- **Phone checklist:** Back bar in both modes, Pomodoro card, the editor opening with no grey box, Preferences and Browse in light and dark.
+- **Phone checklist (dark mode):** Back bar, Pomodoro card, the editor opening with no grey box, Preferences and Browse.
 
-### T4, measured contrast (build beta.16, only if the phone test shows low contrast)
+### T4, measured contrast: deferred (light mode is not a priority; see "Priority" above)
 - Re-introduce v1's light-mode contrast rules (R3-17) **one at a time**, each checked on every bundled light theme. Write a harness script that loops over `THEMES` and prints contrast for secondary/faint/surface/separator before and after; include its output in the commit.
 - Dark mode unchanged.
 
@@ -160,7 +166,7 @@ Everything below reuses **these same variables**, so a theme that restyles Ready
   - the gap between rows equals the Ready to go gap;
   - drag-reorder in Edit mode still moves a deck (simulate it, or at least confirm the `ui-draggable` handles still receive pointer events).
 
-  Screenshot in light and dark.
+  Screenshots in dark (plus a light smoke check).
 
 ### P2, Edit, Search and Sort as outlined buttons (the 10:00 screenshot, your answer "Yes, outline them")
 - **Where:** `#deck-list-header .deck-header-btn` and `.onigiri-select-toggle` (the Edit/Done text button), `web/mobile.css` ~2555.
@@ -212,7 +218,7 @@ Everything below reuses **these same variables**, so a theme that restyles Ready
 
 ### Part P verification
 - `tests.sh` at 87 with the same set; `tests.test_syntax`; any Menu label test updated.
-- **Harness screenshots** at iPhone SE and iPhone 15, in **both** modes, on two themes (the harness theme plus one light theme). Screens:
+- **Harness screenshots** at iPhone SE and iPhone 15, in dark mode on two dark themes, plus one light-mode smoke screenshot of the deck list. Screens:
   - the deck list (rest and scrolled);
   - Edit mode with one deck selected;
   - the Menu page;
@@ -275,12 +281,14 @@ Order: non-theming items first (low risk), then theming items that now only need
 
 ## Verification (every build)
 1. `tests.sh` at 87 with the same set; new tests pass; `tests.test_syntax`; `node --check` on changed JS.
-2. **Theme matrix (new, required for any colour change):** two bundled themes, one mainly light and one mainly dark (pick from `rendering/themes.py`, for example the default and "Machiatto"). For each: Onigiri mode light and dark, plus "system" with Anki light and dark. Screens:
-   - deck list, overview, reviewer (question and answer), Settings (Themes + one page);
-   - Deck Options, the Add window;
-   - a fake Kioku bar, Preferences, Pomodoro.
+2. **Theme check (required for any colour change), dark first:**
+   - **Full check in dark mode** on two dark themes (the harness theme plus one more bundled dark theme), with Onigiri's mode set to Dark and to "Sync with Anki" (Anki dark). Screens:
+     - deck list, overview, reviewer (question and answer), Settings (Themes + one page);
+     - Deck Options, the Add window;
+     - a stand-in Kioku bar, Preferences, Pomodoro.
 
-   Save the grabs to the scratchpad, look at every one, and record any contrast below 4.5 for text.
+     Save the screenshots to the scratchpad, look at every one, and record any text contrast below 4.5.
+   - **Light mode:** one theme, deck list and one Qt window, as a smoke check only: nothing unreadable or missing. No tuning.
 3. Settings sweep at 375/393/430: 0 off-screen; hidden probe 0.
 4. `answer_test.py` after any build touching the reviewer: review log +1, reps +1, undo available, no tracebacks.
 5. Progress log per build in `docs/IOS_UX_AUDIT_PLAN.md` ("Progress (audit 3, v2)"): done / emulation only / needs the phone.
