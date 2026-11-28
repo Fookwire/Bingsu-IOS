@@ -1990,6 +1990,10 @@ html.onigiri-enter-back body {
     animation: onigiri-enter-failsafe 0s linear 1.6s forwards;
 }
 
+/* The end state is held only until mobile.js removes these classes, which it
+   does on animationend (audit 4, Q4-01): nothing stays on body after the slide.
+   (Not fill "backwards": the base rule above would then hide the page for the
+   frame between the end of the animation and the removal.) */
 html.onigiri-enter-forward.onigiri-entering body {
     animation: onigiri-push-from-right 0.34s cubic-bezier(0.32, 0.72, 0, 1) both !important;
 }

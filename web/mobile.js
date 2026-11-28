@@ -64,15 +64,30 @@
             : root.classList.contains('onigiri-enter-back') ? 'onigiri-enter-back' : '';
         if (!cls) return;
         var started = false;
+        var finished = false;
+        // The classes go the moment the slide ends (audit 4, Q4-01): a fixed
+        // 520 ms timer kept the page in WebKit's animation layer for ~0.18 s
+        // after it had stopped moving, and the overview card's top border only
+        // appeared when that layer went away. The timer is now a fallback.
+        function finish() {
+            if (finished) return;
+            finished = true;
+            root.classList.remove(cls, 'onigiri-entering');
+        }
         function start() {
             if (started) return;
             started = true;
             requestAnimationFrame(function () {
                 requestAnimationFrame(function () {
+                    if (document.body) {
+                        document.body.addEventListener('animationend', function onEnd(event) {
+                            if (event.target !== document.body || !/^onigiri-push-from-/.test(event.animationName)) return;
+                            document.body.removeEventListener('animationend', onEnd);
+                            finish();
+                        });
+                    }
                     root.classList.add('onigiri-entering');
-                    setTimeout(function () {
-                        root.classList.remove(cls, 'onigiri-entering');
-                    }, 520);
+                    setTimeout(finish, 460); // 340 ms slide + margin, if the event never comes
                 });
             });
         }

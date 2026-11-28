@@ -325,3 +325,25 @@ Needs the phone (dark mode): corners and outlines in WebKit, Edit mode and drag-
 
 ### Part P follow-up (build 1.1.0-beta.14)
 - Deck icons and names start at the card's edge: a top-level deck with no sub-decks no longer reserves the empty 24pt slot for an expand arrow. In Edit mode they move right to make room for the selection circle (+32pt). Decks with sub-decks keep their arrow in that slot, and sub-decks keep their indent. Checked: leaf decks 35 → 11pt from the card edge, 43pt in Edit mode; screenshots in dark.
+
+### Part Q, audit 4 quirks (build 1.1.0-beta.15), done in emulation
+Source: `docs/audit4_2026-11/Kioku_Bingsu_Audit_4_Quirks.md` (two dark-mode recordings of beta.13/14).
+- **Q4-01 overview card border popping in after the slide:** the slide classes on `<html>` were removed by a fixed 520 ms timer, ~0.18 s after the 0.34 s slide had ended, so the page sat in WebKit's animation layer (where the card's top edge was lost) until then. They are now removed on the slide's own `animationend` (fallback timer 460 ms). Checked in Chromium: `animationend` and the class removal in the same millisecond (476 ms after load, was 646 ms); afterwards `body` has no transform and no animation. Not done (held in reserve): drawing the card's edge as an inset shadow, if the phone still shows the pop.
+- **Q4-02 card-actions panel:**
+  - Cancel is in an opaque footer outside the scrolling list, 50pt tall, no `sticky`. Nothing passes under it.
+  - No text selection or callout anywhere in the panel (`-webkit-user-select`, `-webkit-touch-callout`).
+  - All 11 hover rules only apply on devices that hover (`@media (hover: hover)`), and touch has no hover or pressed fill (Delete Note can't stay red after a scroll).
+  - Shorter list, every action kept:
+    - audio and voice moved up under the quick actions;
+    - Bury and Suspend share one row (each with its Card / Note buttons);
+    - Set Due Date, Reset Card and Create Copy are one row of three tiles;
+    - Delete Note ends the list.
+
+    Each grouping falls back to the old list if a translated label doesn't fit.
+  - The whole answer bar dims while the sheet is open, Show Answer included.
+
+  Checked in the harness (393 wide, dark): the list is 529pt with 529pt available (no scrolling, 94pt to spare in the window); Cancel is in the footer; nothing is sticky or selectable; Delete Note has no fill; Show Answer opacity 0.35. Tests: `tests/test_more_menu_touch.py`.
+Checked: unit tests at the known 87 failures, answer test passed, no tracebacks.
+Needs the phone:
+- a 60 fps recording of opening a deck twice: the border must be there in the first still frame;
+- in the card-actions sheet: scroll if it scrolls, long-press Cancel, drag across Delete Note, ten quick Cancel taps.
